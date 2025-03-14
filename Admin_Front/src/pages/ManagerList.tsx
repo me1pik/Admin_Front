@@ -109,6 +109,7 @@ const Content = styled.div`
   flex-direction: column;
   background-color: #ffffff;
   flex-grow: 1;
+
   font-size: 14px;
 
   padding: 10px;
