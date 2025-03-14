@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import styled, { keyframes } from "styled-components";
-import InputField from "../components/InputField";
-import ReusableModal from "../components/ReusableModal";
-import { schemaLogin } from "../hooks/ValidationYup";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useForm, Controller } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import styled, { keyframes } from 'styled-components';
+import InputField from '../components/InputField';
+import ReusableModal from '../components/ReusableModal';
+import { schemaLogin } from '../hooks/ValidationYup';
 
 type LoginFormInputs = {
   email: string;
@@ -15,8 +15,8 @@ type LoginFormInputs = {
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState("알림");
-  const [modalMessage, setModalMessage] = useState("");
+  const [modalTitle, setModalTitle] = useState('알림');
+  const [modalMessage, setModalMessage] = useState('');
 
   const {
     control,
@@ -24,27 +24,27 @@ const Login: React.FC = () => {
     formState: { errors },
   } = useForm<LoginFormInputs>({
     resolver: yupResolver(schemaLogin),
-    mode: "onChange",
-    defaultValues: { email: "", password: "" },
+    mode: 'onChange',
+    defaultValues: { email: '', password: '' },
   });
 
   const onSubmit = (data: LoginFormInputs) => {
     // 임시 로그인 검증: email이 "admin"이고, password가 "password"이면 로그인 성공
-    if (data.email === "admin" && data.password === "password") {
-      setModalTitle("로그인 성공");
-      setModalMessage("로그인에 성공했습니다.");
+    if (data.email === 'admin' && data.password === 'password') {
+      setModalTitle('로그인 성공');
+      setModalMessage('로그인에 성공했습니다.');
       setIsModalOpen(true);
     } else {
-      setModalTitle("로그인 실패");
-      setModalMessage("아이디와 비밀번호를 확인해주세요.");
+      setModalTitle('로그인 실패');
+      setModalMessage('아이디와 비밀번호를 확인해주세요.');
       setIsModalOpen(true);
     }
   };
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    if (modalTitle === "로그인 성공") {
-      navigate("/admin");
+    if (modalTitle === '로그인 성공') {
+      navigate('/admin');
     }
   };
 
@@ -57,13 +57,13 @@ const Login: React.FC = () => {
         <Form onSubmit={handleSubmit(onSubmit)}>
           <Controller
             control={control}
-            name="email"
+            name='email'
             render={({ field }) => (
               <InputField
-                label="계정(이메일)"
-                id="email"
-                type="text"
-                placeholder="example@domain.com"
+                label='계정(이메일)'
+                id='email'
+                type='text'
+                placeholder='example@domain.com'
                 error={errors.email}
                 {...field}
               />
@@ -71,20 +71,20 @@ const Login: React.FC = () => {
           />
           <Controller
             control={control}
-            name="password"
+            name='password'
             render={({ field }) => (
               <InputField
-                label="비밀번호"
-                id="password"
-                type="password"
-                placeholder="비밀번호를 입력하세요"
+                label='비밀번호'
+                id='password'
+                type='password'
+                placeholder='비밀번호를 입력하세요'
                 error={errors.password}
                 {...field}
               />
             )}
           />
           <ButtonRow>
-            <LoginButton type="submit">로그인</LoginButton>
+            <LoginButton type='submit'>로그인</LoginButton>
           </ButtonRow>
         </Form>
       </LoginContainer>
@@ -92,8 +92,8 @@ const Login: React.FC = () => {
         isOpen={isModalOpen}
         onClose={handleModalClose}
         title={modalTitle}
-        width="300px"
-        height="200px"
+        width='300px'
+        height='200px'
       >
         {modalMessage}
       </ReusableModal>
@@ -120,7 +120,6 @@ const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  max-width: 700px;
   width: 300px;
 `;
 
