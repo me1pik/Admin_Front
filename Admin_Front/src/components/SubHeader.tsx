@@ -106,6 +106,7 @@ const TabContainer = styled.div`
   border: 1px solid #dddddd;
   border-radius: 8px 0px 0px 8px;
   overflow: visible;
+  min-width: 303px;
 `;
 
 interface TabButtonProps {

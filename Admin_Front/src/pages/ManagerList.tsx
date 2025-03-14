@@ -113,6 +113,7 @@ const Content = styled.div`
   font-size: 14px;
 
   padding: 10px;
+  min-width: 600px;
 `;
 
 const HeaderTitle = styled.h1`
