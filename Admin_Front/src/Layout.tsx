@@ -39,4 +39,5 @@ const ContentContainer = styled.div`
   height: 100%;
   overflow-y: auto;
   background-color: #ffffff;
+  margin: 60px 36px; /* 위아래 80px 간격 적용 */
 `;
