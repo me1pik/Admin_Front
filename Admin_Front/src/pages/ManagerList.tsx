@@ -81,9 +81,6 @@ const ManagerList = () => {
       {/* 타이틀과 액션영역을 flex로 정렬 */}
       <InfoBar>
         <TotalCount>Total: {totalCount}</TotalCount>
-        <ActionButton onClick={() => navigate('/admin/create')}>
-          신규 등록
-        </ActionButton>
       </InfoBar>
 
       {/* 메인 컨텐츠 */}
@@ -93,6 +90,9 @@ const ManagerList = () => {
           handleEdit={handleEdit}
           handleDelete={handleDelete}
         />
+        <ActionButton onClick={() => navigate('/admin/create')}>
+          신규 등록
+        </ActionButton>
       </TableContainer>
 
       {/* 페이지네이션 */}

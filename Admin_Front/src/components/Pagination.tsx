@@ -13,7 +13,11 @@ const Pagination: React.FC<PaginationProps> = ({
   setPage,
   totalPages,
 }) => {
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  // totalPages가 0 이하일 경우 최소 1로 보정
+  const correctedTotalPages = totalPages < 1 ? 1 : totalPages;
+
+  // 보정된 totalPages만큼 페이지 배열 생성
+  const pages = Array.from({ length: correctedTotalPages }, (_, i) => i + 1);
 
   return (
     <PaginationContainer>
@@ -29,18 +33,19 @@ const Pagination: React.FC<PaginationProps> = ({
           active={num === page}
           onClick={() => setPage(num)}
         >
-          {num}
+          {/* 2자리 형식으로 표시하고 싶다면 padStart 사용 (예: 01, 02 등) */}
+          {String(num).padStart(2, '0')}
         </PageButton>
       ))}
       <PageArrow
-        disabled={page === totalPages}
+        disabled={page === correctedTotalPages}
         onClick={() => setPage(page + 1)}
       >
         ›
       </PageArrow>
       <PageArrow
-        disabled={page === totalPages}
-        onClick={() => setPage(totalPages)}
+        disabled={page === correctedTotalPages}
+        onClick={() => setPage(correctedTotalPages)}
       >
         »
       </PageArrow>
@@ -52,7 +57,7 @@ export default Pagination;
 
 const PaginationContainer = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
   gap: 8px;
   margin-top: 20px;
