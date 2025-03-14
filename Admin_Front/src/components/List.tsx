@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import HomeIcon from '../assets/Home.svg';
 import MemberIcon from '../assets/Member.svg';
 import AdminIcon from '../assets/Admin.svg';
@@ -20,7 +20,6 @@ const List: React.FC = () => {
     <Container>
       {/* 상단 블랙 바 */}
       <BlackBar>
-        {/* TopBar 추가 */}
         <TopBar />
         <NavIcons>
           <NavIcon
@@ -121,9 +120,8 @@ const Container = styled.div`
   height: 100vh;
 `;
 
-/* 상단 블랙 바 */
 const BlackBar = styled.div`
-  flex: 1; /* 나머지 공간을 전부 차지 */
+  flex: 1;
   background-color: #2c2c2c;
   display: flex;
   flex-direction: column;
@@ -131,7 +129,6 @@ const BlackBar = styled.div`
   position: relative;
 `;
 
-/* TopBar 스타일 추가 */
 const TopBar = styled.div`
   width: 30px;
   height: 6px;
@@ -140,7 +137,6 @@ const TopBar = styled.div`
   margin-bottom: 20px;
 `;
 
-/* 하단 화이트 바 */
 const WhiteBar = styled.div`
   height: 270px;
   background: #ffffff;
@@ -152,7 +148,6 @@ const WhiteBar = styled.div`
   border: 1px solid #dddddd;
 `;
 
-/* 네비게이션 아이콘들 */
 const NavIcons = styled.div`
   flex: 1;
   display: flex;
@@ -188,7 +183,22 @@ const Icon = styled.img`
   height: 24px;
 `;
 
-/* 서브메뉴 */
+/* 더욱 멋진 애니메이션 효과 (슬라이드, 확대, 오버슛 효과 포함) */
+const slideFade = keyframes`
+  0% {
+    opacity: 0;
+    transform: translateX(-20px) scale(0.8);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(10px) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+`;
+
 const SubMenu = styled.div`
   position: absolute;
   left: 60px;
@@ -201,6 +211,7 @@ const SubMenu = styled.div`
   border-radius: 4px;
   border: 1px solid #444;
   z-index: 1;
+  animation: ${slideFade} 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
 `;
 
 const SubMenuItem = styled.div`
@@ -215,7 +226,6 @@ const SubMenuItem = styled.div`
   }
 `;
 
-/* 로고 영역 */
 const LogoContainer = styled.div`
   width: 70px;
   height: 270px;
