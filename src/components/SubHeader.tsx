@@ -105,6 +105,7 @@ interface TabButtonProps {
 }
 
 const TabButton = styled.button<TabButtonProps>`
+  min-width: 110px;
   position: relative;
   background-color: ${({ active }) => (active ? "#f0f0f0" : "#ffffff")};
   color: ${({ active }) => (active ? "#007bff" : "#000000")};

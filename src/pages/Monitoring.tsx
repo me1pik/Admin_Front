@@ -1,121 +1,120 @@
-// src/pages/OrderList.tsx
+// src/pages/MonitoringList.tsx
 import React, { useState } from "react";
 import styled from "styled-components";
-import OrderTable, { Order } from "../components/OrderTable";
+import MonitoringTable, { MonitoringItem } from "../components/MonitoringTable";
 import SubHeader, { TabItem } from "../components/SubHeader";
 import Pagination from "../components/Pagination";
 
-/** 주문 더미 데이터 (paymentDate 제거) */
-const dummyOrders: Order[] = [
+/** 모니터링 더미 데이터 (배송일정 제거) */
+const dummyMonitoring: MonitoringItem[] = [
   {
-    no: 13486,
-    orderDate: "2024-12-12",
-    buyerAccount: "style_hwan",
+    no: 1,
+    orderDate: "2024-11-01",
+    name: "홍길동",
+    buyerAccount: "styleweex",
     brand: "CC Collect",
-    styleCode: "CA234ES321",
+    styleCode: "CA234SE321",
     size: "55 (M)",
-    productOption: "BLACK",
-    paymentMethod: "일시불",
-    paymentStatus: "결제 완료", // 파란색
+    shippingMethod: "택배",
+    shippingStatus: "배송취소중", // 검정 박스
   },
   {
-    no: 13485,
-    orderDate: "2024-12-12",
-    buyerAccount: "jmarr_sunwoo",
+    no: 2,
+    orderDate: "2024-11-01",
+    name: "홍홍홍",
+    buyerAccount: "jmerr_sunwoo",
     brand: "M.IO.DES.PHNE",
     styleCode: "20MEE090",
     size: "55 (M)",
-    productOption: "PINK",
-    paymentMethod: "카드결제",
-    paymentStatus: "취소일정", // 검은색
+    shippingMethod: "택배",
+    shippingStatus: "배송준비중",
   },
   {
-    no: 13484,
-    orderDate: "2024-12-12",
+    no: 3,
+    orderDate: "2024-11-01",
+    name: "홍민수",
     buyerAccount: "jimmyInstagram",
     brand: "M.IO.DES.PHNE",
     styleCode: "20MEE090",
     size: "55 (M)",
-    productOption: "BLACK",
-    paymentMethod: "계좌이체",
-    paymentStatus: "환불 진행중", // 빨간색
+    shippingMethod: "퀵서비스",
+    shippingStatus: "배송준비중",
   },
   {
-    no: 13483,
-    orderDate: "2024-12-12",
+    no: 4,
+    orderDate: "2024-11-01",
+    name: "이영희",
     buyerAccount: "mkkyoons_k",
     brand: "SATIN",
-    styleCode: "24AGT609",
+    styleCode: "24AGT603",
     size: "55 (M)",
-    productOption: "PINK",
-    paymentMethod: "계좌이체",
-    paymentStatus: "환불 완료", // 노란색
+    shippingMethod: "직접수령",
+    shippingStatus: "배송완료",
   },
   {
-    no: 13482,
-    orderDate: "2024-12-12",
+    no: 5,
+    orderDate: "2024-11-01",
+    name: "홍길자",
     buyerAccount: "olive3625",
     brand: "ZZOC",
-    styleCode: "12MEE099",
+    styleCode: "Z24AW5609",
     size: "55 (M)",
-    productOption: "BLACK",
-    paymentMethod: "카드결제",
-    paymentStatus: "결제실패", // 회색
+    shippingMethod: "택배",
+    shippingStatus: "배송취소중",
   },
   {
-    no: 13481,
-    orderDate: "2024-12-12",
+    no: 6,
+    orderDate: "2024-11-01",
+    name: "홍길현",
     buyerAccount: "biscossiny520",
     brand: "MOMOA",
     styleCode: "23APY010",
     size: "55 (M)",
-    productOption: "LIGHT BEIGE",
-    paymentMethod: "일시불",
-    paymentStatus: "결제 완료", // 파란색
+    shippingMethod: "택배",
+    shippingStatus: "배송취소",
   },
   {
-    no: 13480,
-    orderDate: "2024-12-12",
+    no: 7,
+    orderDate: "2024-11-01",
+    name: "홍길민",
     buyerAccount: "biscossiny520",
     brand: "MOMOA",
     styleCode: "23APY010",
     size: "55 (M)",
-    productOption: "GRAY",
-    paymentMethod: "카드결제",
-    paymentStatus: "취소일정", // 검은색
+    shippingMethod: "택배",
+    shippingStatus: "배송완료", // #4AA361
   },
   {
-    no: 13479,
-    orderDate: "2024-12-12",
+    no: 8,
+    orderDate: "2024-11-01",
+    name: "홍길환",
     buyerAccount: "biscossiny520",
     brand: "MOMOA",
     styleCode: "23APY010",
     size: "55 (M)",
-    productOption: "LIGHT BLUE",
-    paymentMethod: "계좌이체",
-    paymentStatus: "환불 진행중", // 빨간색
+    shippingMethod: "직접수령",
+    shippingStatus: "배송중", // 초록
   },
 ];
 
-/** 서브헤더 탭: 전체보기 / 주문내역 / 완료내역 / 취소내역 */
+/** 서브헤더 탭: 전체보기 / 진행내역 / 취소내역 */
 const tabs: TabItem[] = [
   { label: "전체보기", path: "" },
-  { label: "주문내역", path: "주문내역" },
-  { label: "완료내역", path: "결제 완료" }, // 결제 완료만 필터링
-  { label: "취소내역", path: "취소일정" }, // 취소일정만 필터링
+  { label: "진행내역", path: "진행내역" },
+  { label: "취소내역", path: "취소" },
 ];
 
-const OrderList: React.FC = () => {
+const MonitoringList: React.FC = () => {
   // 검색 상태
   const [searchTerm, setSearchTerm] = useState("");
-  // 기본 검색 분류: "buyerAccount" (주문자)
-  const [searchType, setSearchType] = useState("buyerAccount");
+  // 검색 분류: 예) 이름(name) / 주문자(buyerAccount) / 브랜드(brand) / 배송상태(shippingStatus)
+  const [searchType, setSearchType] = useState("name");
 
   // 현재 선택된 탭 상태 (기본값: "전체보기")
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
 
-  // 주문 목록 (임시 데이터)
-  const [orderData] = useState<Order[]>(dummyOrders);
+  // 모니터링 목록 (임시 데이터)
+  const [monitoringData] = useState<MonitoringItem[]>(dummyMonitoring);
 
   // 탭 변경 시
   const handleTabChange = (tab: TabItem) => {
@@ -123,29 +122,32 @@ const OrderList: React.FC = () => {
     setPage(1);
   };
 
-  // 탭 필터링
-  const dataByTab = orderData.filter((item) => {
+  // 탭 필터링:
+  // "전체보기": 모든 데이터,
+  // "진행내역": 배송상태가 "배송중", "배송완료", "배송 준비중", "배송취소중" 등 '취소' 이외,
+  // "취소내역": 배송상태가 "취소" 인 항목만
+  const dataByTab = monitoringData.filter((item) => {
     if (selectedTab.label === "전체보기") return true;
-    if (selectedTab.label === "주문내역") {
-      // 실제 로직에 맞춰 필터링 or 전체
-      return true;
+    if (selectedTab.label === "진행내역") {
+      return item.shippingStatus !== "취소";
     }
-    return item.paymentStatus === selectedTab.path;
+    if (selectedTab.label === "취소내역") {
+      return item.shippingStatus === "취소";
+    }
+    return true;
   });
 
-  // 검색 로직
-  // 검색 분류: buyerAccount(주문자), brand(브랜드), productOption(제품명), paymentStatus(결제상태)
+  // 검색 로직: name, buyerAccount, brand, shippingStatus 등
   const filteredData = dataByTab.filter((item) => {
     const lowerTerm = searchTerm.toLowerCase();
-
-    if (searchType === "buyerAccount") {
+    if (searchType === "name") {
+      return item.name.toLowerCase().includes(lowerTerm);
+    } else if (searchType === "buyerAccount") {
       return item.buyerAccount.toLowerCase().includes(lowerTerm);
     } else if (searchType === "brand") {
       return item.brand.toLowerCase().includes(lowerTerm);
-    } else if (searchType === "productOption") {
-      return item.productOption.toLowerCase().includes(lowerTerm);
-    } else if (searchType === "paymentStatus") {
-      return item.paymentStatus.toLowerCase().includes(lowerTerm);
+    } else if (searchType === "shippingStatus") {
+      return item.shippingStatus.toLowerCase().includes(lowerTerm);
     }
     return true;
   });
@@ -153,21 +155,19 @@ const OrderList: React.FC = () => {
   // 페이지네이션 상태
   const [page, setPage] = useState(1);
   const limit = 10;
-
-  // 페이지네이션 계산
   const totalCount = filteredData.length;
   const totalPages = Math.ceil(totalCount / limit);
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  // 예: 주문자 계정 클릭 시 이벤트
+  // 주문자(계정) 클릭 시 이벤트
   const handleEdit = (account: string) => {
     alert(`주문자 계정(${account}) 클릭됨`);
   };
 
   return (
     <Content>
-      <HeaderTitle>일반 주문내역</HeaderTitle>
+      <HeaderTitle>모니터링 내역</HeaderTitle>
       <SubHeader
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -180,14 +180,17 @@ const OrderList: React.FC = () => {
         <TotalCount>Total: {totalCount}</TotalCount>
       </InfoBar>
       <TableContainer>
-        <OrderTable filteredData={currentPageData} handleEdit={handleEdit} />
+        <MonitoringTable
+          filteredData={currentPageData}
+          handleEdit={handleEdit}
+        />
       </TableContainer>
       <Pagination page={page} setPage={setPage} totalPages={totalPages} />
     </Content>
   );
 };
 
-export default OrderList;
+export default MonitoringList;
 
 /* ====================== Styled Components ====================== */
 

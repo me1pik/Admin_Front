@@ -10,7 +10,7 @@ import UserList from "./pages/UserList";
 // import ProductList from "./pages/ProductList";
 // import BrandList from "./pages/BrandList";
 // import MarketOrderList from "./pages/MarketOrderList";
-// import Monitoring from "./pages/Monitoring";
+import Monitoring from "./pages/Monitoring";
 import OrderList from "./pages/OrderList";
 // import Notice from "./pages/Notice";
 // import Terms from "./pages/Terms";
@@ -33,6 +33,7 @@ const App: React.FC = () => {
           <Route path="/adminlist" element={<AdminList />} />
           <Route path="/userlist" element={<UserList />} />
           <Route path="/orderlist" element={<OrderList />} />
+          <Route path="/monitoring" element={<Monitoring />} />
           {/* <Route path="/analysisinfo" element={<AnalysisInfo />} />
           <Route path="/inventorylist" element={<InventoryList />} />
           <Route path="/statisticslist" element={<StatisticsList />} />
@@ -40,7 +41,6 @@ const App: React.FC = () => {
           <Route path="/productlist" element={<ProductList />} />
           <Route path="/brandlist" element={<BrandList />} />
           <Route path="/marketorderlist" element={<MarketOrderList />} />
-          <Route path="/monitoring" element={<Monitoring />} />
           
           <Route path="/notice" element={<Notice />} />
           <Route path="/terms" element={<Terms />} />
