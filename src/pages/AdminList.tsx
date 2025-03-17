@@ -68,7 +68,66 @@ const dummyAdmins: Admin[] = [
     lastLogin: "2023-03-08",
     registeredAt: "2024-08-15",
   },
-  // 필요한 만큼 더 추가...
+  {
+    no: 15,
+    status: "정상",
+    id: "webmanager",
+    team: "관리팀장 1",
+    name: "홍길동",
+    email: "manager@mkbk.com",
+    lastLogin: "2023-03-14",
+    registeredAt: "2024-11-15",
+  },
+  {
+    no: 14,
+    status: "블럭",
+    id: "webmanager2",
+    team: "관리팀장 2",
+    name: "김철수",
+    email: "manager2@mkbk.com",
+    lastLogin: "",
+    registeredAt: "2024-11-15",
+  },
+  {
+    no: 13,
+    status: "정상",
+    id: "webmanager3",
+    team: "관리팀장 3",
+    name: "이영희",
+    email: "manager3@mkbk.com",
+    lastLogin: "2023-03-14",
+    registeredAt: "2024-11-15",
+  },
+  {
+    no: 12,
+    status: "정상",
+    id: "adminuser1",
+    team: "관리팀장 1",
+    name: "박민수",
+    email: "admin1@mkbk.com",
+    lastLogin: "2023-03-10",
+    registeredAt: "2024-10-01",
+  },
+  {
+    no: 11,
+    status: "블럭",
+    id: "adminuser2",
+    team: "관리팀장 2",
+    name: "최지현",
+    email: "admin2@mkbk.com",
+    lastLogin: "",
+    registeredAt: "2024-09-20",
+  },
+  {
+    no: 10,
+    status: "정상",
+    id: "adminuser3",
+    team: "관리팀장 3",
+    name: "한지민",
+    email: "admin3@mkbk.com",
+    lastLogin: "2023-03-08",
+    registeredAt: "2024-08-15",
+  },
 ];
 
 const tabs: TabItem[] = [
@@ -118,7 +177,7 @@ const AdminList: React.FC = () => {
 
   // 페이지네이션 상태
   const [page, setPage] = useState(1);
-  const limit = 3; // 임시 데이터가 늘어나면 limit 값 조정
+  const limit = 10; // 한 페이지당 10개 고정
 
   // 페이지네이션 계산
   const totalCount = filteredData.length; // 현재 표의 총 건수
@@ -143,7 +202,6 @@ const AdminList: React.FC = () => {
         onTabChange={handleTabChange}
       />
       <InfoBar>
-        {/* Total은 현재 필터링된 전체 데이터 건수를 표시합니다. */}
         <TotalCount>Total: {totalCount}</TotalCount>
       </InfoBar>
       <TableContainer>

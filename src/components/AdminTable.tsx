@@ -27,7 +27,6 @@ const AdminTable: React.FC<AdminTableProps> = ({
   // 선택된 행의 no 값을 저장하는 상태 (체크박스 선택)
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
-  // 전체 선택 여부
   const allSelected =
     filteredData.length > 0 && selectedIds.size === filteredData.length;
 
@@ -80,6 +79,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
               type="checkbox"
               onChange={handleSelectAll}
               checked={allSelected}
+              disabled={filteredData.length === 0}
             />
           </Th>
           <Th>No.</Th>
@@ -104,11 +104,9 @@ const AdminTable: React.FC<AdminTableProps> = ({
             </Td>
             <Td>{manager.no}</Td>
             <Td>{manager.status}</Td>
-            {/* 아이디 필드: 길면 ... 처리, 최소 3글자 보장 */}
             <IdCell>{manager.id}</IdCell>
             <Td>{manager.team}</Td>
             <Td>{manager.name}</Td>
-            {/* 이메일 셀: 클릭 시 handleEdit 호출 */}
             <EmailCell onClick={() => handleEdit(manager.id)}>
               {manager.email}
             </EmailCell>
@@ -126,13 +124,12 @@ export default AdminTable;
 /* ====================== Styled Components ====================== */
 
 const Table = styled.table`
-  width: auto;
+  width: 100%;
   table-layout: fixed;
   border-collapse: collapse;
   margin-bottom: 20px;
   background-color: #ffffff;
   border: 1px solid #dddddd;
-  width: 100%;
 `;
 
 const Th = styled.th`
@@ -162,14 +159,12 @@ const Td = styled.td`
   white-space: nowrap;
 `;
 
-// 아이디 셀: overflow 처리, 최소 3글자 표시
 const IdCell = styled(Td)`
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 3ch;
 `;
 
-// 이메일 셀: 클릭 가능, overflow 처리
 const EmailCell = styled(Td)`
   cursor: pointer;
   color: #007bff;
