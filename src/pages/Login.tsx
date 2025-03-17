@@ -29,8 +29,7 @@ const Login: React.FC = () => {
   });
 
   const onSubmit = (data: LoginFormInputs) => {
-    // 임시 로그인 검증: email이 "admin"이고, password가 "password"이면 로그인 성공
-    if (data.email === "admin" && data.password === "password") {
+    if (data.email === "admin@naver.com" && data.password === "qwer1234") {
       setModalTitle("로그인 성공");
       setModalMessage("로그인에 성공했습니다.");
       setIsModalOpen(true);
@@ -44,7 +43,7 @@ const Login: React.FC = () => {
   const handleModalClose = () => {
     setIsModalOpen(false);
     if (modalTitle === "로그인 성공") {
-      navigate("/admin");
+      navigate("/adminlist");
     }
   };
 
