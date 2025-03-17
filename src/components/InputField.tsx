@@ -56,7 +56,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
       prefixcontent,
       as,
       isEmailField,
-      useToggle = false,
+      // useToggle = false,
       options,
       onSelectChange,
       ...rest
