@@ -29,23 +29,25 @@ const List: React.FC = () => {
             <Icon src={HomeIcon} alt="Home" />
           </NavIcon>
 
+          {/* 관리자 아이콘 : 관리자 목록, 분석정보 목록 */}
           <NavIcon
-            onClick={() => handleMenuClick("manager")}
-            isActive={activeMenu === "manager"}
+            onClick={() => handleMenuClick("admin")}
+            isActive={activeMenu === "admin"}
           >
             <Icon src={AdminIcon} alt="Admin" />
-            {activeMenu === "manager" && (
+            {activeMenu === "admin" && (
               <SubMenu>
-                <SubMenuItem onClick={() => navigate("/admin")}>
+                <SubMenuItem onClick={() => navigate("/adminlist")}>
                   관리자 목록
                 </SubMenuItem>
-                <SubMenuItem onClick={() => navigate("/blockmanagerlist")}>
-                  블럭 관리자 목록
+                <SubMenuItem onClick={() => navigate("/analysisinfo")}>
+                  분석정보 목록
                 </SubMenuItem>
               </SubMenu>
             )}
           </NavIcon>
 
+          {/* 회원 아이콘 : 회원목록, 인벤토리 목록, 통계목록, 정산목록 */}
           <NavIcon
             onClick={() => handleMenuClick("member")}
             isActive={activeMenu === "member"}
@@ -69,6 +71,7 @@ const List: React.FC = () => {
             )}
           </NavIcon>
 
+          {/* 결제 아이콘 : 제품 목록, 브랜드목록, 마켓 주문내역, 일반 주문내역 */}
           <NavIcon
             onClick={() => handleMenuClick("payment")}
             isActive={activeMenu === "payment"}
@@ -77,23 +80,41 @@ const List: React.FC = () => {
             {activeMenu === "payment" && (
               <SubMenu>
                 <SubMenuItem onClick={() => navigate("/productlist")}>
-                  제품 관리
+                  제품 목록
                 </SubMenuItem>
                 <SubMenuItem onClick={() => navigate("/brandlist")}>
-                  브랜드 관리
+                  브랜드목록
                 </SubMenuItem>
-                <SubMenuItem onClick={() => navigate("/Orderlist")}>
-                  주문 목록
+                <SubMenuItem onClick={() => navigate("/marketorderlist")}>
+                  마켓 주문내역
+                </SubMenuItem>
+                <SubMenuItem onClick={() => navigate("/orderlist")}>
+                  일반 주문내역
                 </SubMenuItem>
               </SubMenu>
             )}
           </NavIcon>
 
+          {/* 설정 아이콘 : 공지사항, 이용약관, 개인정보보호, FAQ */}
           <NavIcon
             onClick={() => handleMenuClick("settings")}
             isActive={activeMenu === "settings"}
           >
             <Icon src={SettingIcon} alt="Settings" />
+            {activeMenu === "settings" && (
+              <SubMenu>
+                <SubMenuItem onClick={() => navigate("/notice")}>
+                  공지사항
+                </SubMenuItem>
+                <SubMenuItem onClick={() => navigate("/terms")}>
+                  이용약관
+                </SubMenuItem>
+                <SubMenuItem onClick={() => navigate("/privacy")}>
+                  개인정보보호
+                </SubMenuItem>
+                <SubMenuItem onClick={() => navigate("/faq")}>FAQ</SubMenuItem>
+              </SubMenu>
+            )}
           </NavIcon>
         </NavIcons>
       </BlackBar>
@@ -186,7 +207,6 @@ const Icon = styled.img`
   height: 24px;
 `;
 
-/* 더욱 멋진 애니메이션 효과 (슬라이드, 확대, 오버슛 효과 포함) */
 const slideFade = keyframes`
   0% {
     opacity: 0;

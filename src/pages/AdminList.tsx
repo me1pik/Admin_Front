@@ -1,4 +1,4 @@
-// src/pages/ManagerList.tsx
+// src/pages/AdminList.tsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -7,7 +7,7 @@ import SubHeader from "../components/SubHeader";
 import AdminTable from "../components/AdminTable";
 import Pagination from "../components/Pagination";
 
-const ManagerList = () => {
+const AdminList = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchType, setSearchType] = useState("id");
@@ -92,7 +92,7 @@ const ManagerList = () => {
   );
 };
 
-export default ManagerList;
+export default AdminList;
 
 const Content = styled.div`
   display: flex;
