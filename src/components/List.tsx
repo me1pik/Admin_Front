@@ -85,7 +85,7 @@ const List: React.FC = () => {
             />
             {activeMenu === "member" && (
               <SubMenu>
-                <SubMenuItem onClick={() => navigate("/user")}>
+                <SubMenuItem onClick={() => navigate("/userlist")}>
                   회원 목록
                 </SubMenuItem>
                 <SubMenuItem onClick={() => navigate("/inventorylist")}>
