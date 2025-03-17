@@ -104,7 +104,7 @@ const tabs: TabItem[] = [
   { label: "취소내역", path: "취소" },
 ];
 
-const MonitoringList: React.FC = () => {
+const Monitoring: React.FC = () => {
   // 검색 상태
   const [searchTerm, setSearchTerm] = useState("");
   // 검색 분류: 예) 이름(name) / 주문자(buyerAccount) / 브랜드(brand) / 배송상태(shippingStatus)
@@ -190,7 +190,7 @@ const MonitoringList: React.FC = () => {
   );
 };
 
-export default MonitoringList;
+export default Monitoring;
 
 /* ====================== Styled Components ====================== */
 
