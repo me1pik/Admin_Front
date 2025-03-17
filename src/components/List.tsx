@@ -125,6 +125,9 @@ const List: React.FC = () => {
                 <SubMenuItem onClick={() => navigate("/orderlist")}>
                   일반 주문내역
                 </SubMenuItem>
+                <SubMenuItem onClick={() => navigate("/monitoring")}>
+                  모니터링
+                </SubMenuItem>
               </SubMenu>
             )}
           </NavIcon>

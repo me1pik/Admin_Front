@@ -10,6 +10,7 @@ import UserList from "./pages/UserList";
 // import ProductList from "./pages/ProductList";
 // import BrandList from "./pages/BrandList";
 // import MarketOrderList from "./pages/MarketOrderList";
+// import Monitoring from "./pages/Monitoring";
 import OrderList from "./pages/OrderList";
 // import Notice from "./pages/Notice";
 // import Terms from "./pages/Terms";
@@ -39,6 +40,8 @@ const App: React.FC = () => {
           <Route path="/productlist" element={<ProductList />} />
           <Route path="/brandlist" element={<BrandList />} />
           <Route path="/marketorderlist" element={<MarketOrderList />} />
+          <Route path="/monitoring" element={<Monitoring />} />
+          
           <Route path="/notice" element={<Notice />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
