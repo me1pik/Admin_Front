@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled, { keyframes } from "styled-components";
 import HomeIcon from "../assets/Home.svg";
@@ -11,13 +11,31 @@ import ListLogo from "../assets/ListLogo.svg";
 const List: React.FC = () => {
   const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleMenuClick = (menu: string) => {
     setActiveMenu(activeMenu === menu ? null : menu);
   };
 
+  // 메뉴 영역 외부 클릭 시 메뉴 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setActiveMenu(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
-    <Container>
+    <Container ref={containerRef}>
       {/* 상단 블랙 바 */}
       <BlackBar>
         <TopBar />
@@ -26,7 +44,11 @@ const List: React.FC = () => {
             onClick={() => navigate("/dashboard")}
             isActive={activeMenu === "dashboard"}
           >
-            <Icon src={HomeIcon} alt="Home" />
+            <Icon
+              src={HomeIcon}
+              alt="Home"
+              isActive={activeMenu === "dashboard"}
+            />
           </NavIcon>
 
           {/* 관리자 아이콘 : 관리자 목록, 분석정보 목록 */}
@@ -34,7 +56,11 @@ const List: React.FC = () => {
             onClick={() => handleMenuClick("admin")}
             isActive={activeMenu === "admin"}
           >
-            <Icon src={AdminIcon} alt="Admin" />
+            <Icon
+              src={AdminIcon}
+              alt="Admin"
+              isActive={activeMenu === "admin"}
+            />
             {activeMenu === "admin" && (
               <SubMenu>
                 <SubMenuItem onClick={() => navigate("/adminlist")}>
@@ -52,7 +78,11 @@ const List: React.FC = () => {
             onClick={() => handleMenuClick("member")}
             isActive={activeMenu === "member"}
           >
-            <Icon src={MemberIcon} alt="Member" />
+            <Icon
+              src={MemberIcon}
+              alt="Member"
+              isActive={activeMenu === "member"}
+            />
             {activeMenu === "member" && (
               <SubMenu>
                 <SubMenuItem onClick={() => navigate("/user")}>
@@ -76,7 +106,11 @@ const List: React.FC = () => {
             onClick={() => handleMenuClick("payment")}
             isActive={activeMenu === "payment"}
           >
-            <Icon src={PaymentIcon} alt="Payment" />
+            <Icon
+              src={PaymentIcon}
+              alt="Payment"
+              isActive={activeMenu === "payment"}
+            />
             {activeMenu === "payment" && (
               <SubMenu>
                 <SubMenuItem onClick={() => navigate("/productlist")}>
@@ -100,7 +134,11 @@ const List: React.FC = () => {
             onClick={() => handleMenuClick("settings")}
             isActive={activeMenu === "settings"}
           >
-            <Icon src={SettingIcon} alt="Settings" />
+            <Icon
+              src={SettingIcon}
+              alt="Settings"
+              isActive={activeMenu === "settings"}
+            />
             {activeMenu === "settings" && (
               <SubMenu>
                 <SubMenuItem onClick={() => navigate("/notice")}>
@@ -202,9 +240,14 @@ const NavIcon = styled.div<NavIconProps>`
   }
 `;
 
-const Icon = styled.img`
+interface IconProps {
+  isActive: boolean;
+}
+
+const Icon = styled.img<IconProps>`
   width: 24px;
   height: 24px;
+  filter: ${({ isActive }) => (isActive ? "brightness(0) invert(1)" : "none")};
 `;
 
 const slideFade = keyframes`
