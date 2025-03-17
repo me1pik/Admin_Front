@@ -21,8 +21,8 @@ interface SubHeaderProps {
 const SubHeader: React.FC<SubHeaderProps> = ({
   searchTerm,
   setSearchTerm,
-  // searchType,
-  // setSearchType,
+  searchType,
+  setSearchType,
   tabs,
   onTabChange,
 }) => {
@@ -54,6 +54,16 @@ const SubHeader: React.FC<SubHeaderProps> = ({
         ))}
       </TabContainer>
       <SearchContainer>
+        {/* 검색 타입 선택 드롭다운 */}
+        <Select
+          value={searchType}
+          onChange={(e) => setSearchType(e.target.value)}
+        >
+          <option value="id">아이디</option>
+          <option value="name">이름</option>
+          <option value="email">이메일</option>
+          <option value="team">팀</option>
+        </Select>
         <SearchInput
           type="text"
           placeholder="검색"
@@ -133,6 +143,15 @@ const SearchContainer = styled.div`
   display: flex;
   align-items: center;
   position: relative;
+`;
+
+const Select = styled.select`
+  margin-right: 10px;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+  background: #ffffff;
 `;
 
 const SearchInput = styled.input`
