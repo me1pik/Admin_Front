@@ -213,13 +213,13 @@ const AccountContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: 20px;
+  margin-left: 10px;
 `;
 
 /** 프로필 이미지 (회색 원) - shrink 방지 */
 const ProfileCircle = styled.div`
-  width: 36px;
-  height: 36px;
+  width: 26px;
+  height: 26px;
   flex-shrink: 0;
   border-radius: 50%;
   background-color: #cccccc;

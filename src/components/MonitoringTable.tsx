@@ -168,6 +168,7 @@ const AccountContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-left: 10px;
 `;
 
 /** 프로필 이미지 (회색 원) - shrink 방지 */

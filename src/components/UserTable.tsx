@@ -193,14 +193,15 @@ const InstaContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: 20px;
+  margin-left: 10px;
 `;
 
 /** 아바타(회색 원) */
 const Avatar = styled.div`
-  width: 36px;
-  height: 36px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
+  flex-shrink: 0;
   background-color: #cccccc; /* 회색 원 */
 `;
 
