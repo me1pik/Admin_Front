@@ -84,7 +84,7 @@ const HeaderContainer = styled.div`
   padding: 10px;
   background: #f9f9f9;
   border: 1px solid #dddddd;
-  margin-bottom: 20px;
+  margin-bottom: 34px;
   min-width: 600px;
 `;
 

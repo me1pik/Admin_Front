@@ -232,7 +232,7 @@ const HeaderTitle = styled.h1`
   font-size: 16px;
   line-height: 18px;
   color: #000000;
-  margin-bottom: 10px;
+  margin-bottom: 18px;
 `;
 
 const InfoBar = styled.div`
