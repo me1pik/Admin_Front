@@ -12,12 +12,7 @@ interface SubHeaderProps {
   setSearchType: (value: string) => void; // 추가
 }
 
-const SubHeader: React.FC<SubHeaderProps> = ({
-  searchTerm,
-  setSearchTerm,
-  searchType,
-  setSearchType,
-}) => {
+const SubHeader: React.FC<SubHeaderProps> = ({ searchTerm, setSearchTerm }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState<string>('');
