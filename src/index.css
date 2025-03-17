@@ -1,25 +1,48 @@
-/* html, body가 브라우저 전체를 채우도록 설정 */
+/* @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap'); */
+
+@font-face {
+  font-family: "NanumSquare Neo";
+  src:
+    url("/fonts/woff2/NanumSquareNeo-Variable.woff2") format("woff2"),
+    url("/fonts/woff/NanumSquareNeo-Variable.woff") format("woff"),
+    url("/fonts/TTF/NanumSquareNeo-aLt.ttf") format("truetype"),
+    url("/fonts/OTF/NanumSquareNeoOTF-Bd.otf") format("opentype");
+  font-weight: 100 900;
+
+  font-display: swap;
+}
+
+#root {
+  margin: 0 auto;
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
 html,
 body {
+  overflow-x: hidden;
+  scrollbar-width: none;
+  font-family: "NanumSquare Neo", sans-serif;
+  -webkit-font-smoothing: antialiased;
   margin: 0;
   padding: 0;
-  width: 100%;
-  height: 100%;
-}
 
-/* body를 Flex 컨테이너로 설정할 경우, 기본 정렬이 center가 되지 않도록 조정 */
-body {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch; /* 혹은 flex-start */
-  justify-content: flex-start;
-}
-
-/* #root가 body 내부에서 전체 공간을 채우도록 */
-#root {
-  flex: 1; /* 남은 공간을 전부 사용 */
-  display: flex; /* Layout 컴포넌트를 flex로 감싸기 위해 */
-  flex-direction: column; /* 필요 시 column/row 조정 */
-  width: 100%;
-  height: 100%;
+  box-sizing: border-box;
 }

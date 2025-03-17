@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styled, { keyframes } from 'styled-components';
-import HomeIcon from '../assets/Home.svg';
-import MemberIcon from '../assets/Member.svg';
-import AdminIcon from '../assets/Admin.svg';
-import PaymentIcon from '../assets/Payment.svg';
-import SettingIcon from '../assets/Setting.svg';
-import ListLogo from '../assets/ListLogo.svg';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import styled, { keyframes } from "styled-components";
+import HomeIcon from "../assets/Home.svg";
+import MemberIcon from "../assets/Member.svg";
+import AdminIcon from "../assets/Admin.svg";
+import PaymentIcon from "../assets/Payment.svg";
+import SettingIcon from "../assets/Setting.svg";
+import ListLogo from "../assets/ListLogo.svg";
 
 const List: React.FC = () => {
   const navigate = useNavigate();
@@ -23,23 +23,23 @@ const List: React.FC = () => {
         <TopBar />
         <NavIcons>
           <NavIcon
-            onClick={() => navigate('/dashboard')}
-            isActive={activeMenu === 'dashboard'}
+            onClick={() => navigate("/dashboard")}
+            isActive={activeMenu === "dashboard"}
           >
-            <Icon src={HomeIcon} alt='Home' />
+            <Icon src={HomeIcon} alt="Home" />
           </NavIcon>
 
           <NavIcon
-            onClick={() => handleMenuClick('manager')}
-            isActive={activeMenu === 'manager'}
+            onClick={() => handleMenuClick("manager")}
+            isActive={activeMenu === "manager"}
           >
-            <Icon src={AdminIcon} alt='Admin' />
-            {activeMenu === 'manager' && (
+            <Icon src={AdminIcon} alt="Admin" />
+            {activeMenu === "manager" && (
               <SubMenu>
-                <SubMenuItem onClick={() => navigate('/admin')}>
+                <SubMenuItem onClick={() => navigate("/admin")}>
                   관리자 목록
                 </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/blockmanagerlist')}>
+                <SubMenuItem onClick={() => navigate("/blockmanagerlist")}>
                   블럭 관리자 목록
                 </SubMenuItem>
               </SubMenu>
@@ -47,22 +47,22 @@ const List: React.FC = () => {
           </NavIcon>
 
           <NavIcon
-            onClick={() => handleMenuClick('member')}
-            isActive={activeMenu === 'member'}
+            onClick={() => handleMenuClick("member")}
+            isActive={activeMenu === "member"}
           >
-            <Icon src={MemberIcon} alt='Member' />
-            {activeMenu === 'member' && (
+            <Icon src={MemberIcon} alt="Member" />
+            {activeMenu === "member" && (
               <SubMenu>
-                <SubMenuItem onClick={() => navigate('/user')}>
+                <SubMenuItem onClick={() => navigate("/user")}>
                   회원 목록
                 </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/inventorylist')}>
+                <SubMenuItem onClick={() => navigate("/inventorylist")}>
                   인벤토리 목록
                 </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/statisticslist')}>
+                <SubMenuItem onClick={() => navigate("/statisticslist")}>
                   통계 목록
                 </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/calculatelist')}>
+                <SubMenuItem onClick={() => navigate("/calculatelist")}>
                   정산 목록
                 </SubMenuItem>
               </SubMenu>
@@ -70,19 +70,19 @@ const List: React.FC = () => {
           </NavIcon>
 
           <NavIcon
-            onClick={() => handleMenuClick('payment')}
-            isActive={activeMenu === 'payment'}
+            onClick={() => handleMenuClick("payment")}
+            isActive={activeMenu === "payment"}
           >
-            <Icon src={PaymentIcon} alt='Payment' />
-            {activeMenu === 'payment' && (
+            <Icon src={PaymentIcon} alt="Payment" />
+            {activeMenu === "payment" && (
               <SubMenu>
-                <SubMenuItem onClick={() => navigate('/productlist')}>
+                <SubMenuItem onClick={() => navigate("/productlist")}>
                   제품 관리
                 </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/brandlist')}>
+                <SubMenuItem onClick={() => navigate("/brandlist")}>
                   브랜드 관리
                 </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/Orderlist')}>
+                <SubMenuItem onClick={() => navigate("/Orderlist")}>
                   주문 목록
                 </SubMenuItem>
               </SubMenu>
@@ -90,10 +90,10 @@ const List: React.FC = () => {
           </NavIcon>
 
           <NavIcon
-            onClick={() => handleMenuClick('settings')}
-            isActive={activeMenu === 'settings'}
+            onClick={() => handleMenuClick("settings")}
+            isActive={activeMenu === "settings"}
           >
-            <Icon src={SettingIcon} alt='Settings' />
+            <Icon src={SettingIcon} alt="Settings" />
           </NavIcon>
         </NavIcons>
       </BlackBar>
@@ -101,7 +101,7 @@ const List: React.FC = () => {
       {/* 하단 화이트 바 */}
       <WhiteBar>
         <LogoContainer>
-          <Logo src={ListLogo} alt='Logo' />
+          <Logo src={ListLogo} alt="Logo" />
         </LogoContainer>
         <TopBar />
       </WhiteBar>
@@ -114,10 +114,9 @@ export default List;
 /* ====================== Styled Components ====================== */
 
 const Container = styled.div`
-  display: flex;
-  flex-direction: column;
   width: 70px;
   height: 100vh;
+  max-height: 700px;
 `;
 
 const BlackBar = styled.div`
@@ -127,6 +126,10 @@ const BlackBar = styled.div`
   flex-direction: column;
   align-items: center;
   position: relative;
+  height: 50vh;
+  border: 1px solid #dddddd;
+  border-left: none;
+  border-radius: 0 8px 0 0;
 `;
 
 const TopBar = styled.div`
@@ -144,8 +147,8 @@ const WhiteBar = styled.div`
   flex-direction: column;
   align-items: center;
   position: relative;
-  border-top: 1px solid #dddddd;
   border: 1px solid #dddddd;
+  border-radius: 0 0 8px 0;
 `;
 
 const NavIcons = styled.div`
@@ -153,7 +156,7 @@ const NavIcons = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
   justify-content: center;
 `;
 
@@ -164,13 +167,13 @@ interface NavIconProps {
 const NavIcon = styled.div<NavIconProps>`
   width: 50px;
   height: 50px;
-  background-color: ${({ isActive }) => (isActive ? '#F6AE24' : '#2c2c2c')};
+  background-color: ${({ isActive }) => (isActive ? "#F6AE24" : "#2c2c2c")};
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   cursor: pointer;
-  border-radius: ${({ isActive }) => (isActive ? '10px' : '0px')};
+  border-radius: ${({ isActive }) => (isActive ? "10px" : "0px")};
 
   &:hover {
     background-color: #f6ac36;

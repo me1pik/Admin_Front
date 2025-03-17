@@ -1,7 +1,7 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
-import styled from 'styled-components';
-import List from './components/List';
+import React from "react";
+import { Outlet } from "react-router-dom";
+import styled from "styled-components";
+import List from "./components/List";
 
 const Layout: React.FC = () => {
   return (
@@ -31,7 +31,6 @@ const SidebarContainer = styled.div`
   flex-direction: column;
   justify-content: center; /* 세로 중앙 정렬 */
   align-items: center; /* 가로 중앙 정렬 */
-  background-color: #2c2c2c;
 `;
 
 const ContentContainer = styled.div`
