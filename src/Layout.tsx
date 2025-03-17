@@ -37,6 +37,7 @@ const ContentContainer = styled.div`
   flex: 1;
   height: 100%;
   overflow-y: auto;
+  overflow: hidden;
   background-color: #ffffff;
   margin: 60px 36px; /* 위아래 80px 간격 적용 */
 `;

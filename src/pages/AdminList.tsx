@@ -1,69 +1,135 @@
 // src/pages/AdminList.tsx
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { AdminGet, deleteAdmin, Admin } from "../api/AdminApi";
-import SubHeader from "../components/SubHeader";
-import AdminTable from "../components/AdminTable";
+import AdminTable, { Admin } from "../components/AdminTable";
+import SubHeader, { TabItem } from "../components/SubHeader";
 import Pagination from "../components/Pagination";
 
-const AdminList = () => {
+/** 임시 데이터 (API 호출 대신 하드코딩) */
+const dummyAdmins: Admin[] = [
+  {
+    no: 15,
+    status: "정상",
+    id: "webmanager",
+    team: "관리팀장 1",
+    name: "홍길동",
+    email: "manager@mkbk.com",
+    lastLogin: "2023-03-14",
+    registeredAt: "2024-11-15",
+  },
+  {
+    no: 14,
+    status: "블럭",
+    id: "webmanager2",
+    team: "관리팀장 2",
+    name: "김철수",
+    email: "manager2@mkbk.com",
+    lastLogin: "",
+    registeredAt: "2024-11-15",
+  },
+  {
+    no: 13,
+    status: "정상",
+    id: "webmanager3",
+    team: "관리팀장 3",
+    name: "이영희",
+    email: "manager3@mkbk.com",
+    lastLogin: "2023-03-14",
+    registeredAt: "2024-11-15",
+  },
+  {
+    no: 12,
+    status: "정상",
+    id: "adminuser1",
+    team: "관리팀장 1",
+    name: "박민수",
+    email: "admin1@mkbk.com",
+    lastLogin: "2023-03-10",
+    registeredAt: "2024-10-01",
+  },
+  {
+    no: 11,
+    status: "블럭",
+    id: "adminuser2",
+    team: "관리팀장 2",
+    name: "최지현",
+    email: "admin2@mkbk.com",
+    lastLogin: "",
+    registeredAt: "2024-09-20",
+  },
+  {
+    no: 10,
+    status: "정상",
+    id: "adminuser3",
+    team: "관리팀장 3",
+    name: "한지민",
+    email: "admin3@mkbk.com",
+    lastLogin: "2023-03-08",
+    registeredAt: "2024-08-15",
+  },
+  // 필요한 만큼 더 추가...
+];
+
+const tabs: TabItem[] = [
+  { label: "전체보기", path: "" },
+  { label: "관리자", path: "정상" },
+  { label: "블럭", path: "블럭" },
+];
+
+const AdminList: React.FC = () => {
   const navigate = useNavigate();
+
+  // 검색 상태
   const [searchTerm, setSearchTerm] = useState("");
   const [searchType, setSearchType] = useState("id");
-  const [adminData, setAdminData] = useState<Admin[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [page, setPage] = useState(1);
-  const [limit] = useState(10);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await AdminGet(page, limit);
-        setAdminData(data.admins);
-        setTotalCount(data.total);
-        console.log("Fetched admin data:", data.admins);
-      } catch (error) {
-        console.error("Failed to fetch admin data:", error);
-      }
-    };
+  // 현재 선택된 탭 상태 (기본값: "전체보기")
+  const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
 
-    fetchData();
-  }, [page, limit]);
+  // 관리자 목록 (임시 데이터)
+  const [adminData] = useState<Admin[]>(dummyAdmins);
 
-  const handleEdit = (id: string) => {
-    navigate(`/admin/${id}`);
+  // 탭 변경 시 호출되는 콜백
+  const handleTabChange = (tab: TabItem) => {
+    setSelectedTab(tab);
+    setPage(1); // 탭 변경 시 페이지 초기화
   };
 
-  const handleDelete = async (id: string) => {
-    const confirmDelete = window.confirm(
-      "정말로 이 관리자를 삭제하시겠습니까?"
-    );
-    if (confirmDelete) {
-      try {
-        await deleteAdmin(id);
-        alert("관리자가 성공적으로 삭제되었습니다.");
-        setAdminData((prevData) => prevData.filter((admin) => admin.id !== id));
-      } catch (error) {
-        alert("관리자 삭제 중 오류가 발생했습니다.");
-      }
-    }
-  };
+  // 탭에 따른 데이터 필터링 (전체보기: 모든 데이터, 관리자: status가 "정상", 블럭: status가 "블럭")
+  const dataByTab = adminData.filter((item) => {
+    if (selectedTab.label === "전체보기") return true;
+    return item.status === selectedTab.path;
+  });
 
-  const filteredData = adminData.filter((item) => {
+  // 검색 로직 (탭 필터링 이후)
+  const filteredData = dataByTab.filter((item) => {
     if (searchType === "id") {
       return item.id.toLowerCase().includes(searchTerm.toLowerCase());
     } else if (searchType === "name") {
       return item.name.toLowerCase().includes(searchTerm.toLowerCase());
     } else if (searchType === "email") {
       return item.email.toLowerCase().includes(searchTerm.toLowerCase());
-    } else if (searchType === "role") {
-      return item.role.toLowerCase().includes(searchTerm.toLowerCase());
+    } else if (searchType === "team") {
+      return item.team.toLowerCase().includes(searchTerm.toLowerCase());
     }
     return true;
   });
 
+  // 페이지네이션 상태
+  const [page, setPage] = useState(1);
+  const limit = 3; // 임시 데이터가 늘어나면 limit 값 조정
+
+  // 페이지네이션 계산
+  const totalCount = filteredData.length; // 현재 표의 총 건수
   const totalPages = Math.ceil(totalCount / limit);
+  const offset = (page - 1) * limit;
+  const currentPageData = filteredData.slice(offset, offset + limit);
+
+  // 이메일 클릭 시 수정/상세 페이지 이동
+  const handleEdit = (id: string) => {
+    navigate(`/admin/${id}`);
+  };
 
   return (
     <Content>
@@ -73,19 +139,15 @@ const AdminList = () => {
         setSearchTerm={setSearchTerm}
         searchType={searchType}
         setSearchType={setSearchType}
+        tabs={tabs}
+        onTabChange={handleTabChange}
       />
       <InfoBar>
+        {/* Total은 현재 필터링된 전체 데이터 건수를 표시합니다. */}
         <TotalCount>Total: {totalCount}</TotalCount>
       </InfoBar>
       <TableContainer>
-        <AdminTable
-          filteredData={filteredData}
-          handleEdit={handleEdit}
-          handleDelete={handleDelete}
-        />
-        <ActionButton onClick={() => navigate("/admin/create")}>
-          신규 등록
-        </ActionButton>
+        <AdminTable filteredData={currentPageData} handleEdit={handleEdit} />
       </TableContainer>
       <Pagination page={page} setPage={setPage} totalPages={totalPages} />
     </Content>
@@ -94,6 +156,8 @@ const AdminList = () => {
 
 export default AdminList;
 
+/* ====================== Styled Components ====================== */
+
 const Content = styled.div`
   display: flex;
   flex-direction: column;
@@ -101,7 +165,6 @@ const Content = styled.div`
   flex-grow: 1;
   font-size: 14px;
   padding: 10px;
-  min-width: 600px;
 `;
 
 const HeaderTitle = styled.h1`
@@ -129,19 +192,6 @@ const TotalCount = styled.div`
   color: #000000;
 `;
 
-const ActionButton = styled.button`
-  margin-left: 10px;
-  padding: 5px 10px;
-  cursor: pointer;
-  background-color: #a0522d;
-  color: #ffffff;
-  border: none;
-  border-radius: 4px;
-`;
-
 const TableContainer = styled.div`
-  border: 2px solid #cccccc;
-  padding: 20px;
   box-sizing: border-box;
-  overflow-x: auto;
 `;
