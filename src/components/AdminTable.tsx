@@ -114,6 +114,20 @@ const AdminTable: React.FC<AdminTableProps> = ({
             <Td>{manager.registeredAt}</Td>
           </tr>
         ))}
+        {filteredData.length < 10 &&
+          Array.from({ length: 10 - filteredData.length }).map((_, i) => (
+            <tr key={`empty-${i}`} style={{ height: "44px" }}>
+              <Td>&nbsp;</Td>
+              <Td>&nbsp;</Td>
+              <Td>&nbsp;</Td>
+              <Td>&nbsp;</Td>
+              <Td>&nbsp;</Td>
+              <Td>&nbsp;</Td>
+              <Td>&nbsp;</Td>
+              <Td>&nbsp;</Td>
+              <Td>&nbsp;</Td>
+            </tr>
+          ))}
       </tbody>
     </Table>
   );
