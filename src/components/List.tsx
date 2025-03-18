@@ -195,7 +195,6 @@ export default List;
 const Container = styled.div`
   width: 70px;
   height: 100vh;
-  max-height: 700px;
 `;
 
 const BlackBar = styled.div`
