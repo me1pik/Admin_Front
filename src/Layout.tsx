@@ -21,7 +21,6 @@ export default Layout;
 const Container = styled.div`
   display: flex;
   width: 100%;
-  height: 100vh; /* 전체 화면 높이를 사용하여 레이아웃 안정화 */
 `;
 
 const SidebarContainer = styled.div`
@@ -31,11 +30,11 @@ const SidebarContainer = styled.div`
   flex-direction: column;
   justify-content: center; /* 세로 중앙 정렬 */
   align-items: center; /* 가로 중앙 정렬 */
+  height: 80vh;
 `;
 
 const ContentContainer = styled.div`
   flex: 1;
-  height: 100%;
   overflow-x: hidden; /* 가로 스크롤 숨김 */
   overflow-y: auto; /* 세로 스크롤 자동 */
   background-color: #ffffff;
