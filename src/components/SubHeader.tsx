@@ -12,8 +12,6 @@ export interface TabItem {
 interface SubHeaderProps {
   searchTerm: string;
   setSearchTerm: (value: string) => void;
-  searchType: string;
-  setSearchType: (value: string) => void;
   tabs: TabItem[];
   onTabChange?: (tab: TabItem) => void;
 }
@@ -21,15 +19,13 @@ interface SubHeaderProps {
 const SubHeader: React.FC<SubHeaderProps> = ({
   searchTerm,
   setSearchTerm,
-  searchType,
-  setSearchType,
   tabs,
   onTabChange,
 }) => {
   // 기본 활성 탭은 첫 번째 탭(예: "전체보기")
   const [activeTab, setActiveTab] = useState<string>(tabs[0].label);
 
-  // 탭 클릭 시 activeTab을 업데이트하고 부모 콜백 호출
+  // 탭 클릭 시 activeTab 업데이트 및 부모 콜백 호출
   const handleTabClick = (tab: TabItem) => {
     setActiveTab(tab.label);
     if (onTabChange) {
@@ -54,16 +50,6 @@ const SubHeader: React.FC<SubHeaderProps> = ({
         ))}
       </TabContainer>
       <SearchContainer>
-        {/* 검색 타입 선택 드롭다운 */}
-        <Select
-          value={searchType}
-          onChange={(e) => setSearchType(e.target.value)}
-        >
-          <option value='id'>아이디</option>
-          <option value='name'>이름</option>
-          <option value='email'>이메일</option>
-          <option value='team'>팀</option>
-        </Select>
         <SearchInput
           type='text'
           placeholder='검색'
@@ -78,6 +64,8 @@ const SubHeader: React.FC<SubHeaderProps> = ({
 
 export default SubHeader;
 
+/* ====================== Styled Components ====================== */
+
 const HeaderContainer = styled.div`
   display: flex;
   align-items: center;
@@ -85,6 +73,8 @@ const HeaderContainer = styled.div`
   background: #f9f9f9;
   border: 1px solid #dddddd;
   margin-bottom: 34px;
+
+  min-width: 800px;
 `;
 
 const TabContainer = styled.div`
@@ -143,15 +133,6 @@ const SearchContainer = styled.div`
   display: flex;
   align-items: center;
   position: relative;
-`;
-
-const Select = styled.select`
-  margin-right: 10px;
-  padding: 8px;
-  font-size: 14px;
-  border: 1px solid #dddddd;
-  border-radius: 4px;
-  background: #ffffff;
 `;
 
 const SearchInput = styled.input`

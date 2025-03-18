@@ -96,10 +96,8 @@ const tabs: TabItem[] = [
 ];
 
 const ProductList: React.FC = () => {
-  // 검색 상태
+  // 검색 상태 (오직 searchTerm만 사용)
   const [searchTerm, setSearchTerm] = useState('');
-  // 검색 분류: 예) 스타일코드(styleCode) / 브랜드(brand) / 색상(color) / 상태(status)
-  const [searchType, setSearchType] = useState('styleCode');
 
   // 현재 선택된 탭 상태 (기본값: "전체보기")
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
@@ -113,25 +111,26 @@ const ProductList: React.FC = () => {
     setPage(1);
   };
 
-  // 탭 필터링
+  // 탭 필터링: 탭이 "전체보기"인 경우 모두 표시, 그 외에는 status 필터링
   const dataByTab = productData.filter((item) => {
     if (selectedTab.label === '전체보기') return true;
     return item.status === selectedTab.label;
   });
 
-  // 검색 로직: styleCode, brand, color, status 등
+  // 검색 로직: 더미 제품의 모든 필드를 대상으로 검색 (숫자 필드는 문자열 변환)
   const filteredData = dataByTab.filter((item) => {
     const lowerTerm = searchTerm.toLowerCase();
-    if (searchType === 'styleCode') {
-      return item.styleCode.toLowerCase().includes(lowerTerm);
-    } else if (searchType === 'brand') {
-      return item.brand.toLowerCase().includes(lowerTerm);
-    } else if (searchType === 'color') {
-      return item.color.toLowerCase().includes(lowerTerm);
-    } else if (searchType === 'status') {
-      return item.status.toLowerCase().includes(lowerTerm);
-    }
-    return true;
+    return (
+      String(item.no).toLowerCase().includes(lowerTerm) ||
+      item.styleCode.toLowerCase().includes(lowerTerm) ||
+      item.brand.toLowerCase().includes(lowerTerm) ||
+      item.category.toLowerCase().includes(lowerTerm) ||
+      item.color.toLowerCase().includes(lowerTerm) ||
+      item.size.toLowerCase().includes(lowerTerm) ||
+      item.retailPrice.toString().includes(lowerTerm) ||
+      item.registerDate.toLowerCase().includes(lowerTerm) ||
+      item.status.toLowerCase().includes(lowerTerm)
+    );
   });
 
   // 페이지네이션 상태
@@ -158,8 +157,6 @@ const ProductList: React.FC = () => {
       <SubHeader
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
-        searchType={searchType}
-        setSearchType={setSearchType}
         tabs={tabs}
         onTabChange={handleTabChange}
       />
@@ -169,7 +166,7 @@ const ProductList: React.FC = () => {
       <TableContainer>
         <ProductTable filteredData={currentPageData} handleEdit={handleEdit} />
       </TableContainer>
-      {/* 하단에 버튼과 페이지네이션을 row로 정렬 */}
+      {/* 하단에 버튼과 페이지네이션을 한 줄(row)로 정렬 */}
       <FooterRow>
         <RegisterButton text='제품등록' onClick={handleRegisterClick} />
         <Pagination page={page} setPage={setPage} totalPages={totalPages} />
@@ -224,4 +221,5 @@ const FooterRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: 20px;
 `;
