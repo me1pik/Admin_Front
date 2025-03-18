@@ -1,6 +1,6 @@
 // src/components/AdminTable.tsx
-import React, { useState } from "react";
-import styled from "styled-components";
+import React, { useState } from 'react';
+import styled from 'styled-components';
 
 /** Admin 인터페이스 (임시 데이터용) */
 export interface Admin {
@@ -55,28 +55,28 @@ const AdminTable: React.FC<AdminTableProps> = ({
 
   // 접속 기록이 없는 경우 '-'로 표시
   const getLastLogin = (lastLogin: string) => {
-    return lastLogin && lastLogin.trim() !== "" ? lastLogin : "-";
+    return lastLogin && lastLogin.trim() !== '' ? lastLogin : '-';
   };
 
   return (
     <Table>
       {/* colgroup을 사용하여 각 열에 개별 고정 너비 지정 */}
       <colgroup>
-        <col style={{ width: "40px" }} /> {/* 체크박스 */}
-        <col style={{ width: "50px" }} /> {/* No. */}
-        <col style={{ width: "80px" }} /> {/* 상태 */}
-        <col style={{ width: "100px" }} /> {/* 아이디 */}
-        <col style={{ width: "150px" }} /> {/* 팀장 */}
-        <col style={{ width: "120px" }} /> {/* 이름 */}
-        <col style={{ width: "200px" }} /> {/* 이메일 */}
-        <col style={{ width: "150px" }} /> {/* 최근로그인 */}
-        <col style={{ width: "150px" }} /> {/* 등록일자 */}
+        <col style={{ width: '40px' }} /> {/* 체크박스 */}
+        <col style={{ width: '50px' }} /> {/* No. */}
+        <col style={{ width: '50px' }} /> {/* 상태 */}
+        <col style={{ width: '100px' }} /> {/* 아이디 */}
+        <col style={{ width: '80px' }} /> {/* 팀장 */}
+        <col style={{ width: '80px' }} /> {/* 이름 */}
+        <col style={{ width: '150px' }} /> {/* 이메일 */}
+        <col style={{ width: '100px' }} /> {/* 최근로그인 */}
+        <col style={{ width: '100px' }} /> {/* 등록일자 */}
       </colgroup>
       <thead>
         <tr>
           <Th>
             <input
-              type="checkbox"
+              type='checkbox'
               onChange={handleSelectAll}
               checked={allSelected}
               disabled={filteredData.length === 0}
@@ -97,26 +97,31 @@ const AdminTable: React.FC<AdminTableProps> = ({
           <tr key={index}>
             <Td>
               <input
-                type="checkbox"
+                type='checkbox'
                 checked={selectedIds.has(manager.no)}
                 onChange={() => handleRowSelect(manager.no)}
               />
             </Td>
             <Td>{manager.no}</Td>
             <Td>{manager.status}</Td>
-            <IdCell>{manager.id}</IdCell>
-            <Td>{manager.team}</Td>
-            <Td>{manager.name}</Td>
-            <EmailCell onClick={() => handleEdit(manager.id)}>
+            <IdCell title={manager.id}>{manager.id}</IdCell>
+            <Td title={manager.team}>{manager.team}</Td>
+            <Td title={manager.name}>{manager.name}</Td>
+            <EmailCell
+              onClick={() => handleEdit(manager.id)}
+              title={manager.email}
+            >
               {manager.email}
             </EmailCell>
-            <Td>{getLastLogin(manager.lastLogin)}</Td>
-            <Td>{manager.registeredAt}</Td>
+            <Td title={getLastLogin(manager.lastLogin)}>
+              {getLastLogin(manager.lastLogin)}
+            </Td>
+            <Td title={manager.registeredAt}>{manager.registeredAt}</Td>
           </tr>
         ))}
         {filteredData.length < 10 &&
           Array.from({ length: 10 - filteredData.length }).map((_, i) => (
-            <tr key={`empty-${i}`} style={{ height: "44px" }}>
+            <tr key={`empty-${i}`} style={{ height: '44px' }}>
               <Td>&nbsp;</Td>
               <Td>&nbsp;</Td>
               <Td>&nbsp;</Td>
@@ -151,40 +156,46 @@ const Th = styled.th`
   text-align: center;
   vertical-align: middle;
   background-color: #eeeeee;
-  font-family: "NanumSquare Neo OTF", sans-serif;
+  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 800;
   font-size: 12px;
   line-height: 13px;
   color: #000000;
   border: 1px solid #dddddd;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 5ch;
 `;
 
 const Td = styled.td`
   padding: 12px;
   text-align: center;
   vertical-align: middle;
-  font-family: "NanumSquare Neo OTF", sans-serif;
+  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 400;
   font-size: 12px;
   line-height: 13px;
   color: #000000;
   border: 1px solid #dddddd;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 5ch;
 `;
 
 const IdCell = styled(Td)`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 3ch;
+  /* 추가적으로 최소 5글자 보장 */
+  min-width: 5ch;
 `;
 
 const EmailCell = styled(Td)`
   cursor: pointer;
   color: #007bff;
+  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
+  min-width: 5ch;
 
   &:hover {
     color: #0056b3;

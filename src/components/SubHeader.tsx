@@ -1,8 +1,8 @@
 // src/components/SubHeader.tsx
-import React, { useState } from "react";
-import styled from "styled-components";
-import { FiSearch } from "react-icons/fi";
-import NewIcon from "../assets/New.svg";
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import { FiSearch } from 'react-icons/fi';
+import NewIcon from '../assets/New.svg';
 
 export interface TabItem {
   label: string;
@@ -49,7 +49,7 @@ const SubHeader: React.FC<SubHeaderProps> = ({
             onClick={() => handleTabClick(tab)}
           >
             {tab.label}
-            {activeTab === tab.label && <NewBadge src={NewIcon} alt="New" />}
+            {activeTab === tab.label && <NewBadge src={NewIcon} alt='New' />}
           </TabButton>
         ))}
       </TabContainer>
@@ -59,14 +59,14 @@ const SubHeader: React.FC<SubHeaderProps> = ({
           value={searchType}
           onChange={(e) => setSearchType(e.target.value)}
         >
-          <option value="id">아이디</option>
-          <option value="name">이름</option>
-          <option value="email">이메일</option>
-          <option value="team">팀</option>
+          <option value='id'>아이디</option>
+          <option value='name'>이름</option>
+          <option value='email'>이메일</option>
+          <option value='team'>팀</option>
         </Select>
         <SearchInput
-          type="text"
-          placeholder="검색"
+          type='text'
+          placeholder='검색'
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -85,7 +85,6 @@ const HeaderContainer = styled.div`
   background: #f9f9f9;
   border: 1px solid #dddddd;
   margin-bottom: 34px;
-  min-width: 600px;
 `;
 
 const TabContainer = styled.div`
@@ -107,12 +106,12 @@ interface TabButtonProps {
 const TabButton = styled.button<TabButtonProps>`
   min-width: 110px;
   position: relative;
-  background-color: ${({ active }) => (active ? "#f0f0f0" : "#ffffff")};
-  color: ${({ active }) => (active ? "#007bff" : "#000000")};
+  background-color: ${({ active }) => (active ? '#f0f0f0' : '#ffffff')};
+  color: ${({ active }) => (active ? '#007bff' : '#000000')};
   border: none;
   border-right: 1px solid #cccccc;
   padding: 14px 27px;
-  font-family: "NanumSquare Neo OTF", sans-serif;
+  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 12px;
   line-height: 13px;
@@ -121,10 +120,10 @@ const TabButton = styled.button<TabButtonProps>`
 
   ${({ isFirst, isLast }) =>
     isFirst
-      ? "border-top-left-radius: 8px; border-bottom-left-radius: 8px;"
+      ? 'border-top-left-radius: 8px; border-bottom-left-radius: 8px;'
       : isLast
-        ? "border-top-right-radius: 8px; border-bottom-right-radius: 8px;"
-        : ""}
+        ? 'border-top-right-radius: 8px; border-bottom-right-radius: 8px;'
+        : ''}
 
   &:last-child {
     border-right: none;

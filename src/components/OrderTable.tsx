@@ -1,6 +1,6 @@
 // src/components/OrderTable.tsx
-import React, { useState } from "react";
-import styled from "styled-components";
+import React, { useState } from 'react';
+import styled from 'styled-components';
 
 /** 주문 인터페이스 */
 export interface Order {
@@ -55,40 +55,40 @@ const OrderTable: React.FC<OrderTableProps> = ({
   // 결제상태 배경색 + 텍스트(흰색)
   const getStatusStyle = (status: string) => {
     switch (status) {
-      case "결제 완료":
-        return { background: "#3071B2", label: "결제완료" };
-      case "취소일정":
-        return { background: "#000000", label: "취소일정" };
-      case "환불 진행중":
-        return { background: "#CD5542", label: "환불진행" };
-      case "환불 완료":
-        return { background: "#F69636", label: "환불완료" };
-      case "결제실패":
-        return { background: "#AAAAAA", label: "결제실패" };
+      case '결제 완료':
+        return { background: '#3071B2', label: '결제완료' };
+      case '취소일정':
+        return { background: '#000000', label: '취소일정' };
+      case '환불 진행중':
+        return { background: '#CD5542', label: '환불진행' };
+      case '환불 완료':
+        return { background: '#F69636', label: '환불완료' };
+      case '결제실패':
+        return { background: '#AAAAAA', label: '결제실패' };
       default:
-        return { background: "#000000", label: status };
+        return { background: '#000000', label: status };
     }
   };
 
   return (
     <Table>
       <colgroup>
-        <col style={{ width: "40px" }} /> {/* 체크박스 */}
-        <col style={{ width: "70px" }} /> {/* No. */}
-        <col style={{ width: "100px" }} /> {/* 주문일 */}
-        <col style={{ width: "100px" }} /> {/* 주문자 (계정) */}
-        <col style={{ width: "100px" }} /> {/* 브랜드 */}
-        <col style={{ width: "120px" }} /> {/* 스타일(행정) */}
-        <col style={{ width: "80px" }} /> {/* 사이즈 */}
-        <col style={{ width: "80px" }} /> {/* 제품명/옵션 */}
-        <col style={{ width: "80px" }} /> {/* 결제방법 */}
-        <col style={{ width: "80px" }} /> {/* 결제상태 (맨 오른쪽) */}
+        <col style={{ width: '40px' }} /> {/* 체크박스 */}
+        <col style={{ width: '50px' }} /> {/* No. */}
+        <col style={{ width: '100px' }} /> {/* 주문일 */}
+        <col style={{ width: '150px' }} /> {/* 주문자 (계정) */}
+        <col style={{ width: '100px' }} /> {/* 브랜드 */}
+        <col style={{ width: '100px' }} /> {/* 스타일(행정) */}
+        <col style={{ width: '80px' }} /> {/* 사이즈 */}
+        <col style={{ width: '80px' }} /> {/* 제품명/옵션 */}
+        <col style={{ width: '80px' }} /> {/* 결제방법 */}
+        <col style={{ width: '80px' }} /> {/* 결제상태 (맨 오른쪽) */}
       </colgroup>
       <thead>
         <TableRow>
           <Th>
             <input
-              type="checkbox"
+              type='checkbox'
               onChange={handleSelectAll}
               checked={allSelected}
               disabled={filteredData.length === 0}
@@ -112,7 +112,7 @@ const OrderTable: React.FC<OrderTableProps> = ({
             <TableRow key={index}>
               <Td>
                 <input
-                  type="checkbox"
+                  type='checkbox'
                   checked={selectedIds.has(order.no)}
                   onChange={() => handleRowSelect(order.no)}
                 />
@@ -184,7 +184,7 @@ const Th = styled.th`
   text-align: center;
   vertical-align: middle;
   background-color: #eeeeee;
-  font-family: "NanumSquare Neo OTF", sans-serif;
+  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 800;
   font-size: 12px;
   color: #000000;
@@ -195,7 +195,7 @@ const Th = styled.th`
 const Td = styled.td`
   text-align: center;
   vertical-align: middle;
-  font-family: "NanumSquare Neo OTF", sans-serif;
+  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 400;
   font-size: 12px;
   color: #000000;

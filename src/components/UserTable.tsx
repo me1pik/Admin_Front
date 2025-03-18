@@ -1,6 +1,6 @@
 // src/components/UserTable.tsx
-import React, { useState } from "react";
-import styled from "styled-components";
+import React, { useState } from 'react';
+import styled from 'styled-components';
 
 /** User 인터페이스 */
 export interface User {
@@ -57,23 +57,23 @@ const UserTable: React.FC<UserTableProps> = ({ filteredData, handleEdit }) => {
   return (
     <Table>
       <colgroup>
-        <col style={{ width: "40px" }} /> {/* 체크박스 */}
-        <col style={{ width: "60px" }} /> {/* No. */}
-        <col style={{ width: "60px" }} /> {/* 상태 */}
-        <col style={{ width: "60px" }} /> {/* 등급 */}
-        <col style={{ width: "100px" }} /> {/* 이름 */}
-        <col style={{ width: "100px" }} /> {/* 닉네임 */}
-        <col style={{ width: "200px" }} /> {/* 계정(인스타) */}
-        <col style={{ width: "120px" }} /> {/* 팔로잉/팔로우 */}
-        <col style={{ width: "100px" }} /> {/* 서비스 지역 */}
-        <col style={{ width: "100px" }} /> {/* 가입일자 */}
+        <col style={{ width: '40px' }} /> {/* 체크박스 */}
+        <col style={{ width: '50px' }} /> {/* No. */}
+        <col style={{ width: '50px' }} /> {/* 상태 */}
+        <col style={{ width: '50px' }} /> {/* 등급 */}
+        <col style={{ width: '80px' }} /> {/* 이름 */}
+        <col style={{ width: '80px' }} /> {/* 닉네임 */}
+        <col style={{ width: '150px' }} /> {/* 계정(인스타) */}
+        <col style={{ width: '100px' }} /> {/* 팔로잉/팔로우 */}
+        <col style={{ width: '100px' }} /> {/* 서비스 지역 */}
+        <col style={{ width: '100px' }} /> {/* 가입일자 */}
       </colgroup>
       <thead>
         {/* 테이블 헤더 */}
         <TableRow>
           <Th>
             <input
-              type="checkbox"
+              type='checkbox'
               onChange={handleSelectAll}
               checked={allSelected}
               disabled={filteredData.length === 0}
@@ -95,7 +95,7 @@ const UserTable: React.FC<UserTableProps> = ({ filteredData, handleEdit }) => {
           <TableRow key={index}>
             <Td>
               <input
-                type="checkbox"
+                type='checkbox'
                 checked={selectedIds.has(user.no)}
                 onChange={() => handleRowSelect(user.no)}
               />
@@ -164,7 +164,7 @@ const Th = styled.th`
   text-align: center;
   vertical-align: middle;
   background-color: #eeeeee;
-  font-family: "NanumSquare Neo OTF", sans-serif;
+  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 800;
   font-size: 12px;
   color: #000000;
@@ -175,7 +175,7 @@ const Th = styled.th`
 const Td = styled.td`
   text-align: center;
   vertical-align: middle;
-  font-family: "NanumSquare Neo OTF", sans-serif;
+  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 400;
   font-size: 12px;
   color: #000000;

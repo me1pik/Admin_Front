@@ -49,13 +49,13 @@ const ProductTable: React.FC<ProductTableProps> = ({
   return (
     <Table>
       <colgroup>
-        <col style={{ width: '70px' }} /> {/* No. */}
-        <col style={{ width: '100px' }} /> {/* 스타일(행정) */}
-        <col style={{ width: '120px' }} /> {/* 브랜드 */}
-        <col style={{ width: '100px' }} /> {/* 분류 */}
+        <col style={{ width: '50px' }} /> {/* No. */}
+        <col style={{ width: '150px' }} /> {/* 스타일(행정) */}
+        <col style={{ width: '100px' }} /> {/* 브랜드 */}
+        <col style={{ width: '80px' }} /> {/* 분류 */}
         <col style={{ width: '80px' }} /> {/* 색상 */}
-        <col style={{ width: '120px' }} /> {/* 사이즈 */}
-        <col style={{ width: '80px' }} /> {/* 리테일가 */}
+        <col style={{ width: '100px' }} /> {/* 사이즈 */}
+        <col style={{ width: '100px' }} /> {/* 리테일가 */}
         <col style={{ width: '100px' }} /> {/* 등록일 */}
         <col style={{ width: '80px' }} /> {/* 상태 */}
       </colgroup>

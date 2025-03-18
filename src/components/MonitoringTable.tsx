@@ -1,6 +1,6 @@
 // src/components/MonitoringTable.tsx
-import React from "react";
-import styled from "styled-components";
+import React from 'react';
+import styled from 'styled-components';
 
 /** 모니터링 아이템 인터페이스 */
 export interface MonitoringItem {
@@ -28,33 +28,33 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
   // 배송상태 컬러 박스와 레이블 반환
   const getShippingStyle = (status: string) => {
     switch (status) {
-      case "배송완료":
-        return { background: "#4AA361", label: "배송완료" };
-      case "배송준비중":
-        return { background: "#000000", label: "배송준비중" };
-      case "배송취소중":
-        return { background: "#CD5542", label: "배송취소중" };
-      case "배송취소":
-        return { background: "#AAAAAA", label: "배송취소" };
-      case "배송중":
-        return { background: "#3071B2", label: "배송중" };
+      case '배송완료':
+        return { background: '#4AA361', label: '배송완료' };
+      case '배송준비중':
+        return { background: '#000000', label: '배송준비중' };
+      case '배송취소중':
+        return { background: '#CD5542', label: '배송취소중' };
+      case '배송취소':
+        return { background: '#AAAAAA', label: '배송취소' };
+      case '배송중':
+        return { background: '#3071B2', label: '배송중' };
       default:
-        return { background: "#6c757d", label: status };
+        return { background: '#6c757d', label: status };
     }
   };
 
   return (
     <Table>
       <colgroup>
-        <col style={{ width: "60px" }} /> {/* No. */}
-        <col style={{ width: "100px" }} /> {/* 주문일 */}
-        <col style={{ width: "80px" }} /> {/* 이름 */}
-        <col style={{ width: "120px" }} /> {/* 주문자(계정) */}
-        <col style={{ width: "120px" }} /> {/* 브랜드 */}
-        <col style={{ width: "100px" }} /> {/* 스타일(행정) */}
-        <col style={{ width: "60px" }} /> {/* 사이즈 */}
-        <col style={{ width: "80px" }} /> {/* 배송방식 */}
-        <col style={{ width: "80px" }} /> {/* 배송상태 */}
+        <col style={{ width: '50px' }} /> {/* No. */}
+        <col style={{ width: '100px' }} /> {/* 주문일 */}
+        <col style={{ width: '80px' }} /> {/* 이름 */}
+        <col style={{ width: '150px' }} /> {/* 주문자(계정) */}
+        <col style={{ width: '120px' }} /> {/* 브랜드 */}
+        <col style={{ width: '100px' }} /> {/* 스타일(행정) */}
+        <col style={{ width: '100px' }} /> {/* 사이즈 */}
+        <col style={{ width: '80px' }} /> {/* 배송방식 */}
+        <col style={{ width: '80px' }} /> {/* 배송상태 */}
       </colgroup>
       <thead>
         <TableRow>
@@ -139,7 +139,7 @@ const Th = styled.th`
   text-align: center;
   vertical-align: middle;
   background-color: #eeeeee;
-  font-family: "NanumSquare Neo OTF", sans-serif;
+  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 800;
   font-size: 12px;
   color: #000000;
@@ -150,7 +150,7 @@ const Th = styled.th`
 const Td = styled.td`
   text-align: center;
   vertical-align: middle;
-  font-family: "NanumSquare Neo OTF", sans-serif;
+  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 400;
   font-size: 12px;
   color: #000000;
