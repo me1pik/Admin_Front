@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import svgrPlugin from 'vite-plugin-svgr';
 
 export default defineConfig({
+  base: './',
   plugins: [
     react(),
     svgrPlugin(), // SVG를 React 컴포넌트로 사용 가능하게 함
