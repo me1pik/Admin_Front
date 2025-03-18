@@ -16,7 +16,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false, // 프로덕션 빌드 시 소스맵 생성 비활성화
-    minify: 'terser', // terser를 사용한 코드 압축
+
     rollupOptions: {
       output: {
         assetFileNames: 'assets/[name]-[hash][extname]', // 자산 파일에 해시 추가
