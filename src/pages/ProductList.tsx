@@ -1,5 +1,6 @@
 // src/pages/ProductList.tsx
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import ProductTable, { ProductItem } from '../components/ProductTable';
 import SubHeader, { TabItem } from '../components/SubHeader';
@@ -87,7 +88,6 @@ const dummyProducts: ProductItem[] = [
   },
 ];
 
-/** 서브헤더 탭: 전체보기 / 등록완료 / 등록대기 / 판매종료 */
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
   { label: '등록완료', path: '등록완료' },
@@ -96,6 +96,9 @@ const tabs: TabItem[] = [
 ];
 
 const ProductList: React.FC = () => {
+  // react-router-dom 훅
+  const navigate = useNavigate();
+
   // 검색 상태 (오직 searchTerm만 사용)
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -111,13 +114,13 @@ const ProductList: React.FC = () => {
     setPage(1);
   };
 
-  // 탭 필터링: 탭이 "전체보기"인 경우 모두 표시, 그 외에는 status 필터링
+  // 탭 필터링
   const dataByTab = productData.filter((item) => {
     if (selectedTab.label === '전체보기') return true;
     return item.status === selectedTab.label;
   });
 
-  // 검색 로직: 더미 제품의 모든 필드를 대상으로 검색 (숫자 필드는 문자열 변환)
+  // 검색 로직
   const filteredData = dataByTab.filter((item) => {
     const lowerTerm = searchTerm.toLowerCase();
     return (
@@ -146,9 +149,9 @@ const ProductList: React.FC = () => {
     alert(`스타일 코드(${styleCode}) 클릭됨`);
   };
 
-  // 제품 등록 버튼 클릭 시 이벤트
+  // **제품 등록 버튼 클릭 시 -> productregister 페이지로 이동**
   const handleRegisterClick = () => {
-    alert('제품 등록 버튼 클릭됨');
+    navigate('/productregister');
   };
 
   return (
