@@ -387,39 +387,79 @@ const ProductRegister: React.FC = () => {
             <Bullet />
             <SectionTitle>제품 원단정보</SectionTitle>
           </SectionHeader>
-          <MaterialRow>
-            {/* 왼쪽: 겉감/안감/배색/부속 */}
-            <Column style={{ maxWidth: '300px' }}>
-              <InputRow>
-                <Label>겉감</Label>
-                1. <Input placeholder='' />
-                2. <Input placeholder='' />
-                3. <Input placeholder='' />
-                4. <Input placeholder='' />
-              </InputRow>
-              <InputRow>
-                <Label>안감</Label>
-                1. <Input placeholder='' />
-                2. <Input placeholder='' />
-                3. <Input placeholder='' />
-                4. <Input placeholder='' />
-              </InputRow>
-              <InputRow>
-                <Label>배색</Label>
-                1. <Input placeholder='' />
-                2. <Input placeholder='' />
-                3. <Input placeholder='' />
-                4. <Input placeholder='' />
-              </InputRow>
-              <InputRow>
-                <Label>부속</Label>
-                1. <Input placeholder='' />
-                2. <Input placeholder='' />
-                3. <Input placeholder='' />
-                4. <Input placeholder='' />
-              </InputRow>
-            </Column>
-          </MaterialRow>
+          <FabricTable>
+            <thead>
+              <tr>
+                <th>구분</th>
+                <th>1번</th>
+                <th>2번</th>
+                <th>3번</th>
+                <th>4번</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>겉감</td>
+                <td>
+                  <Input placeholder='' />
+                </td>
+                <td>
+                  <Input placeholder='' />
+                </td>
+                <td>
+                  <Input placeholder='' />
+                </td>
+                <td>
+                  <Input placeholder='' />
+                </td>
+              </tr>
+              <tr>
+                <td>안감</td>
+                <td>
+                  <Input placeholder='' />
+                </td>
+                <td>
+                  <Input placeholder='' />
+                </td>
+                <td>
+                  <Input placeholder='' />
+                </td>
+                <td>
+                  <Input placeholder='' />
+                </td>
+              </tr>
+              <tr>
+                <td>배색</td>
+                <td>
+                  <Input placeholder='' />
+                </td>
+                <td>
+                  <Input placeholder='' />
+                </td>
+                <td>
+                  <Input placeholder='' />
+                </td>
+                <td>
+                  <Input placeholder='' />
+                </td>
+              </tr>
+              <tr>
+                <td>부속</td>
+                <td>
+                  <Input placeholder='' />
+                </td>
+                <td>
+                  <Input placeholder='' />
+                </td>
+                <td>
+                  <Input placeholder='' />
+                </td>
+                <td>
+                  <Input placeholder='' />
+                </td>
+              </tr>
+            </tbody>
+          </FabricTable>
         </SectionBox>
 
         <MiddleDivider />
@@ -648,6 +688,24 @@ const SizeGuideTable = styled.table`
     text-align: center;
     font-size: 12px;
     padding: 4px;
+    position: relative;
+  }
+
+  /* 첫 번째 열에 디바이더 추가 */
+  th:first-child,
+  td:first-child {
+    padding-left: 10px;
+  }
+
+  td:first-child::before {
+    content: '';
+    position: absolute;
+    left: -20px; /* SectionBox의 border와 맞추기 위해 */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 1px;
+    background: #dddddd;
   }
 
   th {
@@ -784,4 +842,38 @@ const Column = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+`;
+
+const FabricTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+
+  th,
+  td {
+    border: 1px solid #ddd;
+    text-align: center;
+    font-size: 12px;
+    padding: 4px;
+  }
+
+  /* 본문 첫번째 셀에 divider 추가 */
+  td:first-child {
+    position: relative;
+  }
+
+  td:first-child::before {
+    content: '';
+    position: absolute;
+    left: -20px; /* SectionBox의 border와 맞추기 위해 */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 1px;
+    background: #dddddd;
+  }
+
+  th {
+    background-color: #f9f9f9;
+  }
 `;
