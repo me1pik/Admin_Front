@@ -3,10 +3,10 @@ import react from '@vitejs/plugin-react';
 import svgrPlugin from 'vite-plugin-svgr';
 
 export default defineConfig({
-  base: './',
+  base: './', // 상대경로로 설정하여 배포 환경에서 경로 문제를 최소화
   plugins: [
     react(),
-    svgrPlugin(), // SVG를 React 컴포넌트로 사용 가능하게 함
+    svgrPlugin(), // SVG를 React 컴포넌트로 변환
   ],
   resolve: {
     alias: {
@@ -16,13 +16,12 @@ export default defineConfig({
   assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.svg'],
   build: {
     outDir: 'dist',
-    sourcemap: false, // 프로덕션 빌드 시 소스맵 생성 비활성화
-
+    sourcemap: false,
     rollupOptions: {
       output: {
-        assetFileNames: 'assets/[name]-[hash][extname]', // 자산 파일에 해시 추가
-        chunkFileNames: 'js/[name]-[hash].js', // 청크 파일에 해시 추가
-        entryFileNames: 'js/[name]-[hash].js', // 엔트리 파일에 해시 추가
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        chunkFileNames: 'js/[name]-[hash].js',
+        entryFileNames: 'js/[name]-[hash].js',
       },
     },
   },
