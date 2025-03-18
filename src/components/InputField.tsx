@@ -1,6 +1,6 @@
-import React, { useState, forwardRef } from "react";
-import styled from "styled-components";
-import Button02 from "../components/Button02";
+import React, { useState, forwardRef } from 'react';
+import styled from 'styled-components';
+import Button02 from '../components/Button02';
 
 type InputFieldProps = {
   label: string;
@@ -8,7 +8,7 @@ type InputFieldProps = {
   type?: string;
   error?: { message: string };
   buttonLabel?: string;
-  buttonColor?: "yellow" | "black";
+  buttonColor?: 'yellow' | 'black';
   onButtonClick?: () => void;
   prefix?: string;
   prefixcontent?: string | React.ReactNode;
@@ -25,7 +25,7 @@ function parsePrefixContent(content: string) {
   let applyGray = false;
 
   return tokens.map((token, i) => {
-    if (token === "|") {
+    if (token === '|') {
       applyGray = true;
       return <GraySpan key={i}>{token}</GraySpan>;
     }
@@ -33,8 +33,8 @@ function parsePrefixContent(content: string) {
       return <GraySpan key={i}>{token}</GraySpan>;
     }
     if (
-      (token.startsWith("(") && token.endsWith(")")) ||
-      token === "해당없음"
+      (token.startsWith('(') && token.endsWith(')')) ||
+      token === '해당없음'
     ) {
       return <GraySpan key={i}>{token}</GraySpan>;
     }
@@ -47,10 +47,10 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
     {
       label,
       id,
-      type = "text",
+      type = 'text',
       error,
       buttonLabel,
-      buttonColor = "yellow",
+      buttonColor = 'yellow',
       onButtonClick,
       prefix,
       prefixcontent,
@@ -64,7 +64,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
     ref
   ) => {
     const [selectedOption, setSelectedOption] = useState(
-      options ? options[0] : ""
+      options ? options[0] : ''
     );
 
     const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -76,7 +76,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
 
     const renderPrefixContent = () => {
       if (!prefixcontent) return null;
-      if (typeof prefixcontent === "string") {
+      if (typeof prefixcontent === 'string') {
         return (
           <PrefixcontentText>
             {parsePrefixContent(prefixcontent)}
@@ -89,9 +89,9 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
     return (
       <InputContainer>
         <Label htmlFor={id} $isEmpty={!label}>
-          {label.split("(")[0] || "​"}
-          {label.includes("(") && (
-            <GrayText>{`(${label.split("(")[1]}`}</GrayText>
+          {label.split('(')[0] || '​'}
+          {label.includes('(') && (
+            <GrayText>{`(${label.split('(')[1]}`}</GrayText>
           )}
         </Label>
 
@@ -132,12 +132,12 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
               <InputWrapper>
                 <EmailDropdown
                   id={`${id}-domain`}
-                  defaultValue="naver.com"
+                  defaultValue='naver.com'
                   disabled={rest.readOnly}
                 >
-                  <option value="gmail.com">gmail.com</option>
-                  <option value="naver.com">naver.com</option>
-                  <option value="daum.net">daum.net</option>
+                  <option value='gmail.com'>gmail.com</option>
+                  <option value='naver.com'>naver.com</option>
+                  <option value='daum.net'>daum.net</option>
                 </EmailDropdown>
               </InputWrapper>
             )}
@@ -170,7 +170,7 @@ const Label = styled.label<{ $isEmpty: boolean }>`
   font-weight: 700;
   line-height: 11.05px;
   text-align: left;
-  visibility: ${({ $isEmpty }) => ($isEmpty ? "hidden" : "visible")};
+  visibility: ${({ $isEmpty }) => ($isEmpty ? 'hidden' : 'visible')};
 `;
 
 const GrayText = styled.span`
@@ -240,8 +240,8 @@ const Input = styled.input`
   font-weight: 400;
   font-size: 13px;
   line-height: 14px;
-  background-color: ${({ readOnly }) => (readOnly ? "#f0f0f0" : "white")};
-  color: ${({ readOnly }) => (readOnly ? "#999999" : "#000000")};
+  background-color: ${({ readOnly }) => (readOnly ? '#f0f0f0' : 'white')};
+  color: ${({ readOnly }) => (readOnly ? '#999999' : '#000000')};
   &:focus {
     outline: none;
   }
