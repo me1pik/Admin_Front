@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import ProductTable, { ProductItem } from '../components/ProductTable';
 import SubHeader, { TabItem } from '../components/SubHeader';
 import Pagination from '../components/Pagination';
+import RegisterButton from '../components/RegisterButton'; // 새 버튼 컴포넌트 임포트
 
 /** 더미 제품 데이터 */
 const dummyProducts: ProductItem[] = [
@@ -13,7 +14,7 @@ const dummyProducts: ProductItem[] = [
     brand: 'CC Collect',
     category: '원피스',
     color: 'BLACK',
-    size: '44(S) / 55(M) / 66(L) ',
+    size: '44(S) / 55(M) / 66(L)',
     retailPrice: 540000,
     registerDate: '2024-11-15',
     status: '등록완료',
@@ -121,7 +122,6 @@ const ProductList: React.FC = () => {
   // 검색 로직: styleCode, brand, color, status 등
   const filteredData = dataByTab.filter((item) => {
     const lowerTerm = searchTerm.toLowerCase();
-
     if (searchType === 'styleCode') {
       return item.styleCode.toLowerCase().includes(lowerTerm);
     } else if (searchType === 'brand') {
@@ -147,6 +147,11 @@ const ProductList: React.FC = () => {
     alert(`스타일 코드(${styleCode}) 클릭됨`);
   };
 
+  // 제품 등록 버튼 클릭 시 이벤트
+  const handleRegisterClick = () => {
+    alert('제품 등록 버튼 클릭됨');
+  };
+
   return (
     <Content>
       <HeaderTitle>제품관리</HeaderTitle>
@@ -164,7 +169,11 @@ const ProductList: React.FC = () => {
       <TableContainer>
         <ProductTable filteredData={currentPageData} handleEdit={handleEdit} />
       </TableContainer>
-      <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+      {/* 하단에 버튼과 페이지네이션을 row로 정렬 */}
+      <FooterRow>
+        <RegisterButton text='제품등록' onClick={handleRegisterClick} />
+        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+      </FooterRow>
     </Content>
   );
 };
@@ -208,4 +217,11 @@ const TotalCount = styled.div`
 
 const TableContainer = styled.div`
   box-sizing: border-box;
+`;
+
+/* FooterRow: 버튼과 페이지네이션을 한 줄(row)로 정렬 */
+const FooterRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;

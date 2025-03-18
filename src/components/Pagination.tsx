@@ -1,18 +1,18 @@
 // src/components/Pagination.tsx
-import React from "react";
-import styled from "styled-components";
+import React from 'react';
+import styled from 'styled-components';
 
 // 활성화 아이콘
-import FirstPageIcon from "../assets/PageNationIcon1.svg";
-import PrevPageIcon from "../assets/PageNationIcon2.svg";
-import NextPageIcon from "../assets/PageNationIcon3.svg";
-import LastPageIcon from "../assets/PageNationIcon4.svg";
+import FirstPageIcon from '../assets/PageNationIcon1.svg';
+import PrevPageIcon from '../assets/PageNationIcon2.svg';
+import NextPageIcon from '../assets/PageNationIcon3.svg';
+import LastPageIcon from '../assets/PageNationIcon4.svg';
 
 // 비활성화 아이콘
-import FirstPageIconDisabled from "../assets/PageNationIcon1none.svg";
-import PrevPageIconDisabled from "../assets/PageNationIcon2none.svg";
-import NextPageIconDisabled from "../assets/PageNationIcon3none.svg";
-import LastPageIconDisabled from "../assets/PageNationIcon4none.svg";
+import FirstPageIconDisabled from '../assets/PageNationIcon1none.svg';
+import PrevPageIconDisabled from '../assets/PageNationIcon2none.svg';
+import NextPageIconDisabled from '../assets/PageNationIcon3none.svg';
+import LastPageIconDisabled from '../assets/PageNationIcon4none.svg';
 
 interface PaginationProps {
   page: number;
@@ -34,8 +34,8 @@ const Pagination: React.FC<PaginationProps> = ({
   if (currentPage > correctedTotalPages) currentPage = correctedTotalPages;
 
   // 2자리 형식(예: 01, 02...)으로 표시
-  const currentPageStr = String(currentPage).padStart(2, "0");
-  const totalPagesStr = String(correctedTotalPages).padStart(2, "0");
+  const currentPageStr = String(currentPage).padStart(2, '0');
+  const totalPagesStr = String(correctedTotalPages).padStart(2, '0');
 
   return (
     <PaginationContainer>
@@ -43,22 +43,22 @@ const Pagination: React.FC<PaginationProps> = ({
       <PageArrow
         disabled={currentPage === 1}
         onClick={() => setPage(1)}
-        aria-label="첫 페이지 이동"
+        aria-label='첫 페이지 이동'
       >
         <Icon
           src={currentPage === 1 ? FirstPageIconDisabled : FirstPageIcon}
-          alt="첫 페이지"
+          alt='첫 페이지'
         />
       </PageArrow>
       {/* 이전 페이지 이동 */}
       <PageArrow
         disabled={currentPage === 1}
         onClick={() => setPage(currentPage - 1)}
-        aria-label="이전 페이지 이동"
+        aria-label='이전 페이지 이동'
       >
         <Icon
           src={currentPage === 1 ? PrevPageIconDisabled : PrevPageIcon}
-          alt="이전 페이지"
+          alt='이전 페이지'
         />
       </PageArrow>
 
@@ -73,7 +73,7 @@ const Pagination: React.FC<PaginationProps> = ({
       <PageArrow
         disabled={currentPage === correctedTotalPages}
         onClick={() => setPage(currentPage + 1)}
-        aria-label="다음 페이지 이동"
+        aria-label='다음 페이지 이동'
       >
         <Icon
           src={
@@ -81,14 +81,14 @@ const Pagination: React.FC<PaginationProps> = ({
               ? NextPageIconDisabled
               : NextPageIcon
           }
-          alt="다음 페이지"
+          alt='다음 페이지'
         />
       </PageArrow>
       {/* 마지막 페이지 이동 */}
       <PageArrow
         disabled={currentPage === correctedTotalPages}
         onClick={() => setPage(correctedTotalPages)}
-        aria-label="마지막 페이지 이동"
+        aria-label='마지막 페이지 이동'
       >
         <Icon
           src={
@@ -96,7 +96,7 @@ const Pagination: React.FC<PaginationProps> = ({
               ? LastPageIconDisabled
               : LastPageIcon
           }
-          alt="마지막 페이지"
+          alt='마지막 페이지'
         />
       </PageArrow>
     </PaginationContainer>
@@ -108,11 +108,12 @@ export default Pagination;
 /* ====================== Styled Components ====================== */
 
 const PaginationContainer = styled.div`
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 27px;
-  margin-top: 20px;
+  margin: 20px auto 0; /* 상단 마진과 좌우 auto로 중앙 정렬 */
 `;
 
 interface PageArrowProps {
@@ -123,7 +124,7 @@ const PageArrow = styled.button<PageArrowProps>`
   border: none;
   background: transparent;
   padding: 0;
-  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
 `;
 
 const Icon = styled.img`
