@@ -1,13 +1,13 @@
-// vite.config.ts
-import { defineConfig } from "vite";
-import svgr from "vite-plugin-svgr";
-import react from "@vitejs/plugin-react";
+// vite.config.ts 예시
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  plugins: [svgr(), react()],
+  plugins: [react()],
   resolve: {
     alias: {
-      "@": "/src",
+      '@': '/src',
     },
   },
+  assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.svg'],
 });
