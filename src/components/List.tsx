@@ -303,7 +303,8 @@ const SubMenu = styled.div`
   position: absolute;
   left: 60px;
   top: 0;
-  width: 150px;
+  width: 100%;
+  min-width: 100px;
   display: flex;
   flex-direction: column;
   background: #333;
@@ -315,6 +316,13 @@ const SubMenu = styled.div`
 `;
 
 const SubMenuItem = styled.div`
+  font-family: 'NanumSquare Neo OTF';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 13px;
+  text-align: center;
+
   color: #ffffff;
   padding: 8px 12px;
   cursor: pointer;

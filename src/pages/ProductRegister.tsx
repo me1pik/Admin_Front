@@ -749,10 +749,10 @@ const SizeImageBox = styled.div`
 `;
 
 /* 소재정보(왼쪽/오른쪽) */
-const MaterialRow = styled.div`
-  display: flex;
-  gap: 20px;
-`;
+// const MaterialRow = styled.div`
+//   display: flex;
+//   gap: 20px;
+// `;
 
 /* 체크박스 그룹 */
 const CheckGroupRow = styled.div`
