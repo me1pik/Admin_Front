@@ -56,8 +56,10 @@ const HeaderContainer = styled.div`
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  height: 100px; /* 헤더 높이 */
-  padding: 0 45px; /* 좌우 여백 */
+  height: 80px; /* 헤더 높이 */
+  margin-right: 60px;
+  width: 100vw;
+
   background-color: #ffffff;
 `;
 
