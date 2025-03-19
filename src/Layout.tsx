@@ -45,7 +45,6 @@ const SidebarContainer = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: #f8f8f8; /* 예시 배경색 */
 `;
 
 /** 메인 콘텐츠 영역 */
@@ -53,7 +52,7 @@ const ContentContainer = styled.div`
   flex: 1;
   overflow-x: hidden;
   overflow-y: auto;
-  background-color: #ffffff;
+
   padding: 90px 36px;
 `;
 
