@@ -1,6 +1,7 @@
 // src/pages/ProductRegister.tsx
 import React from 'react';
 import styled from 'styled-components';
+import DetailSubHeader, { TabItem } from '../components/DetailSubHeader';
 
 const ProductRegister: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
@@ -8,16 +9,28 @@ const ProductRegister: React.FC = () => {
     alert('제품 등록 완료!');
   };
 
+  const handleTabChange = (tab: TabItem) => {
+    // "변경저장", "취소" 중 어떤 버튼이 눌렸는지
+    console.log('선택된 버튼:', tab.label);
+    if (tab.label === '변경저장') {
+      // 저장 로직
+      alert('저장 로직 실행');
+    } else {
+      // 취소 로직
+      alert('취소 로직 실행');
+    }
+  };
+
+  // "변경저장", "취소" 두 버튼만 사용
+  const tabs: TabItem[] = [{ label: '변경저장' }, { label: '취소' }];
+
   return (
     <Container>
       {/* 상단 영역: 제목 + 우측 버튼 */}
       <HeaderRow>
         <Title>제품관리</Title>
-        <ButtonGroup>
-          <BlackButton>변경 저장</BlackButton>
-          <GrayButton>취소</GrayButton>
-        </ButtonGroup>
       </HeaderRow>
+      <DetailSubHeader tabs={tabs} onTabChange={handleTabChange} />
 
       {/* 번호 */}
       <ProductNumber>번호 13486</ProductNumber>
@@ -599,27 +612,6 @@ const Title = styled.h1`
   /* identical to box height */
 
   color: #000000;
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  gap: 8px;
-`;
-
-const BlackButton = styled.button`
-  background-color: #000;
-  color: #fff;
-  padding: 6px 12px;
-  border: none;
-  cursor: pointer;
-`;
-
-const GrayButton = styled.button`
-  background-color: #ccc;
-  color: #000;
-  padding: 6px 12px;
-  border: none;
-  cursor: pointer;
 `;
 
 const ProductNumber = styled.div`
