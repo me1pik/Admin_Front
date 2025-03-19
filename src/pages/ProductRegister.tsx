@@ -14,7 +14,7 @@ const ProductRegister: React.FC = () => {
       <HeaderRow>
         <Title>제품관리</Title>
         <ButtonGroup>
-          <BlackButton>저장하기</BlackButton>
+          <BlackButton>변경 저장</BlackButton>
           <GrayButton>취소</GrayButton>
         </ButtonGroup>
       </HeaderRow>
@@ -33,6 +33,7 @@ const ProductRegister: React.FC = () => {
               <Bullet />
               <SectionTitle>제품 기본정보</SectionTitle>
             </SectionHeader>
+            <VerticalLine2 />
 
             <InputRow>
               <Label>브랜드</Label>
@@ -57,13 +58,13 @@ const ProductRegister: React.FC = () => {
               </Select>
             </InputRow>
           </SectionBox>
-
           {/* 컬럼 2: 종류 및 사이즈 설정 */}
           <SectionBox>
             <SectionHeader>
               <Bullet />
               <SectionTitle>종류 및 사이즈 설정</SectionTitle>
             </SectionHeader>
+            <VerticalLine2 />
 
             <InputRow>
               <Label>종류</Label>
@@ -74,16 +75,38 @@ const ProductRegister: React.FC = () => {
                 <option value='스커트'>스커트</option>
               </Select>
             </InputRow>
+
+            {/* === 사이즈 선택을 체크박스로 구성 === */}
             <InputRow>
               <Label>사이즈</Label>
-              <Select>
-                <option value='44(S)'>44(S)</option>
-                <option value='55(M)'>55(M)</option>
-                <option value='66(L)'>66(L)</option>
-                <option value='77(XL)'>77(XL)</option>
-                <option value='FREE'>FREE</option>
-              </Select>
+              <SizeCheckGroup>
+                <SizeCheckboxLabel>
+                  <SizeCheckbox value='44' />
+                  44
+                </SizeCheckboxLabel>
+
+                <SizeCheckboxLabel>
+                  <SizeCheckbox value='55' />
+                  55
+                </SizeCheckboxLabel>
+
+                <SizeCheckboxLabel>
+                  <SizeCheckbox value='66' />
+                  66
+                </SizeCheckboxLabel>
+
+                <SizeCheckboxLabel>
+                  <SizeCheckbox value='77' />
+                  77
+                </SizeCheckboxLabel>
+
+                <SizeCheckboxLabel>
+                  <SizeCheckbox value='FREE' />
+                  FREE
+                </SizeCheckboxLabel>
+              </SizeCheckGroup>
             </InputRow>
+
             <InputRow>
               <Label>색상</Label>
               <Select defaultValue='CREAM'>
@@ -101,32 +124,34 @@ const ProductRegister: React.FC = () => {
               <Bullet />
               <SectionTitle>제품 가격</SectionTitle>
             </SectionHeader>
-
+            <VerticalLine2 />
             <InputRow>
               <Label>리테일</Label>
-              <Input placeholder='1,390,000' />
+              <Input />
             </InputRow>
             <InputRow>
               <Label>판매</Label>
-              <Input placeholder='1,250,000' />
+              <Input />
             </InputRow>
             <InputRow>
               <Label>대여</Label>
-              <Input placeholder='50,000' />
+              <Input />
             </InputRow>
           </SectionBox>
         </ThreeColumnRow>
 
         <MiddleDivider />
 
-        {/* 2행: 사이즈 가이드 (왼쪽 표, 오른쪽 이미지) */}
+        {/* 2행: 사이즈 가이드 (왼쪽 표, 오른쪽 이미지/표기) */}
         <TwoColumnRow>
           {/* 왼쪽: 사이즈 표 */}
-          <SectionBox style={{ flex: '0 0 600px' }}>
+          <SectionBox style={{ flex: '0 0 400px' }}>
             <SectionHeader>
               <Bullet />
               <SectionTitle>사이즈 가이드</SectionTitle>
             </SectionHeader>
+
+            <VerticalLine1 />
 
             <SizeGuideTable>
               <thead>
@@ -143,239 +168,263 @@ const ProductRegister: React.FC = () => {
                 <tr>
                   <td>44(S)</td>
                   <td>
-                    <InputSmall placeholder='37.5' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='85.1' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='67.3' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='55.2' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='113.3' />
+                    <InputSmall />
                   </td>
                 </tr>
                 <tr>
                   <td>55(M)</td>
                   <td>
-                    <InputSmall placeholder='37.5' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='85.1' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='67.3' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='55.2' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='113.3' />
+                    <InputSmall />
                   </td>
                 </tr>
                 <tr>
                   <td>66(L)</td>
                   <td>
-                    <InputSmall placeholder='37.5' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='85.1' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='67.3' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='55.2' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='113.3' />
+                    <InputSmall />
                   </td>
                 </tr>
                 <tr>
                   <td>77(XL)</td>
                   <td>
-                    <InputSmall placeholder='37.5' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='85.1' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='67.3' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='55.2' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='113.3' />
+                    <InputSmall />
                   </td>
                 </tr>
                 <tr>
                   <td>Free(F)</td>
                   <td>
-                    <InputSmall placeholder='37.5' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='85.1' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='67.3' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='55.2' />
+                    <InputSmall />
                   </td>
                   <td>
-                    <InputSmall placeholder='113.3' />
+                    <InputSmall />
                   </td>
                 </tr>
               </tbody>
             </SizeGuideTable>
-            <Note>*측정 위치에 따라 약간의 오차 있음.</Note>
           </SectionBox>
 
-          {/* 오른쪽: 사이즈 표기 이미지 영역 */}
-          <SectionBox style={{ flex: '0 0 auto', display: 'flex' }}>
+          {/* 오른쪽: 사이즈 표기 이미지 + 텍스트 (flex로 구성) */}
+          <SectionBox style={{ flex: '0 0 auto' }}>
             <SectionHeader>
               <Bullet />
               <SectionTitle>사이즈 표기</SectionTitle>
             </SectionHeader>
 
-            <SizeImage>
-              <SizeImageBox>이미지</SizeImageBox>
-              <p>
-                A. 어깨넓이
-                <br />
-                B. 가슴둘레
-                <br />
-                C. 허리둘레
-                <br />
-                D. 팔길이
-                <br />
-                E. 총길이
-              </p>
-            </SizeImage>
+            <VerticalLine3 />
+
+            {/* 아래부터는 절대 위치 대신 flex 레이아웃 적용 */}
+            <SizeGuideContainer>
+              <GuideWrapper>
+                {/* 원피스 이미지 자리 (예: 썸네일 or Dummy) */}
+                <DressImageContainer>
+                  <DummyDress>이미지</DummyDress>
+                </DressImageContainer>
+
+                {/* 사이즈 표기 텍스트 */}
+                <SizeInfoContainer>
+                  <SpecTitle>[ 사이즈 표기 ]</SpecTitle>
+                  <SpecRow>
+                    <LabelColumn>
+                      <SpecLabel>A. 어깨넓이</SpecLabel>
+                      <SpecLabel>B. 가슴둘레</SpecLabel>
+                      <SpecLabel>C. 허리둘레</SpecLabel>
+                      <SpecLabel>D. 팔길이</SpecLabel>
+                      <SpecLabel>E. 총길이</SpecLabel>
+                    </LabelColumn>
+                    <UnitColumn>
+                      <Unit>( cm 기준 )</Unit>
+                      <Unit>( cm 기준 )</Unit>
+                      <Unit>( cm 기준 )</Unit>
+                      <Unit>( cm 기준 )</Unit>
+                      <Unit>( cm 기준 )</Unit>
+                    </UnitColumn>
+                  </SpecRow>
+                  <Note>*측정 위치에 따라 약간의 오차 있음.</Note>
+                </SizeInfoContainer>
+              </GuideWrapper>
+            </SizeGuideContainer>
           </SectionBox>
         </TwoColumnRow>
 
         <MiddleDivider />
-
         {/* 제품 소재정보: 체크박스 형태 */}
         <SectionBox>
           <SectionHeader>
             <Bullet />
             <SectionTitle>제품 소재정보</SectionTitle>
           </SectionHeader>
-          <Column style={{ maxWidth: '500px' }}>
+
+          <VerticalLine1 />
+
+          <Column style={{ minWidth: '500px' }}>
             <CheckGroupRow>
               <Label>두께감</Label>
-              <CheckGroup>
-                <CheckboxLabel>
-                  <Checkbox name='thickness' value='매우 두꺼움' />
+              <SizeCheckGroup>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='thickness' value='매우 두꺼움' />
                   매우 두꺼움
-                </CheckboxLabel>
-                <CheckboxLabel>
-                  <Checkbox name='thickness' value='두꺼움' />
+                </SizeCheckboxLabel>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='thickness' value='두꺼움' />
                   두꺼움
-                </CheckboxLabel>
-                <CheckboxLabel>
-                  <Checkbox name='thickness' value='적당' defaultChecked />
+                </SizeCheckboxLabel>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='thickness' value='적당' defaultChecked />
                   적당
-                </CheckboxLabel>
-                <CheckboxLabel>
-                  <Checkbox name='thickness' value='얇음' />
+                </SizeCheckboxLabel>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='thickness' value='얇음' />
                   얇음
-                </CheckboxLabel>
-              </CheckGroup>
+                </SizeCheckboxLabel>
+              </SizeCheckGroup>
             </CheckGroupRow>
 
             <CheckGroupRow>
               <Label>신축성</Label>
-              <CheckGroup>
-                <CheckboxLabel>
-                  <Checkbox name='elasticity' value='좋음' />
+              <SizeCheckGroup>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='elasticity' value='좋음' />
                   좋음
-                </CheckboxLabel>
-                <CheckboxLabel>
-                  <Checkbox name='elasticity' value='약간있음' />
+                </SizeCheckboxLabel>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='elasticity' value='약간있음' />
                   약간있음
-                </CheckboxLabel>
-                <CheckboxLabel>
-                  <Checkbox name='elasticity' value='없음' defaultChecked />
+                </SizeCheckboxLabel>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='elasticity' value='없음' defaultChecked />
                   없음
-                </CheckboxLabel>
-                <CheckboxLabel>
-                  <Checkbox name='elasticity' value='허리벤딩' />
+                </SizeCheckboxLabel>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='elasticity' value='허리벤딩' />
                   허리벤딩
-                </CheckboxLabel>
-              </CheckGroup>
+                </SizeCheckboxLabel>
+              </SizeCheckGroup>
             </CheckGroupRow>
 
             <CheckGroupRow>
               <Label>안감</Label>
-              <CheckGroup>
-                <CheckboxLabel>
-                  <Checkbox name='lining' value='정체안감' />
+              <SizeCheckGroup>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='lining' value='정체안감' />
                   정체안감
-                </CheckboxLabel>
-                <CheckboxLabel>
-                  <Checkbox name='lining' value='부분안감' />
+                </SizeCheckboxLabel>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='lining' value='부분안감' />
                   부분안감
-                </CheckboxLabel>
-                <CheckboxLabel>
-                  <Checkbox name='lining' value='기모안감' defaultChecked />
+                </SizeCheckboxLabel>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='lining' value='기모안감' defaultChecked />
                   기모안감
-                </CheckboxLabel>
-                <CheckboxLabel>
-                  <Checkbox name='lining' value='안감없음' />
+                </SizeCheckboxLabel>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='lining' value='안감없음' />
                   안감없음
-                </CheckboxLabel>
-              </CheckGroup>
+                </SizeCheckboxLabel>
+              </SizeCheckGroup>
             </CheckGroupRow>
 
             <CheckGroupRow>
               <Label>촉감</Label>
-              <CheckGroup>
-                <CheckboxLabel>
-                  <Checkbox name='touch' value='뻣뻣함' />
+              <SizeCheckGroup>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='touch' value='뻣뻣함' />
                   뻣뻣함
-                </CheckboxLabel>
-                <CheckboxLabel>
-                  <Checkbox name='touch' value='까슬함' />
+                </SizeCheckboxLabel>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='touch' value='까슬함' />
                   까슬함
-                </CheckboxLabel>
-                <CheckboxLabel>
-                  <Checkbox name='touch' value='적당' defaultChecked />
+                </SizeCheckboxLabel>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='touch' value='적당' defaultChecked />
                   적당
-                </CheckboxLabel>
-                <CheckboxLabel>
-                  <Checkbox name='touch' value='부드러움' />
+                </SizeCheckboxLabel>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='touch' value='부드러움' />
                   부드러움
-                </CheckboxLabel>
-              </CheckGroup>
+                </SizeCheckboxLabel>
+              </SizeCheckGroup>
             </CheckGroupRow>
 
             <CheckGroupRow>
               <Label>비침</Label>
-              <CheckGroup>
-                <CheckboxLabel>
-                  <Checkbox name='transparency' value='비침있음' />
+              <SizeCheckGroup>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='transparency' value='비침있음' />
                   비침있음
-                </CheckboxLabel>
-                <CheckboxLabel>
-                  <Checkbox name='transparency' value='약간있음' />
+                </SizeCheckboxLabel>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='transparency' value='약간있음' />
                   약간있음
-                </CheckboxLabel>
-                <CheckboxLabel>
-                  <Checkbox name='transparency' value='적당' defaultChecked />
+                </SizeCheckboxLabel>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox
+                    name='transparency'
+                    value='적당'
+                    defaultChecked
+                  />
                   적당
-                </CheckboxLabel>
-                <CheckboxLabel>
-                  <Checkbox name='transparency' value='비침없음' />
+                </SizeCheckboxLabel>
+                <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+                  <SizeCheckbox name='transparency' value='비침없음' />
                   비침없음
-                </CheckboxLabel>
-              </CheckGroup>
+                </SizeCheckboxLabel>
+              </SizeCheckGroup>
             </CheckGroupRow>
           </Column>
         </SectionBox>
@@ -387,6 +436,9 @@ const ProductRegister: React.FC = () => {
             <Bullet />
             <SectionTitle>제품 원단정보</SectionTitle>
           </SectionHeader>
+
+          <VerticalLine1 />
+
           <FabricTable>
             <thead>
               <tr>
@@ -470,31 +522,49 @@ const ProductRegister: React.FC = () => {
             <SectionTitle>제품 이미지</SectionTitle>
           </SectionHeader>
 
+          <VerticalLine3 />
+
+          {/* 이미지 박스 4개를 가로로 나열 */}
           <ImageRow>
+            {/* 썸네일 이미지 */}
             <ImageColumn>
+              <ImageBox>
+                <PlusIcon>+</PlusIcon>
+                <ImageAddText>이미지 추가</ImageAddText>
+              </ImageBox>
               <ImageLabel>썸네일 이미지</ImageLabel>
-              <ImageBox>이미지 추가</ImageBox>
             </ImageColumn>
+
+            {/* 착장 이미지 1 */}
             <ImageColumn>
+              <ImageBox>
+                <PlusIcon>+</PlusIcon>
+                <ImageAddText>이미지 추가</ImageAddText>
+              </ImageBox>
               <ImageLabel>착장 이미지 1</ImageLabel>
-              <ImageBox>이미지 추가</ImageBox>
             </ImageColumn>
+
+            {/* 착장 이미지 2 */}
             <ImageColumn>
+              <ImageBox>
+                <PlusIcon>+</PlusIcon>
+                <ImageAddText>이미지 추가</ImageAddText>
+              </ImageBox>
               <ImageLabel>착장 이미지 2</ImageLabel>
-              <ImageBox>이미지 추가</ImageBox>
             </ImageColumn>
+
+            {/* 착장 이미지 3 */}
             <ImageColumn>
+              <ImageBox>
+                <PlusIcon>+</PlusIcon>
+                <ImageAddText>이미지 추가</ImageAddText>
+              </ImageBox>
               <ImageLabel>착장 이미지 3</ImageLabel>
-              <ImageBox>이미지 추가</ImageBox>
             </ImageColumn>
           </ImageRow>
         </SectionBox>
-
         {/* 등록하기 버튼 */}
         <BottomDivider />
-        <ButtonWrap>
-          <SubmitButton type='submit'>등록하기</SubmitButton>
-        </ButtonWrap>
       </FormWrapper>
     </Container>
   );
@@ -505,7 +575,7 @@ export default ProductRegister;
 /* ======================= Styled Components ======================= */
 const Container = styled.div`
   width: 100%;
-  max-width: 1366px;
+
   margin: 0 auto;
   padding: 20px;
   box-sizing: border-box;
@@ -521,8 +591,14 @@ const HeaderRow = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: 18px;
+  font-family: 'NanumSquare Neo OTF';
+  font-style: normal;
   font-weight: 700;
+  font-size: 16px;
+  line-height: 18px;
+  /* identical to box height */
+
+  color: #000000;
 `;
 
 const ButtonGroup = styled.div`
@@ -547,9 +623,12 @@ const GrayButton = styled.button`
 `;
 
 const ProductNumber = styled.div`
-  font-size: 12px;
+  font-family: 'NanumSquare Neo OTF';
+  font-style: normal;
   font-weight: 700;
-  margin-bottom: 10px;
+  font-size: 12px;
+  line-height: 13px;
+  margin-bottom: 20px;
 `;
 
 /* 구분선 */
@@ -594,7 +673,7 @@ const SectionBox = styled.div`
   position: relative;
   margin-bottom: 20px;
   padding-left: 20px;
-  border-left: 1px solid #dddddd;
+  /* border-left: 1px solid #dddddd; */
 `;
 
 /* 섹션 헤더(블릿 + 타이틀) */
@@ -605,7 +684,45 @@ const SectionHeader = styled.div`
   margin-bottom: 10px;
 `;
 
+const VerticalLine1 = styled.div`
+  position: absolute;
+  left: 0px;
+  top: 14px;
+  bottom: 20px;
+  width: 1px;
+  background: #dddddd;
+`;
+
+const VerticalLine2 = styled.div`
+  position: absolute;
+  left: 0px;
+  top: 14px;
+  bottom: 30px;
+  width: 1px;
+  background: #dddddd;
+`;
+
+const VerticalLine3 = styled.div`
+  position: absolute;
+  left: 0px;
+  top: 14px;
+  bottom: 200px;
+  width: 1px;
+  background: #dddddd;
+  /* 세로선 하단에 가로선을 추가하여 ㄴ자 형태로 만듦 */
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 20px; /* 가로선 길이는 필요에 따라 조정 */
+    height: 1px;
+    background: #dddddd;
+  }
+`;
+
 /* 블릿 (원형 + 안쪽 오렌지) */
+
 const Bullet = styled.div`
   position: absolute;
   left: -27px; /* border-left 너비의 절반 정도 */
@@ -629,8 +746,11 @@ const Bullet = styled.div`
 `;
 
 const SectionTitle = styled.div`
+  font-family: 'NanumSquare Neo OTF';
+  font-style: normal;
+  font-weight: 800;
   font-size: 14px;
-  font-weight: 700;
+  line-height: 15px;
   margin-left: 10px; /* 블릿과 타이틀 사이 여백 */
 `;
 
@@ -640,12 +760,16 @@ const InputRow = styled.div`
   margin-bottom: 10px;
 `;
 
-/* 라벨: 섹션 디바이더(라인)와 연결되는 선형 구조 – divider의 길이를 20px만큼 줄임 */
+/* 라벨 */
 const Label = styled.label`
   position: relative;
-  min-width: 50px;
+  min-width: 40px;
+  font-family: 'NanumSquare Neo OTF';
+  font-style: normal;
+  font-weight: 900;
   font-size: 12px;
-  font-weight: 700;
+  line-height: 13px;
+
   margin-right: 10px;
   padding-left: 10px;
   &::before {
@@ -654,7 +778,7 @@ const Label = styled.label`
     left: -20px; /* 섹션박스의 border와 label 사이 간격 조정 */
     top: 50%;
     transform: translateY(-50%);
-    width: 20px; /* 기존 길이에서 20px만큼 줄임 */
+    width: 20px;
     height: 1px;
     background: #dddddd;
   }
@@ -662,21 +786,35 @@ const Label = styled.label`
 
 const Select = styled.select`
   flex: 1;
-  height: 32px;
-  border: 1px solid #ddd;
+  height: 40px;
+  border: 1px solid #000;
   padding: 0 8px;
   font-size: 12px;
+
+  font-family: 'NanumSquare Neo OTF';
+  font-style: normal;
+  font-weight: 800;
+  font-size: 12px;
+  line-height: 13px;
+
+  max-width: 180px;
 `;
 
 const Input = styled.input`
   flex: 1;
-  height: 32px;
+  height: 40px;
+  max-width: 120px;
+
   border: 1px solid #ddd;
   padding: 0 8px;
+  font-family: 'NanumSquare Neo OTF';
+  font-style: normal;
+  font-weight: 700;
   font-size: 12px;
+  line-height: 13px;
 `;
 
-/* 사이즈 테이블 */
+/* 사이즈 테이블 (왼쪽 표) */
 const SizeGuideTable = styled.table`
   width: 100%;
   border-collapse: collapse;
@@ -686,7 +824,14 @@ const SizeGuideTable = styled.table`
   td {
     border: 1px solid #ddd;
     text-align: center;
+    font-family: 'NanumSquare Neo OTF';
+    font-style: normal;
+    font-weight: 900;
     font-size: 12px;
+    line-height: 13px;
+
+    color: #000000;
+
     padding: 4px;
     position: relative;
   }
@@ -724,118 +869,100 @@ const InputSmall = styled.input`
 const Note = styled.div`
   font-size: 12px;
   color: #aaa;
-  margin-top: 5px;
+  margin-top: 15px;
 `;
 
-/* 사이즈 표기 이미지 */
-const SizeImage = styled.div`
+/* ======================================
+   오른쪽 "사이즈 표기" 영역 (flex로 구성)
+====================================== */
+const SizeGuideContainer = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 10px;
+  margin-top: 10px; /* SectionBox 내부에서 약간 띄움 */
 `;
 
-const SizeImageBox = styled.div`
-  width: 100px;
-  height: 150px;
-  border: 1px solid #ddd;
-  background-color: #fff;
+const GuideWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+
+  border: 1px solid #dddddd;
+`;
+
+/* 실제 원피스 이미지 컨테이너 */
+const DressImageContainer = styled.div`
+  width: 120px;
+  height: 180px;
+  background: #ffffff;
+
+  border-radius: 4px;
+
   display: flex;
   align-items: center;
   justify-content: center;
 `;
 
-/* 소재정보(왼쪽/오른쪽) */
-// const MaterialRow = styled.div`
-//   display: flex;
-//   gap: 20px;
-// `;
+// 여기서는 더미 박스를 사용(실제 사용 시 <img>로 교체)
+const DummyDress = styled.div`
+  width: 100px;
+  height: 150px;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #999;
+`;
 
-/* 체크박스 그룹 */
+/* 사이즈 표기 텍스트 박스 */
+const SizeInfoContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+
+  border-radius: 4px;
+  padding: 20px;
+`;
+
+const SpecTitle = styled.div`
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 10px;
+`;
+
+const SpecRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+`;
+
+const LabelColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+const SpecLabel = styled.div`
+  font-size: 12px;
+  font-weight: 700;
+`;
+
+const UnitColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const Unit = styled.div`
+  font-size: 10px;
+  font-weight: 400;
+  color: #999999;
+`;
+
+/* 소재정보(왼쪽/오른쪽) 등은 기존과 동일 */
 const CheckGroupRow = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 10px;
-`;
-
-const CheckGroup = styled.div`
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-`;
-
-const CheckboxLabel = styled.label`
-  display: flex;
-  align-items: center;
-  font-size: 12px;
-  margin-right: 8px;
-`;
-
-/* 체크박스: 기본 appearance 제거 후, 체크 시 노란색 적용 */
-const Checkbox = styled.input.attrs({ type: 'checkbox' })`
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border: 1px solid #ddd;
-  margin-right: 4px;
-  cursor: pointer;
-  display: inline-block;
-  vertical-align: middle;
-  &:checked {
-    background-color: #f6ae24;
-    border-color: #f6ae24;
-  }
-`;
-
-const ImageRow = styled.div`
-  display: flex;
-  gap: 20px;
-`;
-
-const ImageColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const ImageLabel = styled.div`
-  font-size: 12px;
-  font-weight: 700;
-  margin-bottom: 5px;
-`;
-
-const ImageBox = styled.div`
-  width: 120px;
-  height: 150px;
-  border: 1px solid #ddd;
-  background-color: #d9d9d9;
-  font-size: 12px;
-  color: #999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const ButtonWrap = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-`;
-
-const SubmitButton = styled.button`
-  width: 120px;
-  height: 40px;
-  background-color: #f6ae24;
-  border: none;
-  font-weight: 700;
-  color: #fff;
-  cursor: pointer;
-  &:hover {
-    background-color: #ffb84a;
-  }
 `;
 
 const Column = styled.div`
@@ -848,12 +975,21 @@ const FabricTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
+  max-width: 766px;
 
   th,
   td {
     border: 1px solid #ddd;
     text-align: center;
+
+    font-family: 'NanumSquare Neo OTF';
+    font-style: normal;
+    font-weight: 900;
     font-size: 12px;
+    line-height: 13px;
+
+    color: #000000;
+
     padding: 4px;
   }
 
@@ -875,5 +1011,114 @@ const FabricTable = styled.table`
 
   th {
     background-color: #f9f9f9;
+  }
+`;
+
+/* 4행: 제품 이미지 */
+const ImageRow = styled.div`
+  display: flex;
+  gap: 20px;
+`;
+
+const ImageColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const ImageLabel = styled.div`
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 20px; /* 이미지 박스와 라벨 사이 간격 */
+  text-align: center;
+`;
+
+const ImageBox = styled.div`
+  width: 140px;
+  height: 200px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
+
+const PlusIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px; /* 아이콘 컨테이너의 너비 */
+  height: 24px; /* 아이콘 컨테이너의 높이 */
+  font-size: 20px; /* + 문자 크기 */
+  color: #ddd;
+  border: 1px solid #ddd;
+  margin-bottom: 4px;
+`;
+
+/* "이미지 추가" 텍스트 */
+const ImageAddText = styled.div`
+  font-family: 'NanumSquare Neo OTF';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 13px;
+
+  color: #dddddd;
+
+  margin-top: 5px;
+`;
+
+// 사이즈 체크박스를 감싸는 래퍼 (가로로 나열)
+const SizeCheckGroup = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: center;
+`;
+
+// 체크박스 + 텍스트를 한 묶음으로 클릭 가능하게
+const SizeCheckboxLabel = styled.label`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+
+  font-family: 'NanumSquare Neo OTF';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 13px;
+
+  color: #000000;
+`;
+
+// 실제 체크박스 스타일
+const SizeCheckbox = styled.input.attrs({ type: 'checkbox' })`
+  appearance: none;
+  border: 1px solid #ddd;
+  margin-bottom: 5px;
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  cursor: pointer;
+  position: relative;
+
+  &:checked::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 10px;
+    height: 5px;
+    border-left: 3px solid orange;
+    border-bottom: 3px solid orange;
+    transform: rotate(-45deg);
+  }
+
+  &:focus {
+    outline: none;
   }
 `;
