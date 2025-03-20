@@ -1,9 +1,11 @@
 // src/pages/ProductRegister.tsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import DetailSubHeader, { TabItem } from '../components/Header/DetailSubHeader';
-import sizeProductImg from '../assets/productregisterSizeProduct.svg';
+import ListButtonDetailSubHeader, {
+  DetailSubHeaderProps,
+} from '../components/Header/ListButtonDetailSubHeader';
 
+import sizeProductImg from '../assets/productregisterSizeProduct.svg';
 import SizeGuideSection from '../components/productregister/SizeGuideSection';
 import SizeDisplaySection from '../components/productregister/SizeDisplaySection';
 import MaterialInfoSection from '../components/productregister/MaterialInfoSection';
@@ -27,22 +29,40 @@ const ProductDetail: React.FC = () => {
     null,
   ]);
 
+  /** 목록으로 버튼 클릭 시 */
+  const handleBackClick = () => {
+    console.log('목록으로 버튼 클릭됨');
+    window.history.back();
+  };
+
+  /** 정보수정 버튼 클릭 시 */
+  const handleEditClick = () => {
+    console.log('정보수정 버튼 클릭 -> 정보 수정 로직 실행');
+    alert('정보가 수정되었습니다!');
+  };
+
+  /** 종료처리 버튼 클릭 시 */
+  const handleEndClick = () => {
+    console.log('종료처리 버튼 클릭 -> 종료 처리 로직 실행');
+    alert('종료 처리가 완료되었습니다!');
+  };
+
+  // ListButtonDetailSubHeader에 넘길 프롭스
+  const detailSubHeaderProps: DetailSubHeaderProps = {
+    backLabel: '목록이동',
+    onBackClick: handleBackClick,
+    editLabel: '정보수정',
+    onEditClick: handleEditClick,
+    endLabel: '종료처리',
+    onEndClick: handleEndClick,
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     alert('제품 등록 완료!');
   };
 
-  const handleTabChange = (tab: TabItem) => {
-    console.log('선택된 버튼:', tab.label);
-    if (tab.label === '변경저장') {
-      alert('저장 로직 실행');
-    } else {
-      alert('취소 로직 실행');
-    }
-  };
-
-  const tabs: TabItem[] = [{ label: '변경저장' }, { label: '취소' }];
-
+  // 이미지 업로드 핸들러
   const handleImageUpload = (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
@@ -67,31 +87,46 @@ const ProductDetail: React.FC = () => {
       <HeaderRow>
         <Title>제품관리</Title>
       </HeaderRow>
-      <DetailSubHeader tabs={tabs} onTabChange={handleTabChange} />
+
+      {/* 목록이동 / 정보수정 / 종료처리 버튼 */}
+      <ListButtonDetailSubHeader {...detailSubHeaderProps} />
+
+      {/* 번호 표시 */}
       <ProductNumberWrapper>
         <ProductNumberLabel>번호</ProductNumberLabel>
         <ProductNumberValue>{dummyProducts[0].no}</ProductNumberValue>
       </ProductNumberWrapper>
+
+      {/* 상단 3박스 영역 */}
       <DetailTopBoxes />
+
       <MiddleDivider />
+
       <FormWrapper onSubmit={handleSubmit}>
         {/* 2행: 사이즈 가이드, 사이즈 표기 */}
         <TwoColumnRow>
           <SizeGuideSection />
           <SizeDisplaySection sizeProductImg={sizeProductImg} />
         </TwoColumnRow>
+
         <MiddleDivider />
+
         {/* 3행: 제품 소재정보 */}
         <MaterialInfoSection />
+
         <MiddleDivider />
+
         {/* 4행: 제품 원단정보 */}
         <FabricInfoSection />
+
         <MiddleDivider />
+
         {/* 5행: 제품 이미지 */}
         <ProductImageSection
           images={images}
           handleImageUpload={handleImageUpload}
         />
+
         <BottomDivider />
       </FormWrapper>
     </Container>
@@ -99,6 +134,8 @@ const ProductDetail: React.FC = () => {
 };
 
 export default ProductDetail;
+
+/* ====================== Styled Components ====================== */
 
 const Container = styled.div`
   width: 100%;
