@@ -1,7 +1,7 @@
 // src/pages/OrderList.tsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import OrderTable, { Order } from '../components/OrderTable';
+import OrderTable, { Order } from '../components/Table/OrderTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
 import Pagination from '../components/Pagination';
 

@@ -1,7 +1,9 @@
 // src/pages/MonitoringList.tsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import MonitoringTable, { MonitoringItem } from '../components/MonitoringTable';
+import MonitoringTable, {
+  MonitoringItem,
+} from '../components/Table/MonitoringTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
 import Pagination from '../components/Pagination';
 

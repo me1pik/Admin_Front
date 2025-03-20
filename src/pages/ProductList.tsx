@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import ProductTable, { ProductItem } from '../components/ProductTable';
+import ProductTable, { ProductItem } from '../components/Table/ProductTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
 import Pagination from '../components/Pagination';
 import RegisterButton from '../components/RegisterButton'; // 새 버튼 컴포넌트 임포트

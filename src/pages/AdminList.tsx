@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import AdminTable, { Admin } from '../components/AdminTable';
+import AdminTable, { Admin } from '../components/Table/AdminTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
 import Pagination from '../components/Pagination';
 
