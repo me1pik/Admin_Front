@@ -78,7 +78,7 @@ const HeaderContainer = styled.div`
   display: flex;
   align-items: center;
 
-  min-width: 1200px; /* 예시로 1200px 고정 */
+  min-width: 1000px; /* 예시로 1200px 고정 */
   min-height: 60px;
   background: #f9f9f9;
   border: 1px solid #dddddd;
