@@ -137,8 +137,7 @@ const ProductList: React.FC = () => {
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  // 스타일 코드(또는 품번) 클릭 시 해당 제품의 상세 페이지로 이동
-  const handleEdit = (styleCode: string, no: number) => {
+  const handleEdit = (no: number) => {
     navigate(`/productdetail/${no}`);
   };
   // **제품 등록 버튼 클릭 시 -> productregister 페이지로 이동**
