@@ -105,7 +105,7 @@ const VerticalLine = styled.div`
   position: absolute;
   left: 0;
   top: 14px;
-  bottom: 30px;
+  bottom: 50px;
   width: 1px;
   background: #dddddd;
 `;
