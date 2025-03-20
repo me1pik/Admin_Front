@@ -9,6 +9,7 @@ import Layout from './Layout';
 import ProductList from './pages/ProductList';
 import ProductRegister from './pages/ProductRegister';
 import ProductDetail from './pages/ProductDetail';
+import UserDetail from './pages/UserDetail';
 // import AnalysisInfo from "./pages/AnalysisInfo";
 // import InventoryList from "./pages/InventoryList";
 // import StatisticsList from "./pages/StatisticsList";
@@ -32,6 +33,7 @@ const App: React.FC = () => {
         <Route element={<Layout />}>
           <Route path='/adminlist' element={<AdminList />} />
           <Route path='/userlist' element={<UserList />} />
+          <Route path='/userdetail/:no' element={<UserDetail />} />
           <Route path='/orderlist' element={<OrderList />} />
           <Route path='/monitoring' element={<Monitoring />} />
           <Route path='/productlist' element={<ProductList />} />

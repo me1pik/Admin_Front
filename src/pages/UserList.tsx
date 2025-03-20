@@ -1,5 +1,6 @@
 // src/pages/UserList.tsx
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import UserTable, { User } from '../components/Table/UserTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
@@ -75,7 +76,6 @@ const dummyUsers: User[] = [
   },
 ];
 
-/** 탭: 전체보기 / 일반회원 / 블럭회원 */
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
   { label: '일반회원', path: '일반' },
@@ -83,28 +83,21 @@ const tabs: TabItem[] = [
 ];
 
 const UserList: React.FC = () => {
-  // 검색 상태 (검색 분류 제거)
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-
-  // 현재 선택된 탭 상태 (기본값: "전체보기")
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-
-  // 유저 목록 (임시 데이터)
   const [userData] = useState<User[]>(dummyUsers);
 
-  // 탭 변경 시 호출되는 콜백
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
-    setPage(1); // 탭 변경 시 페이지 초기화
+    setPage(1);
   };
 
-  // 탭에 따른 데이터 필터링 (status 필드를 기준으로 필터링)
   const dataByTab = userData.filter((item) => {
     if (selectedTab.label === '전체보기') return true;
-    return item.status === selectedTab.path; // "일반" / "블럭"
+    return item.status === selectedTab.path;
   });
 
-  // 검색 로직: 더미 데이터의 모든 문자열 필드를 대상으로 검색
   const filteredData = dataByTab.filter((item) => {
     const lowerTerm = searchTerm.toLowerCase();
     return (
@@ -120,17 +113,16 @@ const UserList: React.FC = () => {
     );
   });
 
-  // 페이지네이션 상태
   const [page, setPage] = useState(1);
-  const limit = 10; // 한 페이지당 10개
+  const limit = 10;
   const totalCount = filteredData.length;
   const totalPages = Math.ceil(totalCount / limit);
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  // 인스타 계정 클릭 시 수정/상세 페이지 이동 (예시)
-  const handleEdit = (instagram: string) => {
-    alert(`인스타 계정(${instagram}) 클릭됨`);
+  // 인스타 계정 클릭 시 유저 번호(no)를 이용해 상세 페이지로 이동
+  const handleEdit = (no: number) => {
+    navigate(`/userdetail/${no}`);
   };
 
   return (

@@ -1,4 +1,4 @@
-// src/components/UserTable.tsx
+// src/components/Table/UserTable.tsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
@@ -18,7 +18,7 @@ export interface User {
 /** UserTable 컴포넌트 Props */
 interface UserTableProps {
   filteredData: User[];
-  handleEdit: (id: string) => void; // 예: 클릭 시 상세 페이지로 이동 등
+  handleEdit: (no: number) => void; // 이제 유저 번호(no)를 인자로 받음
 }
 
 const UserTable: React.FC<UserTableProps> = ({ filteredData, handleEdit }) => {
@@ -69,7 +69,6 @@ const UserTable: React.FC<UserTableProps> = ({ filteredData, handleEdit }) => {
         <col style={{ width: '100px' }} /> {/* 가입일자 */}
       </colgroup>
       <thead>
-        {/* 테이블 헤더 */}
         <TableRow>
           <Th>
             <input
@@ -109,7 +108,8 @@ const UserTable: React.FC<UserTableProps> = ({ filteredData, handleEdit }) => {
             <TdLeft>
               <InstaContainer>
                 <Avatar />
-                <InstaText onClick={() => handleEdit(user.instagram)}>
+                {/* 클릭 시 handleEdit에 user.no 전달 */}
+                <InstaText onClick={() => handleEdit(user.no)}>
                   {user.instagram}
                 </InstaText>
               </InstaContainer>
@@ -119,8 +119,6 @@ const UserTable: React.FC<UserTableProps> = ({ filteredData, handleEdit }) => {
             <Td>{user.joinDate}</Td>
           </TableRow>
         ))}
-
-        {/* 데이터가 10개 미만이면 빈 행을 추가 */}
         {filteredData.length < 10 &&
           Array.from({ length: 10 - filteredData.length }).map((_, i) => (
             <TableRow key={`empty-${i}`}>
@@ -145,7 +143,6 @@ export default UserTable;
 
 /* ====================== Styled Components ====================== */
 
-/** 공통 테이블 스타일 */
 const Table = styled.table`
   width: 100%;
   table-layout: fixed;
@@ -155,7 +152,6 @@ const Table = styled.table`
   border: 1px solid #dddddd;
 `;
 
-/** 행 높이를 44px로 고정 */
 const TableRow = styled.tr`
   height: 44px;
 `;
@@ -183,12 +179,10 @@ const Td = styled.td`
   white-space: nowrap;
 `;
 
-/** 인스타 계정 셀만 왼쪽 정렬하고 싶다면 Td에서 상속받아 text-align: left 적용 */
 const TdLeft = styled(Td)`
   text-align: left;
 `;
 
-/** 인스타 계정 셀(아바타 + 텍스트) */
 const InstaContainer = styled.div`
   display: flex;
   align-items: center;
@@ -196,16 +190,14 @@ const InstaContainer = styled.div`
   margin-left: 10px;
 `;
 
-/** 아바타(회색 원) */
 const Avatar = styled.div`
   width: 26px;
   height: 26px;
   border-radius: 50%;
   flex-shrink: 0;
-  background-color: #cccccc; /* 회색 원 */
+  background-color: #cccccc;
 `;
 
-/** 인스타 계정 텍스트 */
 const InstaText = styled.span`
   cursor: pointer;
   color: #007bff;
