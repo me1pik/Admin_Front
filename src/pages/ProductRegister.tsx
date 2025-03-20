@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import DetailSubHeader, { TabItem } from '../components/DetailSubHeader';
+import sizeProductImg from '../assets/productregisterSizeProduct.svg';
 
 const ProductRegister: React.FC = () => {
   const [images, setImages] = useState<(string | null)[]>([
@@ -318,30 +319,39 @@ const ProductRegister: React.FC = () => {
             {/* 아래부터는 절대 위치 대신 flex 레이아웃 적용 */}
             <SizeGuideContainer>
               <GuideWrapper>
-                {/* 원피스 이미지 자리 (예: 썸네일 or Dummy) */}
-                <DressImageContainer>
-                  <DummyDress>이미지</DummyDress>
-                </DressImageContainer>
+                <SizeGuideContainer>
+                  <SizeProductImage
+                    src={sizeProductImg}
+                    alt='사이즈 표기 이미지'
+                  />
+                </SizeGuideContainer>
 
                 {/* 사이즈 표기 텍스트 */}
                 <SizeInfoContainer>
                   <SpecTitle>[ 사이즈 표기 ]</SpecTitle>
-                  <SpecRow>
-                    <LabelColumn>
+                  <SpaceColumn>
+                    <SpecItemRow>
                       <SpecLabel>A. 어깨넓이</SpecLabel>
+                      <Unit>( cm 기준 )</Unit>
+                    </SpecItemRow>
+                    <SpecItemRow>
                       <SpecLabel>B. 가슴둘레</SpecLabel>
+                      <Unit>( cm 기준 )</Unit>
+                    </SpecItemRow>
+                    <SpecItemRow>
                       <SpecLabel>C. 허리둘레</SpecLabel>
+                      <Unit>( cm 기준 )</Unit>
+                    </SpecItemRow>
+                    <SpecItemRow>
                       <SpecLabel>D. 팔길이</SpecLabel>
+                      <Unit>( cm 기준 )</Unit>
+                    </SpecItemRow>
+                    <SpecItemRow>
                       <SpecLabel>E. 총길이</SpecLabel>
-                    </LabelColumn>
-                    <UnitColumn>
                       <Unit>( cm 기준 )</Unit>
-                      <Unit>( cm 기준 )</Unit>
-                      <Unit>( cm 기준 )</Unit>
-                      <Unit>( cm 기준 )</Unit>
-                      <Unit>( cm 기준 )</Unit>
-                    </UnitColumn>
-                  </SpecRow>
+                    </SpecItemRow>
+                  </SpaceColumn>
+
                   <Note>*측정 위치에 따라 약간의 오차 있음.</Note>
                 </SizeInfoContainer>
               </GuideWrapper>
@@ -888,7 +898,7 @@ const InputSmall = styled.input`
 const Note = styled.div`
   font-size: 12px;
   color: #aaa;
-  margin-top: 15px;
+  margin-top: 29px;
 `;
 
 /* ======================================
@@ -897,7 +907,6 @@ const Note = styled.div`
 const SizeGuideContainer = styled.div`
   display: flex;
   flex-direction: column;
-  margin-top: 10px; /* SectionBox 내부에서 약간 띄움 */
 `;
 
 const GuideWrapper = styled.div`
@@ -907,31 +916,6 @@ const GuideWrapper = styled.div`
   border: 1px solid #dddddd;
 `;
 
-/* 실제 원피스 이미지 컨테이너 */
-const DressImageContainer = styled.div`
-  width: 120px;
-  height: 180px;
-  background: #ffffff;
-
-  border-radius: 4px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-// 여기서는 더미 박스를 사용(실제 사용 시 <img>로 교체)
-const DummyDress = styled.div`
-  width: 100px;
-  height: 150px;
-  background: #eee;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  color: #999;
-`;
-
 /* 사이즈 표기 텍스트 박스 */
 const SizeInfoContainer = styled.div`
   display: flex;
@@ -939,25 +923,25 @@ const SizeInfoContainer = styled.div`
   background: #ffffff;
 
   border-radius: 4px;
-  padding: 20px;
+  padding: 20px 0;
 `;
 
 const SpecTitle = styled.div`
   font-size: 12px;
   font-weight: 800;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 `;
 
-const SpecRow = styled.div`
+const SpaceColumn = styled.div`
   display: flex;
-  flex-direction: row;
-  gap: 10px;
+  flex-direction: column;
+  gap: 20px;
 `;
 
 const LabelColumn = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 20px;
 `;
 
 const SpecLabel = styled.div`
@@ -1010,6 +994,7 @@ const FabricTable = styled.table`
     color: #000000;
 
     padding: 4px;
+    min-width: 50px;
   }
 
   /* 본문 첫번째 셀에 divider 추가 */
@@ -1144,4 +1129,18 @@ const SizeCheckbox = styled.input.attrs({ type: 'checkbox' })`
 
 const HiddenFileInput = styled.input`
   display: none;
+`;
+
+const SizeProductImage = styled.img`
+  width: 146px;
+  height: 232px;
+  object-fit: contain; /* 필요에 따라 cover, contain 등 조절 */
+  margin: 10px;
+`;
+
+const SpecItemRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 5px; /* 라벨과 단위 사이 간격 */
 `;
