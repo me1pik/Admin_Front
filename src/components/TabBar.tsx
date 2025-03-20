@@ -11,7 +11,7 @@ interface ShippingTabBarProps {
   onTabClick?: (index: number) => void;
 }
 
-const ShippingTabBar: React.FC<ShippingTabBarProps> = ({
+const TabBar: React.FC<ShippingTabBarProps> = ({
   tabs,
   activeIndex = 0,
   onTabClick,
@@ -36,7 +36,7 @@ const ShippingTabBar: React.FC<ShippingTabBarProps> = ({
   );
 };
 
-export default ShippingTabBar;
+export default TabBar;
 
 /* ====================== Styled Components ====================== */
 
