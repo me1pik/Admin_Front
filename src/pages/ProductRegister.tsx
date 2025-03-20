@@ -651,12 +651,12 @@ const FormWrapper = styled.form`
 /* 레이아웃 */
 const ThreeColumnRow = styled.div`
   display: flex;
-  gap: 20px;
+  gap: 50px;
 `;
 
 const TwoColumnRow = styled.div`
   display: flex;
-  gap: 20px;
+  gap: 50px;
   margin-bottom: 10px;
 `;
 
