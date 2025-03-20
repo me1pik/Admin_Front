@@ -2,7 +2,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-interface UsageHistoryRow {
+export interface UsageHistoryRow {
   date: string; // 이용일자
   orderNumber: string; // 주문번호
   productName: string; // 상품명
@@ -10,45 +10,13 @@ interface UsageHistoryRow {
   amount: string; // 결제금액
 }
 
-const dummyUsageHistory: UsageHistoryRow[] = [
-  {
-    date: '2025-03-01',
-    orderNumber: 'ORD12345',
-    productName: '상품 A',
-    status: '완료',
-    amount: '120,000원',
-  },
-  {
-    date: '2025-02-27',
-    orderNumber: 'ORD12346',
-    productName: '상품 B',
-    status: '취소',
-    amount: '80,000원',
-  },
-  {
-    date: '2025-02-25',
-    orderNumber: 'ORD12347',
-    productName: '상품 C',
-    status: '진행중',
-    amount: '150,000원',
-  },
-  {
-    date: '2025-02-20',
-    orderNumber: 'ORD12348',
-    productName: '상품 D',
-    status: '완료',
-    amount: '200,000원',
-  },
-  {
-    date: '2025-02-15',
-    orderNumber: 'ORD12349',
-    productName: '상품 E',
-    status: '완료',
-    amount: '90,000원',
-  },
-];
+interface UsageHistoryTableProps {
+  data: UsageHistoryRow[];
+}
 
-const UsageHistoryTable: React.FC = () => {
+const UsageHistoryTable: React.FC<UsageHistoryTableProps> = ({ data }) => {
+  const emptyRowsCount = Math.max(0, 10 - data.length);
+
   return (
     <TableContainer>
       <StyledTable>
@@ -62,13 +30,22 @@ const UsageHistoryTable: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {dummyUsageHistory.map((row, idx) => (
+          {data.map((row, idx) => (
             <tr key={idx}>
               <Td>{row.date}</Td>
               <Td>{row.orderNumber}</Td>
               <Td>{row.productName}</Td>
               <Td>{row.status}</Td>
               <Td>{row.amount}</Td>
+            </tr>
+          ))}
+          {Array.from({ length: emptyRowsCount }).map((_, idx) => (
+            <tr key={`empty-${idx}`}>
+              <Td />
+              <Td />
+              <Td />
+              <Td />
+              <Td />
             </tr>
           ))}
         </tbody>
@@ -95,17 +72,27 @@ const StyledTable = styled.table`
 `;
 
 const Th = styled.th`
-  padding: 10px;
+  height: 40px;
   border: 1px solid #dddddd;
   background-color: #eeeeee;
-  text-align: center;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 12px;
+  color: #000000;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const Td = styled.td`
-  padding: 10px;
+  height: 44px;
   border: 1px solid #dddddd;
-  text-align: center;
+  font-weight: 400;
   font-size: 12px;
+  color: #000000;
+  text-align: center;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;

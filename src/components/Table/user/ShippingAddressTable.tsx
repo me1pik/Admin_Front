@@ -1,9 +1,8 @@
-// src/components/userdetail/ShippingAddressTable.tsx
+// src/components/ShippingAddressTable.tsx
 import React, { useState } from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
-/** 배송지 정보 타입(예시) */
-interface ShippingRow {
+export interface ShippingRow {
   type: string; // 수령지 (자택, 기타 등)
   name: string; // 수령인
   address: string; // 배송지
@@ -12,85 +11,22 @@ interface ShippingRow {
   isDefault: boolean; // 기본설정 여부
 }
 
-/** 예시 데이터 하드코딩 */
-const dummyShippingData: ShippingRow[] = [
-  {
-    type: '자택',
-    name: '홍길동',
-    address: '서울 금천구 디지털로9길 41, 삼성IT해링턴타워 1008호',
-    phone1: '010-1234-5678',
-    phone2: '010-1234-5678',
-    isDefault: true,
-  },
-  {
-    type: '자택',
-    name: '홍길동',
-    address: '서울 금천구 디지털로9길 41, 삼성IT해링턴타워 1008호',
-    phone1: '010-1234-5678',
-    phone2: '010-1234-5678',
-    isDefault: false,
-  },
-  {
-    type: '자택',
-    name: '홍길동',
-    address: '서울 금천구 디지털로9길 41, 삼성IT해링턴타워 1008호',
-    phone1: '010-1234-5678',
-    phone2: '010-1234-5678',
-    isDefault: false,
-  },
-  {
-    type: '자택',
-    name: '홍길동',
-    address: '서울 금천구 디지털로9길 41, 삼성IT해링턴타워 1008호',
-    phone1: '010-1234-5678',
-    phone2: '010-1234-5678',
-    isDefault: false,
-  },
-  {
-    type: '자택',
-    name: '홍길동',
-    address: '서울 금천구 디지털로9길 41, 삼성IT해링턴타워 1008호',
-    phone1: '010-1234-5678',
-    phone2: '010-1234-5678',
-    isDefault: false,
-  },
-  {
-    type: '기타',
-    name: '홍길동',
-    address: '대구 달성군 다사읍 달구벌대로 842-7 강창훼밀리아파트 103동 906호',
-    phone1: '010-1234-5678',
-    phone2: '010-1234-5678',
-    isDefault: false,
-  },
-  {
-    type: '자택',
-    name: '홍길동',
-    address: '서울 금천구 디지털로9길 41, 삼성IT해링턴타워 1008호',
-    phone1: '010-1234-5678',
-    phone2: '010-1234-5678',
-    isDefault: false,
-  },
-];
+interface ShippingAddressTableProps {
+  data: ShippingRow[];
+}
 
-/** 공통 ellipsis 스타일 */
-const ellipsis = css`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-
-const ShippingAddressTable: React.FC = () => {
-  // 각 행의 선택 상태를 저장하는 상태 (행의 인덱스를 Set으로 관리)
+const ShippingAddressTable: React.FC<ShippingAddressTableProps> = ({
+  data,
+}) => {
+  // 선택된 행의 인덱스를 관리
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
 
-  const allSelected =
-    dummyShippingData.length > 0 &&
-    selectedRows.size === dummyShippingData.length;
+  const allSelected = data.length > 0 && selectedRows.size === data.length;
 
   // 헤더 전체 선택 체크박스 핸들러
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
-      setSelectedRows(new Set(dummyShippingData.map((_, idx) => idx)));
+      setSelectedRows(new Set(data.map((_, idx) => idx)));
     } else {
       setSelectedRows(new Set());
     }
@@ -108,6 +44,9 @@ const ShippingAddressTable: React.FC = () => {
       return newSet;
     });
   };
+
+  // 10행 고정을 위해 부족한 행의 개수 계산
+  const emptyRowsCount = Math.max(0, 10 - data.length);
 
   return (
     <TableContainer>
@@ -139,7 +78,7 @@ const ShippingAddressTable: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {dummyShippingData.map((row, idx) => (
+          {data.map((row, idx) => (
             <tr key={idx}>
               <TdCheckbox>
                 <input
@@ -154,6 +93,18 @@ const ShippingAddressTable: React.FC = () => {
               <Td title={row.phone1}>{row.phone1}</Td>
               <Td title={row.phone2}>{row.phone2}</Td>
               <Td>{row.isDefault ? 'Y' : 'N'}</Td>
+            </tr>
+          ))}
+          {/* 데이터가 10행 미만이면 빈 행 추가 */}
+          {Array.from({ length: emptyRowsCount }).map((_, idx) => (
+            <tr key={`empty-${idx}`}>
+              <TdCheckbox />
+              <Td />
+              <Td />
+              <Td />
+              <Td />
+              <Td />
+              <Td />
             </tr>
           ))}
         </tbody>
@@ -189,7 +140,9 @@ const Th = styled.th`
   font-size: 12px;
   color: #000000;
   text-align: center;
-  ${ellipsis}
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const ThCheckbox = styled(Th)`
@@ -204,7 +157,9 @@ const Td = styled.td`
   color: #000000;
   text-align: center;
   vertical-align: middle;
-  ${ellipsis}
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const TdCheckbox = styled(Td)`

@@ -2,41 +2,19 @@
 import React from 'react';
 import styled from 'styled-components';
 
-interface AdditionalListRow {
+export interface AdditionalListRow {
   item: string; // 항목명
   detail: string; // 세부내용
   status: string; // 상태 (예: 활성/비활성)
 }
 
-const dummyAdditionalList: AdditionalListRow[] = [
-  {
-    item: '추가 항목 1',
-    detail: '세부 내용 1',
-    status: '활성',
-  },
-  {
-    item: '추가 항목 2',
-    detail: '세부 내용 2',
-    status: '비활성',
-  },
-  {
-    item: '추가 항목 3',
-    detail: '세부 내용 3',
-    status: '활성',
-  },
-  {
-    item: '추가 항목 4',
-    detail: '세부 내용 4',
-    status: '활성',
-  },
-  {
-    item: '추가 항목 5',
-    detail: '세부 내용 5',
-    status: '비활성',
-  },
-];
+interface AdditionalListTableProps {
+  data: AdditionalListRow[];
+}
 
-const AdditionalListTable: React.FC = () => {
+const AdditionalListTable: React.FC<AdditionalListTableProps> = ({ data }) => {
+  const emptyRowsCount = Math.max(0, 10 - data.length);
+
   return (
     <TableContainer>
       <StyledTable>
@@ -48,11 +26,18 @@ const AdditionalListTable: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {dummyAdditionalList.map((row, idx) => (
+          {data.map((row, idx) => (
             <tr key={idx}>
               <Td>{row.item}</Td>
               <Td>{row.detail}</Td>
               <Td>{row.status}</Td>
+            </tr>
+          ))}
+          {Array.from({ length: emptyRowsCount }).map((_, idx) => (
+            <tr key={`empty-${idx}`}>
+              <Td />
+              <Td />
+              <Td />
             </tr>
           ))}
         </tbody>
@@ -79,17 +64,27 @@ const StyledTable = styled.table`
 `;
 
 const Th = styled.th`
-  padding: 10px;
+  height: 40px;
   border: 1px solid #dddddd;
   background-color: #eeeeee;
-  text-align: center;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 12px;
+  color: #000000;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const Td = styled.td`
-  padding: 10px;
+  height: 44px;
   border: 1px solid #dddddd;
-  text-align: center;
+  font-weight: 400;
   font-size: 12px;
+  color: #000000;
+  text-align: center;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;

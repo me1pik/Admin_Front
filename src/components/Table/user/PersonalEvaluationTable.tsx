@@ -2,41 +2,21 @@
 import React from 'react';
 import styled from 'styled-components';
 
-interface PersonalEvaluationRow {
+export interface PersonalEvaluationRow {
   item: string; // 평가 항목
   score: number; // 평가 점수 (예: 1 ~ 5)
   comment: string; // 평가 의견
 }
 
-const dummyEvaluations: PersonalEvaluationRow[] = [
-  {
-    item: '서비스 품질',
-    score: 4,
-    comment: '전반적으로 만족합니다.',
-  },
-  {
-    item: '배송 속도',
-    score: 5,
-    comment: '매우 빠릅니다!',
-  },
-  {
-    item: '고객 지원',
-    score: 3,
-    comment: '개선의 여지가 있습니다.',
-  },
-  {
-    item: '가격 만족도',
-    score: 4,
-    comment: '가격 대비 좋은 품질입니다.',
-  },
-  {
-    item: '재구매 의사',
-    score: 5,
-    comment: '반드시 재구매할 예정입니다.',
-  },
-];
+interface PersonalEvaluationTableProps {
+  data: PersonalEvaluationRow[];
+}
 
-const PersonalEvaluationTable: React.FC = () => {
+const PersonalEvaluationTable: React.FC<PersonalEvaluationTableProps> = ({
+  data,
+}) => {
+  const emptyRowsCount = Math.max(0, 10 - data.length);
+
   return (
     <TableContainer>
       <StyledTable>
@@ -48,11 +28,18 @@ const PersonalEvaluationTable: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {dummyEvaluations.map((row, idx) => (
+          {data.map((row, idx) => (
             <tr key={idx}>
               <Td>{row.item}</Td>
               <Td>{row.score}</Td>
               <Td>{row.comment}</Td>
+            </tr>
+          ))}
+          {Array.from({ length: emptyRowsCount }).map((_, idx) => (
+            <tr key={`empty-${idx}`}>
+              <Td />
+              <Td />
+              <Td />
             </tr>
           ))}
         </tbody>
@@ -79,17 +66,27 @@ const StyledTable = styled.table`
 `;
 
 const Th = styled.th`
-  padding: 10px;
+  height: 40px;
   border: 1px solid #dddddd;
   background-color: #eeeeee;
-  text-align: center;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 12px;
+  color: #000000;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const Td = styled.td`
-  padding: 10px;
+  height: 44px;
   border: 1px solid #dddddd;
-  text-align: center;
+  font-weight: 400;
   font-size: 12px;
+  color: #000000;
+  text-align: center;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;

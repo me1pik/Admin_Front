@@ -128,7 +128,6 @@ const Table = styled.table`
   width: 100%;
   table-layout: fixed;
   border-collapse: collapse;
-  margin-bottom: 20px;
   background-color: #ffffff;
   border: 1px solid #dddddd;
 `;

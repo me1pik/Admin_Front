@@ -6,21 +6,31 @@ import ListButtonDetailSubHeader, {
 } from '../components/Header/ListButtonDetailSubHeader';
 import DetailTopBoxes from '../components/DetailTopBoxes';
 import ShippingTabBar from '../components/TabBar';
-import ShippingAddressTable from '../components/ShippingAddressTable';
-import UsageHistoryTable from '../components/Table/user/UsageHistoryTable';
-import PointHistoryTable from '../components/Table/user/PointHistoryTable';
-import AdditionalListTable from '../components/Table/user/AdditionalListTable';
-import PersonalEvaluationTable from '../components/Table/user/PersonalEvaluationTable';
+import ShippingAddressTable, {
+  ShippingRow,
+} from '../components/Table/user/ShippingAddressTable';
+import UsageHistoryTable, {
+  UsageHistoryRow,
+} from '../components/Table/user/UsageHistoryTable';
+import PointHistoryTable, {
+  PointHistoryRow,
+} from '../components/Table/user/PointHistoryTable';
+import AdditionalListTable, {
+  AdditionalListRow,
+} from '../components/Table/user/AdditionalListTable';
+import PersonalEvaluationTable, {
+  PersonalEvaluationRow,
+} from '../components/Table/user/PersonalEvaluationTable';
+import Pagination from '../components/Pagination';
 
-// 더미 데이터에서 번호를 가져오기 (예시로 첫번째 제품의 번호 사용)
+// 예시 제품 번호
 const dummyProducts = [
   {
     no: 13486,
-    // 기타 필드 생략
   },
 ];
 
-// 탭 목록 배열
+// 탭 목록
 const shippingTabs = [
   '배송지 설정',
   '이용내역',
@@ -29,29 +39,164 @@ const shippingTabs = [
   '개인평가',
 ];
 
-const UserDetail: React.FC = () => {
-  // 현재 활성화된 탭 인덱스 관리
-  const [activeTab, setActiveTab] = useState<number>(0);
+// 각 테이블에 전달할 더미 데이터 (데이터가 10행 이하인 경우 나머지는 빈 행으로 표시됨)
+const dummyShippingData: ShippingRow[] = [
+  {
+    type: '자택',
+    name: '홍길동',
+    address: '서울 금천구 디지털로9길 41, 삼성IT해링턴타워 1008호',
+    phone1: '010-1234-5678',
+    phone2: '010-1234-5678',
+    isDefault: true,
+  },
+  {
+    type: '자택',
+    name: '홍길동',
+    address: '서울 금천구 디지털로9길 41, 삼성IT해링턴타워 1008호',
+    phone1: '010-1234-5678',
+    phone2: '010-1234-5678',
+    isDefault: false,
+  },
+  {
+    type: '자택',
+    name: '홍길동',
+    address: '서울 금천구 디지털로9길 41, 삼성IT해링턴타워 1008호',
+    phone1: '010-1234-5678',
+    phone2: '010-1234-5678',
+    isDefault: false,
+  },
+  {
+    type: '자택',
+    name: '홍길동',
+    address: '서울 금천구 디지털로9길 41, 삼성IT해링턴타워 1008호',
+    phone1: '010-1234-5678',
+    phone2: '010-1234-5678',
+    isDefault: true,
+  },
+  {
+    type: '자택',
+    name: '홍길동',
+    address: '서울 금천구 디지털로9길 41, 삼성IT해링턴타워 1008호',
+    phone1: '010-1234-5678',
+    phone2: '010-1234-5678',
+    isDefault: false,
+  },
+  {
+    type: '자택',
+    name: '홍길동',
+    address: '서울 금천구 디지털로9길 41, 삼성IT해링턴타워 1008호',
+    phone1: '010-1234-5678',
+    phone2: '010-1234-5678',
+    isDefault: false,
+  },
+  {
+    type: '자택',
+    name: '홍길동',
+    address: '서울 금천구 디지털로9길 41, 삼성IT해링턴타워 1008호',
+    phone1: '010-1234-5678',
+    phone2: '010-1234-5678',
+    isDefault: true,
+  },
+  {
+    type: '자택',
+    name: '홍길동',
+    address: '서울 금천구 디지털로9길 41, 삼성IT해링턴타워 1008호',
+    phone1: '010-1234-5678',
+    phone2: '010-1234-5678',
+    isDefault: false,
+  },
+  {
+    type: '자택',
+    name: '홍길동',
+    address: '서울 금천구 디지털로9길 41, 삼성IT해링턴타워 1008호',
+    phone1: '010-1234-5678',
+    phone2: '010-1234-5678',
+    isDefault: false,
+  },
+];
 
-  /** 목록으로 버튼 클릭 시 */
+const dummyUsageHistory: UsageHistoryRow[] = [
+  {
+    date: '2025-03-01',
+    orderNumber: 'ORD12345',
+    productName: '상품 A',
+    status: '완료',
+    amount: '120,000원',
+  },
+  {
+    date: '2025-02-27',
+    orderNumber: 'ORD12346',
+    productName: '상품 B',
+    status: '취소',
+    amount: '80,000원',
+  },
+  {
+    date: '2025-02-25',
+    orderNumber: 'ORD12347',
+    productName: '상품 C',
+    status: '진행중',
+    amount: '150,000원',
+  },
+];
+
+const dummyPointHistory: PointHistoryRow[] = [
+  {
+    date: '2025-03-01',
+    description: '구매 적립',
+    points: '+50',
+  },
+  {
+    date: '2025-02-28',
+    description: '포인트 사용',
+    points: '-30',
+  },
+];
+
+const dummyAdditionalList: AdditionalListRow[] = [
+  {
+    item: '추가 항목 1',
+    detail: '세부 내용 1',
+    status: '활성',
+  },
+  {
+    item: '추가 항목 2',
+    detail: '세부 내용 2',
+    status: '비활성',
+  },
+];
+
+const dummyEvaluations: PersonalEvaluationRow[] = [
+  {
+    item: '서비스 품질',
+    score: 4,
+    comment: '전반적으로 만족합니다.',
+  },
+  {
+    item: '배송 속도',
+    score: 5,
+    comment: '매우 빠릅니다!',
+  },
+];
+
+const UserDetail: React.FC = () => {
+  // 현재 활성화된 탭 인덱스와 페이지 상태 관리
+  const [activeTab, setActiveTab] = useState<number>(0);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
+  /** 버튼 핸들러들 */
   const handleBackClick = () => {
-    console.log('목록으로 버튼 클릭됨');
     window.history.back();
   };
 
-  /** 정보수정 버튼 클릭 시 */
   const handleEditClick = () => {
-    console.log('정보수정 버튼 클릭 -> 정보 수정 로직 실행');
     alert('정보가 수정되었습니다!');
   };
 
-  /** 종료처리 버튼 클릭 시 */
   const handleEndClick = () => {
-    console.log('종료처리 버튼 클릭 -> 종료 처리 로직 실행');
     alert('종료 처리가 완료되었습니다!');
   };
 
-  // 상단 (목록이동/정보수정/종료처리) 버튼 프롭스
   const detailSubHeaderProps: DetailSubHeaderProps = {
     backLabel: '목록이동',
     onBackClick: handleBackClick,
@@ -61,24 +206,50 @@ const UserDetail: React.FC = () => {
     onEndClick: handleEndClick,
   };
 
-  // 탭 클릭 핸들러
+  // 탭 클릭 시 페이지를 1로 초기화
   const handleTabClick = (index: number) => {
     setActiveTab(index);
+    setPage(1);
   };
 
-  // 활성 탭에 따라 보여줄 테이블 컴포넌트 결정
-  const renderTable = () => {
+  // 현재 활성 탭에 해당하는 전체 데이터 반환
+  const getActiveData = (): any[] => {
     switch (activeTab) {
       case 0:
-        return <ShippingAddressTable />;
+        return dummyShippingData;
       case 1:
-        return <UsageHistoryTable />;
+        return dummyUsageHistory;
       case 2:
-        return <PointHistoryTable />;
+        return dummyPointHistory;
       case 3:
-        return <AdditionalListTable />;
+        return dummyAdditionalList;
       case 4:
-        return <PersonalEvaluationTable />;
+        return dummyEvaluations;
+      default:
+        return [];
+    }
+  };
+
+  const activeData = getActiveData();
+  const totalPages = Math.max(1, Math.ceil(activeData.length / pageSize));
+
+  // 현재 페이지에 해당하는 데이터 슬라이스
+  const sliceData = (data: any[]) =>
+    data.slice((page - 1) * pageSize, page * pageSize);
+
+  const renderTable = () => {
+    const slicedData = sliceData(activeData);
+    switch (activeTab) {
+      case 0:
+        return <ShippingAddressTable data={slicedData} />;
+      case 1:
+        return <UsageHistoryTable data={slicedData} />;
+      case 2:
+        return <PointHistoryTable data={slicedData} />;
+      case 3:
+        return <AdditionalListTable data={slicedData} />;
+      case 4:
+        return <PersonalEvaluationTable data={slicedData} />;
       default:
         return null;
     }
@@ -101,15 +272,15 @@ const UserDetail: React.FC = () => {
 
       <MiddleDivider />
 
-      {/* 탭 버튼: activeTab과 handleTabClick 전달 */}
       <ShippingTabBar
         tabs={shippingTabs}
         activeIndex={activeTab}
         onTabClick={handleTabClick}
       />
 
-      {/* 활성 탭에 따른 테이블 렌더링 */}
       {renderTable()}
+
+      <Pagination page={page} setPage={setPage} totalPages={totalPages} />
     </Container>
   );
 };
