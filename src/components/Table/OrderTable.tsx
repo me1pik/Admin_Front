@@ -98,7 +98,7 @@ const OrderTable: React.FC<OrderTableProps> = ({
           <Th>주문일</Th>
           <Th>주문자 (계정)</Th>
           <Th>브랜드</Th>
-          <Th>스타일(행정)</Th>
+          <Th>스타일(코드)</Th>
           <Th>사이즈</Th>
           <Th>제품명/옵션</Th>
           <Th>결제방법</Th>

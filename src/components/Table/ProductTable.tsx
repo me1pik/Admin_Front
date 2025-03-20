@@ -62,7 +62,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
       <thead>
         <TableRow>
           <Th>No.</Th>
-          <Th>스타일(행정)</Th>
+          <Th>스타일(품번)</Th>
           <Th>브랜드</Th>
           <Th>분류</Th>
           <Th>색상</Th>

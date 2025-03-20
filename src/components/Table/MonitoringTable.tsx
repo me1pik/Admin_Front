@@ -63,7 +63,7 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
           <Th>이름</Th>
           <Th>주문자(계정)</Th>
           <Th>브랜드</Th>
-          <Th>스타일(행정)</Th>
+          <Th>스타일(코드)</Th>
           <Th>사이즈</Th>
           <Th>배송방식</Th>
           <Th>배송상태</Th>
