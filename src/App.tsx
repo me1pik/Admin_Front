@@ -8,6 +8,7 @@ import OrderList from './pages/OrderList';
 import Layout from './Layout';
 import ProductList from './pages/ProductList';
 import ProductRegister from './pages/ProductRegister';
+import ProductDetail from './pages/ProductDetail';
 // import AnalysisInfo from "./pages/AnalysisInfo";
 // import InventoryList from "./pages/InventoryList";
 // import StatisticsList from "./pages/StatisticsList";
@@ -34,8 +35,9 @@ const App: React.FC = () => {
           <Route path='/orderlist' element={<OrderList />} />
           <Route path='/monitoring' element={<Monitoring />} />
           <Route path='/productlist' element={<ProductList />} />
-          {/* 추가: 제품등록 페이지 라우트 */}
+
           <Route path='/productregister' element={<ProductRegister />} />
+          <Route path='/productdetail/:no' element={<ProductDetail />} />
           {/* <Route path="/analysisinfo" element={<AnalysisInfo />} />
           <Route path="/inventorylist" element={<InventoryList />} />
           <Route path="/statisticslist" element={<StatisticsList />} />

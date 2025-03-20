@@ -1,4 +1,4 @@
-// src/components/ProductTable.tsx
+// src/components/Table/ProductTable.tsx
 import React from 'react';
 import styled, { css } from 'styled-components';
 
@@ -18,7 +18,8 @@ export interface ProductItem {
 /** ProductTable Props */
 interface ProductTableProps {
   filteredData: ProductItem[];
-  handleEdit: (styleCode: string) => void;
+  // handleEdit 함수가 styleCode와 no 두 개의 인자를 받도록 수정
+  handleEdit: (styleCode: string, no: number) => void;
 }
 
 // 모든 셀에 공통으로 적용할 ellipsis 스타일
@@ -32,17 +33,17 @@ const ProductTable: React.FC<ProductTableProps> = ({
   filteredData,
   handleEdit,
 }) => {
-  // 상태별 배경색
+  // 상태별 배경색 반환 함수
   const getStatusColor = (status: string) => {
     switch (status) {
       case '등록완료':
-        return '#4AA361'; // 예: 초록
+        return '#4AA361';
       case '등록대기':
-        return '#3071B2'; // 예: 파랑
+        return '#3071B2';
       case '판매종료':
-        return '#CD5542'; // 예: 빨강
+        return '#CD5542';
       default:
-        return '#6c757d'; // 기타 상태
+        return '#6c757d';
     }
   };
 
@@ -50,7 +51,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
     <Table>
       <colgroup>
         <col style={{ width: '50px' }} /> {/* No. */}
-        <col style={{ width: '150px' }} /> {/* 스타일(행정) */}
+        <col style={{ width: '150px' }} /> {/* 스타일(품번) */}
         <col style={{ width: '100px' }} /> {/* 브랜드 */}
         <col style={{ width: '80px' }} /> {/* 분류 */}
         <col style={{ width: '80px' }} /> {/* 색상 */}
@@ -76,7 +77,8 @@ const ProductTable: React.FC<ProductTableProps> = ({
         {filteredData.map((item, idx) => (
           <TableRow key={idx}>
             <Td>{item.no}</Td>
-            <Td onClick={() => handleEdit(item.styleCode)}>
+            {/* onClick 시 두 인자(styleCode, no)를 전달 */}
+            <Td onClick={() => handleEdit(item.styleCode, item.no)}>
               <StyleCodeText title={item.styleCode}>
                 {item.styleCode}
               </StyleCodeText>
@@ -99,7 +101,6 @@ const ProductTable: React.FC<ProductTableProps> = ({
             </Td>
           </TableRow>
         ))}
-        {/* 빈 행 렌더링 (10행 맞추기) */}
         {filteredData.length < 10 &&
           Array.from({ length: 10 - filteredData.length }).map((_, i) => (
             <TableRow key={`empty-${i}`}>

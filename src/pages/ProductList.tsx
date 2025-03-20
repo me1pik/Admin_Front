@@ -96,16 +96,9 @@ const tabs: TabItem[] = [
 ];
 
 const ProductList: React.FC = () => {
-  // react-router-dom 훅
   const navigate = useNavigate();
-
-  // 검색 상태 (오직 searchTerm만 사용)
   const [searchTerm, setSearchTerm] = useState('');
-
-  // 현재 선택된 탭 상태 (기본값: "전체보기")
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-
-  // 제품 목록 (임시 데이터)
   const [productData] = useState<ProductItem[]>(dummyProducts);
 
   // 탭 변경 시
@@ -144,11 +137,10 @@ const ProductList: React.FC = () => {
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  // 편집(또는 등록/상세보기 등) 버튼 클릭 시 이벤트
-  const handleEdit = (styleCode: string) => {
-    alert(`스타일 코드(${styleCode}) 클릭됨`);
+  // 스타일 코드(또는 품번) 클릭 시 해당 제품의 상세 페이지로 이동
+  const handleEdit = (styleCode: string, no: number) => {
+    navigate(`/productdetail/${no}`);
   };
-
   // **제품 등록 버튼 클릭 시 -> productregister 페이지로 이동**
   const handleRegisterClick = () => {
     navigate('/productregister');
