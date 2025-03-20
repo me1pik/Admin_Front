@@ -216,91 +216,91 @@ const ProductRegister: React.FC = () => {
                 <tr>
                   <td>44(S)</td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                 </tr>
                 <tr>
                   <td>55(M)</td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                 </tr>
                 <tr>
                   <td>66(L)</td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                 </tr>
                 <tr>
                   <td>77(XL)</td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                 </tr>
                 <tr>
                   <td>Free(F)</td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                   <td>
-                    <InputSmall />
+                    <InputSmall placeholder='-' />
                   </td>
                 </tr>
               </tbody>
@@ -510,61 +510,61 @@ const ProductRegister: React.FC = () => {
               <tr>
                 <td>겉감</td>
                 <td>
-                  <Input placeholder='' />
+                  <Input placeholder='-' />
                 </td>
                 <td>
-                  <Input placeholder='' />
+                  <Input placeholder='-' />
                 </td>
                 <td>
-                  <Input placeholder='' />
+                  <Input placeholder='-' />
                 </td>
                 <td>
-                  <Input placeholder='' />
+                  <Input placeholder='-' />
                 </td>
               </tr>
               <tr>
                 <td>안감</td>
                 <td>
-                  <Input placeholder='' />
+                  <Input placeholder='-' />
                 </td>
                 <td>
-                  <Input placeholder='' />
+                  <Input placeholder='-' />
                 </td>
                 <td>
-                  <Input placeholder='' />
+                  <Input placeholder='-' />
                 </td>
                 <td>
-                  <Input placeholder='' />
+                  <Input placeholder='-' />
                 </td>
               </tr>
               <tr>
                 <td>배색</td>
                 <td>
-                  <Input placeholder='' />
+                  <Input placeholder='-' />
                 </td>
                 <td>
-                  <Input placeholder='' />
+                  <Input placeholder='-' />
                 </td>
                 <td>
-                  <Input placeholder='' />
+                  <Input placeholder='-' />
                 </td>
                 <td>
-                  <Input placeholder='' />
+                  <Input placeholder='-' />
                 </td>
               </tr>
               <tr>
                 <td>부속</td>
                 <td>
-                  <Input placeholder='' />
+                  <Input placeholder='-' />
                 </td>
                 <td>
-                  <Input placeholder='' />
+                  <Input placeholder='-' />
                 </td>
                 <td>
-                  <Input placeholder='' />
+                  <Input placeholder='-' />
                 </td>
                 <td>
-                  <Input placeholder='' />
+                  <Input placeholder='-' />
                 </td>
               </tr>
             </tbody>
@@ -833,7 +833,6 @@ const Input = styled.input`
   flex: 1;
   height: 40px;
   max-width: 120px;
-
   border: 1px solid #ddd;
   padding: 0 8px;
   font-family: 'NanumSquare Neo OTF';
@@ -841,6 +840,10 @@ const Input = styled.input`
   font-weight: 700;
   font-size: 12px;
   line-height: 13px;
+
+  &::placeholder {
+    text-align: center;
+  }
 `;
 
 /* 사이즈 테이블 (왼쪽 표) */
