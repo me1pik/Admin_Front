@@ -43,10 +43,10 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
                     }}
                   />
                 ) : (
-                  <>
+                  <IconTextWrapper>
                     <PlusIcon>+</PlusIcon>
                     <ImageAddText>이미지 추가</ImageAddText>
-                  </>
+                  </IconTextWrapper>
                 )}
               </ImageBox>
             </label>
@@ -145,6 +145,12 @@ const ImageBox = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+`;
+
+const IconTextWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const PlusIcon = styled.div`
