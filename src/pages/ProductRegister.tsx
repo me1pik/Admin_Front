@@ -840,9 +840,10 @@ const Input = styled.input`
   font-weight: 700;
   font-size: 12px;
   line-height: 13px;
+  text-align: center;
 
   &::placeholder {
-    text-align: center;
+    font-size: 20px;
   }
 `;
 
@@ -896,6 +897,10 @@ const InputSmall = styled.input`
   border: 1px solid #ddd;
   font-size: 12px;
   text-align: center;
+
+  &::placeholder {
+    font-size: 20px;
+  }
 `;
 
 const Note = styled.div`
@@ -941,21 +946,9 @@ const SpaceColumn = styled.div`
   gap: 20px;
 `;
 
-const LabelColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-`;
-
 const SpecLabel = styled.div`
   font-size: 12px;
   font-weight: 700;
-`;
-
-const UnitColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 `;
 
 const Unit = styled.div`
