@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import ListButtonDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../components/Header/ListButtonDetailSubHeader';
-
 import DetailTopBoxes from '../components/DetailTopBoxes';
 import ShippingTabBar from '../components/ShippingTabBar';
 import ShippingAddressTable from '../components/ShippingAddressTable';
@@ -15,6 +14,15 @@ const dummyProducts = [
     no: 13486,
     // 기타 필드 생략
   },
+];
+
+// 탭 목록 배열을 부모(UserDetail)에서 정의
+const shippingTabs = [
+  '배송지 설정',
+  '이용내역',
+  '포인트 내역',
+  '추가목록',
+  '개인평가',
 ];
 
 const UserDetail: React.FC = () => {
@@ -36,7 +44,7 @@ const UserDetail: React.FC = () => {
     alert('종료 처리가 완료되었습니다!');
   };
 
-  // 상단 (목록이동/정보수정/종료처리) 버튼
+  // 상단 (목록이동/정보수정/종료처리) 버튼 프롭스
   const detailSubHeaderProps: DetailSubHeaderProps = {
     backLabel: '목록이동',
     onBackClick: handleBackClick,
@@ -48,29 +56,24 @@ const UserDetail: React.FC = () => {
 
   return (
     <Container>
-      {/* 상단 헤더 영역 */}
       <HeaderRow>
         <Title>제품관리</Title>
       </HeaderRow>
 
-      {/* 목록이동 / 정보수정 / 종료처리 버튼 */}
       <ListButtonDetailSubHeader {...detailSubHeaderProps} />
 
-      {/* 번호 표시 */}
       <ProductNumberWrapper>
         <ProductNumberLabel>번호</ProductNumberLabel>
         <ProductNumberValue>{dummyProducts[0].no}</ProductNumberValue>
       </ProductNumberWrapper>
 
-      {/* 상단 3박스 영역 */}
       <DetailTopBoxes />
 
       <MiddleDivider />
 
-      {/* 탭 버튼: 배송지 설정 / 이용내역 / 포인트 내역 / 추가목록 / 개인평가 */}
-      <ShippingTabBar activeIndex={0} />
+      {/* 탭 버튼: 부모에서 탭 목록(shippingTabs)을 전달 */}
+      <ShippingTabBar tabs={shippingTabs} activeIndex={0} />
 
-      {/* 배송지 테이블 */}
       <ShippingAddressTable />
     </Container>
   );

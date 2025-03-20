@@ -1,6 +1,6 @@
 // src/components/userdetail/ShippingAddressTable.tsx
 import React, { useState } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 /** 배송지 정보 타입(예시) */
 interface ShippingRow {
@@ -72,6 +72,13 @@ const dummyShippingData: ShippingRow[] = [
   },
 ];
 
+/** 공통 ellipsis 스타일 */
+const ellipsis = css`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
 const ShippingAddressTable: React.FC = () => {
   // 각 행의 선택 상태를 저장하는 상태 (행의 인덱스를 Set으로 관리)
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
@@ -83,10 +90,8 @@ const ShippingAddressTable: React.FC = () => {
   // 헤더 전체 선택 체크박스 핸들러
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
-      // 모든 행 선택
       setSelectedRows(new Set(dummyShippingData.map((_, idx) => idx)));
     } else {
-      // 전체 해제
       setSelectedRows(new Set());
     }
   };
@@ -143,11 +148,11 @@ const ShippingAddressTable: React.FC = () => {
                   onChange={() => handleRowSelect(idx)}
                 />
               </TdCheckbox>
-              <Td>{row.type}</Td>
-              <Td>{row.name}</Td>
-              <Td>{row.address}</Td>
-              <Td>{row.phone1}</Td>
-              <Td>{row.phone2}</Td>
+              <Td title={row.type}>{row.type}</Td>
+              <Td title={row.name}>{row.name}</Td>
+              <Td title={row.address}>{row.address}</Td>
+              <Td title={row.phone1}>{row.phone1}</Td>
+              <Td title={row.phone2}>{row.phone2}</Td>
               <Td>{row.isDefault ? 'Y' : 'N'}</Td>
             </tr>
           ))}
@@ -164,9 +169,9 @@ export default ShippingAddressTable;
 const TableContainer = styled.div`
   width: 100%;
   overflow-x: auto;
-
   border: 1px solid #dddddd;
   border-radius: 4px;
+  min-width: 1000px;
 `;
 
 const StyledTable = styled.table`
@@ -184,6 +189,7 @@ const Th = styled.th`
   font-size: 12px;
   color: #000000;
   text-align: center;
+  ${ellipsis}
 `;
 
 const ThCheckbox = styled(Th)`
@@ -198,6 +204,7 @@ const Td = styled.td`
   color: #000000;
   text-align: center;
   vertical-align: middle;
+  ${ellipsis}
 `;
 
 const TdCheckbox = styled(Td)`
