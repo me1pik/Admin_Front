@@ -1,9 +1,16 @@
 // src/pages/ProductRegister.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import DetailSubHeader, { TabItem } from '../components/DetailSubHeader';
 
 const ProductRegister: React.FC = () => {
+  const [images, setImages] = useState<(string | null)[]>([
+    null,
+    null,
+    null,
+    null,
+  ]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     alert('제품 등록 완료!');
@@ -23,6 +30,33 @@ const ProductRegister: React.FC = () => {
 
   // "변경저장", "취소" 두 버튼만 사용
   const tabs: TabItem[] = [{ label: '변경저장' }, { label: '취소' }];
+
+  // 파일 업로드 핸들러: 선택된 파일을 읽어 이미지 URL로 변환하여 상태 업데이트
+  const handleImageUpload = (
+    index: number,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImages((prev) => {
+          const newImages = [...prev];
+          newImages[index] = reader.result as string;
+          return newImages;
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // 이미지 라벨 배열 (원하는 순서대로)
+  const imageLabels = [
+    '썸네일 이미지',
+    '착장 이미지 1',
+    '착장 이미지 2',
+    '착장 이미지 3',
+  ];
 
   return (
     <Container>
@@ -534,49 +568,42 @@ const ProductRegister: React.FC = () => {
             <Bullet />
             <SectionTitle>제품 이미지</SectionTitle>
           </SectionHeader>
-
           <VerticalLine3 />
 
-          {/* 이미지 박스 4개를 가로로 나열 */}
           <ImageRow>
-            {/* 썸네일 이미지 */}
-            <ImageColumn>
-              <ImageBox>
-                <PlusIcon>+</PlusIcon>
-                <ImageAddText>이미지 추가</ImageAddText>
-              </ImageBox>
-              <ImageLabel>썸네일 이미지</ImageLabel>
-            </ImageColumn>
-
-            {/* 착장 이미지 1 */}
-            <ImageColumn>
-              <ImageBox>
-                <PlusIcon>+</PlusIcon>
-                <ImageAddText>이미지 추가</ImageAddText>
-              </ImageBox>
-              <ImageLabel>착장 이미지 1</ImageLabel>
-            </ImageColumn>
-
-            {/* 착장 이미지 2 */}
-            <ImageColumn>
-              <ImageBox>
-                <PlusIcon>+</PlusIcon>
-                <ImageAddText>이미지 추가</ImageAddText>
-              </ImageBox>
-              <ImageLabel>착장 이미지 2</ImageLabel>
-            </ImageColumn>
-
-            {/* 착장 이미지 3 */}
-            <ImageColumn>
-              <ImageBox>
-                <PlusIcon>+</PlusIcon>
-                <ImageAddText>이미지 추가</ImageAddText>
-              </ImageBox>
-              <ImageLabel>착장 이미지 3</ImageLabel>
-            </ImageColumn>
+            {imageLabels.map((label, index) => (
+              <ImageColumn key={index}>
+                <label htmlFor={`image-upload-${index}`}>
+                  <ImageBox>
+                    {images[index] ? (
+                      <img
+                        src={images[index]!}
+                        alt='Uploaded'
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                        }}
+                      />
+                    ) : (
+                      <>
+                        <PlusIcon>+</PlusIcon>
+                        <ImageAddText>이미지 추가</ImageAddText>
+                      </>
+                    )}
+                  </ImageBox>
+                </label>
+                <HiddenFileInput
+                  id={`image-upload-${index}`}
+                  type='file'
+                  accept='image/*'
+                  onChange={(e) => handleImageUpload(index, e)}
+                />
+                <ImageLabel>{label}</ImageLabel>
+              </ImageColumn>
+            ))}
           </ImageRow>
         </SectionBox>
-        {/* 등록하기 버튼 */}
         <BottomDivider />
       </FormWrapper>
     </Container>
@@ -1113,4 +1140,8 @@ const SizeCheckbox = styled.input.attrs({ type: 'checkbox' })`
   &:focus {
     outline: none;
   }
+`;
+
+const HiddenFileInput = styled.input`
+  display: none;
 `;
