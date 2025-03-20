@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import MonitoringTable, { MonitoringItem } from '../components/MonitoringTable';
-import SubHeader, { TabItem } from '../components/SubHeader';
+import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
 import Pagination from '../components/Pagination';
 
 /** 모니터링 더미 데이터 (배송일정 제거) */

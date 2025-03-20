@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import OrderTable, { Order } from '../components/OrderTable';
-import SubHeader, { TabItem } from '../components/SubHeader';
+import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
 import Pagination from '../components/Pagination';
 
 /** 주문 더미 데이터 (paymentDate 제거) */

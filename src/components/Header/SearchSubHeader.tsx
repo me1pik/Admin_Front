@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FiSearch } from 'react-icons/fi';
-import NewIcon from '../assets/New.svg';
+import NewIcon from '../../assets/New.svg';
 
 export interface TabItem {
   label: string;

@@ -1,7 +1,7 @@
 // src/pages/ProductRegister.tsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import DetailSubHeader, { TabItem } from '../components/DetailSubHeader';
+import DetailSubHeader, { TabItem } from '../components/Header/DetailSubHeader';
 import sizeProductImg from '../assets/productregisterSizeProduct.svg';
 import BasicInfoSection from '../components/productregister/BasicInfoSection';
 import SizeSettingSection from '../components/productregister/SizeSettingSection';

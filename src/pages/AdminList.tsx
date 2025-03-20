@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import AdminTable, { Admin } from '../components/AdminTable';
-import SubHeader, { TabItem } from '../components/SubHeader';
+import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
 import Pagination from '../components/Pagination';
 
 /** 임시 데이터 (API 호출 대신 하드코딩) */
