@@ -12,6 +12,13 @@ import MaterialInfoSection from '../components/productregister/MaterialInfoSecti
 import FabricInfoSection from '../components/productregister/FabricInfoSection';
 import ProductImageSection from '../components/productregister/ProductImageSection';
 
+const dummyProducts = [
+  {
+    no: 13486,
+    // 기타 필드 생략
+  },
+];
+
 const ProductRegister: React.FC = () => {
   const [images, setImages] = useState<(string | null)[]>([
     null,
@@ -61,7 +68,11 @@ const ProductRegister: React.FC = () => {
         <Title>제품관리</Title>
       </HeaderRow>
       <DetailSubHeader tabs={tabs} onTabChange={handleTabChange} />
-      <ProductNumber>번호 13486</ProductNumber>
+      {/* 번호 표시 */}
+      <ProductNumberWrapper>
+        <ProductNumberLabel>번호</ProductNumberLabel>
+        <ProductNumberValue>{dummyProducts[0].no}</ProductNumberValue>
+      </ProductNumberWrapper>
       <TopDivider />
 
       <FormWrapper onSubmit={handleSubmit}>
@@ -129,24 +140,16 @@ const Title = styled.h1`
   color: #000000;
 `;
 
-const ProductNumber = styled.div`
-  font-family: 'NanumSquare Neo OTF';
-  font-weight: 700;
-  font-size: 12px;
-  line-height: 13px;
-  margin-bottom: 20px;
-`;
-
 const TopDivider = styled.hr`
   border: 0;
   border-top: 1px solid #dddddd;
-  margin-bottom: 20px;
+  margin-bottom: 40px;
 `;
 
 const MiddleDivider = styled.hr`
   border: 0;
   border-top: 1px dashed #dddddd;
-  margin: 30px 0;
+  margin: 40px 0;
 `;
 
 const BottomDivider = styled.hr`
@@ -169,4 +172,26 @@ const TwoColumnRow = styled.div`
   display: flex;
   gap: 50px;
   margin-bottom: 10px;
+`;
+
+const ProductNumberWrapper = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin: 10px 0;
+  margin-top: 34px;
+`;
+
+const ProductNumberLabel = styled.div`
+  font-family: 'NanumSquare Neo OTF', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  color: #000000;
+`;
+
+const ProductNumberValue = styled.div`
+  font-family: 'NanumSquare Neo OTF', sans-serif;
+  font-weight: 900;
+  font-size: 12px;
+  color: #000000;
 `;

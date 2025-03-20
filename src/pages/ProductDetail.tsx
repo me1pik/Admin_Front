@@ -165,6 +165,8 @@ const ProductNumberWrapper = styled.div`
   align-items: baseline;
   gap: 5px;
   margin: 10px 0;
+
+  margin-top: 34px;
 `;
 
 const ProductNumberLabel = styled.div`

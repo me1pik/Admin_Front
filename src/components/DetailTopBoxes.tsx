@@ -99,7 +99,6 @@ export default DetailTopBoxes;
 
 /** 전체 컨테이너 */
 const Container = styled.div`
-  padding: 20px 0;
   min-width: 1000px;
 `;
 
