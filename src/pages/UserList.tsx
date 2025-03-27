@@ -1,80 +1,11 @@
 // src/pages/UserList.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import UserTable, { User } from '../components/Table/UserTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
 import Pagination from '../components/Pagination';
-
-/** 임시 데이터 (API 호출 대신 하드코딩) */
-const dummyUsers: User[] = [
-  {
-    no: 13486,
-    status: '일반',
-    grade: '일반',
-    name: '홍길동',
-    nickname: 'mivin',
-    instagram: 'style_hwan',
-    followingFollower: '5,480 / 397',
-    serviceArea: '서울-강남',
-    joinDate: '2024-11-15',
-  },
-  {
-    no: 13485,
-    status: '일반',
-    grade: '일반',
-    name: '홍홍홍',
-    nickname: 'mivin2',
-    instagram: 'cobacarmi',
-    followingFollower: '1,200 / 567',
-    serviceArea: '서울-강동',
-    joinDate: '2024-11-15',
-  },
-  {
-    no: 13484,
-    status: '일반',
-    grade: '우수',
-    name: '홍길순',
-    nickname: 'mivin3',
-    instagram: 'jmarr_sunwoo',
-    followingFollower: '2,900 / 1,110',
-    serviceArea: '경기-용인',
-    joinDate: '2024-11-15',
-  },
-  {
-    no: 13483,
-    status: '일반',
-    grade: '일반',
-    name: '홍길자',
-    nickname: 'mivin4',
-    instagram: 'jimmyInstagram',
-    followingFollower: '1,223 / 402',
-    serviceArea: '서울-서초',
-    joinDate: '2024-11-15',
-  },
-  {
-    no: 13482,
-    status: '일반',
-    grade: '일반',
-    name: '홍길현',
-    nickname: 'mivin5',
-    instagram: 'mkkyoons_k',
-    followingFollower: '24,400 / 3,200',
-    serviceArea: '경기-분당',
-    joinDate: '2024-11-15',
-  },
-  {
-    no: 13481,
-    status: '블럭',
-    grade: '일반',
-    name: '홍길민',
-    nickname: 'mivin6',
-    instagram: 'biscossiny520',
-    followingFollower: '5,480 / 397',
-    serviceArea: '서울-강북',
-    joinDate: '2024-11-15',
-  },
-];
+import { getAllUsers, getBlockedUsers } from '../api/adminUser';
 
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
@@ -86,19 +17,53 @@ const UserList: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-  const [userData] = useState<User[]>(dummyUsers);
+  const [userData, setUserData] = useState<User[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
+  const fetchUsers = async () => {
+    try {
+      let res;
+      // 탭에 따라 API 호출: 블럭회원이면 getBlockedUsers, 그 외는 getAllUsers 호출
+      if (selectedTab.label === '블럭회원') {
+        res = await getBlockedUsers(limit, page);
+      } else {
+        res = await getAllUsers(limit, page);
+      }
+      // API에서 받은 데이터를 테이블에 맞게 매핑 (필요에 따라 변환)
+      const users: User[] = res.users.map((u: any) => ({
+        no: u.id,
+        // getBlockedUsers 호출 시는 '블럭', 아니면 '일반'으로 표시 (API에서 받은 status 값이 다를 경우 수정)
+        status: selectedTab.label === '블럭회원' ? '블럭' : '일반',
+        grade: u.membershipLevel,
+        name: u.name,
+        nickname: u.nickname,
+        instagram: u.instagramId,
+        followingFollower: `${u.followersCount} / ${u.followingCount}`,
+        serviceArea: u.address,
+        joinDate: new Date(u.signupDate).toLocaleDateString('ko-KR'),
+      }));
+      setUserData(users);
+      setTotalCount(res.total);
+    } catch (err) {
+      console.error('사용자 목록을 불러오는데 실패했습니다:', err);
+    }
+  };
+
+  // 페이지나 탭 변경 시 API 호출
+  useEffect(() => {
+    fetchUsers();
+  }, [page, selectedTab]);
+
+  // 탭 변경 시 페이지 초기화
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
     setPage(1);
   };
 
-  const dataByTab = userData.filter((item) => {
-    if (selectedTab.label === '전체보기') return true;
-    return item.status === selectedTab.path;
-  });
-
-  const filteredData = dataByTab.filter((item) => {
+  // 클라이언트 사이드 검색 필터링 (API에서 검색 기능을 제공하지 않는 경우)
+  const filteredData = userData.filter((item) => {
     const lowerTerm = searchTerm.toLowerCase();
     return (
       String(item.no).toLowerCase().includes(lowerTerm) ||
@@ -113,14 +78,7 @@ const UserList: React.FC = () => {
     );
   });
 
-  const [page, setPage] = useState(1);
-  const limit = 10;
-  const totalCount = filteredData.length;
-  const totalPages = Math.ceil(totalCount / limit);
-  const offset = (page - 1) * limit;
-  const currentPageData = filteredData.slice(offset, offset + limit);
-
-  // 인스타 계정 클릭 시 유저 번호(no)를 이용해 상세 페이지로 이동
+  // 인스타그램 계정을 클릭하면 해당 사용자의 상세 페이지로 이동
   const handleEdit = (no: number) => {
     navigate(`/userdetail/${no}`);
   };
@@ -135,12 +93,16 @@ const UserList: React.FC = () => {
         onTabChange={handleTabChange}
       />
       <InfoBar>
-        <TotalCountText>Total: {totalCount}</TotalCountText>
+        <TotalCountText>Total: {filteredData.length}</TotalCountText>
       </InfoBar>
       <TableContainer>
-        <UserTable filteredData={currentPageData} handleEdit={handleEdit} />
+        <UserTable filteredData={filteredData} handleEdit={handleEdit} />
       </TableContainer>
-      <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+      <Pagination
+        page={page}
+        setPage={setPage}
+        totalPages={Math.ceil(totalCount / limit)}
+      />
     </Content>
   );
 };

@@ -1,11 +1,13 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import styled, { keyframes } from "styled-components";
-import InputField from "../components/InputField";
-import ReusableModal from "../components/ReusableModal";
-import { schemaLogin } from "../hooks/ValidationYup";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useForm, Controller } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import styled, { keyframes } from 'styled-components';
+import InputField from '../components/InputField';
+import ReusableModal from '../components/ReusableModal';
+import { schemaLogin } from '../hooks/ValidationYup';
+import { adminLogin } from '../api/adminAuth';
+import Cookies from 'js-cookie';
 
 type LoginFormInputs = {
   email: string;
@@ -15,8 +17,8 @@ type LoginFormInputs = {
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState("알림");
-  const [modalMessage, setModalMessage] = useState("");
+  const [modalTitle, setModalTitle] = useState('알림');
+  const [modalMessage, setModalMessage] = useState('');
 
   const {
     control,
@@ -24,27 +26,38 @@ const Login: React.FC = () => {
     formState: { errors },
   } = useForm<LoginFormInputs>({
     resolver: yupResolver(schemaLogin),
-    mode: "onChange",
-    defaultValues: { email: "", password: "" },
+    mode: 'onChange',
+    defaultValues: { email: '', password: '' },
   });
 
-  const onSubmit = (data: LoginFormInputs) => {
-    if (data.email === "admin@naver.com" && data.password === "qwer1234") {
-      setModalTitle("로그인 성공");
-      setModalMessage("로그인에 성공했습니다.");
+  const onSubmit = async (data: LoginFormInputs) => {
+    try {
+      // API 호출: 관리자 로그인
+      const response = await adminLogin({
+        id: data.email,
+        password: data.password,
+      });
+      // 액세스, 리프레시 토큰 쿠키 저장
+      Cookies.set('accessToken', response.accessToken, { secure: true });
+      Cookies.set('refreshToken', response.refreshToken, { secure: true });
+      setModalTitle('로그인 성공');
+      setModalMessage('로그인에 성공했습니다.');
       setIsModalOpen(true);
-    } else {
-      setModalTitle("로그인 실패");
-      setModalMessage("아이디와 비밀번호를 확인해주세요.");
+      // 1초 후 adminlist로 자동 이동
+      setTimeout(() => {
+        setIsModalOpen(false);
+        navigate('/adminlist');
+      }, 1000);
+    } catch (error) {
+      setModalTitle('로그인 실패');
+      setModalMessage('아이디와 비밀번호를 확인해주세요.');
       setIsModalOpen(true);
     }
   };
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    if (modalTitle === "로그인 성공") {
-      navigate("/adminlist");
-    }
+    // 로그인 실패인 경우만 수동으로 모달을 닫으면 됩니다.
   };
 
   return (
@@ -56,13 +69,13 @@ const Login: React.FC = () => {
         <Form onSubmit={handleSubmit(onSubmit)}>
           <Controller
             control={control}
-            name="email"
+            name='email'
             render={({ field }) => (
               <InputField
-                label="계정(이메일)"
-                id="email"
-                type="text"
-                placeholder="example@domain.com"
+                label='계정(이메일)'
+                id='email'
+                type='text'
+                placeholder='example@domain.com'
                 error={errors.email}
                 {...field}
               />
@@ -70,20 +83,20 @@ const Login: React.FC = () => {
           />
           <Controller
             control={control}
-            name="password"
+            name='password'
             render={({ field }) => (
               <InputField
-                label="비밀번호"
-                id="password"
-                type="password"
-                placeholder="비밀번호를 입력하세요"
+                label='비밀번호'
+                id='password'
+                type='password'
+                placeholder='비밀번호를 입력하세요'
                 error={errors.password}
                 {...field}
               />
             )}
           />
           <ButtonRow>
-            <LoginButton type="submit">로그인</LoginButton>
+            <LoginButton type='submit'>로그인</LoginButton>
           </ButtonRow>
         </Form>
       </LoginContainer>
@@ -91,8 +104,8 @@ const Login: React.FC = () => {
         isOpen={isModalOpen}
         onClose={handleModalClose}
         title={modalTitle}
-        width="300px"
-        height="200px"
+        width='300px'
+        height='200px'
       >
         {modalMessage}
       </ReusableModal>
@@ -115,7 +128,6 @@ const fadeIn = keyframes`
   }
 `;
 
-/* Container를 뷰포트 전체로 설정하여 중앙 정렬 */
 const Container = styled.div`
   display: flex;
   justify-content: center;
