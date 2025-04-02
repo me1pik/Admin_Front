@@ -1,4 +1,4 @@
-// src/pages/PageList.tsx
+// src/pages/Pagelist.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -89,7 +89,7 @@ const dummyData: User[] = [
   },
 ];
 
-const PageList: React.FC = () => {
+const Pagelist: React.FC = () => {
   const navigate = useNavigate();
 
   // 검색어
@@ -165,7 +165,7 @@ const PageList: React.FC = () => {
   );
 };
 
-export default PageList;
+export default Pagelist;
 
 /* ====================== Styled Components ====================== */
 
