@@ -7,6 +7,7 @@ import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
 import Pagination from '../components/Pagination';
 import RegisterButton from '../components/RegisterButton';
 import { getAllAdmins, getActiveAdmins, getBlockedAdmins } from '../api/admin';
+import { GetAdminsResponse } from '../api/admin';
 
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
@@ -50,15 +51,16 @@ const AdminList: React.FC = () => {
   useEffect(() => {
     const fetchAdmins = async () => {
       try {
-        let response;
+        let response: GetAdminsResponse;
         if (selectedTab.label === '전체보기') {
           response = await getAllAdmins(limit, page);
         } else if (selectedTab.label === '관리자') {
           response = await getActiveAdmins(limit, page);
         } else if (selectedTab.label === '블럭') {
           response = await getBlockedAdmins(limit, page);
+        } else {
+          response = { admins: [], total: 0 };
         }
-        // API 응답 데이터를 변환 후 상태에 저장
         setAdminData(mapAdminData(response.admins));
         setTotalCount(response.total);
       } catch (error) {
