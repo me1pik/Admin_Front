@@ -1,5 +1,5 @@
 // src/components/ShippingAddressTable.tsx
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 export interface ShippingRow {
@@ -18,33 +18,6 @@ interface ShippingAddressTableProps {
 const ShippingAddressTable: React.FC<ShippingAddressTableProps> = ({
   data,
 }) => {
-  // 선택된 행의 인덱스를 관리
-  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
-
-  const allSelected = data.length > 0 && selectedRows.size === data.length;
-
-  // 헤더 전체 선택 체크박스 핸들러
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      setSelectedRows(new Set(data.map((_, idx) => idx)));
-    } else {
-      setSelectedRows(new Set());
-    }
-  };
-
-  // 개별 행 선택 체크박스 핸들러
-  const handleRowSelect = (idx: number) => {
-    setSelectedRows((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(idx)) {
-        newSet.delete(idx);
-      } else {
-        newSet.add(idx);
-      }
-      return newSet;
-    });
-  };
-
   // 10행 고정을 위해 부족한 행의 개수 계산
   const emptyRowsCount = Math.max(0, 10 - data.length);
 
@@ -52,7 +25,7 @@ const ShippingAddressTable: React.FC<ShippingAddressTableProps> = ({
     <TableContainer>
       <StyledTable>
         <colgroup>
-          <col style={{ width: '40px' }} /> {/* 체크박스 열 */}
+          <col style={{ width: '50px' }} /> {/* No. 열 */}
           <col style={{ width: '80px' }} /> {/* 수령지 */}
           <col style={{ width: '80px' }} /> {/* 이름 */}
           <col style={{ width: '300px' }} /> {/* 배송지 */}
@@ -62,13 +35,7 @@ const ShippingAddressTable: React.FC<ShippingAddressTableProps> = ({
         </colgroup>
         <thead>
           <tr>
-            <ThCheckbox>
-              <input
-                type='checkbox'
-                checked={allSelected}
-                onChange={handleSelectAll}
-              />
-            </ThCheckbox>
+            <Th>No.</Th>
             <Th>수령지</Th>
             <Th>이름</Th>
             <Th>배송지</Th>
@@ -80,13 +47,7 @@ const ShippingAddressTable: React.FC<ShippingAddressTableProps> = ({
         <tbody>
           {data.map((row, idx) => (
             <tr key={idx}>
-              <TdCheckbox>
-                <input
-                  type='checkbox'
-                  checked={selectedRows.has(idx)}
-                  onChange={() => handleRowSelect(idx)}
-                />
-              </TdCheckbox>
+              <Td>{idx + 1}</Td>
               <Td title={row.type}>{row.type}</Td>
               <Td title={row.name}>{row.name}</Td>
               <Td title={row.address}>{row.address}</Td>
@@ -98,7 +59,7 @@ const ShippingAddressTable: React.FC<ShippingAddressTableProps> = ({
           {/* 데이터가 10행 미만이면 빈 행 추가 */}
           {Array.from({ length: emptyRowsCount }).map((_, idx) => (
             <tr key={`empty-${idx}`}>
-              <TdCheckbox />
+              <Td />
               <Td />
               <Td />
               <Td />
@@ -145,10 +106,6 @@ const Th = styled.th`
   white-space: nowrap;
 `;
 
-const ThCheckbox = styled(Th)`
-  width: 40px;
-`;
-
 const Td = styled.td`
   height: 44px;
   border: 1px solid #dddddd;
@@ -160,8 +117,4 @@ const Td = styled.td`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-`;
-
-const TdCheckbox = styled(Td)`
-  width: 40px;
 `;
