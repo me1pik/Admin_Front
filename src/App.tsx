@@ -11,6 +11,7 @@ import ProductRegister from './pages/ProductRegister';
 import ProductDetail from './pages/ProductDetail';
 import UserDetail from './pages/UserDetail';
 import AdminDetail from './pages/AdminDetail';
+import PageList from './pages/Pagelist';
 // import AnalysisInfo from "./pages/AnalysisInfo";
 // import InventoryList from "./pages/InventoryList";
 // import StatisticsList from "./pages/StatisticsList";
@@ -35,6 +36,7 @@ const App: React.FC = () => {
           <Route path='/adminlist' element={<AdminList />} />
           <Route path='/admindetail/:no' element={<AdminDetail />} />
           <Route path='/userlist' element={<UserList />} />
+          <Route path='/pagelist' element={<PageList />} />
           <Route path='/userdetail/:no' element={<UserDetail />} />
           <Route path='/orderlist' element={<OrderList />} />
           <Route path='/monitoring' element={<Monitoring />} />

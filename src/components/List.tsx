@@ -77,10 +77,10 @@ const List: React.FC = () => {
             {activeMenu === 'admin' && (
               <SubMenu>
                 <SubMenuItem onClick={() => navigate('/adminlist')}>
-                  관리자 목록
+                  관리자 관리
                 </SubMenuItem>
                 <SubMenuItem onClick={() => navigate('/analysisinfo')}>
-                  분석정보 목록
+                  분석정보
                 </SubMenuItem>
               </SubMenu>
             )}
@@ -99,13 +99,16 @@ const List: React.FC = () => {
             {activeMenu === 'member' && (
               <SubMenu>
                 <SubMenuItem onClick={() => navigate('/userlist')}>
-                  회원 목록
+                  회원 관리
                 </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/inventorylist')}>
-                  인벤토리 목록
+                <SubMenuItem onClick={() => navigate('/pagelist')}>
+                  페이지 목록
                 </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/statisticslist')}>
-                  통계 목록
+                <SubMenuItem onClick={() => navigate('/product-evaluation')}>
+                  제품평가
+                </SubMenuItem>
+                <SubMenuItem onClick={() => navigate('/details-sales')}>
+                  판매내역
                 </SubMenuItem>
                 <SubMenuItem onClick={() => navigate('/calculatelist')}>
                   정산 목록
