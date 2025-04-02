@@ -2,10 +2,19 @@
 import React from 'react';
 import styled from 'styled-components';
 
+/** 기존 item, score, comment 대신
+ *  스크린샷과 동일한 컬럼 구조로 변경합니다.
+ */
 export interface PersonalEvaluationRow {
-  item: string; // 평가 항목
-  score: number; // 평가 점수 (예: 1 ~ 5)
-  comment: string; // 평가 의견
+  no: number; // No.
+  usageType: string; // 이용형태
+  productNumber: string; // 제품번호
+  serviceQuality: string; // 서비스 품질
+  usagePeriod: string; // 이용 기간
+  brand: string; // 브랜드
+  style: string; // 스타일 (품번)
+  size: string; // 사이즈
+  color: string; // 제품색상
 }
 
 interface PersonalEvaluationTableProps {
@@ -22,21 +31,39 @@ const PersonalEvaluationTable: React.FC<PersonalEvaluationTableProps> = ({
       <StyledTable>
         <thead>
           <tr>
-            <Th>평가 항목</Th>
-            <Th>평가 점수</Th>
-            <Th>평가 의견</Th>
+            <Th>No.</Th>
+            <Th>이용형태</Th>
+            <Th>제품상태</Th>
+            <Th>서비스 품질</Th>
+            <Th>이용 기간</Th>
+            <Th>브랜드</Th>
+            <Th>스타일 (품번)</Th>
+            <Th>사이즈</Th>
+            <Th>제품색상</Th>
           </tr>
         </thead>
         <tbody>
           {data.map((row, idx) => (
             <tr key={idx}>
-              <Td>{row.item}</Td>
-              <Td>{row.score}</Td>
-              <Td>{row.comment}</Td>
+              <Td>{row.no}</Td>
+              <Td>{row.usageType}</Td>
+              <Td>{row.productNumber}</Td>
+              <Td>{row.serviceQuality}</Td>
+              <Td>{row.usagePeriod}</Td>
+              <Td>{row.brand}</Td>
+              <Td>{row.style}</Td>
+              <Td>{row.size}</Td>
+              <Td>{row.color}</Td>
             </tr>
           ))}
           {Array.from({ length: emptyRowsCount }).map((_, idx) => (
             <tr key={`empty-${idx}`}>
+              <Td />
+              <Td />
+              <Td />
+              <Td />
+              <Td />
+              <Td />
               <Td />
               <Td />
               <Td />
