@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import AdminTable, { Admin } from '../components/Table/AdminTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
 import Pagination from '../components/Pagination';
-
+import RegisterButton from '../components/RegisterButton';
 /** 임시 데이터 (API 호출 대신 하드코딩) */
 const dummyAdmins: Admin[] = [
   {
@@ -138,23 +138,23 @@ const tabs: TabItem[] = [
 
 const AdminList: React.FC = () => {
   const navigate = useNavigate();
-
   // 검색 상태
   const [searchTerm, setSearchTerm] = useState('');
-
-  // 현재 선택된 탭 상태 (기본값: "전체보기")
+  // 현재 선택된 탭 상태
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-
   // 관리자 목록 (임시 데이터)
   const [adminData] = useState<Admin[]>(dummyAdmins);
+  // 페이지네이션 상태
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
   // 탭 변경 시 호출되는 콜백
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
-    setPage(1); // 탭 변경 시 페이지 초기화
+    setPage(1);
   };
 
-  // 탭에 따른 데이터 필터링 (전체보기: 모든 데이터, 관리자: status가 "정상", 블럭: status가 "블럭")
+  // 탭에 따른 데이터 필터링
   const dataByTab = adminData.filter((item) => {
     if (selectedTab.label === '전체보기') return true;
     return item.status === selectedTab.path;
@@ -175,19 +175,24 @@ const AdminList: React.FC = () => {
     );
   });
 
-  // 페이지네이션 상태
-  const [page, setPage] = useState(1);
-  const limit = 10; // 한 페이지당 10개 고정
-
   // 페이지네이션 계산
   const totalCount = filteredData.length;
   const totalPages = Math.ceil(totalCount / limit);
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  // 이메일 클릭 시, 해당 관리자의 no 값으로 상세 페이지 이동
+  // 이메일 클릭 시 상세 페이지 이동
+  // AdminTable에서 id(string)을 인자로 전달하기 때문에, 해당 id에 맞는 admin을 찾아 no 값을 사용
   const handleEdit = (id: string) => {
-    navigate(`/admindetail/${id}`);
+    const admin = adminData.find((admin) => admin.id === id);
+    if (admin) {
+      navigate(`/admindetail/${admin.no}`);
+    }
+  };
+
+  // RegisterButton 클릭 시 처리 (컴포넌트 내부에서 navigate 사용)
+  const handleRegisterClick = () => {
+    navigate('/admin-create');
   };
 
   return (
@@ -206,6 +211,7 @@ const AdminList: React.FC = () => {
         <AdminTable filteredData={currentPageData} handleEdit={handleEdit} />
       </TableContainer>
       <FooterRow>
+        <RegisterButton text='제품등록' onClick={handleRegisterClick} />
         <Pagination page={page} setPage={setPage} totalPages={totalPages} />
       </FooterRow>
     </Content>
@@ -213,7 +219,6 @@ const AdminList: React.FC = () => {
 };
 
 export default AdminList;
-/* ====================== Styled Components ====================== */
 
 const Content = styled.div`
   display: flex;
