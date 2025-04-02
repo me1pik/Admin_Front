@@ -57,7 +57,6 @@ const Login: React.FC = () => {
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    // 로그인 실패인 경우만 수동으로 모달을 닫으면 됩니다.
   };
 
   return (

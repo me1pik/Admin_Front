@@ -20,9 +20,11 @@ const UserList: React.FC = () => {
   const [userData, setUserData] = useState<User[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const limit = 10;
 
   const fetchUsers = async () => {
+    setLoading(true);
     try {
       let res;
       // 탭에 따라 API 호출: 블럭회원이면 getBlockedUsers, 그 외는 getAllUsers 호출
@@ -48,6 +50,8 @@ const UserList: React.FC = () => {
       setTotalCount(res.total);
     } catch (err) {
       console.error('사용자 목록을 불러오는데 실패했습니다:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -96,7 +100,11 @@ const UserList: React.FC = () => {
         <TotalCountText>Total: {filteredData.length}</TotalCountText>
       </InfoBar>
       <TableContainer>
-        <UserTable filteredData={filteredData} handleEdit={handleEdit} />
+        {loading ? (
+          <LoadingText>로딩중...</LoadingText>
+        ) : (
+          <UserTable filteredData={filteredData} handleEdit={handleEdit} />
+        )}
       </TableContainer>
       <Pagination
         page={page}
@@ -146,4 +154,12 @@ const TotalCountText = styled.div`
 
 const TableContainer = styled.div`
   box-sizing: border-box;
+`;
+
+const LoadingText = styled.div`
+  font-family: 'NanumSquare Neo OTF', sans-serif;
+  font-size: 14px;
+  color: #555;
+  text-align: center;
+  padding: 20px;
 `;

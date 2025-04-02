@@ -1,7 +1,7 @@
+// src/api/Axios.ts
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-// Axios 인스턴스 생성
 export const Axios = axios.create({
   baseURL: 'https://api.stylewh.com',
   withCredentials: true, // 쿠키 포함 (세션 관리 가능)
@@ -17,7 +17,7 @@ Axios.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // 401 Unauthorized 발생 → 리프레시 토큰으로 재발급 시도
+    // 401 Unauthorized 발생 시 리프레시 토큰으로 재발급 시도
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
@@ -25,8 +25,9 @@ Axios.interceptors.response.use(
         if (!refreshToken) throw new Error('No refresh token available.');
 
         console.log('🔄 리프레시 토큰으로 새 액세스 토큰 요청 중...');
+        // 명세서에 맞게 /admin/auth/refresh 엔드포인트 호출
         const { data } = await axios.post(
-          'https://api.stylewh.com/auth/refresh',
+          'https://api.stylewh.com/admin/auth/refresh',
           { refreshToken }
         );
 
@@ -37,7 +38,7 @@ Axios.interceptors.response.use(
 
         return Axios(originalRequest);
       } catch (refreshError) {
-        console.error('❌ 리프레시 토큰 만료 - 로그아웃 처리');
+        console.error('❌ 리프레시 토큰 만료 - 로그아웃 처리', refreshError);
         Cookies.remove('accessToken');
         Cookies.remove('refreshToken');
         window.location.href = '/login'; // 강제 로그아웃 처리

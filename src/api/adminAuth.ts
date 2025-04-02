@@ -1,5 +1,4 @@
 // src/api/adminAuth.ts
-
 import { Axios } from './Axios';
 
 export interface AdminLoginRequest {
