@@ -49,8 +49,8 @@ const DetailsSalesTable: React.FC<DetailsSalesTableProps> = ({
           <Th>계정(인스타)</Th>
           <Th>시즌 편집참여</Th>
           <Th>등록 제품수</Th>
-          <Th>구매 횟수</Th>
-          <Th>구매 갯수</Th>
+          <Th>구매자 수</Th>
+          <Th>판매제품 수</Th>
           <Th>총 판매금액</Th>
         </TableRow>
       </thead>
