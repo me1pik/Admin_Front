@@ -1,4 +1,3 @@
-// src/pages/UserList.tsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -27,7 +26,7 @@ const UserList: React.FC = () => {
     setLoading(true);
     try {
       let res;
-      // 탭에 따라 API 호출: 블럭회원이면 getBlockedUsers, 그 외는 getAllUsers 호출
+      // 탭에 따라 API 호출: '블럭회원'이면 getBlockedUsers, 그 외에는 getAllUsers 호출
       if (selectedTab.label === '블럭회원') {
         res = await getBlockedUsers(limit, page);
       } else {
@@ -36,7 +35,7 @@ const UserList: React.FC = () => {
       // API에서 받은 데이터를 테이블에 맞게 매핑 (필요에 따라 변환)
       const users: User[] = res.users.map((u: any) => ({
         no: u.id,
-        // getBlockedUsers 호출 시는 '블럭', 아니면 '일반'으로 표시 (API에서 받은 status 값이 다를 경우 수정)
+        // getBlockedUsers 호출 시는 '블럭', 아니면 '일반'으로 표시 (API의 status 값이 다를 경우 수정)
         status: selectedTab.label === '블럭회원' ? '블럭' : '일반',
         grade: u.membershipLevel,
         name: u.name,
@@ -55,7 +54,7 @@ const UserList: React.FC = () => {
     }
   };
 
-  // 페이지나 탭 변경 시 API 호출
+  // 페이지나 탭이 변경될 때 API 호출
   useEffect(() => {
     fetchUsers();
   }, [page, selectedTab]);

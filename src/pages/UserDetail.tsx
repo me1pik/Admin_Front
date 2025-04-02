@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import ListButtonDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../components/Header/ListButtonDetailSubHeader';
-import DetailTopBoxes from '../components/DetailTopBoxes';
+import UserDetailTopBoxes from '../components/UserDetailTopBoxes';
 import ShippingTabBar from '../components/TabBar';
 import ShippingAddressTable, {
   ShippingRow,
@@ -449,7 +449,7 @@ const UserDetail: React.FC = () => {
         <ProductNumberValue>{dummyProducts[0].no}</ProductNumberValue>
       </ProductNumberWrapper>
 
-      <DetailTopBoxes />
+      <UserDetailTopBoxes />
 
       <MiddleDivider />
 
