@@ -3,9 +3,12 @@ import React from 'react';
 import styled from 'styled-components';
 
 export interface PointHistoryRow {
-  date: string; // 포인트 날짜
-  description: string; // 내역
-  points: string; // 포인트 변화 (적립 또는 사용)
+  no: number; // No.
+  date: string; // 적립일자
+  kind: '적립' | '차감'; // 종류 (적립/차감)
+  history: string; // 포인트 변동내역
+  changedPoints: string; // 변동 포인트
+  remainingPoints: string; // 잔여 포인트
 }
 
 interface PointHistoryTableProps {
@@ -20,21 +23,30 @@ const PointHistoryTable: React.FC<PointHistoryTableProps> = ({ data }) => {
       <StyledTable>
         <thead>
           <tr>
-            <Th>포인트 날짜</Th>
-            <Th>내역</Th>
-            <Th>포인트 변화</Th>
+            <Th>No.</Th>
+            <Th>적립일자</Th>
+            <Th>종류 (적립/차감)</Th>
+            <Th>포인트 변동내역</Th>
+            <Th>변동 포인트</Th>
+            <Th>잔여 포인트</Th>
           </tr>
         </thead>
         <tbody>
           {data.map((row, idx) => (
             <tr key={idx}>
+              <Td>{row.no}</Td>
               <Td>{row.date}</Td>
-              <Td>{row.description}</Td>
-              <Td>{row.points}</Td>
+              <Td>{row.kind}</Td>
+              <Td>{row.history}</Td>
+              <Td>{row.changedPoints}</Td>
+              <Td>{row.remainingPoints}</Td>
             </tr>
           ))}
           {Array.from({ length: emptyRowsCount }).map((_, idx) => (
             <tr key={`empty-${idx}`}>
+              <Td />
+              <Td />
+              <Td />
               <Td />
               <Td />
               <Td />

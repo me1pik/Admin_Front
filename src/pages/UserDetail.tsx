@@ -39,7 +39,7 @@ const shippingTabs = [
   '개인평가',
 ];
 
-// 각 테이블에 전달할 더미 데이터 (데이터가 10행 이하인 경우 나머지는 빈 행으로 표시됨)
+// ★ 배송지 설정 예시
 const dummyShippingData: ShippingRow[] = [
   {
     type: '자택',
@@ -115,7 +115,7 @@ const dummyShippingData: ShippingRow[] = [
   },
 ];
 
-// ★ 스크린샷과 유사한 '이용내역' 데이터 예시
+// ★ 이용내역 예시
 const dummyUsageHistory: UsageHistoryRow[] = [
   {
     no: 42,
@@ -196,19 +196,59 @@ const dummyUsageHistory: UsageHistoryRow[] = [
   },
 ];
 
+// ★ 포인트 내역 예시 (스크린샷과 유사한 형식)
 const dummyPointHistory: PointHistoryRow[] = [
   {
-    date: '2025-03-01',
-    description: '구매 적립',
-    points: '+50',
+    no: 42,
+    date: '2025-03-10',
+    kind: '적립',
+    history: '[23044123980AUMU] 구매 - 포인트 적립',
+    changedPoints: '500',
+    remainingPoints: '2,500',
   },
   {
-    date: '2025-02-28',
-    description: '포인트 사용',
-    points: '-30',
+    no: 41,
+    date: '2025-03-10',
+    kind: '적립',
+    history: '[23044123980AUMU] 구매 - 포인트 적립',
+    changedPoints: '500',
+    remainingPoints: '3,000',
+  },
+  {
+    no: 40,
+    date: '2025-03-10',
+    kind: '차감',
+    history: '[23044123980AUMU] 결제 - 포인트 사용',
+    changedPoints: '500',
+    remainingPoints: '2,500',
+  },
+  {
+    no: 39,
+    date: '2025-03-09',
+    kind: '적립',
+    history: '[23044123980AUMU] 구매 - 포인트 적립',
+    changedPoints: '500',
+    remainingPoints: '3,000',
+  },
+  {
+    no: 38,
+    date: '2025-03-09',
+    kind: '차감',
+    history: '[23044123980AUMU] 결제 - 포인트 사용',
+    changedPoints: '500',
+    remainingPoints: '2,500',
+  },
+  {
+    no: 37,
+    date: '2025-03-08',
+    kind: '차감',
+    history: '[23044123980AUMU] 결제 - 포인트 사용',
+    changedPoints: '500',
+    remainingPoints: '2,000',
   },
 ];
 
+// ★ 추가 목록 예시
 const dummyAdditionalList: AdditionalListRow[] = [
   {
     item: '추가 항목 1',
@@ -222,6 +262,7 @@ const dummyAdditionalList: AdditionalListRow[] = [
   },
 ];
 
+// ★ 개인 평가 예시
 const dummyEvaluations: PersonalEvaluationRow[] = [
   {
     item: '서비스 품질',
@@ -277,7 +318,7 @@ const UserDetail: React.FC = () => {
       case 1:
         return dummyUsageHistory;
       case 2:
-        return dummyPointHistory;
+        return dummyPointHistory; // ← 포인트 내역
       case 3:
         return dummyAdditionalList;
       case 4:
