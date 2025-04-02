@@ -84,7 +84,7 @@ const UserDetailTopBoxes: React.FC = () => {
           <Content>
             <Row>
               <Value>
-                <BoldValue>서울/ 금천구</BoldValue>
+                <BoldValue>서울 / 금천구 </BoldValue>(서비스 지역)
               </Value>
             </Row>
             <Row>
