@@ -13,6 +13,7 @@ import UserDetail from './pages/UserDetail';
 import AdminDetail from './pages/AdminDetail';
 import PageList from './pages/Pagelist';
 import ProductEvaluation from './pages/ProductEvaluation';
+import DetailsSales from './pages/DetailsSales';
 
 // import AnalysisInfo from "./pages/AnalysisInfo";
 // import InventoryList from "./pages/InventoryList";
@@ -40,6 +41,7 @@ const App: React.FC = () => {
           <Route path='/userlist' element={<UserList />} />
           <Route path='/pagelist' element={<PageList />} />
           <Route path='/product-evaluation' element={<ProductEvaluation />} />
+          <Route path='/details-sales' element={<DetailsSales />} />
 
           <Route path='/userdetail/:no' element={<UserDetail />} />
           <Route path='/orderlist' element={<OrderList />} />
