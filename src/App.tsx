@@ -10,10 +10,15 @@ import ProductList from './pages/ProductList';
 import ProductRegister from './pages/ProductRegister';
 import ProductDetail from './pages/ProductDetail';
 import UserDetail from './pages/UserDetail';
+import AdminDetail from './pages/AdminDetail';
+import Pagelist from './pages/Pagelist';
+import ProductEvaluation from './pages/ProductEvaluation';
+import DetailsSales from './pages/DetailsSales';
+import CalculateList from './pages/CalculateList';
+
 // import AnalysisInfo from "./pages/AnalysisInfo";
 // import InventoryList from "./pages/InventoryList";
 // import StatisticsList from "./pages/StatisticsList";
-// import CalculateList from "./pages/CalculateList";
 // import BrandList from "./pages/BrandList";
 // import MarketOrderList from "./pages/MarketOrderList";
 // import Notice from "./pages/Notice";
@@ -32,7 +37,13 @@ const App: React.FC = () => {
         {/* Layout 내부에 Outlet을 사용하여 공통 UI를 구성 */}
         <Route element={<Layout />}>
           <Route path='/adminlist' element={<AdminList />} />
+          <Route path='/admindetail/:no' element={<AdminDetail />} />
           <Route path='/userlist' element={<UserList />} />
+          <Route path='/Pagelist' element={<Pagelist />} />
+          <Route path='/product-evaluation' element={<ProductEvaluation />} />
+          <Route path='/details-sales' element={<DetailsSales />} />
+          <Route path='/calculatelist' element={<CalculateList />} />
+
           <Route path='/userdetail/:no' element={<UserDetail />} />
           <Route path='/orderlist' element={<OrderList />} />
           <Route path='/monitoring' element={<Monitoring />} />

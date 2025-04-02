@@ -3,9 +3,14 @@ import React from 'react';
 import styled from 'styled-components';
 
 export interface AdditionalListRow {
-  item: string; // 항목명
-  detail: string; // 세부내용
-  status: string; // 상태 (예: 활성/비활성)
+  no: number; // No.
+  registeredDate: string; // 등록일자
+  style: string; // 스타일 (품번)
+  brand: string; // 브랜드
+  category: string; // 분류
+  color: string; // 색상
+  purchaseSize: string; // 구매 사이즈
+  retailPrice: string; // 리테일가
 }
 
 interface AdditionalListTableProps {
@@ -20,21 +25,36 @@ const AdditionalListTable: React.FC<AdditionalListTableProps> = ({ data }) => {
       <StyledTable>
         <thead>
           <tr>
-            <Th>항목명</Th>
-            <Th>세부내용</Th>
-            <Th>상태</Th>
+            <Th>No.</Th>
+            <Th>등록일자</Th>
+            <Th>스타일 (품번)</Th>
+            <Th>브랜드</Th>
+            <Th>분류</Th>
+            <Th>색상</Th>
+            <Th>구매 사이즈</Th>
+            <Th>리테일가</Th>
           </tr>
         </thead>
         <tbody>
           {data.map((row, idx) => (
             <tr key={idx}>
-              <Td>{row.item}</Td>
-              <Td>{row.detail}</Td>
-              <Td>{row.status}</Td>
+              <Td>{row.no}</Td>
+              <Td>{row.registeredDate}</Td>
+              <Td>{row.style}</Td>
+              <Td>{row.brand}</Td>
+              <Td>{row.category}</Td>
+              <Td>{row.color}</Td>
+              <Td>{row.purchaseSize}</Td>
+              <Td>{row.retailPrice}</Td>
             </tr>
           ))}
           {Array.from({ length: emptyRowsCount }).map((_, idx) => (
             <tr key={`empty-${idx}`}>
+              <Td />
+              <Td />
+              <Td />
+              <Td />
+              <Td />
               <Td />
               <Td />
               <Td />

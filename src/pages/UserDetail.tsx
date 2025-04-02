@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import ListButtonDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../components/Header/ListButtonDetailSubHeader';
-import DetailTopBoxes from '../components/DetailTopBoxes';
+import UserDetailTopBoxes from '../components/UserDetailTopBoxes';
 import ShippingTabBar from '../components/TabBar';
 import ShippingAddressTable, {
   ShippingRow,
@@ -26,7 +26,7 @@ import Pagination from '../components/Pagination';
 // 예시 제품 번호
 const dummyProducts = [
   {
-    no: 13486,
+    no: 5,
   },
 ];
 
@@ -39,7 +39,7 @@ const shippingTabs = [
   '개인평가',
 ];
 
-// 각 테이블에 전달할 더미 데이터 (데이터가 10행 이하인 경우 나머지는 빈 행으로 표시됨)
+// ★ 배송지 설정 예시
 const dummyShippingData: ShippingRow[] = [
   {
     type: '자택',
@@ -115,66 +115,247 @@ const dummyShippingData: ShippingRow[] = [
   },
 ];
 
+// ★ 이용내역 예시
 const dummyUsageHistory: UsageHistoryRow[] = [
   {
-    date: '2025-03-01',
-    orderNumber: 'ORD12345',
-    productName: '상품 A',
-    status: '완료',
-    amount: '120,000원',
+    no: 42,
+    applicationDate: '2025-03-10',
+    purpose: '대여',
+    usagePeriod: '2025-03-04 ~ 2025-03-07 ',
+    brand: 'CC Collect',
+    style: 'C224MSE231',
+    size: '55 (M)',
+    color: 'BLACK',
+    status: '배송완료',
   },
   {
-    date: '2025-02-27',
-    orderNumber: 'ORD12346',
-    productName: '상품 B',
-    status: '취소',
-    amount: '80,000원',
+    no: 41,
+    applicationDate: '2025-03-10',
+    purpose: '대여',
+    usagePeriod: '2025-03-04 ~ 2025-03-07 ',
+    brand: 'M.O.D.S/PHINE',
+    style: '24/MSE09',
+    size: '55 (M)',
+    color: 'PINK',
+    status: '배송준비중',
   },
   {
-    date: '2025-02-25',
-    orderNumber: 'ORD12347',
-    productName: '상품 C',
-    status: '진행중',
-    amount: '150,000원',
+    no: 40,
+    applicationDate: '2025-03-10',
+    purpose: '구매',
+    usagePeriod: '2025-03-04 ~ 2025-03-07 ',
+    brand: 'M.O.D.S/PHINE',
+    style: '24/MSE09',
+    size: '55 (M)',
+    color: 'BLACK',
+    status: '주문취소중',
+  },
+  {
+    no: 39,
+    applicationDate: '2025-03-09',
+    purpose: '대여',
+    usagePeriod: '2025-03-04 ~ 2025-03-07 ',
+    brand: 'SATIN',
+    style: 'C244T63',
+    size: '55 (M)',
+    color: 'BLACK',
+    status: '배송중',
+  },
+  {
+    no: 38,
+    applicationDate: '2025-03-09',
+    purpose: '구매',
+    usagePeriod: '2025-03-04 ~ 2025-03-07 ',
+    brand: 'ZOOC',
+    style: 'Z244MSE015',
+    size: '55 (M)',
+    color: 'PINK',
+    status: '배송완료',
+  },
+  {
+    no: 37,
+    applicationDate: '2025-03-09',
+    purpose: '구매',
+    usagePeriod: '2025-03-04 ~ 2025-03-07 ',
+    brand: 'ZOOC',
+    style: '24/MSE009',
+    size: '55 (M)',
+    color: 'BLACK',
+    status: '주문취소',
+  },
+  {
+    no: 36,
+    applicationDate: '2025-03-08',
+    purpose: '대여',
+    usagePeriod: '2025-03-04 ~ 2025-03-07 ',
+    brand: 'ZOOC',
+    style: 'Z244MSE015',
+    size: '55 (M)',
+    color: 'LIGHT BEIGE',
+    status: '배송중',
   },
 ];
 
+// ★ 포인트 내역 예시 (스크린샷과 유사한 형식)
 const dummyPointHistory: PointHistoryRow[] = [
   {
-    date: '2025-03-01',
-    description: '구매 적립',
-    points: '+50',
+    no: 42,
+    date: '2025-03-10',
+    kind: '적립',
+    history: '[23044123980AUMU] 구매 - 포인트 적립',
+    changedPoints: '500',
+    remainingPoints: '2,500',
   },
   {
-    date: '2025-02-28',
-    description: '포인트 사용',
-    points: '-30',
+    no: 41,
+    date: '2025-03-10',
+    kind: '적립',
+    history: '[23044123980AUMU] 구매 - 포인트 적립',
+    changedPoints: '500',
+    remainingPoints: '3,000',
+  },
+  {
+    no: 40,
+    date: '2025-03-10',
+    kind: '차감',
+    history: '[23044123980AUMU] 결제 - 포인트 사용',
+    changedPoints: '500',
+    remainingPoints: '2,500',
+  },
+  {
+    no: 39,
+    date: '2025-03-09',
+    kind: '적립',
+    history: '[23044123980AUMU] 구매 - 포인트 적립',
+    changedPoints: '500',
+    remainingPoints: '3,000',
+  },
+  {
+    no: 38,
+    date: '2025-03-09',
+    kind: '차감',
+    history: '[23044123980AUMU] 결제 - 포인트 사용',
+    changedPoints: '500',
+    remainingPoints: '2,500',
+  },
+  {
+    no: 37,
+    date: '2025-03-08',
+    kind: '차감',
+    history: '[23044123980AUMU] 결제 - 포인트 사용',
+    changedPoints: '500',
+    remainingPoints: '2,000',
   },
 ];
 
+// ★ 추가 목록 예시
 const dummyAdditionalList: AdditionalListRow[] = [
   {
-    item: '추가 항목 1',
-    detail: '세부 내용 1',
-    status: '활성',
+    no: 42,
+    registeredDate: '2025-03-10',
+    style: 'C244MSE231',
+    brand: 'CC Collect',
+    category: '원피스',
+    color: 'BLACK',
+    purchaseSize: '55 (M) / 66 (L) / 77 (XL)',
+    retailPrice: '540,000',
   },
   {
-    item: '추가 항목 2',
-    detail: '세부 내용 2',
-    status: '비활성',
+    no: 41,
+    registeredDate: '2025-03-10',
+    style: '24/MSE009',
+    brand: 'M.O.D.S/PHINE',
+    category: '원피스',
+    color: 'PINK',
+    purchaseSize: '55 (M) / 66 (L) / 77 (XL)',
+    retailPrice: '540,000',
+  },
+  {
+    no: 40,
+    registeredDate: '2025-03-10',
+    style: '24/MSE009',
+    brand: 'M.O.D.S/PHINE',
+    category: '원피스',
+    color: 'BLACK',
+    purchaseSize: '55 (M) / 66 (L) / 77 (XL)',
+    retailPrice: '540,000',
+  },
+  {
+    no: 39,
+    registeredDate: '2025-03-09',
+    style: 'C244T63',
+    brand: 'SATIN',
+    category: '원피스',
+    color: 'BLACK',
+    purchaseSize: '55 (M) / 66 (L) / 77 (XL)',
+    retailPrice: '600,000',
+  },
+  {
+    no: 38,
+    registeredDate: '2025-03-09',
+    style: 'Z244MSE015',
+    brand: 'ZOOC',
+    category: '원피스',
+    color: 'PINK',
+    purchaseSize: '55 (M) / 66 (L) / 77 (XL)',
+    retailPrice: '540,000',
+  },
+  {
+    no: 37,
+    registeredDate: '2025-03-09',
+    style: '24/MSE009',
+    brand: 'ZOOC',
+    category: '원피스',
+    color: 'BLACK',
+    purchaseSize: '55 (M) / 66 (L) / 77 (XL)',
+    retailPrice: '500,000',
+  },
+  {
+    no: 36,
+    registeredDate: '2025-03-08',
+    style: 'Z244MSE015',
+    brand: 'ZOOC',
+    category: '원피스',
+    color: 'LIGHT BEIGE',
+    purchaseSize: '55 (M) / 66 (L) / 77 (XL)',
+    retailPrice: '540,000',
   },
 ];
 
+// ★ 개인 평가 예시
 const dummyEvaluations: PersonalEvaluationRow[] = [
   {
-    item: '서비스 품질',
-    score: 4,
-    comment: '전반적으로 만족합니다.',
+    no: 42,
+    usageType: '대여',
+    productNumber: '5',
+    serviceQuality: '4점 (만족)',
+    usagePeriod: '2025-03-04 ~ 2025-03-07',
+    brand: 'CC Collect',
+    style: 'C224MSE231',
+    size: '55 (M)',
+    color: 'BLACK',
   },
   {
-    item: '배송 속도',
-    score: 5,
-    comment: '매우 빠릅니다!',
+    no: 41,
+    usageType: '대여',
+    productNumber: '5',
+    serviceQuality: '5점 (매우만족)',
+    usagePeriod: '2025-03-10 ~ 2025-03-14',
+    brand: 'M.O.D.S/PHINE',
+    style: '24/MSE009',
+    size: '55 (M)',
+    color: 'PINK',
+  },
+  {
+    no: 40,
+    usageType: '구매',
+    productNumber: '5',
+    serviceQuality: '3점 (보통)',
+    usagePeriod: '2025-03-10 ~ 2025-03-14',
+    brand: 'M.O.D.S/PHINE',
+    style: '24/MSE009',
+    size: '55 (M)',
+    color: 'BLACK',
   },
 ];
 
@@ -220,7 +401,7 @@ const UserDetail: React.FC = () => {
       case 1:
         return dummyUsageHistory;
       case 2:
-        return dummyPointHistory;
+        return dummyPointHistory; // ← 포인트 내역
       case 3:
         return dummyAdditionalList;
       case 4:
@@ -268,7 +449,7 @@ const UserDetail: React.FC = () => {
         <ProductNumberValue>{dummyProducts[0].no}</ProductNumberValue>
       </ProductNumberWrapper>
 
-      <DetailTopBoxes />
+      <UserDetailTopBoxes />
 
       <MiddleDivider />
 
@@ -280,7 +461,9 @@ const UserDetail: React.FC = () => {
 
       {renderTable()}
 
-      <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+      <FooterRow>
+        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+      </FooterRow>
     </Container>
   );
 };
@@ -338,4 +521,10 @@ const MiddleDivider = styled.hr`
   border: 0;
   border-top: 1px dashed #dddddd;
   margin: 30px 0;
+`;
+const FooterRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 40px;
 `;

@@ -57,14 +57,13 @@ const Login: React.FC = () => {
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    // 로그인 실패인 경우만 수동으로 모달을 닫으면 됩니다.
   };
 
   return (
     <Container>
       <LoginContainer>
         <Header>
-          <Title>관리자 로그인</Title>
+          <Title>멜픽 시스템</Title>
         </Header>
         <Form onSubmit={handleSubmit(onSubmit)}>
           <Controller
@@ -154,8 +153,13 @@ const Header = styled.div`
 
 const Title = styled.h2`
   margin: 0;
-  font-size: 24px;
-  color: #333;
+  font-family: 'NanumSquare Neo OTF';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 40px;
+
+  color: #000000;
 `;
 
 const Form = styled.form`

@@ -1,167 +1,81 @@
 // src/pages/AdminList.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import AdminTable, { Admin } from '../components/Table/AdminTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
 import Pagination from '../components/Pagination';
-
-/** 임시 데이터 (API 호출 대신 하드코딩) */
-const dummyAdmins: Admin[] = [
-  {
-    no: 15,
-    status: '정상',
-    id: 'webmanager',
-    team: '관리팀장 1',
-    name: '홍길동',
-    email: 'manager@mkbk.com',
-    lastLogin: '2023-03-14',
-    registeredAt: '2024-11-15',
-  },
-  {
-    no: 14,
-    status: '블럭',
-    id: 'webmanager2',
-    team: '관리팀장 2',
-    name: '김철수',
-    email: 'manager2@mkbk.com',
-    lastLogin: '',
-    registeredAt: '2024-11-15',
-  },
-  {
-    no: 13,
-    status: '정상',
-    id: 'webmanager3',
-    team: '관리팀장 3',
-    name: '이영희',
-    email: 'manager3@mkbk.com',
-    lastLogin: '2023-03-14',
-    registeredAt: '2024-11-15',
-  },
-  {
-    no: 12,
-    status: '정상',
-    id: 'adminuser1',
-    team: '관리팀장 1',
-    name: '박민수',
-    email: 'admin1@mkbk.com',
-    lastLogin: '2023-03-10',
-    registeredAt: '2024-10-01',
-  },
-  {
-    no: 11,
-    status: '블럭',
-    id: 'adminuser2',
-    team: '관리팀장 2',
-    name: '최지현',
-    email: 'admin2@mkbk.com',
-    lastLogin: '',
-    registeredAt: '2024-09-20',
-  },
-  {
-    no: 10,
-    status: '정상',
-    id: 'adminuser3',
-    team: '관리팀장 3',
-    name: '한지민',
-    email: 'admin3@mkbk.com',
-    lastLogin: '2023-03-08',
-    registeredAt: '2024-08-15',
-  },
-  {
-    no: 15,
-    status: '정상',
-    id: 'webmanager',
-    team: '관리팀장 1',
-    name: '홍길동',
-    email: 'manager@mkbk.com',
-    lastLogin: '2023-03-14',
-    registeredAt: '2024-11-15',
-  },
-  {
-    no: 14,
-    status: '블럭',
-    id: 'webmanager2',
-    team: '관리팀장 2',
-    name: '김철수',
-    email: 'manager2@mkbk.com',
-    lastLogin: '',
-    registeredAt: '2024-11-15',
-  },
-  {
-    no: 13,
-    status: '정상',
-    id: 'webmanager3',
-    team: '관리팀장 3',
-    name: '이영희',
-    email: 'manager3@mkbk.com',
-    lastLogin: '2023-03-14',
-    registeredAt: '2024-11-15',
-  },
-  {
-    no: 12,
-    status: '정상',
-    id: 'adminuser1',
-    team: '관리팀장 1',
-    name: '박민수',
-    email: 'admin1@mkbk.com',
-    lastLogin: '2023-03-10',
-    registeredAt: '2024-10-01',
-  },
-  {
-    no: 11,
-    status: '블럭',
-    id: 'adminuser2',
-    team: '관리팀장 2',
-    name: '최지현',
-    email: 'admin2@mkbk.com',
-    lastLogin: '',
-    registeredAt: '2024-09-20',
-  },
-  {
-    no: 10,
-    status: '정상',
-    id: 'adminuser3',
-    team: '관리팀장 3',
-    name: '한지민',
-    email: 'admin3@mkbk.com',
-    lastLogin: '2023-03-08',
-    registeredAt: '2024-08-15',
-  },
-];
+import RegisterButton from '../components/RegisterButton';
+import { getAllAdmins, getActiveAdmins, getBlockedAdmins } from '../api/admin';
 
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
-  { label: '관리자', path: '정상' },
-  { label: '블럭', path: '블럭' },
+  { label: '관리자', path: 'active' },
+  { label: '블럭', path: 'blocked' },
 ];
 
 const AdminList: React.FC = () => {
   const navigate = useNavigate();
 
-  // 검색 상태 (검색 분류 제거)
+  // 검색 상태
   const [searchTerm, setSearchTerm] = useState('');
-
-  // 현재 선택된 탭 상태 (기본값: "전체보기")
+  // 현재 선택된 탭 상태
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
+  // API에서 불러온 관리자 목록 (AdminResponse를 Admin 타입으로 변환)
+  const [adminData, setAdminData] = useState<Admin[]>([]);
+  // 전체 관리자 수 (API 응답)
+  const [totalCount, setTotalCount] = useState(0);
+  // 페이지네이션 상태
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
-  // 관리자 목록 (임시 데이터)
-  const [adminData] = useState<Admin[]>(dummyAdmins);
+  // API 응답(AdminResponse)을 AdminTable 컴포넌트에서 사용하는 Admin 타입으로 변환하는 함수
+  const mapAdminData = (admins: any[]): Admin[] => {
+    return admins.map((admin) => ({
+      no: admin.no,
+      status: admin.status,
+      id: admin.id,
+      // API에 team 필드가 없다면 기본값 또는 role 정보를 사용하도록 함
+      team: admin.role || '',
+      name: admin.name,
+      email: admin.email,
+      // lastLogin은 API에 없으므로 기본값 '-' 처리
+      lastLogin: '-',
+      // 등록일자는 signupDate가 있으면 사용하고 없으면 createdAt 사용
+      registeredAt: admin.signupDate || admin.createdAt,
+    }));
+  };
+
+  // 선택된 탭이나 페이지가 변경될 때 API를 호출합니다.
+  useEffect(() => {
+    const fetchAdmins = async () => {
+      try {
+        let response;
+        if (selectedTab.label === '전체보기') {
+          response = await getAllAdmins(limit, page);
+        } else if (selectedTab.label === '관리자') {
+          response = await getActiveAdmins(limit, page);
+        } else if (selectedTab.label === '블럭') {
+          response = await getBlockedAdmins(limit, page);
+        }
+        // API 응답 데이터를 변환 후 상태에 저장
+        setAdminData(mapAdminData(response.admins));
+        setTotalCount(response.total);
+      } catch (error) {
+        console.error('관리자 데이터를 불러오는 중 에러 발생', error);
+      }
+    };
+    fetchAdmins();
+  }, [page, selectedTab]);
 
   // 탭 변경 시 호출되는 콜백
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
-    setPage(1); // 탭 변경 시 페이지 초기화
+    setPage(1);
   };
 
-  // 탭에 따른 데이터 필터링 (전체보기: 모든 데이터, 관리자: status가 "정상", 블럭: status가 "블럭")
-  const dataByTab = adminData.filter((item) => {
-    if (selectedTab.label === '전체보기') return true;
-    return item.status === selectedTab.path;
-  });
-
-  // 검색 로직: id, name, email, team, status, registeredAt, lastLogin, 그리고 숫자인 no도 문자열로 변환 후 포함 여부 확인
-  const filteredData = dataByTab.filter((item) => {
+  // 클라이언트측 검색 로직: 여러 항목에서 검색
+  const filteredData = adminData.filter((item) => {
     const lowerTerm = searchTerm.toLowerCase();
     return (
       String(item.no).toLowerCase().includes(lowerTerm) ||
@@ -171,23 +85,24 @@ const AdminList: React.FC = () => {
       item.team.toLowerCase().includes(lowerTerm) ||
       item.status.toLowerCase().includes(lowerTerm) ||
       item.registeredAt.toLowerCase().includes(lowerTerm) ||
-      (item.lastLogin && item.lastLogin.toLowerCase().includes(lowerTerm))
+      item.lastLogin.toLowerCase().includes(lowerTerm)
     );
   });
 
-  // 페이지네이션 상태
-  const [page, setPage] = useState(1);
-  const limit = 10; // 한 페이지당 10개 고정
+  // 페이지네이션을 위해 필터된 데이터에서 현재 페이지 데이터만 선택합니다.
+  const currentPageData = filteredData.slice(0, limit);
 
-  // 페이지네이션 계산
-  const totalCount = filteredData.length;
-  const totalPages = Math.ceil(totalCount / limit);
-  const offset = (page - 1) * limit;
-  const currentPageData = filteredData.slice(offset, offset + limit);
-
-  // 이메일 클릭 시 수정/상세 페이지 이동
+  // 이메일 클릭 시 상세 페이지 이동 (AdminTable에서 id(string)을 인자로 전달)
   const handleEdit = (id: string) => {
-    navigate(`/admin/${id}`);
+    const admin = adminData.find((admin) => admin.id === id);
+    if (admin) {
+      navigate(`/admindetail/${admin.no}`);
+    }
+  };
+
+  // RegisterButton 클릭 시 처리
+  const handleRegisterClick = () => {
+    navigate('/admin-create');
   };
 
   return (
@@ -205,14 +120,19 @@ const AdminList: React.FC = () => {
       <TableContainer>
         <AdminTable filteredData={currentPageData} handleEdit={handleEdit} />
       </TableContainer>
-      <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+      <FooterRow>
+        <RegisterButton text='제품등록' onClick={handleRegisterClick} />
+        <Pagination
+          page={page}
+          setPage={setPage}
+          totalPages={Math.ceil(totalCount / limit)}
+        />
+      </FooterRow>
     </Content>
   );
 };
 
 export default AdminList;
-
-/* ====================== Styled Components ====================== */
 
 const Content = styled.div`
   display: flex;
@@ -249,4 +169,11 @@ const TotalCountText = styled.div`
 
 const TableContainer = styled.div`
   box-sizing: border-box;
+`;
+
+const FooterRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 40px;
 `;

@@ -1,4 +1,3 @@
-// src/pages/UserList.tsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -20,21 +19,25 @@ const UserList: React.FC = () => {
   const [userData, setUserData] = useState<User[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const limit = 10;
 
+  // ✅ totalPages 계산 추가
+  const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+
+  // 유저 데이터 요청
   const fetchUsers = async () => {
+    setLoading(true);
     try {
       let res;
-      // 탭에 따라 API 호출: 블럭회원이면 getBlockedUsers, 그 외는 getAllUsers 호출
       if (selectedTab.label === '블럭회원') {
         res = await getBlockedUsers(limit, page);
       } else {
         res = await getAllUsers(limit, page);
       }
-      // API에서 받은 데이터를 테이블에 맞게 매핑 (필요에 따라 변환)
+
       const users: User[] = res.users.map((u: any) => ({
         no: u.id,
-        // getBlockedUsers 호출 시는 '블럭', 아니면 '일반'으로 표시 (API에서 받은 status 값이 다를 경우 수정)
         status: selectedTab.label === '블럭회원' ? '블럭' : '일반',
         grade: u.membershipLevel,
         name: u.name,
@@ -44,25 +47,25 @@ const UserList: React.FC = () => {
         serviceArea: u.address,
         joinDate: new Date(u.signupDate).toLocaleDateString('ko-KR'),
       }));
+
       setUserData(users);
       setTotalCount(res.total);
     } catch (err) {
       console.error('사용자 목록을 불러오는데 실패했습니다:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // 페이지나 탭 변경 시 API 호출
   useEffect(() => {
     fetchUsers();
   }, [page, selectedTab]);
 
-  // 탭 변경 시 페이지 초기화
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
     setPage(1);
   };
 
-  // 클라이언트 사이드 검색 필터링 (API에서 검색 기능을 제공하지 않는 경우)
   const filteredData = userData.filter((item) => {
     const lowerTerm = searchTerm.toLowerCase();
     return (
@@ -78,7 +81,6 @@ const UserList: React.FC = () => {
     );
   });
 
-  // 인스타그램 계정을 클릭하면 해당 사용자의 상세 페이지로 이동
   const handleEdit = (no: number) => {
     navigate(`/userdetail/${no}`);
   };
@@ -96,20 +98,20 @@ const UserList: React.FC = () => {
         <TotalCountText>Total: {filteredData.length}</TotalCountText>
       </InfoBar>
       <TableContainer>
-        <UserTable filteredData={filteredData} handleEdit={handleEdit} />
+        {loading ? (
+          <LoadingText>로딩중...</LoadingText>
+        ) : (
+          <UserTable filteredData={filteredData} handleEdit={handleEdit} />
+        )}
       </TableContainer>
-      <Pagination
-        page={page}
-        setPage={setPage}
-        totalPages={Math.ceil(totalCount / limit)}
-      />
+      <FooterRow>
+        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+      </FooterRow>
     </Content>
   );
 };
 
 export default UserList;
-
-/* ====================== Styled Components ====================== */
 
 const Content = styled.div`
   display: flex;
@@ -146,4 +148,19 @@ const TotalCountText = styled.div`
 
 const TableContainer = styled.div`
   box-sizing: border-box;
+`;
+
+const LoadingText = styled.div`
+  font-family: 'NanumSquare Neo OTF', sans-serif;
+  font-size: 14px;
+  color: #555;
+  text-align: center;
+  padding: 20px;
+`;
+
+const FooterRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 40px;
 `;
