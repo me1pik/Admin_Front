@@ -10,27 +10,19 @@ import ShippingTabBar from '../components/TabBar';
 import TaskHistoryTable, {
   TaskHistoryRow,
 } from '../components/Table/admin/TaskHistoryTable';
-// 권한설정 테이블
+// 권한설정 테이블 (새로운 구조)
 import PermissionSettingsTable, {
-  PermissionRow,
+  PermissionGroup,
 } from '../components/Table/admin/PermissionSettingsTable';
 
 import Pagination from '../components/Pagination';
 
-// 예시 제품 번호
-const dummyProducts = [
-  {
-    no: 5,
-  },
-];
+const dummyProducts = [{ no: 5 }];
 
 // 탭 목록
 const tabs = ['작업내역', '권한설정'];
 
-/** ─────────────────────────────
- *  작업내역 더미 데이터 수정
- *  - 컬럼: 작업일자, 작업내용, 변경일시 (변경내용 제거)
- *  ───────────────────────────── */
+/** 작업내역 더미 데이터 (동일) */
 const dummyTaskData: TaskHistoryRow[] = [
   {
     workDate: '서비스 > 제품목록 관리',
@@ -38,49 +30,55 @@ const dummyTaskData: TaskHistoryRow[] = [
       '변경전 작업내용을 기여합니다. 관리자 내 상세 변경된 내용을 검토 및 반영',
     changedAt: '2025-03-02 00:00:00',
   },
-  {
-    workDate: '서비스 > 회원목록 관리',
-    workContent:
-      '회원목록 검색 기능 수정(변경전). 관리자 내 상세 조회 항목 추가',
-    changedAt: '2025-03-03 12:20:00',
-  },
-  {
-    workDate: '서비스 > 주문목록 관리',
-    workContent: '주문 취소 프로세스(변경전). 관리자 내 세부 권한 점검 필요',
-    changedAt: '2025-03-04 09:15:30',
-  },
-  // 필요 시 더 많은 데이터 추가
+  // ...생략
 ];
 
-/** ─────────────────────────────
- *  권한설정 더미 데이터 (기존과 동일)
- *  ───────────────────────────── */
-const dummyPermissionData: PermissionRow[] = [
+/**
+ * 권한설정 더미 데이터 (이미지 구조)
+ * - 카테고리: 관리자, 회원, 서비스, 고객센터
+ * - 각 카테고리에 대해 여러 권한(체크박스)
+ */
+const dummyPermissionData: PermissionGroup[] = [
   {
-    no: 42,
-    applicationDate: '2025-03-10',
-    role: '관리자',
-    status: '활성',
-    remarks: '전체 권한 부여',
+    category: '관리자',
+    permissions: [
+      { label: '관리자 관리', checked: true },
+      { label: '분석정보 목록', checked: false },
+      // 필요한 만큼 추가
+    ],
   },
   {
-    no: 41,
-    applicationDate: '2025-03-10',
-    role: '편집자',
-    status: '비활성',
-    remarks: '일부 권한 제한',
+    category: '회원',
+    permissions: [
+      { label: '회원관리', checked: true },
+      { label: '페이지 목록', checked: false },
+      { label: '스케줄 목록', checked: false },
+      { label: '판매내역', checked: false },
+      { label: '정산내역', checked: true },
+    ],
   },
   {
-    no: 40,
-    applicationDate: '2025-03-09',
-    role: '조회자',
-    status: '활성',
-    remarks: '조회만 가능',
+    category: '서비스',
+    permissions: [
+      { label: '제품목록', checked: true },
+      { label: '브랜드 목록', checked: false },
+      { label: '마켓 주문내역', checked: false },
+      { label: '일반 주문내역', checked: false },
+      { label: '모니터링', checked: false },
+    ],
+  },
+  {
+    category: '고객센터',
+    permissions: [
+      { label: '공지사항', checked: false },
+      { label: '이용약관', checked: false },
+      { label: '개인정보보호', checked: false },
+      { label: 'FAQ', checked: false },
+    ],
   },
 ];
 
 const AdminDetail: React.FC = () => {
-  // 현재 활성화된 탭 인덱스와 페이지 상태 관리
   const [activeTab, setActiveTab] = useState<number>(0);
   const [page, setPage] = useState(1);
   const pageSize = 10;
@@ -89,11 +87,9 @@ const AdminDetail: React.FC = () => {
   const handleBackClick = () => {
     window.history.back();
   };
-
   const handleEditClick = () => {
     alert('정보가 수정되었습니다!');
   };
-
   const handleEndClick = () => {
     alert('종료 처리가 완료되었습니다!');
   };
@@ -128,7 +124,7 @@ const AdminDetail: React.FC = () => {
   const activeData = getActiveData();
   const totalPages = Math.max(1, Math.ceil(activeData.length / pageSize));
 
-  // 현재 페이지에 해당하는 데이터 슬라이스
+  // 현재 페이지에 해당하는 데이터 슬라이스 (작업내역과 달리, 권한설정은 굳이 페이지 필요없으면 생략 가능)
   const sliceData = (data: any[]) =>
     data.slice((page - 1) * pageSize, page * pageSize);
 
@@ -138,6 +134,7 @@ const AdminDetail: React.FC = () => {
       case 0:
         return <TaskHistoryTable data={slicedData} />;
       case 1:
+        // 권한설정
         return <PermissionSettingsTable data={slicedData} />;
       default:
         return null;
