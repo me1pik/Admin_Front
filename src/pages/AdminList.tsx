@@ -139,7 +139,7 @@ const tabs: TabItem[] = [
 const AdminList: React.FC = () => {
   const navigate = useNavigate();
 
-  // 검색 상태 (검색 분류 제거)
+  // 검색 상태
   const [searchTerm, setSearchTerm] = useState('');
 
   // 현재 선택된 탭 상태 (기본값: "전체보기")
@@ -160,7 +160,7 @@ const AdminList: React.FC = () => {
     return item.status === selectedTab.path;
   });
 
-  // 검색 로직: id, name, email, team, status, registeredAt, lastLogin, 그리고 숫자인 no도 문자열로 변환 후 포함 여부 확인
+  // 검색 로직: 여러 항목에서 검색
   const filteredData = dataByTab.filter((item) => {
     const lowerTerm = searchTerm.toLowerCase();
     return (
@@ -185,9 +185,9 @@ const AdminList: React.FC = () => {
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  // 이메일 클릭 시 수정/상세 페이지 이동
-  const handleEdit = (id: string) => {
-    navigate(`/admin/${id}`);
+  // 이메일 클릭 시, 해당 관리자의 no 값으로 상세 페이지 이동
+  const handleEdit = (no: number) => {
+    navigate(`/admindetail/${no}`);
   };
 
   return (
@@ -211,7 +211,6 @@ const AdminList: React.FC = () => {
 };
 
 export default AdminList;
-
 /* ====================== Styled Components ====================== */
 
 const Content = styled.div`
