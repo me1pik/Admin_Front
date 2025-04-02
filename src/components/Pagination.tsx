@@ -113,7 +113,6 @@ const PaginationContainer = styled.div`
   justify-content: center;
   align-items: center;
   gap: 27px;
-  margin: 40px auto 0; /* 상단 마진과 좌우 auto로 중앙 정렬 */
 `;
 
 interface PageArrowProps {

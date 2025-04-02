@@ -175,7 +175,9 @@ const OrderList: React.FC = () => {
       <TableContainer>
         <OrderTable filteredData={currentPageData} handleEdit={handleEdit} />
       </TableContainer>
-      <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+      <FooterRow>
+        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+      </FooterRow>
     </Content>
   );
 };
@@ -219,4 +221,10 @@ const TotalCount = styled.div`
 
 const TableContainer = styled.div`
   box-sizing: border-box;
+`;
+const FooterRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 40px;
 `;

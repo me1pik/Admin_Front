@@ -186,8 +186,8 @@ const AdminList: React.FC = () => {
   const currentPageData = filteredData.slice(offset, offset + limit);
 
   // 이메일 클릭 시, 해당 관리자의 no 값으로 상세 페이지 이동
-  const handleEdit = (no: number) => {
-    navigate(`/admindetail/${no}`);
+  const handleEdit = (id: string) => {
+    navigate(`/admindetail/${id}`);
   };
 
   return (
@@ -205,7 +205,9 @@ const AdminList: React.FC = () => {
       <TableContainer>
         <AdminTable filteredData={currentPageData} handleEdit={handleEdit} />
       </TableContainer>
-      <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+      <FooterRow>
+        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+      </FooterRow>
     </Content>
   );
 };
@@ -248,4 +250,11 @@ const TotalCountText = styled.div`
 
 const TableContainer = styled.div`
   box-sizing: border-box;
+`;
+
+const FooterRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 40px;
 `;

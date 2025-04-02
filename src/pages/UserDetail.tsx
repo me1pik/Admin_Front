@@ -461,7 +461,9 @@ const UserDetail: React.FC = () => {
 
       {renderTable()}
 
-      <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+      <FooterRow>
+        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+      </FooterRow>
     </Container>
   );
 };
@@ -519,4 +521,10 @@ const MiddleDivider = styled.hr`
   border: 0;
   border-top: 1px dashed #dddddd;
   margin: 30px 0;
+`;
+const FooterRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 40px;
 `;
