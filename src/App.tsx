@@ -14,11 +14,11 @@ import AdminDetail from './pages/AdminDetail';
 import PageList from './pages/Pagelist';
 import ProductEvaluation from './pages/ProductEvaluation';
 import DetailsSales from './pages/DetailsSales';
+import CalculateList from './pages/CalculateList';
 
 // import AnalysisInfo from "./pages/AnalysisInfo";
 // import InventoryList from "./pages/InventoryList";
 // import StatisticsList from "./pages/StatisticsList";
-// import CalculateList from "./pages/CalculateList";
 // import BrandList from "./pages/BrandList";
 // import MarketOrderList from "./pages/MarketOrderList";
 // import Notice from "./pages/Notice";
@@ -42,6 +42,7 @@ const App: React.FC = () => {
           <Route path='/pagelist' element={<PageList />} />
           <Route path='/product-evaluation' element={<ProductEvaluation />} />
           <Route path='/details-sales' element={<DetailsSales />} />
+          <Route path='/calculatelist' element={<CalculateList />} />
 
           <Route path='/userdetail/:no' element={<UserDetail />} />
           <Route path='/orderlist' element={<OrderList />} />
