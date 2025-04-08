@@ -1,9 +1,9 @@
-// src/components/Table/NoticeTable.tsx
+// src/components/Table/TermsTable.tsx
 import React from 'react';
 import styled from 'styled-components';
 
 /** 공지사항 아이템 인터페이스 */
-export interface NoticeItem {
+export interface TermsItem {
   no: number; // 게시글 번호
   type: string; // 구분 (공지 / 안내)
   content: string; // 내용
@@ -11,14 +11,14 @@ export interface NoticeItem {
   createdAt: string; // 등록일
 }
 
-/** NoticeTable Props */
-interface NoticeTableProps {
-  filteredData: NoticeItem[];
+/** TermsTable Props */
+interface TermsTableProps {
+  filteredData: TermsItem[];
   /** 작성자 클릭 시 이벤트: 작성자명, 게시글 번호 함께 넘김 */
   handleEdit: (author: string, no: number) => void;
 }
 
-const NoticeTable: React.FC<NoticeTableProps> = ({
+const TermsTable: React.FC<TermsTableProps> = ({
   filteredData,
   handleEdit,
 }) => {
@@ -74,7 +74,7 @@ const NoticeTable: React.FC<NoticeTableProps> = ({
   );
 };
 
-export default NoticeTable;
+export default TermsTable;
 
 /* ====================== Styled Components ====================== */
 

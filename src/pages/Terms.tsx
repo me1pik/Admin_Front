@@ -1,88 +1,92 @@
-// src/pages/NoticeList.tsx
+// src/pages/TermsList.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // 작성자 클릭 시 상세이동
 import styled from 'styled-components';
-import NoticeTable, { NoticeItem } from '../components/Table/Setting/FAQTable';
+import TermsTable, { TermsItem } from '../components/Table/Setting/TermsTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
 import Pagination from '../components/Pagination';
 
-/** 공지사항 더미 데이터 */
-const dummyNotice: NoticeItem[] = [
+/** 이용약관 더미 데이터 */
+const dummyTerms: TermsItem[] = [
   {
-    no: 13485,
-    type: '공지',
-    content: '[공지] 새로운 시즌 신상품 할인안내 (2025 봄)',
-    author: '홍길동 매니저',
+    no: 13486,
+    type: '서비스 정책',
+    content: '제1장 - 총칙',
+    author: '홍길동 (등급1)',
     createdAt: '2025.04.01',
   },
   {
     no: 13486,
-    type: '공지',
-    content: '[공지] 시스템 정기 점검 안내 (4/15 ~ 4/16)',
-    author: '이영희 담당',
-    createdAt: '2025.04.02',
+    type: '서비스 정책',
+    content: '제2장 - 책임제한 사항',
+    author: '홍길동 (등급1)',
+    createdAt: '2025.04.01',
   },
   {
-    no: 13487,
-    type: '안내',
-    content: '[안내] 회원가입 이벤트 당첨자 발표',
-    author: '김민수 운영',
-    createdAt: '2025.04.03',
+    no: 13486,
+    type: '서비스 정책',
+    content: '제3장 - 서비스 제공 사항 (무엇무엇)',
+    author: '홍길동 (등급1)',
+    createdAt: '2025.04.01',
   },
   {
-    no: 13488,
-    type: '공지',
-    content: '[공지] 휴무일 배송 지연 공지',
-    author: '박민정 팀장',
-    createdAt: '2025.04.04',
+    no: 13486,
+    type: '서비스 정책',
+    content: '회사에서 제공하는 법적 서비스 사항',
+    author: '홍길동 (등급1)',
+    createdAt: '2025.04.01',
   },
   {
-    no: 13489,
-    type: '안내',
-    content: '[안내] 적립금 사용정책 변경 안내',
-    author: '허준 대리',
-    createdAt: '2025.04.05',
+    no: 13486,
+    type: '서비스 정책',
+    content: '회사에서 제공하는 법적 서비스 사항',
+    author: '홍길동 (등급1)',
+    createdAt: '2025.04.01',
+  },
+  // 6번, 7번도 홍길동으로 변경
+  {
+    no: 13486,
+    type: '서비스 정책',
+    content: '회사에서 제공하는 법적 서비스 사항',
+    author: '홍길동 (등급1)',
+    createdAt: '2025.04.01',
   },
   {
-    no: 13490,
-    type: '공지',
-    content: '[공지] 신규 브랜드 입점 예정 안내 (4월말)',
-    author: '최수영 매니저',
-    createdAt: '2025.04.06',
+    no: 13486,
+    type: '서비스 정책',
+    content: '회사에서 제공하는 법적 서비스 사항',
+    author: '홍길동 (등급1)',
+    createdAt: '2025.04.01',
   },
+  // 8번만 김민수
   {
-    no: 13491,
-    type: '안내',
-    content: '[안내] 리뷰 프로모션 (포토리뷰 작성 시 포인트 지급)',
-    author: '정아름 운영',
-    createdAt: '2025.04.07',
-  },
-  {
-    no: 13492,
-    type: '안내',
-    content: '[안내] 배송비 인상 안내 (물류비 상승)',
-    author: '김진호 담당',
-    createdAt: '2025.04.08',
+    no: 13486,
+    type: '서비스 정책',
+    content: '회사에서 제공하는 법적 서비스 사항',
+    author: '김민수 (등급2)',
+    createdAt: '2025.04.01',
   },
 ];
 
-/** 서브헤더 탭: 전체보기 / 공지 / 안내 */
+/** 서브헤더 탭: 전체보기 / 공지 / 안내 (프로젝트 특성에 따라 변경 가능) */
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
-  { label: '공지', path: '공지' },
-  { label: '안내', path: '안내' },
+  { label: '서비스 정책', path: '서비스 정책' },
+  { label: '판매정책', path: '판매정책' },
+  { label: '훼손정책', path: '훼손정책' },
 ];
 
-const NoticeList: React.FC = () => {
+const TermsList: React.FC = () => {
   const navigate = useNavigate(); // 작성자 클릭 시 라우팅
+
   // 검색 상태
   const [searchTerm, setSearchTerm] = useState('');
 
   // 현재 선택된 탭 상태
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
 
-  // 공지사항 목록
-  const [noticeData] = useState<NoticeItem[]>(dummyNotice);
+  // 이용약관 목록
+  const [TermsData] = useState<TermsItem[]>(dummyTerms);
 
   // 탭 변경 시
   const handleTabChange = (tab: TabItem) => {
@@ -91,9 +95,10 @@ const NoticeList: React.FC = () => {
   };
 
   // 탭 필터링 로직
-  const dataByTab = noticeData.filter((item) => {
+  const dataByTab = TermsData.filter((item) => {
     if (selectedTab.label === '전체보기') return true;
-    return item.type === selectedTab.label; // 공지 or 안내
+    // 공지 or 안내 등으로 필터링
+    return item.type === selectedTab.label;
   });
 
   // 검색 로직 (No, 구분, 내용, 작성자, 등록일 포함)
@@ -118,13 +123,12 @@ const NoticeList: React.FC = () => {
 
   /** 작성자 클릭 시 상세 페이지로 이동 */
   const handleAuthorClick = (author: string, no: number) => {
-    // 여기서 no (게시글 ID) 를 사용해 상세 페이지로 라우팅
-    navigate(`/noticeDetail/${no}`);
+    navigate(`/TermsDetail/${no}`);
   };
 
   return (
     <Content>
-      <HeaderTitle>공지사항</HeaderTitle>
+      <HeaderTitle>이용약관</HeaderTitle>
       <SubHeader
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -135,8 +139,8 @@ const NoticeList: React.FC = () => {
         <TotalCountText>Total: {totalCount}</TotalCountText>
       </InfoBar>
       <TableContainer>
-        {/* NoticeTable에서 작성자 클릭 시 handleAuthorClick 실행 */}
-        <NoticeTable
+        {/* TermsTable에서 작성자 클릭 시 handleAuthorClick 실행 */}
+        <TermsTable
           filteredData={currentPageData}
           handleEdit={handleAuthorClick}
         />
@@ -148,7 +152,7 @@ const NoticeList: React.FC = () => {
   );
 };
 
-export default NoticeList;
+export default TermsList;
 
 /* ====================== Styled Components ====================== */
 
