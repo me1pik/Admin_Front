@@ -18,11 +18,12 @@ import CalculateList from './pages/CalculateList';
 import BrandList from './pages/BrandList';
 import GeneralOrderDetail from './pages/GeneralOrderDetail';
 
+import Notice from './pages/Notice';
+
 // import AnalysisInfo from "./pages/AnalysisInfo";
 // import InventoryList from "./pages/InventoryList";
 // import StatisticsList from "./pages/StatisticsList";
 // import MarketOrderList from "./pages/MarketOrderList";
-// import Notice from "./pages/Notice";
 // import Terms from "./pages/Terms";
 // import Privacy from "./pages/Privacy";
 // import FAQ from "./pages/FAQ";
@@ -55,13 +56,13 @@ const App: React.FC = () => {
           <Route path='/brandlist' element={<BrandList />} />
           <Route path='/generalorderdetail' element={<GeneralOrderDetail />} />
 
+          <Route path='/notice' element={<Notice />} />
           {/* <Route path="/analysisinfo" element={<AnalysisInfo />} />
           <Route path="/inventorylist" element={<InventoryList />} />
           <Route path="/statisticslist" element={<StatisticsList />} />
           <Route path="/calculatelist" element={<CalculateList />} />
           <Route path="/marketorderlist" element={<MarketOrderList />} />
           
-          <Route path="/notice" element={<Notice />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/faq" element={<FAQ />} /> */}
