@@ -1,14 +1,15 @@
 // src/pages/UserDetail.tsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import ListButtonDetailSubHeader, {
+import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
-} from '../components/Header/ListButtonDetailSubHeader';
+} from '../components/Header/SettingsDetailSubHeader';
 import NoticeDetailTopBoxes from '../components/NoticeDetailTopBoxes';
 import ShippingTabBar from '../components/TabBar';
 import NoticeDetailTable, {
   NoticeDetailRow,
 } from '../components/Table/Setting/NoticeDetailTable';
+import ReusableModal2 from '../components/ReusableModal2';
 
 const dummyProducts = [{ no: 5 }];
 
@@ -24,26 +25,48 @@ const dummyNoticeDetail: NoticeDetailRow = {
 
 const NoticeDetail: React.FC = () => {
   const [activeTab, setActiveTab] = useState<number>(0);
-  // Pagination 관련 상태 및 로직 삭제
+
+  // 모달 관련 상태
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalMessage, setModalMessage] = useState('');
+
+  // 모달의 "네" 버튼 클릭 시 /notice로 이동
+  const handleModalConfirm = () => {
+    window.location.href = '/notice';
+  };
 
   /** 버튼 핸들러들 */
   const handleBackClick = () => {
     window.history.back();
   };
-  const handleEditClick = () => {
-    alert('정보가 수정되었습니다!');
+
+  // "변경저장" 버튼 클릭 시 (저장 동작 후 모달 띄움)
+  const handleSaveClick = () => {
+    // 여기서 변경내용 저장 로직 수행 (예: API 호출 등)
+    // 성공 시 모달 상태 업데이트
+    setModalTitle('변경 완료');
+    setModalMessage('변경 내용을 저장하시겠습니까?.');
+    setIsModalOpen(true);
   };
-  const handleEndClick = () => {
-    alert('종료 처리가 완료되었습니다!');
+
+  // "삭제" 버튼 클릭 시 (삭제 동작 후 모달 띄움)
+  const handleDeleteClick = () => {
+    // 여기서 공지사항 삭제 로직 수행 (예: API 호출 등)
+    // 성공 시 모달 상태 업데이트
+    setModalTitle('삭제 완료');
+    setModalMessage('공지사항을 삭제하시겠습니까?');
+    setIsModalOpen(true);
   };
 
   const detailSubHeaderProps: DetailSubHeaderProps = {
     backLabel: '목록이동',
     onBackClick: handleBackClick,
-    editLabel: '정보수정',
-    onEditClick: handleEditClick,
-    endLabel: '종료처리',
-    onEndClick: handleEndClick,
+    // 오른쪽 버튼 텍스트와 핸들러를 각각 "변경저장", "삭제"로 지정
+    editLabel: '변경저장',
+    onEditClick: handleSaveClick,
+    endLabel: '삭제',
+    onEndClick: handleDeleteClick,
   };
 
   // 탭 클릭 시 처리
@@ -70,7 +93,7 @@ const NoticeDetail: React.FC = () => {
         <Title>공지사항</Title>
       </HeaderRow>
 
-      <ListButtonDetailSubHeader {...detailSubHeaderProps} />
+      <SettingsDetailSubHeader {...detailSubHeaderProps} />
 
       <ProductNumberWrapper>
         <ProductNumberLabel>번호</ProductNumberLabel>
@@ -88,14 +111,21 @@ const NoticeDetail: React.FC = () => {
       />
 
       {renderTable()}
-      {/* Pagination 요소 제거 */}
+
+      {/* 모달 컴포넌트 */}
+      <ReusableModal2
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleModalConfirm}
+        title={modalTitle}
+      >
+        {modalMessage}
+      </ReusableModal2>
     </Container>
   );
 };
 
 export default NoticeDetail;
-
-/* ====================== Styled Components ====================== */
 
 const Container = styled.div`
   width: 100%;
