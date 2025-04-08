@@ -60,8 +60,15 @@ const TabButton = styled.button<TabButtonProps>`
   font-size: 12px;
   color: #000;
   cursor: pointer;
+  /* 탭 버튼이 하나인 경우 양쪽 끝 모두 8px, 아니라면 첫번째/마지막에만 적용 */
   border-radius: ${({ isFirst, isLast }) =>
-    isFirst ? '8px 0 0 0' : isLast ? '0 8px 0 0' : '0'};
+    isFirst && isLast
+      ? '8px 8px 0 0'
+      : isFirst
+        ? '8px 0 0 0'
+        : isLast
+          ? '0 8px 0 0'
+          : '0'};
   background-color: ${({ isActive }) => (isActive ? '#eeeeee' : '#ffffff')};
 
   &:hover {

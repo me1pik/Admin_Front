@@ -122,11 +122,11 @@ const Td = styled.td`
 /** 제목 Input */
 const InputBox = styled.input`
   ${commonFontStyles}
-  width: 98%;
+  width: 100%;
   height: 32px;
-  padding: 5px;
+  padding: 10px;
   border: 1px solid #dddddd;
-  margin: 5px 0;
+  margin: 10px 0;
   box-sizing: border-box;
 `;
 
@@ -135,7 +135,7 @@ const SelectBox = styled.select`
   ${commonFontStyles}
   width: 160px;
   height: 32px;
-  margin: 5px 0;
+  margin: 10px 0;
   border: 1px solid #000000;
   box-sizing: border-box;
 `;
@@ -143,10 +143,10 @@ const SelectBox = styled.select`
 /** 내용 TextArea */
 const TextArea = styled.textarea`
   ${commonFontStyles}
-  width: 98%;
+  width: 100%;
   min-height: 300px; /* 요청하신 최소 높이 1000px */
-  padding: 5px;
-  margin: 5px 0;
+  padding: 10px;
+  margin: 10px 0;
   border: 1px solid #dddddd;
   box-sizing: border-box;
   resize: none;

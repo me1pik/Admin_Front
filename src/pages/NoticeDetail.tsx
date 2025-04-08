@@ -1,4 +1,4 @@
-// src/pages/UserDetail.tsx (파일명은 예시입니다. 실제로는 NoticeDetail.tsx 등 원하는 이름 사용)
+// src/pages/UserDetail.tsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import ListButtonDetailSubHeader, {
@@ -9,14 +9,13 @@ import ShippingTabBar from '../components/TabBar';
 import NoticeDetailTable, {
   NoticeDetailRow,
 } from '../components/Table/Setting/NoticeDetailTable';
-import Pagination from '../components/Pagination';
 
 const dummyProducts = [{ no: 5 }];
 
 // 탭 목록 (상세내용만 1개)
 const tabs = ['상세내용'];
 
-/** 노티스 상세내용 더미 데이터 (이미지에 맞춰 구성) */
+/** 노티스 상세내용 더미 데이터 */
 const dummyNoticeDetail: NoticeDetailRow = {
   title: '회사에서 제공하는 판매 서비스 사항',
   category: '개인정보처리방침',
@@ -25,8 +24,7 @@ const dummyNoticeDetail: NoticeDetailRow = {
 
 const NoticeDetail: React.FC = () => {
   const [activeTab, setActiveTab] = useState<number>(0);
-  const [page, setPage] = useState(1);
-  const pageSize = 10;
+  // Pagination 관련 상태 및 로직 삭제
 
   /** 버튼 핸들러들 */
   const handleBackClick = () => {
@@ -48,22 +46,18 @@ const NoticeDetail: React.FC = () => {
     onEndClick: handleEndClick,
   };
 
-  // 탭 클릭 시 페이지를 1로 초기화 (여기서는 탭이 1개뿐이므로 의미는 적음)
+  // 탭 클릭 시 처리
   const handleTabClick = (index: number) => {
     setActiveTab(index);
-    setPage(1);
   };
 
   // 실제 데이터 (현재는 dummy 한 개만)
   const noticeDetailData = [dummyNoticeDetail];
 
-  // 페이지네이션 계산 (현재 탭이 1개뿐이라 사실상 의미 없음)
-  const totalPages = 1; // 여기서는 1
   // renderTable
   const renderTable = () => {
     switch (activeTab) {
       case 0:
-        // NoticeDetailTable에 배열로 넘겨주되, 1개 아이템만
         return <NoticeDetailTable data={noticeDetailData} />;
       default:
         return null;
@@ -94,10 +88,7 @@ const NoticeDetail: React.FC = () => {
       />
 
       {renderTable()}
-
-      <FooterRow>
-        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
-      </FooterRow>
+      {/* Pagination 요소 제거 */}
     </Container>
   );
 };
@@ -155,10 +146,4 @@ const MiddleDivider = styled.hr`
   border: 0;
   border-top: 1px dashed #dddddd;
   margin: 30px 0;
-`;
-const FooterRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 40px;
 `;
