@@ -16,6 +16,7 @@ import ProductEvaluation from './pages/ProductEvaluation';
 import DetailsSales from './pages/DetailsSales';
 import CalculateList from './pages/CalculateList';
 import BrandList from './pages/BrandList';
+import GeneralOrderDetail from './pages/GeneralOrderDetail';
 
 // import AnalysisInfo from "./pages/AnalysisInfo";
 // import InventoryList from "./pages/InventoryList";
@@ -52,6 +53,8 @@ const App: React.FC = () => {
           <Route path='/productregister' element={<ProductRegister />} />
           <Route path='/productdetail/:no' element={<ProductDetail />} />
           <Route path='/brandlist' element={<BrandList />} />
+          <Route path='/generalorderdetail' element={<GeneralOrderDetail />} />
+
           {/* <Route path="/analysisinfo" element={<AnalysisInfo />} />
           <Route path="/inventorylist" element={<InventoryList />} />
           <Route path="/statisticslist" element={<StatisticsList />} />
