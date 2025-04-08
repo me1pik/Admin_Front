@@ -46,7 +46,7 @@ const NoticeDetail: React.FC = () => {
     // 여기서 변경내용 저장 로직 수행 (예: API 호출 등)
     // 성공 시 모달 상태 업데이트
     setModalTitle('변경 완료');
-    setModalMessage('변경 내용을 저장하시겠습니까?.');
+    setModalMessage('변경 내용을 저장하시겠습니까?');
     setIsModalOpen(true);
   };
 
@@ -62,7 +62,7 @@ const NoticeDetail: React.FC = () => {
   const detailSubHeaderProps: DetailSubHeaderProps = {
     backLabel: '목록이동',
     onBackClick: handleBackClick,
-    // 오른쪽 버튼 텍스트와 핸들러를 각각 "변경저장", "삭제"로 지정
+    // 오른쪽 버튼의 텍스트와 동작을 각각 "변경저장", "삭제"로 지정
     editLabel: '변경저장',
     onEditClick: handleSaveClick,
     endLabel: '삭제',
@@ -77,7 +77,7 @@ const NoticeDetail: React.FC = () => {
   // 실제 데이터 (현재는 dummy 한 개만)
   const noticeDetailData = [dummyNoticeDetail];
 
-  // renderTable
+  // renderTable: 수정 가능하도록 한 NoticeDetailTable 사용
   const renderTable = () => {
     switch (activeTab) {
       case 0:

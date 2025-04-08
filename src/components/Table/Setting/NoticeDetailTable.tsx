@@ -1,25 +1,52 @@
 // src/components/Table/Setting/NoticeDetailTable.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 /** 노티스 디테일에 필요한 필드 (제목, 구분, 내용) */
 export interface NoticeDetailRow {
-  title: string; // 제목
-  category: string; // 구분 (예: "개인정보처리방침", "공지", "안내" 등)
-  content: string; // 내용 (여러 줄)
+  title: string;
+  category: string;
+  content: string;
 }
 
-/** Props: 배열 형태로 받되, 실제론 1개의 데이터만 사용한다고 가정 */
+/** Props: 배열 형태로 받되 실제론 1개의 데이터만 사용한다고 가정 */
 interface NoticeDetailTableProps {
   data: NoticeDetailRow[];
+  onChange?: (row: NoticeDetailRow) => void;
 }
 
-const NoticeDetailTable: React.FC<NoticeDetailTableProps> = ({ data }) => {
-  // 첫 번째 아이템만 표시 (없으면 빈 문자열로 처리)
-  const row = data[0] ?? {
-    title: '',
-    category: '',
-    content: '',
+const NoticeDetailTable: React.FC<NoticeDetailTableProps> = ({
+  data,
+  onChange,
+}) => {
+  // 최초 값은 props의 첫번째 데이터
+  const [row, setRow] = useState<NoticeDetailRow>(
+    data[0] ?? { title: '', category: '', content: '' }
+  );
+
+  // 외부 데이터 변경 시 업데이트 (선택 사항)
+  useEffect(() => {
+    if (data[0]) {
+      setRow(data[0]);
+    }
+  }, [data]);
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const updatedRow = { ...row, title: e.target.value };
+    setRow(updatedRow);
+    if (onChange) onChange(updatedRow);
+  };
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const updatedRow = { ...row, category: e.target.value };
+    setRow(updatedRow);
+    if (onChange) onChange(updatedRow);
+  };
+
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const updatedRow = { ...row, content: e.target.value };
+    setRow(updatedRow);
+    if (onChange) onChange(updatedRow);
   };
 
   return (
@@ -30,7 +57,11 @@ const NoticeDetailTable: React.FC<NoticeDetailTableProps> = ({ data }) => {
           <TableRow>
             <Th>제목</Th>
             <Td>
-              <InputBox type='text' value={row.title} readOnly />
+              <InputBox
+                type='text'
+                value={row.title}
+                onChange={handleTitleChange}
+              />
             </Td>
           </TableRow>
 
@@ -38,11 +69,11 @@ const NoticeDetailTable: React.FC<NoticeDetailTableProps> = ({ data }) => {
           <TableRow>
             <Th>구분</Th>
             <Td>
-              <SelectBox value={row.category} disabled>
-                <option value='개인정보처리방침'>개인정보처리방침</option>
-                <option value='공지'>공지</option>
-                <option value='안내'>안내</option>
-                {/* 필요한 옵션은 자유롭게 추가 */}
+              <SelectBox value={row.category} onChange={handleCategoryChange}>
+                <Option value='개인정보처리방침'>개인정보처리방침</Option>
+                <Option value='공지'>공지</Option>
+                <Option value='안내'>안내</Option>
+                {/* 추가 옵션 가능 */}
               </SelectBox>
             </Td>
           </TableRow>
@@ -51,7 +82,7 @@ const NoticeDetailTable: React.FC<NoticeDetailTableProps> = ({ data }) => {
           <TableRow>
             <Th>내용</Th>
             <Td>
-              <TextArea value={row.content} readOnly />
+              <TextArea value={row.content} onChange={handleContentChange} />
             </Td>
           </TableRow>
         </tbody>
@@ -66,45 +97,37 @@ export default NoticeDetailTable;
 
 /** 공통 폰트 스타일 */
 const commonFontStyles = `
-font-family: 'NanumSquare Neo OTF';
-font-style: normal;
-font-weight: 400;
-font-size: 12px;
-line-height: 23px;
-
-color: #000000;
+  font-family: 'NanumSquare Neo OTF';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 23px;
+  color: #000000;
 `;
 
-/** 컨테이너: 테두리와 패딩으로 테이블 둘레를 감싸며, 내부는 별도의 테두리 없음 */
 const TableContainer = styled.div`
   width: 100%;
-  min-width: 1000px; /* 필요에 따라 조정 */
+  min-width: 1000px;
   box-sizing: border-box;
-
-  /* 외곽 테두리 */
   border: 1px solid #dddddd;
   border-radius: 4px;
 `;
 
 const StyledTable = styled.table`
   width: 100%;
-  border-collapse: collapse; /* 또는 separate + border-spacing: 0; */
+  border-collapse: collapse;
   background-color: #ffffff;
-  ${commonFontStyles}/* 폰트 스타일 전체 적용 */
+  ${commonFontStyles}
 `;
 
 const TableRow = styled.tr`
-  /* 각 행 사이에만 선을 보이도록 */
   border-bottom: 1px solid #dddddd;
-
-  /* 마지막 행의 선 제거 */
   &:last-child {
     border-bottom: none;
   }
 `;
 
 const Th = styled.th`
-  /* 개별 셀 테두리는 없앰 */
   border: none;
   text-align: left;
   padding: 0 20px;
@@ -140,11 +163,21 @@ const SelectBox = styled.select`
   box-sizing: border-box;
 `;
 
+/** 옵션 텍스트에만 적용할 스타일 */
+const Option = styled.option`
+  font-family: 'NanumSquare Neo OTF';
+  font-style: normal;
+  font-weight: 800;
+  font-size: 12px;
+  line-height: 13px;
+  color: #000000;
+`;
+
 /** 내용 TextArea */
 const TextArea = styled.textarea`
   ${commonFontStyles}
   width: 100%;
-  min-height: 300px; /* 요청하신 최소 높이 1000px */
+  min-height: 300px;
   padding: 10px;
   margin: 10px 0;
   border: 1px solid #dddddd;
