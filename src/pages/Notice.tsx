@@ -2,7 +2,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // 작성자 클릭 시 상세이동
 import styled from 'styled-components';
-import NoticeTable, { NoticeItem } from '../components/Table/Setting/FAQTable';
+import NoticeTable, {
+  NoticeItem,
+} from '../components/Table/Setting/NoticeTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
 import Pagination from '../components/Pagination';
 
