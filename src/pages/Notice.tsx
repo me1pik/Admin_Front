@@ -1,4 +1,6 @@
+// src/pages/NoticeList.tsx
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // 작성자 클릭 시 상세이동
 import styled from 'styled-components';
 import NoticeTable, { NoticeItem } from '../components/Table/NoticeTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
@@ -72,6 +74,7 @@ const tabs: TabItem[] = [
 ];
 
 const NoticeList: React.FC = () => {
+  const navigate = useNavigate(); // 작성자 클릭 시 라우팅
   // 검색 상태
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -93,7 +96,7 @@ const NoticeList: React.FC = () => {
     return item.type === selectedTab.label; // 공지 or 안내
   });
 
-  // 검색 로직 (No, 구분, 내용, 작성자, 등록일을 포함)
+  // 검색 로직 (No, 구분, 내용, 작성자, 등록일 포함)
   const filteredData = dataByTab.filter((item) => {
     const lowerTerm = searchTerm.toLowerCase();
     return (
@@ -113,9 +116,10 @@ const NoticeList: React.FC = () => {
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  // 작성자 클릭 시 이벤트 (예시)
-  const handleEdit = (author: string) => {
-    alert(`작성자(${author}) 클릭됨`);
+  /** 작성자 클릭 시 상세 페이지로 이동 */
+  const handleAuthorClick = (author: string, no: number) => {
+    // 여기서 no (게시글 ID) 를 사용해 상세 페이지로 라우팅
+    navigate(`/noticeDetail/${no}`);
   };
 
   return (
@@ -131,7 +135,11 @@ const NoticeList: React.FC = () => {
         <TotalCountText>Total: {totalCount}</TotalCountText>
       </InfoBar>
       <TableContainer>
-        <NoticeTable filteredData={currentPageData} handleEdit={handleEdit} />
+        {/* NoticeTable에서 작성자 클릭 시 handleAuthorClick 실행 */}
+        <NoticeTable
+          filteredData={currentPageData}
+          handleEdit={handleAuthorClick}
+        />
       </TableContainer>
       <FooterRow>
         <Pagination page={page} setPage={setPage} totalPages={totalPages} />

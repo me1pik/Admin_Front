@@ -1,9 +1,10 @@
+// src/components/Table/NoticeTable.tsx
 import React from 'react';
 import styled from 'styled-components';
 
 /** 공지사항 아이템 인터페이스 */
 export interface NoticeItem {
-  no: number; // No.
+  no: number; // 게시글 번호
   type: string; // 구분 (공지 / 안내)
   content: string; // 내용
   author: string; // 작성자
@@ -13,13 +14,17 @@ export interface NoticeItem {
 /** NoticeTable Props */
 interface NoticeTableProps {
   filteredData: NoticeItem[];
-  handleEdit: (author: string) => void; // 작성자 클릭 시 이벤트
+  /** 작성자 클릭 시 이벤트: 작성자명, 게시글 번호 함께 넘김 */
+  handleEdit: (author: string, no: number) => void;
 }
 
 const NoticeTable: React.FC<NoticeTableProps> = ({
   filteredData,
   handleEdit,
 }) => {
+  // 10행 고정
+  const emptyRowsCount = Math.max(0, 10 - filteredData.length);
+
   return (
     <Table>
       <colgroup>
@@ -44,24 +49,26 @@ const NoticeTable: React.FC<NoticeTableProps> = ({
             <Td>{item.no}</Td>
             <Td>{item.type}</Td>
             <TdLeft>{item.content}</TdLeft>
-            {/* 작성자 셀 클릭 이벤트 */}
-            <Td onClick={() => handleEdit(item.author)}>
-              <AuthorText>{item.author}</AuthorText>
+            {/* 작성자 클릭: handleEdit(author, no) */}
+            <Td
+              onClick={() => handleEdit(item.author, item.no)}
+              style={{ cursor: 'pointer', color: '#007bff' }}
+            >
+              {item.author}
             </Td>
             <Td>{item.createdAt}</Td>
           </TableRow>
         ))}
-        {/* 빈 행 렌더링 (10줄 고정) */}
-        {filteredData.length < 10 &&
-          Array.from({ length: 10 - filteredData.length }).map((_, i) => (
-            <TableRow key={`empty-${i}`}>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <TdLeft>&nbsp;</TdLeft>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-            </TableRow>
-          ))}
+        {/* 빈행 처리 */}
+        {Array.from({ length: emptyRowsCount }).map((_, i) => (
+          <TableRow key={`empty-${i}`}>
+            <Td>&nbsp;</Td>
+            <Td>&nbsp;</Td>
+            <TdLeft>&nbsp;</TdLeft>
+            <Td>&nbsp;</Td>
+            <Td>&nbsp;</Td>
+          </TableRow>
+        ))}
       </tbody>
     </Table>
   );
@@ -106,21 +113,10 @@ const Td = styled.td`
   white-space: nowrap;
 `;
 
-/** 내용(가변폭) 셀: 왼쪽 정렬 */
 const TdLeft = styled(Td)`
   text-align: left;
   padding-left: 8px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-`;
-
-/** 작성자 텍스트 (클릭 시 이벤트) */
-const AuthorText = styled.span`
-  font-size: 12px;
-  cursor: pointer;
-  color: #007bff;
-  &:hover {
-    color: #0056b3;
-  }
 `;

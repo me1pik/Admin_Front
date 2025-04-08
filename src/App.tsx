@@ -19,7 +19,7 @@ import BrandList from './pages/BrandList';
 import GeneralOrderDetail from './pages/GeneralOrderDetail';
 
 import Notice from './pages/Notice';
-
+import NoticeDetail from './pages/NoticeDetail';
 // import AnalysisInfo from "./pages/AnalysisInfo";
 // import InventoryList from "./pages/InventoryList";
 // import StatisticsList from "./pages/StatisticsList";
@@ -45,18 +45,16 @@ const App: React.FC = () => {
           <Route path='/product-evaluation' element={<ProductEvaluation />} />
           <Route path='/details-sales' element={<DetailsSales />} />
           <Route path='/calculatelist' element={<CalculateList />} />
-
           <Route path='/userdetail/:no' element={<UserDetail />} />
           <Route path='/orderlist' element={<OrderList />} />
           <Route path='/monitoring' element={<Monitoring />} />
           <Route path='/productlist' element={<ProductList />} />
-
           <Route path='/productregister' element={<ProductRegister />} />
           <Route path='/productdetail/:no' element={<ProductDetail />} />
           <Route path='/brandlist' element={<BrandList />} />
           <Route path='/generalorderdetail' element={<GeneralOrderDetail />} />
-
-          <Route path='/notice' element={<Notice />} />
+          <Route path='/notice' element={<Notice />} />{' '}
+          <Route path='/noticeDetail/:no' element={<NoticeDetail />} />
           {/* <Route path="/analysisinfo" element={<AnalysisInfo />} />
           <Route path="/inventorylist" element={<InventoryList />} />
           <Route path="/statisticslist" element={<StatisticsList />} />
