@@ -67,7 +67,7 @@ const PrivacyList: React.FC = () => {
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  const handleAuthorClick = (author: string, no: number) => {
+  const handleAuthorClick = (_author: string, no: number) => {
     navigate(`/settingsDetail/${no}`, {
       state: { selectOptions: privacySelectOptions },
     });

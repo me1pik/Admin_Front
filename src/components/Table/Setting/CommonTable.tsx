@@ -1,4 +1,3 @@
-import React from 'react';
 import styled from 'styled-components';
 
 /** 모든 테이블 아이템이 가져야 할 공통 필드 */

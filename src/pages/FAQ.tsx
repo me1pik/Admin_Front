@@ -117,7 +117,8 @@ const FAQList: React.FC = () => {
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  const handleAuthorClick = (author: string, no: number) => {
+  const handleAuthorClick = (_author: string, no: number) => {
+    // _author는 의도적으로 사용하지 않음
     navigate(`/settingsDetail/${no}`, {
       state: { selectOptions: faqSelectOptions },
     });
