@@ -1,30 +1,30 @@
-// src/components/Table/Setting/NoticeDetailTable.tsx
+// src/components/Table/Setting/SettingsDetailTable.tsx
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { TabItem } from '../../Header/SearchSubHeader';
 
-/** 노티스 디테일에 필요한 필드 (제목, 구분, 내용) */
-export interface NoticeDetailRow {
+export interface SettingsDetailRow {
   title: string;
   category: string;
   content: string;
 }
 
-/** Props: 배열 형태로 받되 실제론 1개의 데이터만 사용한다고 가정 */
-interface NoticeDetailTableProps {
-  data: NoticeDetailRow[];
-  onChange?: (row: NoticeDetailRow) => void;
+interface SettingsDetailTableProps {
+  data: SettingsDetailRow[];
+  onChange?: (row: SettingsDetailRow) => void;
+  // 부모에서 전달받은 TabItem 배열을 통해 SelectBox 옵션 구성 (프롭스로 반드시 전달)
+  selectOptions: TabItem[];
 }
 
-const NoticeDetailTable: React.FC<NoticeDetailTableProps> = ({
+const SettingsDetailTable: React.FC<SettingsDetailTableProps> = ({
   data,
   onChange,
+  selectOptions,
 }) => {
-  // 최초 값은 props의 첫번째 데이터
-  const [row, setRow] = useState<NoticeDetailRow>(
+  const [row, setRow] = useState<SettingsDetailRow>(
     data[0] ?? { title: '', category: '', content: '' }
   );
 
-  // 외부 데이터 변경 시 업데이트 (선택 사항)
   useEffect(() => {
     if (data[0]) {
       setRow(data[0]);
@@ -65,15 +65,16 @@ const NoticeDetailTable: React.FC<NoticeDetailTableProps> = ({
             </Td>
           </TableRow>
 
-          {/* 2) 구분 */}
+          {/* 2) 구분 - 부모에서 전달받은 selectOptions 사용 */}
           <TableRow>
             <Th>구분</Th>
             <Td>
               <SelectBox value={row.category} onChange={handleCategoryChange}>
-                <Option value='개인정보처리방침'>개인정보처리방침</Option>
-                <Option value='공지'>공지</Option>
-                <Option value='안내'>안내</Option>
-                {/* 추가 옵션 가능 */}
+                {selectOptions.map((option) => (
+                  <Option key={option.label} value={option.label}>
+                    {option.label}
+                  </Option>
+                ))}
               </SelectBox>
             </Td>
           </TableRow>
@@ -91,19 +92,9 @@ const NoticeDetailTable: React.FC<NoticeDetailTableProps> = ({
   );
 };
 
-export default NoticeDetailTable;
+export default SettingsDetailTable;
 
 /* ====================== Styled Components ====================== */
-
-/** 공통 폰트 스타일 */
-const commonFontStyles = `
-  font-family: 'NanumSquare Neo OTF';
-  font-style: normal;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 23px;
-  color: #000000;
-`;
 
 const TableContainer = styled.div`
   width: 100%;
@@ -117,7 +108,10 @@ const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   background-color: #ffffff;
-  ${commonFontStyles}
+  font-family: 'NanumSquare Neo OTF';
+  font-size: 12px;
+  line-height: 23px;
+  color: #000000;
 `;
 
 const TableRow = styled.tr`
@@ -128,8 +122,6 @@ const TableRow = styled.tr`
 `;
 
 const Th = styled.th`
-  border: none;
-  text-align: left;
   padding: 0 20px;
   white-space: nowrap;
   font-weight: 800;
@@ -137,14 +129,11 @@ const Th = styled.th`
 `;
 
 const Td = styled.td`
-  border: none;
   padding: 0 10px;
   vertical-align: middle;
 `;
 
-/** 제목 Input */
 const InputBox = styled.input`
-  ${commonFontStyles}
   width: 100%;
   height: 32px;
   padding: 10px;
@@ -153,9 +142,7 @@ const InputBox = styled.input`
   box-sizing: border-box;
 `;
 
-/** 구분 Select */
 const SelectBox = styled.select`
-  ${commonFontStyles}
   width: 160px;
   height: 32px;
   margin: 10px 0;
@@ -163,19 +150,14 @@ const SelectBox = styled.select`
   box-sizing: border-box;
 `;
 
-/** 옵션 텍스트에만 적용할 스타일 */
 const Option = styled.option`
-  font-family: 'NanumSquare Neo OTF';
-  font-style: normal;
   font-weight: 800;
   font-size: 12px;
   line-height: 13px;
   color: #000000;
 `;
 
-/** 내용 TextArea */
 const TextArea = styled.textarea`
-  ${commonFontStyles}
   width: 100%;
   min-height: 300px;
   padding: 10px;

@@ -1,59 +1,60 @@
-// src/pages/UserDetail.tsx
+// src/pages/SettingsDetail.tsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { useLocation, useNavigate } from 'react-router-dom';
 import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../components/Header/SettingsDetailSubHeader';
-import NoticeDetailTopBoxes from '../components/NoticeDetailTopBoxes';
+import SettingsDetailTopBoxes from '../components/SettingsDetailTopBoxes';
 import ShippingTabBar from '../components/TabBar';
-import NoticeDetailTable, {
-  NoticeDetailRow,
-} from '../components/Table/Setting/NoticeDetailTable';
+import SettingsDetailTable, {
+  SettingsDetailRow,
+} from '../components/Table/Setting/SettingsDetailTable';
 import ReusableModal2 from '../components/ReusableModal2';
+import { TabItem } from '../components/Header/SearchSubHeader';
 
-const dummyProducts = [{ no: 5 }];
+const SettingsDetail: React.FC = () => {
+  // useLocation 훅은 컴포넌트 내부에서 호출합니다.
+  const location = useLocation() as { state?: { selectOptions: TabItem[] } };
+  const selectOptions: TabItem[] = location.state?.selectOptions || [];
 
-// 탭 목록 (상세내용만 1개)
-const tabs = ['상세내용'];
+  // useNavigate 훅을 사용하여 이전 경로로 돌아갈 수 있도록 합니다.
+  const navigate = useNavigate();
 
-/** 노티스 상세내용 더미 데이터 */
-const dummyNoticeDetail: NoticeDetailRow = {
-  title: '회사에서 제공하는 판매 서비스 사항',
-  category: '개인정보처리방침',
-  content: `본 약관은 주식회사 스타일윅스(이하 “회사”라 합니다.)가 제공하는 의류 및 잡화(이하 “제품”이라 합니다.) 대여 및 전자상거래에 관한 온/오프라인상의 제반 서비스(이하 “서비스”라 합니다.)를 이용함에 있어 회사와 회원의 권리와 의무에 대한 책임사항을 규정함을 목적으로 합니다..`,
-};
+  // ShippingTabBar는 string[] 타입의 탭 목록을 요구하므로, label 값 배열을 사용합니다.
+  const shippingTabs: string[] = ['상세내용'];
 
-const NoticeDetail: React.FC = () => {
+  const dummyProducts = [{ no: 5 }];
+  const dummySettingsDetail: SettingsDetailRow = {
+    title: '회사에서 제공하는 판매 서비스 사항',
+    category: '개인정보처리방침',
+    content: `본 약관은 주식회사 스타일윅스(이하 “회사”라 합니다.)가 제공하는 의류 및 잡화(이하 “제품”이라 합니다.) 대여 및 전자상거래에 관한 온/오프라인상의 제반 서비스(이하 “서비스”라 합니다.)를 이용함에 있어 회사와 회원의 권리와 의무에 대한 책임사항을 규정함을 목적으로 합니다.`,
+  };
+
   const [activeTab, setActiveTab] = useState<number>(0);
-
-  // 모달 관련 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
   const [modalMessage, setModalMessage] = useState('');
 
-  // 모달의 "네" 버튼 클릭 시 /notice로 이동
+  // "네" 버튼 클릭 시 이전 경로로 이동하도록 수정 (navigate(-1))
   const handleModalConfirm = () => {
-    window.location.href = '/notice';
+    navigate(-1);
   };
 
-  /** 버튼 핸들러들 */
+  /** 각 버튼 핸들러 */
   const handleBackClick = () => {
     window.history.back();
   };
 
-  // "변경저장" 버튼 클릭 시 (저장 동작 후 모달 띄움)
   const handleSaveClick = () => {
-    // 여기서 변경내용 저장 로직 수행 (예: API 호출 등)
-    // 성공 시 모달 상태 업데이트
+    // 변경내용 저장 로직 (예: API 호출) 후 모달 띄우기
     setModalTitle('변경 완료');
     setModalMessage('변경 내용을 저장하시겠습니까?');
     setIsModalOpen(true);
   };
 
-  // "삭제" 버튼 클릭 시 (삭제 동작 후 모달 띄움)
   const handleDeleteClick = () => {
-    // 여기서 공지사항 삭제 로직 수행 (예: API 호출 등)
-    // 성공 시 모달 상태 업데이트
+    // 삭제 로직 (예: API 호출) 후 모달 띄우기
     setModalTitle('삭제 완료');
     setModalMessage('공지사항을 삭제하시겠습니까?');
     setIsModalOpen(true);
@@ -62,26 +63,30 @@ const NoticeDetail: React.FC = () => {
   const detailSubHeaderProps: DetailSubHeaderProps = {
     backLabel: '목록이동',
     onBackClick: handleBackClick,
-    // 오른쪽 버튼의 텍스트와 동작을 각각 "변경저장", "삭제"로 지정
     editLabel: '변경저장',
     onEditClick: handleSaveClick,
     endLabel: '삭제',
     onEndClick: handleDeleteClick,
   };
 
-  // 탭 클릭 시 처리
+  // 탭 클릭 시 activeTab 업데이트
   const handleTabClick = (index: number) => {
     setActiveTab(index);
   };
 
-  // 실제 데이터 (현재는 dummy 한 개만)
-  const noticeDetailData = [dummyNoticeDetail];
+  // 실제 데이터 배열 (현재 dummy 데이터 한 개)
+  const SettingsDetailData = [dummySettingsDetail];
 
-  // renderTable: 수정 가능하도록 한 NoticeDetailTable 사용
+  // activeTab에 따라 다른 테이블을 렌더링 (현재는 단일 테이블만)
   const renderTable = () => {
     switch (activeTab) {
       case 0:
-        return <NoticeDetailTable data={noticeDetailData} />;
+        return (
+          <SettingsDetailTable
+            data={SettingsDetailData}
+            selectOptions={selectOptions}
+          />
+        );
       default:
         return null;
     }
@@ -100,12 +105,12 @@ const NoticeDetail: React.FC = () => {
         <ProductNumberValue>{dummyProducts[0].no}</ProductNumberValue>
       </ProductNumberWrapper>
 
-      <NoticeDetailTopBoxes />
+      <SettingsDetailTopBoxes />
 
       <MiddleDivider />
 
       <ShippingTabBar
-        tabs={tabs}
+        tabs={shippingTabs} // string[] 타입 전달
         activeIndex={activeTab}
         onTabClick={handleTabClick}
       />
@@ -125,8 +130,9 @@ const NoticeDetail: React.FC = () => {
   );
 };
 
-export default NoticeDetail;
+export default SettingsDetail;
 
+/* ====================== Styled Components ====================== */
 const Container = styled.div`
   width: 100%;
   margin: 0 auto;

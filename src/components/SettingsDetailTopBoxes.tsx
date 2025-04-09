@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import userDetailImg2 from '../assets/userDetailImg2.svg';
 // import userDetailImg3 from '../assets/userDetailImg3.svg';
 
-const AdminDetailTopBoxes: React.FC = () => {
+const SettingsDetailTopBoxes: React.FC = () => {
   return (
     <Container>
       <BoxWrapper>
@@ -36,7 +36,7 @@ const AdminDetailTopBoxes: React.FC = () => {
   );
 };
 
-export default AdminDetailTopBoxes;
+export default SettingsDetailTopBoxes;
 
 /* ======================= Styled Components ======================= */
 

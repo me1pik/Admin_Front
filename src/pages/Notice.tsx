@@ -1,6 +1,6 @@
 // src/pages/NoticeList.tsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // 작성자 클릭 시 상세이동
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import NoticeTable, {
   NoticeItem,
@@ -68,37 +68,34 @@ const dummyNotice: NoticeItem[] = [
   },
 ];
 
-/** 서브헤더 탭: 전체보기 / 공지 / 안내 */
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
   { label: '공지', path: '공지' },
   { label: '안내', path: '안내' },
 ];
 
+// Notice용 selectOptions
+const noticeSelectOptions: TabItem[] = [
+  { label: '공지', path: '' },
+  { label: '안내', path: '' },
+];
+
 const NoticeList: React.FC = () => {
-  const navigate = useNavigate(); // 작성자 클릭 시 라우팅
-  // 검색 상태
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-
-  // 현재 선택된 탭 상태
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-
-  // 공지사항 목록
   const [noticeData] = useState<NoticeItem[]>(dummyNotice);
 
-  // 탭 변경 시
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
     setPage(1);
   };
 
-  // 탭 필터링 로직
   const dataByTab = noticeData.filter((item) => {
     if (selectedTab.label === '전체보기') return true;
-    return item.type === selectedTab.label; // 공지 or 안내
+    return item.type === selectedTab.label;
   });
 
-  // 검색 로직 (No, 구분, 내용, 작성자, 등록일 포함)
   const filteredData = dataByTab.filter((item) => {
     const lowerTerm = searchTerm.toLowerCase();
     return (
@@ -110,7 +107,6 @@ const NoticeList: React.FC = () => {
     );
   });
 
-  // 페이지네이션 상태
   const [page, setPage] = useState(1);
   const limit = 10;
   const totalCount = filteredData.length;
@@ -118,10 +114,10 @@ const NoticeList: React.FC = () => {
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  /** 작성자 클릭 시 상세 페이지로 이동 */
   const handleAuthorClick = (author: string, no: number) => {
-    // 여기서 no (게시글 ID) 를 사용해 상세 페이지로 라우팅
-    navigate(`/noticeDetail/${no}`);
+    navigate(`/settingsDetail/${no}`, {
+      state: { selectOptions: noticeSelectOptions },
+    });
   };
 
   return (
@@ -137,7 +133,6 @@ const NoticeList: React.FC = () => {
         <TotalCountText>Total: {totalCount}</TotalCountText>
       </InfoBar>
       <TableContainer>
-        {/* NoticeTable에서 작성자 클릭 시 handleAuthorClick 실행 */}
         <NoticeTable
           filteredData={currentPageData}
           handleEdit={handleAuthorClick}
@@ -153,7 +148,6 @@ const NoticeList: React.FC = () => {
 export default NoticeList;
 
 /* ====================== Styled Components ====================== */
-
 const Content = styled.div`
   display: flex;
   flex-direction: column;
