@@ -13,11 +13,10 @@ import FabricInfoSection from '../components/productregister/FabricInfoSection';
 import ProductImageSection from '../components/productregister/ProductImageSection';
 import DetailTopBoxes from '../components/DetailTopBoxes';
 
-// 더미 데이터에서 번호를 가져오기 (예시로 첫번째 제품의 번호 사용)
+// 더미 데이터 (예시: 첫 번째 제품 번호)
 const dummyProducts = [
   {
     no: 13486,
-    // 기타 필드 생략
   },
 ];
 
@@ -36,16 +35,16 @@ const ProductDetail: React.FC = () => {
     'https://via.placeholder.com/140x200?text=이미지9',
   ];
   const initialLinks: (string | null)[] = [
-    'https://dummy-link.com/썸네일',
-    'https://dummy-link.com/이미지1',
-    'https://dummy-link.com/이미지2',
-    'https://dummy-link.com/이미지3',
-    'https://dummy-link.com/이미지4',
-    'https://dummy-link.com/이미지5',
-    'https://dummy-link.com/이미지6',
-    'https://dummy-link.com/이미지7',
-    'https://dummy-link.com/이미지8',
-    'https://dummy-link.com/이미지9',
+    'https://썸네일',
+    'https:///이미지1',
+    'https:///이미지2',
+    'https:///이미지3',
+    'https:///이미지4',
+    'https:///이미지5',
+    'https:///이미지6',
+    'https:///이미지7',
+    'https:///이미지8',
+    'https:///이미지9',
   ];
   const [images, setImages] = useState<(string | null)[]>(initialImages);
   const [imageLinks, setImageLinks] = useState<(string | null)[]>(initialLinks);
@@ -94,28 +93,6 @@ const ProductDetail: React.FC = () => {
           newImages[index] = reader.result as string;
           return newImages;
         });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // 이미지 추가 핸들러 (빈 슬롯에 추가)
-  // 현재 모든 슬롯이 채워져 있으므로 실제 추가는 삭제 후 추가하는 방식으로 동작함
-  const handleImageAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files && e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const idx = images.findIndex((img) => img === null);
-        if (idx !== -1) {
-          setImages((prev) => {
-            const newImages = [...prev];
-            newImages[idx] = reader.result as string;
-            return newImages;
-          });
-        } else {
-          alert('최대 10개 이미지만 추가할 수 있습니다.');
-        }
       };
       reader.readAsDataURL(file);
     }
@@ -205,7 +182,6 @@ const ProductDetail: React.FC = () => {
           images={images}
           imageLinks={imageLinks}
           handleImageUpload={handleImageUpload}
-          handleImageAdd={handleImageAdd}
           handleImageDelete={handleImageDelete}
           handleImageLinkChange={handleImageLinkChange}
           handleImageReorder={handleImageReorder}

@@ -9,7 +9,6 @@ interface ProductImageSectionProps {
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
   ) => void;
-  handleImageAdd: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleImageDelete: (index: number) => void;
   handleImageLinkChange: (index: number, value: string) => void;
   handleImageReorder: (dragIndex: number, hoverIndex: number) => void;
@@ -20,7 +19,6 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
   images = new Array(10).fill(null),
   imageLinks = new Array(10).fill(''),
   handleImageUpload,
-  handleImageAdd,
   handleImageDelete,
   handleImageLinkChange,
   handleImageReorder,
@@ -281,7 +279,6 @@ const DeleteButton = styled.button`
   }
 `;
 
-// SlotAddButton: 각 슬롯 오른쪽 하단에 추가 버튼
 const SlotAddButton = styled.button`
   position: absolute;
   bottom: 4px;
