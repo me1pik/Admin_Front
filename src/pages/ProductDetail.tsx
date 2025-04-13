@@ -22,28 +22,46 @@ const dummyProducts = [
 ];
 
 const ProductDetail: React.FC = () => {
-  const [images, setImages] = useState<(string | null)[]>([
-    null,
-    null,
-    null,
-    null,
-  ]);
+  // 10개 이미지: 첫 번째는 썸네일, 나머지는 이미지1 ~ 이미지9 (임시 데이터)
+  const initialImages: (string | null)[] = [
+    'https://via.placeholder.com/140x200?text=썸네일',
+    'https://via.placeholder.com/140x200?text=이미지1',
+    'https://via.placeholder.com/140x200?text=이미지2',
+    'https://via.placeholder.com/140x200?text=이미지3',
+    'https://via.placeholder.com/140x200?text=이미지4',
+    'https://via.placeholder.com/140x200?text=이미지5',
+    'https://via.placeholder.com/140x200?text=이미지6',
+    'https://via.placeholder.com/140x200?text=이미지7',
+    'https://via.placeholder.com/140x200?text=이미지8',
+    'https://via.placeholder.com/140x200?text=이미지9',
+  ];
+  const initialLinks: (string | null)[] = [
+    'https://dummy-link.com/썸네일',
+    'https://dummy-link.com/이미지1',
+    'https://dummy-link.com/이미지2',
+    'https://dummy-link.com/이미지3',
+    'https://dummy-link.com/이미지4',
+    'https://dummy-link.com/이미지5',
+    'https://dummy-link.com/이미지6',
+    'https://dummy-link.com/이미지7',
+    'https://dummy-link.com/이미지8',
+    'https://dummy-link.com/이미지9',
+  ];
+  const [images, setImages] = useState<(string | null)[]>(initialImages);
+  const [imageLinks, setImageLinks] = useState<(string | null)[]>(initialLinks);
 
   /** 목록으로 버튼 클릭 시 */
   const handleBackClick = () => {
-    console.log('목록으로 버튼 클릭됨');
     window.history.back();
   };
 
   /** 정보수정 버튼 클릭 시 */
   const handleEditClick = () => {
-    console.log('정보수정 버튼 클릭 -> 정보 수정 로직 실행');
     alert('정보가 수정되었습니다!');
   };
 
   /** 종료처리 버튼 클릭 시 */
   const handleEndClick = () => {
-    console.log('종료처리 버튼 클릭 -> 종료 처리 로직 실행');
     alert('종료 처리가 완료되었습니다!');
   };
 
@@ -62,7 +80,7 @@ const ProductDetail: React.FC = () => {
     alert('제품 등록 완료!');
   };
 
-  // 이미지 업로드 핸들러
+  // 개별 슬롯 이미지 업로드 핸들러
   const handleImageUpload = (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
@@ -79,6 +97,67 @@ const ProductDetail: React.FC = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  // 이미지 추가 핸들러 (빈 슬롯에 추가)
+  // 현재 모든 슬롯이 채워져 있으므로 실제 추가는 삭제 후 추가하는 방식으로 동작함
+  const handleImageAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const idx = images.findIndex((img) => img === null);
+        if (idx !== -1) {
+          setImages((prev) => {
+            const newImages = [...prev];
+            newImages[idx] = reader.result as string;
+            return newImages;
+          });
+        } else {
+          alert('최대 10개 이미지만 추가할 수 있습니다.');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // 삭제 핸들러
+  const handleImageDelete = (index: number) => {
+    setImages((prev) => {
+      const newImages = [...prev];
+      newImages[index] = null;
+      return newImages;
+    });
+    setImageLinks((prev) => {
+      const newLinks = [...prev];
+      newLinks[index] = '';
+      return newLinks;
+    });
+  };
+
+  // 이미지 링크 변경 핸들러
+  const handleImageLinkChange = (index: number, value: string) => {
+    setImageLinks((prev) => {
+      const newLinks = [...prev];
+      newLinks[index] = value;
+      return newLinks;
+    });
+  };
+
+  // 드래그 앤 드롭 순서 변경 핸들러
+  const handleImageReorder = (dragIndex: number, hoverIndex: number) => {
+    setImages((prev) => {
+      const next = [...prev];
+      const [removed] = next.splice(dragIndex, 1);
+      next.splice(hoverIndex, 0, removed);
+      return next;
+    });
+    setImageLinks((prev) => {
+      const next = [...prev];
+      const [removed] = next.splice(dragIndex, 1);
+      next.splice(hoverIndex, 0, removed);
+      return next;
+    });
   };
 
   return (
@@ -124,7 +203,12 @@ const ProductDetail: React.FC = () => {
         {/* 5행: 제품 이미지 */}
         <ProductImageSection
           images={images}
+          imageLinks={imageLinks}
           handleImageUpload={handleImageUpload}
+          handleImageAdd={handleImageAdd}
+          handleImageDelete={handleImageDelete}
+          handleImageLinkChange={handleImageLinkChange}
+          handleImageReorder={handleImageReorder}
         />
 
         <BottomDivider />
@@ -135,7 +219,7 @@ const ProductDetail: React.FC = () => {
 
 export default ProductDetail;
 
-/* ====================== Styled Components ====================== */
+/* ================= Styled Components ====================== */
 
 const Container = styled.div`
   width: 100%;
@@ -157,7 +241,7 @@ const Title = styled.h1`
   font-weight: 700;
   font-size: 16px;
   line-height: 18px;
-  color: #000000;
+  color: #000;
 `;
 
 const ProductNumberWrapper = styled.div`
@@ -165,7 +249,6 @@ const ProductNumberWrapper = styled.div`
   align-items: baseline;
   gap: 5px;
   margin: 10px 0;
-
   margin-top: 34px;
 `;
 
@@ -173,25 +256,25 @@ const ProductNumberLabel = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 12px;
-  color: #000000;
+  color: #000;
 `;
 
 const ProductNumberValue = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
-  color: #000000;
+  color: #000;
 `;
 
 const MiddleDivider = styled.hr`
   border: 0;
-  border-top: 1px dashed #dddddd;
+  border-top: 1px dashed #ddd;
   margin: 30px 0;
 `;
 
 const BottomDivider = styled.hr`
   border: 0;
-  border-top: 1px solid #dddddd;
+  border-top: 1px solid #ddd;
   margin: 40px 0 20px;
 `;
 
