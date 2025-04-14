@@ -9,13 +9,14 @@ interface ProductImageSectionProps {
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
   ) => void;
+  // 부모에서 API 이미지 삭제까지 진행하도록 구현되어야 합니다.
   handleImageDelete: (index: number) => void;
   handleImageLinkChange: (index: number, value: string) => void;
+  // handleImageReorder는 부모에서 두 배열(이미지와 링크)을 동시에 재정렬하도록 구현되어야 합니다.
   handleImageReorder: (dragIndex: number, hoverIndex: number) => void;
 }
 
 const ProductImageSection: React.FC<ProductImageSectionProps> = ({
-  // 부모에서 전달한 값 사용, 없으면 10개 슬롯 생성
   images = new Array(10).fill(null),
   imageLinks = new Array(10).fill(''),
   handleImageUpload,
@@ -23,29 +24,31 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
   handleImageLinkChange,
   handleImageReorder,
 }) => {
-  // 이미지 레이블: 첫 번째는 '썸네일 이미지', 나머지는 "이미지 1 ~ 이미지 9"
   const imageLabels = new Array(10)
     .fill('')
     .map((_, index) => (index === 0 ? '썸네일 이미지' : `이미지 ${index}`));
 
-  // 드래그 관련 이벤트 핸들러
+  // 드래그 앤 드롭 핸들러
   const onDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    // text/plain 타입으로 인덱스를 저장합니다.
     e.dataTransfer.setData('text/plain', index.toString());
+    e.dataTransfer.effectAllowed = 'move';
   };
 
   const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
   };
 
   const onDrop = (e: React.DragEvent<HTMLDivElement>, hoverIndex: number) => {
     e.preventDefault();
-    const dragIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+    const data = e.dataTransfer.getData('text/plain');
+    const dragIndex = parseInt(data, 10);
     if (!isNaN(dragIndex) && dragIndex !== hoverIndex) {
       handleImageReorder(dragIndex, hoverIndex);
     }
   };
 
-  // 각 슬롯 내에서 이미지가 없으면 오른쪽 하단에 "+" 버튼을 노출하여 해당 슬롯의 파일 입력을 트리거
   const onSlotAddClick = (index: number) => {
     const fileInput = document.getElementById(
       `image-upload-${index}`
@@ -63,16 +66,35 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
       <ImageGrid>
         {imageLabels.map((label, index) => (
           <ImageColumn key={index}>
-            <ImageWrapper
+            <DraggableWrapper
               draggable
               onDragStart={(e) => onDragStart(e, index)}
               onDragOver={onDragOver}
               onDrop={(e) => onDrop(e, index)}
             >
-              {index === 0 ? (
-                <ThumbnailImageBox>
-                  {images[index] ? (
-                    <>
+              {/* 인덱스 번호 표시 */}
+              <IndexLabel>{index + 1}</IndexLabel>
+              {images[index] ? (
+                <>
+                  {index === 0 ? (
+                    <ThumbnailImageBox>
+                      <UploadedImage
+                        src={images[index] as string}
+                        alt='Uploaded'
+                      />
+                      <DeleteButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // 삭제 버튼 클릭 시, 부모의 handleImageDelete를 호출하여 해당 박스 전체 삭제
+                          handleImageDelete(index);
+                        }}
+                        title='이미지 삭제'
+                      >
+                        x
+                      </DeleteButton>
+                    </ThumbnailImageBox>
+                  ) : (
+                    <ImageBox>
                       <UploadedImage
                         src={images[index] as string}
                         alt='Uploaded'
@@ -86,39 +108,13 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
                       >
                         x
                       </DeleteButton>
-                    </>
-                  ) : (
-                    <>
-                      <EmptyBox />
-                      <SlotAddButton
-                        onClick={() => onSlotAddClick(index)}
-                        title='이미지 추가'
-                      >
-                        +
-                      </SlotAddButton>
-                    </>
+                    </ImageBox>
                   )}
-                </ThumbnailImageBox>
+                </>
               ) : (
-                <ImageBox>
-                  {images[index] ? (
-                    <>
-                      <UploadedImage
-                        src={images[index] as string}
-                        alt='Uploaded'
-                      />
-                      <DeleteButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleImageDelete(index);
-                        }}
-                        title='이미지 삭제'
-                      >
-                        x
-                      </DeleteButton>
-                    </>
-                  ) : (
-                    <>
+                <>
+                  {index === 0 ? (
+                    <ThumbnailImageBox>
                       <EmptyBox />
                       <SlotAddButton
                         onClick={() => onSlotAddClick(index)}
@@ -126,18 +122,27 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
                       >
                         +
                       </SlotAddButton>
-                    </>
+                    </ThumbnailImageBox>
+                  ) : (
+                    <ImageBox>
+                      <EmptyBox />
+                      <SlotAddButton
+                        onClick={() => onSlotAddClick(index)}
+                        title='이미지 추가'
+                      >
+                        +
+                      </SlotAddButton>
+                    </ImageBox>
                   )}
-                </ImageBox>
+                </>
               )}
-              {/* 각 슬롯 전용 숨김 파일 입력 */}
               <HiddenFileInput
                 id={`image-upload-${index}`}
                 type='file'
                 accept='image/*'
                 onChange={(e) => handleImageUpload(index, e)}
               />
-            </ImageWrapper>
+            </DraggableWrapper>
             <ImageLabel>{label}</ImageLabel>
             <ImageLinkInput
               type='text'
@@ -154,8 +159,7 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
 
 export default ProductImageSection;
 
-/* ================= Styled Components ================= */
-
+/* Styled Components */
 const SectionBox = styled.div`
   position: relative;
   margin-bottom: 20px;
@@ -228,9 +232,21 @@ const ImageColumn = styled.div`
   align-items: center;
 `;
 
-const ImageWrapper = styled.div`
+const DraggableWrapper = styled.div`
   position: relative;
   cursor: move;
+`;
+
+const IndexLabel = styled.div`
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  padding: 2px 4px;
+  font-size: 10px;
+  z-index: 3;
+  border-radius: 2px;
 `;
 
 const ImageBox = styled.div`
@@ -244,7 +260,6 @@ const ImageBox = styled.div`
   position: relative;
 `;
 
-// ThumbnailImageBox: 썸네일 슬롯 구분을 위해 배경색 및 테두리 강조
 const ThumbnailImageBox = styled(ImageBox)`
   background-color: #e0f7fa;
   border: 2px solid #00acc1;
@@ -273,7 +288,7 @@ const DeleteButton = styled.button`
   padding: 2px 6px;
   cursor: pointer;
   border-radius: 4px;
-  z-index: 2;
+  z-index: 4;
   &:hover {
     opacity: 0.8;
   }
@@ -291,7 +306,7 @@ const SlotAddButton = styled.button`
   height: 28px;
   border-radius: 50%;
   cursor: pointer;
-  z-index: 2;
+  z-index: 4;
   display: flex;
   align-items: center;
   justify-content: center;

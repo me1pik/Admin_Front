@@ -1,8 +1,26 @@
 // src/components/productregister/MaterialInfoSection.tsx
 import React from 'react';
 import styled from 'styled-components';
+import { ProductDetailResponse } from '../../api/adminProduct';
 
-const MaterialInfoSection: React.FC = () => {
+interface MaterialInfoSectionProps {
+  product: ProductDetailResponse;
+  onChange?: (data: Partial<ProductDetailResponse>) => void;
+}
+
+const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
+  product,
+  onChange,
+}) => {
+  // 체크박스 변화 시 호출되는 핸들러
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, checked } = e.target;
+    if (onChange) {
+      // 체크되면 해당 value, 아니면 빈 문자열을 전달
+      onChange({ [name]: checked ? value : '' });
+    }
+  };
+
   return (
     <SectionBox>
       <SectionHeader>
@@ -19,11 +37,17 @@ const MaterialInfoSection: React.FC = () => {
                 type='checkbox'
                 name='thickness'
                 value='매우 두꺼움'
+                onChange={handleCheckboxChange}
               />
               매우 두꺼움
             </SizeCheckboxLabel>
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
-              <SizeCheckbox type='checkbox' name='thickness' value='두꺼움' />
+              <SizeCheckbox
+                type='checkbox'
+                name='thickness'
+                value='두꺼움'
+                onChange={handleCheckboxChange}
+              />
               두꺼움
             </SizeCheckboxLabel>
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
@@ -32,11 +56,17 @@ const MaterialInfoSection: React.FC = () => {
                 name='thickness'
                 value='적당'
                 defaultChecked
+                onChange={handleCheckboxChange}
               />
               적당
             </SizeCheckboxLabel>
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
-              <SizeCheckbox type='checkbox' name='thickness' value='얇음' />
+              <SizeCheckbox
+                type='checkbox'
+                name='thickness'
+                value='얇음'
+                onChange={handleCheckboxChange}
+              />
               얇음
             </SizeCheckboxLabel>
           </SizeCheckGroup>
@@ -46,16 +76,22 @@ const MaterialInfoSection: React.FC = () => {
           <Label>신축성</Label>
           <SizeCheckGroup>
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
-              <SizeCheckbox type='checkbox' name='elasticity' value='좋음' />
-              좋음
+              <SizeCheckbox
+                type='checkbox'
+                name='elasticity'
+                value='좋음'
+                onChange={handleCheckboxChange}
+              />
+              {product.elasticity || '좋음'}
             </SizeCheckboxLabel>
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
               <SizeCheckbox
                 type='checkbox'
                 name='elasticity'
                 value='약간있음'
+                onChange={handleCheckboxChange}
               />
-              약간있음
+              {product.elasticity || '약간있음'}
             </SizeCheckboxLabel>
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
               <SizeCheckbox
@@ -63,6 +99,7 @@ const MaterialInfoSection: React.FC = () => {
                 name='elasticity'
                 value='없음'
                 defaultChecked
+                onChange={handleCheckboxChange}
               />
               없음
             </SizeCheckboxLabel>
@@ -71,6 +108,7 @@ const MaterialInfoSection: React.FC = () => {
                 type='checkbox'
                 name='elasticity'
                 value='허리벤딩'
+                onChange={handleCheckboxChange}
               />
               허리벤딩
             </SizeCheckboxLabel>
@@ -81,11 +119,21 @@ const MaterialInfoSection: React.FC = () => {
           <Label>안감</Label>
           <SizeCheckGroup>
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
-              <SizeCheckbox type='checkbox' name='lining' value='정체안감' />
+              <SizeCheckbox
+                type='checkbox'
+                name='lining'
+                value='정체안감'
+                onChange={handleCheckboxChange}
+              />
               정체안감
             </SizeCheckboxLabel>
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
-              <SizeCheckbox type='checkbox' name='lining' value='부분안감' />
+              <SizeCheckbox
+                type='checkbox'
+                name='lining'
+                value='부분안감'
+                onChange={handleCheckboxChange}
+              />
               부분안감
             </SizeCheckboxLabel>
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
@@ -94,11 +142,17 @@ const MaterialInfoSection: React.FC = () => {
                 name='lining'
                 value='기모안감'
                 defaultChecked
+                onChange={handleCheckboxChange}
               />
               기모안감
             </SizeCheckboxLabel>
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
-              <SizeCheckbox type='checkbox' name='lining' value='안감없음' />
+              <SizeCheckbox
+                type='checkbox'
+                name='lining'
+                value='안감없음'
+                onChange={handleCheckboxChange}
+              />
               안감없음
             </SizeCheckboxLabel>
           </SizeCheckGroup>
@@ -108,11 +162,21 @@ const MaterialInfoSection: React.FC = () => {
           <Label>촉감</Label>
           <SizeCheckGroup>
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
-              <SizeCheckbox type='checkbox' name='touch' value='뻣뻣함' />
+              <SizeCheckbox
+                type='checkbox'
+                name='touch'
+                value='뻣뻣함'
+                onChange={handleCheckboxChange}
+              />
               뻣뻣함
             </SizeCheckboxLabel>
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
-              <SizeCheckbox type='checkbox' name='touch' value='까슬함' />
+              <SizeCheckbox
+                type='checkbox'
+                name='touch'
+                value='까슬함'
+                onChange={handleCheckboxChange}
+              />
               까슬함
             </SizeCheckboxLabel>
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
@@ -121,11 +185,17 @@ const MaterialInfoSection: React.FC = () => {
                 name='touch'
                 value='적당'
                 defaultChecked
+                onChange={handleCheckboxChange}
               />
               적당
             </SizeCheckboxLabel>
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
-              <SizeCheckbox type='checkbox' name='touch' value='부드러움' />
+              <SizeCheckbox
+                type='checkbox'
+                name='touch'
+                value='부드러움'
+                onChange={handleCheckboxChange}
+              />
               부드러움
             </SizeCheckboxLabel>
           </SizeCheckGroup>
@@ -139,6 +209,7 @@ const MaterialInfoSection: React.FC = () => {
                 type='checkbox'
                 name='transparency'
                 value='비침있음'
+                onChange={handleCheckboxChange}
               />
               비침있음
             </SizeCheckboxLabel>
@@ -147,6 +218,7 @@ const MaterialInfoSection: React.FC = () => {
                 type='checkbox'
                 name='transparency'
                 value='약간있음'
+                onChange={handleCheckboxChange}
               />
               약간있음
             </SizeCheckboxLabel>
@@ -156,6 +228,7 @@ const MaterialInfoSection: React.FC = () => {
                 name='transparency'
                 value='적당'
                 defaultChecked
+                onChange={handleCheckboxChange}
               />
               적당
             </SizeCheckboxLabel>
@@ -164,6 +237,7 @@ const MaterialInfoSection: React.FC = () => {
                 type='checkbox'
                 name='transparency'
                 value='비침없음'
+                onChange={handleCheckboxChange}
               />
               비침없음
             </SizeCheckboxLabel>
@@ -274,7 +348,7 @@ const SizeCheckboxLabel = styled.label`
   font-weight: 700;
   font-size: 12px;
   line-height: 13px;
-  color: #000000;
+  color: #000;
 `;
 
 const SizeCheckbox = styled.input.attrs({ type: 'checkbox' })`

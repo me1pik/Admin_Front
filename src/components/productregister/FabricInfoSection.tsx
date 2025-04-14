@@ -1,8 +1,24 @@
 // src/components/productregister/FabricInfoSection.tsx
 import React from 'react';
 import styled from 'styled-components';
+import { ProductDetailResponse } from '../../api/adminProduct';
 
-const FabricInfoSection: React.FC = () => {
+interface FabricInfoSectionProps {
+  product: ProductDetailResponse;
+  onChange?: (data: Partial<ProductDetailResponse>) => void;
+}
+
+const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
+  product,
+  onChange,
+}) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (onChange) {
+      onChange({ [name]: value });
+    }
+  };
+
   return (
     <SectionBox>
       <SectionHeader>
@@ -24,61 +40,125 @@ const FabricInfoSection: React.FC = () => {
           <tr>
             <td>겉감</td>
             <td>
-              <Input placeholder='-' />
+              <Input
+                name='fabric_겉감_1'
+                placeholder={product.fabricComposition.겉감 || '-'}
+                onChange={handleInputChange}
+              />
             </td>
             <td>
-              <Input placeholder='-' />
+              <Input
+                name='fabric_겉감_2'
+                placeholder={product.fabricComposition.겉감 || '-'}
+                onChange={handleInputChange}
+              />
             </td>
             <td>
-              <Input placeholder='-' />
+              <Input
+                name='fabric_겉감_3'
+                placeholder={product.fabricComposition.겉감 || '-'}
+                onChange={handleInputChange}
+              />
             </td>
             <td>
-              <Input placeholder='-' />
+              <Input
+                name='fabric_겉감_4'
+                placeholder={product.fabricComposition.겉감 || '-'}
+                onChange={handleInputChange}
+              />
             </td>
           </tr>
           <tr>
             <td>안감</td>
             <td>
-              <Input placeholder='-' />
+              <Input
+                name='fabric_안감_1'
+                placeholder={product.fabricComposition.안감 || '-'}
+                onChange={handleInputChange}
+              />
             </td>
             <td>
-              <Input placeholder='-' />
+              <Input
+                name='fabric_안감_2'
+                placeholder={product.fabricComposition.안감 || '-'}
+                onChange={handleInputChange}
+              />
             </td>
             <td>
-              <Input placeholder='-' />
+              <Input
+                name='fabric_안감_3'
+                placeholder={product.fabricComposition.안감 || '-'}
+                onChange={handleInputChange}
+              />
             </td>
             <td>
-              <Input placeholder='-' />
+              <Input
+                name='fabric_안감_4'
+                placeholder={product.fabricComposition.안감 || '-'}
+                onChange={handleInputChange}
+              />
             </td>
           </tr>
           <tr>
             <td>배색</td>
             <td>
-              <Input placeholder='-' />
+              <Input
+                name='fabric_배색_1'
+                placeholder='-'
+                onChange={handleInputChange}
+              />
             </td>
             <td>
-              <Input placeholder='-' />
+              <Input
+                name='fabric_배색_2'
+                placeholder='-'
+                onChange={handleInputChange}
+              />
             </td>
             <td>
-              <Input placeholder='-' />
+              <Input
+                name='fabric_배색_3'
+                placeholder='-'
+                onChange={handleInputChange}
+              />
             </td>
             <td>
-              <Input placeholder='-' />
+              <Input
+                name='fabric_배색_4'
+                placeholder='-'
+                onChange={handleInputChange}
+              />
             </td>
           </tr>
           <tr>
             <td>부속</td>
             <td>
-              <Input placeholder='-' />
+              <Input
+                name='fabric_부속_1'
+                placeholder='-'
+                onChange={handleInputChange}
+              />
             </td>
             <td>
-              <Input placeholder='-' />
+              <Input
+                name='fabric_부속_2'
+                placeholder='-'
+                onChange={handleInputChange}
+              />
             </td>
             <td>
-              <Input placeholder='-' />
+              <Input
+                name='fabric_부속_3'
+                placeholder='-'
+                onChange={handleInputChange}
+              />
             </td>
             <td>
-              <Input placeholder='-' />
+              <Input
+                name='fabric_부속_4'
+                placeholder='-'
+                onChange={handleInputChange}
+              />
             </td>
           </tr>
         </tbody>
@@ -153,7 +233,7 @@ const FabricTable = styled.table`
     font-weight: 900;
     font-size: 12px;
     line-height: 13px;
-    color: #000000;
+    color: #000;
     padding: 4px;
     min-width: 50px;
   }

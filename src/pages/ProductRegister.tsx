@@ -1,74 +1,190 @@
 // src/pages/ProductRegister.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import DetailSubHeader, { TabItem } from '../components/Header/DetailSubHeader';
+import ListButtonDetailSubHeader from '../components/Header/ListButtonDetailSubHeader';
 import sizeProductImg from '../assets/productregisterSizeProduct.svg';
-import BasicInfoSection from '../components/productregister/BasicInfoSection';
-import SizeSettingSection from '../components/productregister/SizeSettingSection';
-import PriceSection from '../components/productregister/PriceSection';
+import DetailTopBoxes from '../components/DetailTopBoxes';
 import SizeGuideSection from '../components/productregister/SizeGuideSection';
 import SizeDisplaySection from '../components/productregister/SizeDisplaySection';
 import MaterialInfoSection from '../components/productregister/MaterialInfoSection';
 import FabricInfoSection from '../components/productregister/FabricInfoSection';
 import ProductImageSection from '../components/productregister/ProductImageSection';
+import {
+  getProductDetail,
+  updateProduct,
+  ProductDetailResponse,
+  UpdateProductRequest,
+} from '../api/adminProduct';
 
-const dummyProducts = [
-  {
-    no: 13486,
-    // 기타 필드 생략
+const newEmptyProduct: ProductDetailResponse = {
+  id: 0,
+  name: '',
+  product_num: '',
+  brand: '',
+  category: '',
+  color: '',
+  price: {
+    originalPrice: 0,
+    discountRate: 0,
+    finalPrice: 0,
   },
-];
+  registration: 0,
+  registration_date: '',
+  product_url: '',
+  product_img: [],
+  size_picture: '',
+  season: '',
+  manufacturer: '',
+  description: '',
+  fabricComposition: {
+    겉감: '',
+    안감: '',
+  },
+  elasticity: '',
+  transparency: '',
+  thickness: '',
+  lining: '',
+  fit: '',
+  sizes: [{ size: '', measurements: { 어깨: 0, 가슴: 0, 총장: 0 } }],
+};
 
 const ProductRegister: React.FC = () => {
-  // 총 10개의 슬롯을 위해 배열 길이 10으로 초기화
-  const [images, setImages] = useState<(string | null)[]>(
-    new Array(10).fill(null)
-  );
-  const [imageLinks, setImageLinks] = useState<(string | null)[]>(
-    new Array(10).fill('')
-  );
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const productId = id ? parseInt(id, 10) : null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert('제품 등록 완료!');
+  const [productDetail, setProductDetail] = useState<ProductDetailResponse>(
+    productId ? ({} as ProductDetailResponse) : newEmptyProduct
+  );
+  const [images, setImages] = useState<(string | null)[]>([]);
+  const [imageLinks, setImageLinks] = useState<(string | null)[]>([]);
+  const [loading, setLoading] = useState<boolean>(!!productId);
+  const [error, setError] = useState<string>('');
+
+  useEffect(() => {
+    if (productId) {
+      const fetchProductDetail = async () => {
+        setLoading(true);
+        setError('');
+        try {
+          const data = await getProductDetail(productId);
+          setProductDetail(data);
+          if (data.product_img && data.product_img.length > 0) {
+            setImages(data.product_img);
+            setImageLinks(data.product_img);
+          }
+        } catch (err) {
+          console.error('제품 상세 정보를 불러오는데 실패했습니다.', err);
+          setError('제품 상세 정보를 불러오는데 실패했습니다.');
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchProductDetail();
+    }
+  }, [productId]);
+
+  const handleBackClick = () => {
+    navigate(-1);
   };
 
-  const handleTabChange = (tab: TabItem) => {
-    console.log('선택된 버튼:', tab.label);
-    if (tab.label === '변경저장') {
-      alert('저장 로직 실행');
+  const handleEditOrRegister = async () => {
+    if (productId) {
+      // 수정 모드
+      const updateData: UpdateProductRequest = {
+        name: productDetail.name,
+        product_url: productDetail.product_url,
+        product_img: imageLinks.filter((link) => link) as string[],
+      };
+      try {
+        const updated = await updateProduct(productDetail.id, updateData);
+        setProductDetail(updated);
+        alert('제품 정보가 수정되었습니다!');
+        navigate('/productlist');
+      } catch (error) {
+        console.error('제품 정보 수정 실패', error);
+        alert('제품 정보 수정에 실패하였습니다.');
+      }
     } else {
-      alert('취소 로직 실행');
+      // 신규 등록
+      console.log('신규 등록 데이터:', productDetail, images, imageLinks);
+      alert('제품이 등록되었습니다!');
+      navigate('/productlist');
     }
   };
 
-  const tabs: TabItem[] = [{ label: '변경저장' }, { label: '취소' }];
+  const handleEndClick = async () => {
+    if (productId) {
+      const terminationUpdate: UpdateProductRequest = {
+        // 종료 처리에 필요한 필드 채워 넣기
+      };
+      try {
+        const updated = await updateProduct(
+          productDetail.id,
+          terminationUpdate
+        );
+        setProductDetail(updated);
+        alert('종료 처리가 완료되었습니다!');
+        navigate('/productlist');
+      } catch (error) {
+        console.error('종료 처리 실패', error);
+        alert('종료 처리에 실패하였습니다.');
+      }
+    }
+  };
 
-  // 이미지 업로드 시 상태 업데이트
+  // handleInputChange 함수는 사용하지 않으므로 삭제
+
+  // 사이즈 변경 콜백
+  const handleSizesChange = (
+    sizes: {
+      size: string;
+      measurements: { 어깨: number; 가슴: number; 총장: number };
+    }[]
+  ) => {
+    setProductDetail((prev) => ({ ...prev, sizes }));
+  };
+
+  const detailSubHeaderProps = productId
+    ? {
+        backLabel: '목록이동',
+        onBackClick: handleBackClick,
+        editLabel: '정보수정',
+        onEditClick: handleEditOrRegister,
+        endLabel: '종료처리',
+        onEndClick: handleEndClick,
+      }
+    : {
+        backLabel: '목록이동',
+        onBackClick: handleBackClick,
+        editLabel: '등록 완료',
+        onEditClick: handleEditOrRegister,
+      };
+
   const handleImageUpload = (
     index: number,
-    e: React.ChangeEvent<HTMLInputElement>
+    e: ChangeEvent<HTMLInputElement>
   ) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImages((prev) => {
-          const newImages = [...prev];
-          newImages[index] = reader.result as string;
-          return newImages;
+          const newImgs = [...prev];
+          newImgs[index] = reader.result as string;
+          return newImgs;
         });
       };
       reader.readAsDataURL(file);
     }
   };
 
-  // 이미지 삭제 핸들러
   const handleImageDelete = (index: number) => {
     setImages((prev) => {
-      const newImages = [...prev];
-      newImages[index] = null;
-      return newImages;
+      const newImgs = [...prev];
+      newImgs[index] = null;
+      return newImgs;
     });
     setImageLinks((prev) => {
       const newLinks = [...prev];
@@ -77,7 +193,6 @@ const ProductRegister: React.FC = () => {
     });
   };
 
-  // 이미지 링크 변경 핸들러
   const handleImageLinkChange = (index: number, value: string) => {
     setImageLinks((prev) => {
       const newLinks = [...prev];
@@ -86,67 +201,77 @@ const ProductRegister: React.FC = () => {
     });
   };
 
-  // 이미지 순서 변경 핸들러 (드래그앤드롭)
   const handleImageReorder = (dragIndex: number, hoverIndex: number) => {
     setImages((prev) => {
-      const newImages = [...prev];
-      const [removed] = newImages.splice(dragIndex, 1);
-      newImages.splice(hoverIndex, 0, removed);
-      return newImages;
+      const next = [...prev];
+      const [removed] = next.splice(dragIndex, 1);
+      next.splice(hoverIndex, 0, removed);
+      return next;
     });
     setImageLinks((prev) => {
-      const newLinks = [...prev];
-      const [removed] = newLinks.splice(dragIndex, 1);
-      newLinks.splice(hoverIndex, 0, removed);
-      return newLinks;
+      const next = [...prev];
+      const [removed] = next.splice(dragIndex, 1);
+      next.splice(hoverIndex, 0, removed);
+      return next;
     });
   };
 
+  if (loading) return <Container>Loading...</Container>;
+  if (error) return <Container>{error}</Container>;
+
   return (
     <Container>
-      {/* 상단 헤더 영역 */}
       <HeaderRow>
-        <Title>제품관리</Title>
+        <Title>제품등록</Title>
       </HeaderRow>
-      <DetailSubHeader tabs={tabs} onTabChange={handleTabChange} />
-      {/* 번호 표시 */}
+
+      <ListButtonDetailSubHeader {...detailSubHeaderProps} />
+
       <ProductNumberWrapper>
         <ProductNumberLabel>번호</ProductNumberLabel>
-        <ProductNumberValue>{dummyProducts[0].no}</ProductNumberValue>
+        <ProductNumberValue>
+          {productId ? productDetail.id : '신규 등록'}
+        </ProductNumberValue>
       </ProductNumberWrapper>
-      <TopDivider />
 
-      <FormWrapper onSubmit={handleSubmit}>
-        {/* 1행: 제품 기본정보, 종류 및 사이즈 설정, 제품 가격 */}
-        <ThreeColumnRow>
-          <BasicInfoSection />
-          <SizeSettingSection />
-          <PriceSection />
-        </ThreeColumnRow>
+      {productId && productDetail && <DetailTopBoxes product={productDetail} />}
 
-        <MiddleDivider />
+      <MiddleDivider />
 
-        {/* 2행: 사이즈 가이드, 사이즈 표기 */}
+      <FormWrapper onSubmit={(e) => e.preventDefault()}>
         <TwoColumnRow>
-          <SizeGuideSection />
-          <SizeDisplaySection sizeProductImg={sizeProductImg} />
+          <SizeGuideSection
+            product={productDetail}
+            onSizesChange={handleSizesChange}
+          />
+          <SizeDisplaySection
+            product={productDetail}
+            sizeProductImg={sizeProductImg}
+          />
         </TwoColumnRow>
 
         <MiddleDivider />
 
-        {/* 3행: 제품 소재정보 */}
-        <MaterialInfoSection />
+        <MaterialInfoSection
+          product={productDetail}
+          onChange={(data: Partial<ProductDetailResponse>) =>
+            setProductDetail((prev) => ({ ...prev, ...data }))
+          }
+        />
 
         <MiddleDivider />
 
-        {/* 4행: 제품 원단정보 */}
-        <FabricInfoSection />
+        <FabricInfoSection
+          product={productDetail}
+          onChange={(data: Partial<ProductDetailResponse>) =>
+            setProductDetail((prev) => ({ ...prev, ...data }))
+          }
+        />
 
         <MiddleDivider />
 
-        {/* 5행: 제품 이미지 */}
         <ProductImageSection
-          images={images}
+          images={productDetail.product_img}
           imageLinks={imageLinks}
           handleImageUpload={handleImageUpload}
           handleImageDelete={handleImageDelete}
@@ -162,7 +287,7 @@ const ProductRegister: React.FC = () => {
 
 export default ProductRegister;
 
-/* =============== Styled Components =============== */
+/* Styled Components */
 const Container = styled.div`
   width: 100%;
   margin: 0 auto;
@@ -170,56 +295,19 @@ const Container = styled.div`
   box-sizing: border-box;
   font-family: 'NanumSquare Neo OTF', sans-serif;
 `;
-
 const HeaderRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
 `;
-
 const Title = styled.h1`
   font-family: 'NanumSquare Neo OTF';
   font-weight: 700;
   font-size: 16px;
   line-height: 18px;
-  color: #000000;
+  color: #000;
 `;
-
-const TopDivider = styled.hr`
-  border: 0;
-  border-top: 1px solid #dddddd;
-  margin-bottom: 40px;
-`;
-
-const MiddleDivider = styled.hr`
-  border: 0;
-  border-top: 1px dashed #dddddd;
-  margin: 40px 0;
-`;
-
-const BottomDivider = styled.hr`
-  border: 0;
-  border-top: 1px solid #dddddd;
-  margin: 40px 0 20px;
-`;
-
-const FormWrapper = styled.form`
-  display: flex;
-  flex-direction: column;
-`;
-
-const ThreeColumnRow = styled.div`
-  display: flex;
-  gap: 50px;
-`;
-
-const TwoColumnRow = styled.div`
-  display: flex;
-  gap: 50px;
-  margin-bottom: 10px;
-`;
-
 const ProductNumberWrapper = styled.div`
   display: flex;
   align-items: baseline;
@@ -227,17 +315,34 @@ const ProductNumberWrapper = styled.div`
   margin: 10px 0;
   margin-top: 34px;
 `;
-
 const ProductNumberLabel = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 12px;
-  color: #000000;
+  color: #000;
 `;
-
 const ProductNumberValue = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
-  color: #000000;
+  color: #000;
+`;
+const MiddleDivider = styled.hr`
+  border: 0;
+  border-top: 1px dashed #ddd;
+  margin: 30px 0;
+`;
+const BottomDivider = styled.hr`
+  border: 0;
+  border-top: 1px solid #ddd;
+  margin: 40px 0 20px;
+`;
+const FormWrapper = styled.form`
+  display: flex;
+  flex-direction: column;
+`;
+const TwoColumnRow = styled.div`
+  display: flex;
+  gap: 50px;
+  margin-bottom: 10px;
 `;

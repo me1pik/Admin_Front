@@ -19,16 +19,16 @@ interface TaskHistoryTableProps {
 }
 
 const TaskHistoryTable: React.FC<TaskHistoryTableProps> = ({ data }) => {
-  // 10행 고정을 위해 부족한 행의 개수 계산
+  // 10행 고정을 위해 부족한 행의 개수를 계산
   const emptyRowsCount = Math.max(0, 10 - data.length);
 
   return (
     <TableContainer>
       <StyledTable>
         <colgroup>
-          <col style={{ width: '20%' }} /> {/* 작업일자 */}
-          <col style={{ width: '60%' }} /> {/* 작업내용 */}
-          <col style={{ width: '20%' }} /> {/* 변경일시 */}
+          <col style={{ width: '20%' }} />
+          <col style={{ width: '60%' }} />
+          <col style={{ width: '20%' }} />
         </colgroup>
         <thead>
           <tr>

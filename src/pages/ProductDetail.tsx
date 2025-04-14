@@ -1,85 +1,109 @@
-// src/pages/ProductRegister.tsx
-import React, { useState } from 'react';
+// src/pages/ProductDetail.tsx
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import ListButtonDetailSubHeader, {
-  DetailSubHeaderProps,
-} from '../components/Header/ListButtonDetailSubHeader';
-
-import sizeProductImg from '../assets/productregisterSizeProduct.svg';
+import { useParams, useNavigate } from 'react-router-dom';
+import ListButtonDetailSubHeader from '../components/Header/ListButtonDetailSubHeader';
 import SizeGuideSection from '../components/productregister/SizeGuideSection';
 import SizeDisplaySection from '../components/productregister/SizeDisplaySection';
 import MaterialInfoSection from '../components/productregister/MaterialInfoSection';
 import FabricInfoSection from '../components/productregister/FabricInfoSection';
 import ProductImageSection from '../components/productregister/ProductImageSection';
 import DetailTopBoxes from '../components/DetailTopBoxes';
+import {
+  getProductDetail,
+  updateProduct,
+  ProductDetailResponse,
+  UpdateProductRequest,
+} from '../api/adminProduct';
 
-// 더미 데이터 (예시: 첫 번째 제품 번호)
-const dummyProducts = [
-  {
-    no: 13486,
-  },
+const defaultImages = [
+  'https://via.placeholder.com/140x200?text=Thumbnail',
+  'https://via.placeholder.com/140x200?text=Image+1',
+  // ... 기타 기본 이미지
 ];
 
 const ProductDetail: React.FC = () => {
-  // 10개 이미지: 첫 번째는 썸네일, 나머지는 이미지1 ~ 이미지9 (임시 데이터)
-  const initialImages: (string | null)[] = [
-    'https://via.placeholder.com/140x200?text=썸네일',
-    'https://via.placeholder.com/140x200?text=이미지1',
-    'https://via.placeholder.com/140x200?text=이미지2',
-    'https://via.placeholder.com/140x200?text=이미지3',
-    'https://via.placeholder.com/140x200?text=이미지4',
-    'https://via.placeholder.com/140x200?text=이미지5',
-    'https://via.placeholder.com/140x200?text=이미지6',
-    'https://via.placeholder.com/140x200?text=이미지7',
-    'https://via.placeholder.com/140x200?text=이미지8',
-    'https://via.placeholder.com/140x200?text=이미지9',
-  ];
-  const initialLinks: (string | null)[] = [
-    'https://썸네일',
-    'https:///이미지1',
-    'https:///이미지2',
-    'https:///이미지3',
-    'https:///이미지4',
-    'https:///이미지5',
-    'https:///이미지6',
-    'https:///이미지7',
-    'https:///이미지8',
-    'https:///이미지9',
-  ];
-  const [images, setImages] = useState<(string | null)[]>(initialImages);
-  const [imageLinks, setImageLinks] = useState<(string | null)[]>(initialLinks);
+  const { no } = useParams<{ no: string }>();
+  const productId = no ? parseInt(no, 10) : null;
+  const navigate = useNavigate();
 
-  /** 목록으로 버튼 클릭 시 */
+  const [product, setProduct] = useState<ProductDetailResponse | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
+  const [images, setImages] = useState<(string | null)[]>(defaultImages);
+  const [imageLinks, setImageLinks] =
+    useState<(string | null)[]>(defaultImages);
+
+  useEffect(() => {
+    if (productId) {
+      const fetchProduct = async () => {
+        setLoading(true);
+        setError('');
+        try {
+          const data = await getProductDetail(productId);
+          setProduct(data);
+          if (data.product_img && data.product_img.length > 0) {
+            setImages(data.product_img);
+            setImageLinks(data.product_img);
+          }
+        } catch (err) {
+          console.error('제품 상세 정보를 불러오는데 실패했습니다.', err);
+          setError('제품 상세 정보를 불러오는데 실패했습니다.');
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchProduct();
+    } else {
+      setError('유효한 제품 ID가 없습니다.');
+      setLoading(false);
+    }
+  }, [productId]);
+
   const handleBackClick = () => {
-    window.history.back();
+    navigate(-1);
   };
 
-  /** 정보수정 버튼 클릭 시 */
-  const handleEditClick = () => {
-    alert('정보가 수정되었습니다!');
+  const handleEditClick = async () => {
+    if (product) {
+      const updateData: UpdateProductRequest = {
+        name: product.name,
+        product_url: product.product_url,
+        product_img: imageLinks.filter((link) => link) as string[],
+      };
+      try {
+        const updated = await updateProduct(product.id, updateData);
+        setProduct(updated);
+        alert('제품 정보가 수정되었습니다!');
+        navigate('/productlist');
+      } catch (error) {
+        console.error('제품 정보 수정 실패', error);
+        alert('제품 정보 수정에 실패하였습니다.');
+      }
+    }
   };
 
-  /** 종료처리 버튼 클릭 시 */
-  const handleEndClick = () => {
-    alert('종료 처리가 완료되었습니다!');
-  };
-
-  // ListButtonDetailSubHeader에 넘길 프롭스
-  const detailSubHeaderProps: DetailSubHeaderProps = {
-    backLabel: '목록이동',
-    onBackClick: handleBackClick,
-    editLabel: '정보수정',
-    onEditClick: handleEditClick,
-    endLabel: '종료처리',
-    onEndClick: handleEndClick,
+  const handleEndClick = async () => {
+    if (product) {
+      const terminationUpdate: UpdateProductRequest = {
+        // 종료처리 필요한 필드 채워 넣기
+      };
+      try {
+        const updated = await updateProduct(product.id, terminationUpdate);
+        setProduct(updated);
+        alert('종료 처리가 완료되었습니다!');
+        navigate('/productlist');
+      } catch (error) {
+        console.error('종료 처리 실패', error);
+        alert('종료 처리에 실패하였습니다.');
+      }
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert('제품 등록 완료!');
   };
 
-  // 개별 슬롯 이미지 업로드 핸들러
   const handleImageUpload = (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
@@ -98,7 +122,6 @@ const ProductDetail: React.FC = () => {
     }
   };
 
-  // 삭제 핸들러
   const handleImageDelete = (index: number) => {
     setImages((prev) => {
       const newImages = [...prev];
@@ -112,7 +135,6 @@ const ProductDetail: React.FC = () => {
     });
   };
 
-  // 이미지 링크 변경 핸들러
   const handleImageLinkChange = (index: number, value: string) => {
     setImageLinks((prev) => {
       const newLinks = [...prev];
@@ -121,7 +143,6 @@ const ProductDetail: React.FC = () => {
     });
   };
 
-  // 드래그 앤 드롭 순서 변경 핸들러
   const handleImageReorder = (dragIndex: number, hoverIndex: number) => {
     setImages((prev) => {
       const next = [...prev];
@@ -137,66 +158,83 @@ const ProductDetail: React.FC = () => {
     });
   };
 
+  if (loading) return <Container>Loading...</Container>;
+  if (error) return <Container>{error}</Container>;
+
   return (
     <Container>
-      {/* 상단 헤더 영역 */}
       <HeaderRow>
         <Title>제품관리</Title>
       </HeaderRow>
 
-      {/* 목록이동 / 정보수정 / 종료처리 버튼 */}
-      <ListButtonDetailSubHeader {...detailSubHeaderProps} />
+      <ListButtonDetailSubHeader
+        backLabel='목록이동'
+        onBackClick={handleBackClick}
+        editLabel='정보수정'
+        onEditClick={handleEditClick}
+        endLabel='종료처리'
+        onEndClick={handleEndClick}
+      />
 
-      {/* 번호 표시 */}
       <ProductNumberWrapper>
         <ProductNumberLabel>번호</ProductNumberLabel>
-        <ProductNumberValue>{dummyProducts[0].no}</ProductNumberValue>
+        <ProductNumberValue>
+          {product ? product.id : '로딩 중...'}
+        </ProductNumberValue>
       </ProductNumberWrapper>
 
-      {/* 상단 3박스 영역 */}
-      <DetailTopBoxes />
-
-      <MiddleDivider />
-
-      <FormWrapper onSubmit={handleSubmit}>
-        {/* 2행: 사이즈 가이드, 사이즈 표기 */}
-        <TwoColumnRow>
-          <SizeGuideSection />
-          <SizeDisplaySection sizeProductImg={sizeProductImg} />
-        </TwoColumnRow>
-
-        <MiddleDivider />
-
-        {/* 3행: 제품 소재정보 */}
-        <MaterialInfoSection />
-
-        <MiddleDivider />
-
-        {/* 4행: 제품 원단정보 */}
-        <FabricInfoSection />
-
-        <MiddleDivider />
-
-        {/* 5행: 제품 이미지 */}
-        <ProductImageSection
-          images={images}
-          imageLinks={imageLinks}
-          handleImageUpload={handleImageUpload}
-          handleImageDelete={handleImageDelete}
-          handleImageLinkChange={handleImageLinkChange}
-          handleImageReorder={handleImageReorder}
-        />
-
-        <BottomDivider />
-      </FormWrapper>
+      {product && (
+        <>
+          <DetailTopBoxes product={product} />
+          <MiddleDivider />
+          <FormWrapper onSubmit={handleSubmit}>
+            <TwoColumnRow>
+              <SizeGuideSection
+                product={product} /* onSizesChange 콜백 추가 가능 */
+              />
+              <SizeDisplaySection
+                product={product}
+                sizeProductImg={product.size_picture}
+              />
+            </TwoColumnRow>
+            <MiddleDivider />
+            <MaterialInfoSection
+              product={product}
+              onChange={(data: Partial<ProductDetailResponse>) =>
+                setProduct((prev) => ({ ...prev!, ...data }))
+              }
+            />
+            <MiddleDivider />
+            <FabricInfoSection
+              product={product}
+              onChange={(data: Partial<ProductDetailResponse>) =>
+                setProduct((prev) => ({ ...prev!, ...data }))
+              }
+            />
+            <MiddleDivider />
+            <ProductImageSection
+              images={
+                product.product_img && product.product_img.length > 0
+                  ? product.product_img
+                  : images
+              }
+              imageLinks={imageLinks}
+              handleImageUpload={handleImageUpload}
+              handleImageDelete={handleImageDelete}
+              handleImageLinkChange={handleImageLinkChange}
+              handleImageReorder={handleImageReorder}
+            />
+            <BottomDivider />
+          </FormWrapper>
+        </>
+      )}
     </Container>
   );
 };
 
 export default ProductDetail;
 
-/* ================= Styled Components ====================== */
-
+/* Styled Components */
 const Container = styled.div`
   width: 100%;
   margin: 0 auto;
@@ -204,14 +242,12 @@ const Container = styled.div`
   box-sizing: border-box;
   font-family: 'NanumSquare Neo OTF', sans-serif;
 `;
-
 const HeaderRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
 `;
-
 const Title = styled.h1`
   font-family: 'NanumSquare Neo OTF';
   font-weight: 700;
@@ -219,7 +255,6 @@ const Title = styled.h1`
   line-height: 18px;
   color: #000;
 `;
-
 const ProductNumberWrapper = styled.div`
   display: flex;
   align-items: baseline;
@@ -227,38 +262,32 @@ const ProductNumberWrapper = styled.div`
   margin: 10px 0;
   margin-top: 34px;
 `;
-
 const ProductNumberLabel = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 12px;
   color: #000;
 `;
-
 const ProductNumberValue = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
   color: #000;
 `;
-
 const MiddleDivider = styled.hr`
   border: 0;
   border-top: 1px dashed #ddd;
   margin: 30px 0;
 `;
-
 const BottomDivider = styled.hr`
   border: 0;
   border-top: 1px solid #ddd;
   margin: 40px 0 20px;
 `;
-
 const FormWrapper = styled.form`
   display: flex;
   flex-direction: column;
 `;
-
 const TwoColumnRow = styled.div`
   display: flex;
   gap: 50px;
