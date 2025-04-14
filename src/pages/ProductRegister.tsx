@@ -20,12 +20,13 @@ const dummyProducts = [
 ];
 
 const ProductRegister: React.FC = () => {
-  const [images, setImages] = useState<(string | null)[]>([
-    null,
-    null,
-    null,
-    null,
-  ]);
+  // 총 10개의 슬롯을 위해 배열 길이 10으로 초기화
+  const [images, setImages] = useState<(string | null)[]>(
+    new Array(10).fill(null)
+  );
+  const [imageLinks, setImageLinks] = useState<(string | null)[]>(
+    new Array(10).fill('')
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +44,7 @@ const ProductRegister: React.FC = () => {
 
   const tabs: TabItem[] = [{ label: '변경저장' }, { label: '취소' }];
 
+  // 이미지 업로드 시 상태 업데이트
   const handleImageUpload = (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
@@ -59,6 +61,45 @@ const ProductRegister: React.FC = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  // 이미지 삭제 핸들러
+  const handleImageDelete = (index: number) => {
+    setImages((prev) => {
+      const newImages = [...prev];
+      newImages[index] = null;
+      return newImages;
+    });
+    setImageLinks((prev) => {
+      const newLinks = [...prev];
+      newLinks[index] = '';
+      return newLinks;
+    });
+  };
+
+  // 이미지 링크 변경 핸들러
+  const handleImageLinkChange = (index: number, value: string) => {
+    setImageLinks((prev) => {
+      const newLinks = [...prev];
+      newLinks[index] = value;
+      return newLinks;
+    });
+  };
+
+  // 이미지 순서 변경 핸들러 (드래그앤드롭)
+  const handleImageReorder = (dragIndex: number, hoverIndex: number) => {
+    setImages((prev) => {
+      const newImages = [...prev];
+      const [removed] = newImages.splice(dragIndex, 1);
+      newImages.splice(hoverIndex, 0, removed);
+      return newImages;
+    });
+    setImageLinks((prev) => {
+      const newLinks = [...prev];
+      const [removed] = newLinks.splice(dragIndex, 1);
+      newLinks.splice(hoverIndex, 0, removed);
+      return newLinks;
+    });
   };
 
   return (
@@ -106,7 +147,11 @@ const ProductRegister: React.FC = () => {
         {/* 5행: 제품 이미지 */}
         <ProductImageSection
           images={images}
+          imageLinks={imageLinks}
           handleImageUpload={handleImageUpload}
+          handleImageDelete={handleImageDelete}
+          handleImageLinkChange={handleImageLinkChange}
+          handleImageReorder={handleImageReorder}
         />
 
         <BottomDivider />
@@ -117,6 +162,7 @@ const ProductRegister: React.FC = () => {
 
 export default ProductRegister;
 
+/* =============== Styled Components =============== */
 const Container = styled.div`
   width: 100%;
   margin: 0 auto;
