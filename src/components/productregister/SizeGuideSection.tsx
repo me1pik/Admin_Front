@@ -1,6 +1,7 @@
 // SizeGuideSection.tsx
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import styled from 'styled-components';
+import { FaTimes, FaPlus } from 'react-icons/fa';
 import { ProductDetailResponse } from '../../api/adminProduct';
 
 export interface SizeGuideSectionProps {
@@ -81,7 +82,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
       }));
       onSizesChange(sizes);
     }
-    // onSizesChange를 의존성 배열에서 제외하여 sizeData 변경시에만 실행
+    // sizeData 변경시에만 실행
   }, [sizeData]);
 
   const handleCellChange = (
@@ -229,8 +230,11 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
                 />
               </Td>
               <Td>
-                <IconButton onClick={() => handleDeleteRow(idx)} title='삭제'>
-                  &#128465;
+                <IconButton
+                  onClick={() => handleDeleteRow(idx)}
+                  title='행 삭제'
+                >
+                  <FaTimes size={16} color='#d32f2f' />
                 </IconButton>
               </Td>
             </tr>
@@ -240,7 +244,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
           <tr>
             <TfootCell colSpan={7}>
               <IconButton onClick={handleAddRow} title='행 추가'>
-                &#43; <AddText>행 추가</AddText>
+                <FaPlus size={16} color='#0026fc' /> <AddText>행 추가</AddText>
               </IconButton>
             </TfootCell>
           </tr>
@@ -366,7 +370,11 @@ const IconButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+  transition:
+    transform 0.2s,
+    opacity 0.2s;
   &:hover {
+    transform: scale(1.1);
     opacity: 0.8;
   }
 `;
