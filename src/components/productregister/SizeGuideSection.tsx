@@ -1,4 +1,3 @@
-// src/components/productregister/SizeGuideSection.tsx
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import styled from 'styled-components';
 import { FaPlus, FaTrashAlt } from 'react-icons/fa';
@@ -18,7 +17,7 @@ export interface SizeRow {
   size: string;
   어깨: string;
   가슴: string;
-  허리: string; // 원래 API에서는 measurements.총장을 할당하므로, 이름은 그대로 유지
+  허리: string; // measurements 총장을 '허리'로 사용
   팔길이: string;
   총길이: string;
 }
@@ -36,18 +35,24 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   product,
   onSizesChange,
 }) => {
-  // 기본값: 제품 사이즈 데이터가 없으면 3개 행 생성
+  // 기본값: 제품 사이즈 데이터가 없으면 5개 행(44,55,66,77,Free) 생성
   const defaultRows: SizeRow[] = [
     { size: '44', 어깨: '', 가슴: '', 허리: '', 팔길이: '', 총길이: '' },
     { size: '55', 어깨: '', 가슴: '', 허리: '', 팔길이: '', 총길이: '' },
     { size: '66', 어깨: '', 가슴: '', 허리: '', 팔길이: '', 총길이: '' },
+    { size: '77', 어깨: '', 가슴: '', 허리: '', 팔길이: '', 총길이: '' },
+    { size: 'Free', 어깨: '', 가슴: '', 허리: '', 팔길이: '', 총길이: '' },
   ];
 
-  // 제품 데이터가 있는 경우 매핑 (숫자만 남기도록 처리)
+  // 제품 데이터가 있는 경우 매핑 (숫자만 남기도록 처리하되, FREE인 경우는 그대로 'Free')
   const initialRows: SizeRow[] =
     product.sizes && product.sizes.length > 0
       ? product.sizes.map((item) => ({
-          size: (item.size || '').replace(/[^0-9]/g, ''),
+          size:
+            item.size.toLowerCase().includes('free') ||
+            item.size.trim().toLowerCase() === 'free'
+              ? 'Free'
+              : item.size.replace(/[^0-9]/g, ''),
           어깨: item.measurements?.어깨?.toString() || '',
           가슴: item.measurements?.가슴?.toString() || '',
           허리: item.measurements?.총장?.toString() || '',
