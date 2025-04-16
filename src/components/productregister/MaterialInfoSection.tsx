@@ -13,29 +13,30 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
   onChange,
   editable = false,
 }) => {
-  // 초기 선택값은 product에서 받아오거나, 없으면 기본값으로 설정
+  // 만약 ProductDetailResponse 타입에 touch 속성이 없다면 (product as any).touch로 캐스팅하여 사용하거나 해당 속성을 제거해주세요.
   const [selectedOptions, setSelectedOptions] = useState({
     thickness: product.thickness || '적당',
     elasticity: product.elasticity || '없음',
     lining: product.lining || '기모안감',
-    touch: product.touch || '적당',
+    // TS 에러가 발생하는 경우, 아래와 같이 처리할 수 있습니다.
+    touch: (product as any).touch || '적당',
     transparency: product.transparency || '적당',
   });
 
-  // 제품 prop이 변경되면 내부 상태도 업데이트 (수정 후 저장 후 부모에서 다시 내려줄 경우)
+  // 제품 prop이 변경되면 내부 상태를 업데이트
   useEffect(() => {
     setSelectedOptions({
       thickness: product.thickness || '적당',
       elasticity: product.elasticity || '없음',
       lining: product.lining || '기모안감',
-      touch: product.touch || '적당',
+      touch: (product as any).touch || '적당',
       transparency: product.transparency || '적당',
     });
   }, [product]);
 
-  // 체크박스 클릭 시 해당 그룹의 값을 업데이트하여 단일 선택을 구현
+  // 체크박스 클릭 시 단일 선택을 위해 상태 갱신 및 상위 컴포넌트에 전달
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!editable) return; // 수정 모드가 아니라면 이벤트 무시
+    if (!editable) return; // 수정 불가능하면 무시
     const { name, value } = e.target;
     if (selectedOptions[name as keyof typeof selectedOptions] === value) return;
     const newOptions = { ...selectedOptions, [name]: value };

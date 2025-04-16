@@ -75,7 +75,7 @@ const ProductDetail: React.FC = () => {
     navigate(-1);
   };
 
-  // "정보수정" 버튼 클릭 시 제품 전체 상태를 업데이트 API로 전송
+  // "정보수정" 버튼 클릭 시 product 상태를 updateProduct API로 전송하여 업데이트
   const handleEditClick = async () => {
     if (product) {
       const updateData: UpdateProductRequest = {
@@ -115,7 +115,7 @@ const ProductDetail: React.FC = () => {
     e.preventDefault();
   };
 
-  // 이미지 업로드, 삭제, 링크 변경 및 재정렬 핸들러
+  // 이미지 관련 핸들러들
   const handleImageUpload = (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
@@ -218,7 +218,7 @@ const ProductDetail: React.FC = () => {
               />
             </TwoColumnRow>
             <MiddleDivider />
-            {/* MaterialInfoSection는 항상 수정 가능 */}
+            {/* MaterialInfoSection는 항상 수정 가능한 상태 */}
             <MaterialInfoSection
               product={product}
               editable={true}
