@@ -50,9 +50,11 @@ export interface ProductDetailResponse {
   };
   registration: number;
   registration_date: string;
+
   product_url: string;
   product_img: string[];
   size_picture: string;
+
   season: string;
   manufacturer: string;
   description: string;

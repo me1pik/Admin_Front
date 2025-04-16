@@ -1,25 +1,20 @@
-// ProductImageSection.tsx
 import React from 'react';
 import styled from 'styled-components';
 
 interface ProductImageSectionProps {
   images?: (string | null)[];
-  imageLinks?: (string | null)[];
   handleImageUpload: (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
   ) => void;
   handleImageDelete: (index: number) => void;
-  handleImageLinkChange: (index: number, value: string) => void;
   handleImageReorder: (dragIndex: number, hoverIndex: number) => void;
 }
 
 const ProductImageSection: React.FC<ProductImageSectionProps> = ({
   images = new Array(10).fill(null),
-  imageLinks = new Array(10).fill(''),
   handleImageUpload,
   handleImageDelete,
-  handleImageLinkChange,
   handleImageReorder,
 }) => {
   const imageLabels = new Array(10)
@@ -138,12 +133,6 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
               />
             </DraggableWrapper>
             <ImageLabel>{label}</ImageLabel>
-            <ImageLinkInput
-              type='text'
-              placeholder='이미지 링크를 입력하세요'
-              value={imageLinks[index] || ''}
-              onChange={(e) => handleImageLinkChange(index, e.target.value)}
-            />
           </ImageColumn>
         ))}
       </ImageGrid>
@@ -318,13 +307,4 @@ const ImageLabel = styled.div`
   font-weight: 700;
   margin-top: 20px;
   text-align: center;
-`;
-
-const ImageLinkInput = styled.input`
-  margin-top: 8px;
-  width: 140px;
-  padding: 4px 8px;
-  font-size: 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
 `;

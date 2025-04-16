@@ -233,6 +233,7 @@ const SpecItemRow = styled.div`
 const SpecLabelInput = styled.input`
   font-size: 12px;
   font-weight: 700;
+  width: 80px;
   text-align: left;
   border: none;
   background: transparent;
