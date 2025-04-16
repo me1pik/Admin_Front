@@ -1,4 +1,4 @@
-// src/components/productregister/FabricInfoSection.tsx
+// FabricInfoSection.tsx
 import React from 'react';
 import styled from 'styled-components';
 import { ProductDetailResponse } from '../../api/adminProduct';

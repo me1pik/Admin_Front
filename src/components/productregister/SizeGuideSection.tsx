@@ -1,6 +1,6 @@
+// SizeGuideSection.tsx
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import styled from 'styled-components';
-import { FaPlus, FaTrashAlt } from 'react-icons/fa';
 import { ProductDetailResponse } from '../../api/adminProduct';
 
 export interface SizeGuideSectionProps {
@@ -35,7 +35,6 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   product,
   onSizesChange,
 }) => {
-  // 기본값: 제품 사이즈 데이터가 없으면 5개 행(44,55,66,77,Free) 생성
   const defaultRows: SizeRow[] = [
     { size: '44', 어깨: '', 가슴: '', 허리: '', 팔길이: '', 총길이: '' },
     { size: '55', 어깨: '', 가슴: '', 허리: '', 팔길이: '', 총길이: '' },
@@ -44,7 +43,6 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     { size: 'Free', 어깨: '', 가슴: '', 허리: '', 팔길이: '', 총길이: '' },
   ];
 
-  // 제품 데이터가 있는 경우 매핑 (숫자만 남기도록 처리하되, FREE인 경우는 그대로 'Free')
   const initialRows: SizeRow[] =
     product.sizes && product.sizes.length > 0
       ? product.sizes.map((item) => ({
@@ -62,8 +60,6 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
       : defaultRows;
 
   const [sizeData, setSizeData] = useState<SizeRow[]>(initialRows);
-
-  // 헤더 텍스트(편집 가능하도록)
   const [headers, setHeaders] = useState<Headers>({
     size: '사이즈',
     어깨: 'A(어깨)',
@@ -73,7 +69,6 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     총길이: 'E(총길이)',
   });
 
-  // sizeData 변경 시 콜백 호출 (숫자로 변환)
   useEffect(() => {
     if (onSizesChange) {
       const sizes = sizeData.map((row) => ({
@@ -81,14 +76,14 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
         measurements: {
           어깨: Number(row.어깨) || 0,
           가슴: Number(row.가슴) || 0,
-          총장: Number(row.허리) || 0, // '허리' 필드를 '총장'으로 사용
+          총장: Number(row.허리) || 0,
         },
       }));
       onSizesChange(sizes);
     }
-  }, [sizeData, onSizesChange]);
+    // onSizesChange를 의존성 배열에서 제외하여 sizeData 변경시에만 실행
+  }, [sizeData]);
 
-  // 셀 값 변경 처리
   const handleCellChange = (
     rowIndex: number,
     field: keyof SizeRow,
@@ -105,7 +100,6 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     });
   };
 
-  // 헤더 값 변경 처리
   const handleHeaderChange = (
     field: keyof Headers,
     e: ChangeEvent<HTMLInputElement>
@@ -114,7 +108,6 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     setHeaders((prev) => ({ ...prev, [field]: newValue }));
   };
 
-  // 행 추가
   const handleAddRow = () => {
     const newRow: SizeRow = {
       size: '',
@@ -127,12 +120,10 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     setSizeData((prev) => [...prev, newRow]);
   };
 
-  // 행 삭제
   const handleDeleteRow = (rowIndex: number) => {
     setSizeData((prev) => prev.filter((_, idx) => idx !== rowIndex));
   };
 
-  // Enter 키 기본동작 방지
   const preventEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') e.preventDefault();
   };
@@ -239,7 +230,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
               </Td>
               <Td>
                 <IconButton onClick={() => handleDeleteRow(idx)} title='삭제'>
-                  <FaTrashAlt />
+                  &#128465;
                 </IconButton>
               </Td>
             </tr>
@@ -249,7 +240,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
           <tr>
             <TfootCell colSpan={7}>
               <IconButton onClick={handleAddRow} title='행 추가'>
-                <FaPlus /> <AddText>행 추가</AddText>
+                &#43; <AddText>행 추가</AddText>
               </IconButton>
             </TfootCell>
           </tr>
@@ -267,14 +258,12 @@ const SectionBox = styled.div`
   margin-bottom: 20px;
   padding-left: 20px;
 `;
-
 const SectionHeaderContainer = styled.div`
   display: flex;
   align-items: center;
   position: relative;
   margin-bottom: 10px;
 `;
-
 const Bullet = styled.div`
   position: absolute;
   left: -27px;
@@ -295,7 +284,6 @@ const Bullet = styled.div`
     border-radius: 50%;
   }
 `;
-
 const SectionTitle = styled.div`
   font-family: 'NanumSquare Neo OTF';
   font-weight: 800;
@@ -303,7 +291,6 @@ const SectionTitle = styled.div`
   line-height: 15px;
   margin-left: 10px;
 `;
-
 const VerticalLine = styled.div`
   position: absolute;
   left: 0;
@@ -312,7 +299,6 @@ const VerticalLine = styled.div`
   width: 1px;
   background: #dddddd;
 `;
-
 const SizeGuideTable = styled.table`
   width: 100%;
   border-collapse: collapse;
@@ -347,15 +333,11 @@ const SizeGuideTable = styled.table`
     background-color: #f9f9f9;
   }
 `;
-
 const EditableTh = styled.th`
   padding: 0;
 `;
-
 const Th = styled.th``;
-
 const Td = styled.td``;
-
 const InputSmall = styled.input`
   width: 50px;
   height: 28px;
@@ -363,7 +345,6 @@ const InputSmall = styled.input`
   font-size: 12px;
   text-align: center;
 `;
-
 const HeaderInput = styled.input`
   width: 100%;
   height: 100%;
@@ -377,7 +358,6 @@ const HeaderInput = styled.input`
     outline: none;
   }
 `;
-
 const IconButton = styled.button`
   border: none;
   background: none;
@@ -390,12 +370,10 @@ const IconButton = styled.button`
     opacity: 0.8;
   }
 `;
-
 const TfootCell = styled.td`
   padding: 10px;
   text-align: center;
 `;
-
 const AddText = styled.span`
   margin-left: 6px;
   font-size: 14px;

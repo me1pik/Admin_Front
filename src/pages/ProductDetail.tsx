@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+// ProductDetail.tsx
+import React, { useEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
 import ListButtonDetailSubHeader from '../components/Header/ListButtonDetailSubHeader';
@@ -31,6 +32,22 @@ const ProductDetail: React.FC = () => {
   const [imageLinks, setImageLinks] =
     useState<(string | null)[]>(defaultImages);
 
+  // 중앙 업데이트 함수: 모든 변경 내용을 product 상태에 반영 (메모이제이션)
+  const handleProductChange = useCallback(
+    (data: Partial<ProductDetailResponse>) => {
+      setProduct((prev) => ({ ...prev!, ...data }));
+    },
+    []
+  );
+
+  // onSizesChange에 전달할 콜백을 별도로 메모이제이션
+  const handleSizesChange = useCallback(
+    (sizes) => {
+      handleProductChange({ sizes });
+    },
+    [handleProductChange]
+  );
+
   useEffect(() => {
     if (productId) {
       const fetchProduct = async () => {
@@ -38,7 +55,7 @@ const ProductDetail: React.FC = () => {
         setError('');
         try {
           const data = await getProductDetail(productId);
-          // API에서 받아온 사이즈 데이터에 measurements가 누락된 경우 기본값을 채워줍니다.
+          // API에서 받아온 사이즈 데이터에 measurements가 누락된 경우 기본값 채우기
           if (data.sizes && data.sizes.length > 0) {
             data.sizes = data.sizes.map((item) => ({
               size: item.size,
@@ -64,18 +81,11 @@ const ProductDetail: React.FC = () => {
     }
   }, [productId]);
 
-  // DetailTopBoxes에서 변경된 데이터를 product 상태에 반영
-  const handleTopBoxesChange = (
-    changedData: Partial<ProductDetailResponse>
-  ) => {
-    setProduct((prev) => ({ ...prev!, ...changedData }));
-  };
-
   const handleBackClick = () => {
     navigate(-1);
   };
 
-  // "정보수정" 버튼 클릭 시 product 상태를 updateProduct API로 전송하여 업데이트
+  // "정보수정" 버튼 클릭 시 중앙 상태(product)를 API로 업데이트
   const handleEditClick = async () => {
     if (product) {
       const updateData: UpdateProductRequest = {
@@ -115,7 +125,7 @@ const ProductDetail: React.FC = () => {
     e.preventDefault();
   };
 
-  // 이미지 관련 핸들러들
+  // 이미지 관련 핸들러들: 수정 시 중앙 상태에도 반영
   const handleImageUpload = (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
@@ -133,6 +143,10 @@ const ProductDetail: React.FC = () => {
         setImageLinks((prev) => {
           const newLinks = [...prev];
           newLinks[index] = uploadedImage;
+          // 중앙 상태 업데이트: product_img 필드 업데이트
+          handleProductChange({
+            product_img: newLinks.filter((link) => !!link) as string[],
+          });
           return newLinks;
         });
       };
@@ -149,6 +163,9 @@ const ProductDetail: React.FC = () => {
     setImageLinks((prev) => {
       const newLinks = [...prev];
       newLinks[index] = '';
+      handleProductChange({
+        product_img: newLinks.filter((link) => !!link) as string[],
+      });
       return newLinks;
     });
   };
@@ -157,6 +174,9 @@ const ProductDetail: React.FC = () => {
     setImageLinks((prev) => {
       const newLinks = [...prev];
       newLinks[index] = value;
+      handleProductChange({
+        product_img: newLinks.filter((link) => !!link) as string[],
+      });
       return newLinks;
     });
   };
@@ -172,6 +192,9 @@ const ProductDetail: React.FC = () => {
       const next = [...prev];
       const [removed] = next.splice(dragIndex, 1);
       next.splice(hoverIndex, 0, removed);
+      handleProductChange({
+        product_img: next.filter((link) => !!link) as string[],
+      });
       return next;
     });
   };
@@ -206,32 +229,30 @@ const ProductDetail: React.FC = () => {
           <DetailTopBoxes
             product={product}
             editable={true}
-            onChange={handleTopBoxesChange}
+            onChange={handleProductChange}
           />
           <MiddleDivider />
           <FormWrapper onSubmit={handleSubmit}>
             <TwoColumnRow>
-              <SizeGuideSection product={product} />
+              <SizeGuideSection
+                product={product}
+                onSizesChange={handleSizesChange}
+              />
               <SizeDisplaySection
                 product={product}
                 sizeProductImg={product.size_picture}
               />
             </TwoColumnRow>
             <MiddleDivider />
-            {/* MaterialInfoSection는 항상 수정 가능한 상태 */}
             <MaterialInfoSection
               product={product}
               editable={true}
-              onChange={(data: Partial<ProductDetailResponse>) =>
-                setProduct((prev) => ({ ...prev!, ...data }))
-              }
+              onChange={handleProductChange}
             />
             <MiddleDivider />
             <FabricInfoSection
               product={product}
-              onChange={(data: Partial<ProductDetailResponse>) =>
-                setProduct((prev) => ({ ...prev!, ...data }))
-              }
+              onChange={handleProductChange}
             />
             <MiddleDivider />
             <ProductImageSection

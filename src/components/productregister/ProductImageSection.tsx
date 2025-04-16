@@ -1,3 +1,4 @@
+// ProductImageSection.tsx
 import React from 'react';
 import styled from 'styled-components';
 
@@ -8,10 +9,8 @@ interface ProductImageSectionProps {
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
   ) => void;
-  // 부모에서 API 이미지 삭제까지 진행하도록 구현되어야 합니다.
   handleImageDelete: (index: number) => void;
   handleImageLinkChange: (index: number, value: string) => void;
-  // handleImageReorder는 부모에서 두 배열(이미지와 링크)을 동시에 재정렬하도록 구현되어야 합니다.
   handleImageReorder: (dragIndex: number, hoverIndex: number) => void;
 }
 
@@ -27,7 +26,6 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
     .fill('')
     .map((_, index) => (index === 0 ? '썸네일 이미지' : `이미지 ${index}`));
 
-  // 드래그 앤 드롭 핸들러
   const onDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
     e.dataTransfer.setData('text/plain', index.toString());
     e.dataTransfer.effectAllowed = 'move';
@@ -181,8 +179,8 @@ const Bullet = styled.div`
   &::after {
     content: '';
     position: absolute;
-    top: 4px;
     left: 4px;
+    top: 4px;
     width: 6px;
     height: 6px;
     background: #f6ae24;

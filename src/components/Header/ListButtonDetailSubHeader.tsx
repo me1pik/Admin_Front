@@ -1,14 +1,12 @@
-// src/components/Header/ListButtonDetailSubHeader.tsx
+// ListButtonDetailSubHeader.tsx
 import React from 'react';
 import styled from 'styled-components';
 
 export interface DetailSubHeaderProps {
   backLabel: string;
   onBackClick?: () => void;
-  // 신규 등록 시 "등록 완료", 수정 시 "정보수정" 버튼 텍스트로 사용
   editLabel: string;
   onEditClick?: () => void;
-  // 수정 모드일 때 종료처리 버튼 (신규 등록 시에는 표시하지 않음)
   endLabel?: string;
   onEndClick?: () => void;
 }

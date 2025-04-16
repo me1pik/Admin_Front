@@ -1,10 +1,9 @@
-// src/components/productregister/SizeDisplaySection.tsx
+// SizeDisplaySection.tsx
 import React, { useState, ChangeEvent } from 'react';
 import styled from 'styled-components';
 import { ProductDetailResponse } from '../../api/adminProduct';
 
 interface SizeDisplaySectionProps {
-  // 만약 추후 product 정보가 필요하면 확장할 수 있습니다.
   product?: ProductDetailResponse;
   sizeProductImg: string;
 }
@@ -23,7 +22,6 @@ interface Labels {
 const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
   sizeProductImg,
 }) => {
-  // 로컬 state를 사용하여 각 텍스트 요소의 초기값을 설정합니다.
   const [labels, setLabels] = useState<Labels>({
     title: '사이즈 표기',
     specTitle: '[ 사이즈 표기 ]',
@@ -35,7 +33,6 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
     note: '*측정 위치에 따라 약간의 오차 있음.',
   });
 
-  // 각 input 필드의 값을 변경하는 핸들러
   const handleLabelChange = (
     field: keyof Labels,
     e: ChangeEvent<HTMLInputElement>
@@ -51,7 +48,6 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
     <SectionBox style={{ flex: '0 0 auto' }}>
       <SectionHeader>
         <Bullet />
-        {/* 제목은 수정이 필요 없으면 readOnly로, 필요시 제거 가능합니다. */}
         <SectionTitleInput value={labels.title} readOnly />
       </SectionHeader>
       <VerticalLine />
@@ -116,7 +112,6 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
 export default SizeDisplaySection;
 
 /* Styled Components */
-
 const SectionBox = styled.div`
   position: relative;
   margin-bottom: 20px;
@@ -151,7 +146,6 @@ const Bullet = styled.div`
   }
 `;
 
-/* 제목 input: readOnly 처리하면 기본 스타일 유지 */
 const SectionTitleInput = styled.input`
   font-family: 'NanumSquare Neo OTF';
   font-weight: 800;
