@@ -1,4 +1,3 @@
-// src/pages/ProductDetail.tsx
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -16,11 +15,8 @@ import {
   UpdateProductRequest,
 } from '../api/adminProduct';
 
-const defaultImages = [
-  'https://via.placeholder.com/140x200?text=Thumbnail',
-  'https://via.placeholder.com/140x200?text=Image+1',
-  // ... 기타 기본 이미지
-];
+// 기본 이미지 배열은 빈 배열
+const defaultImages: (string | null)[] = [];
 
 const ProductDetail: React.FC = () => {
   const { no } = useParams<{ no: string }>();
@@ -30,6 +26,7 @@ const ProductDetail: React.FC = () => {
   const [product, setProduct] = useState<ProductDetailResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
+  // API에서 받아온 이미지를 상태로 관리
   const [images, setImages] = useState<(string | null)[]>(defaultImages);
   const [imageLinks, setImageLinks] =
     useState<(string | null)[]>(defaultImages);
@@ -41,6 +38,13 @@ const ProductDetail: React.FC = () => {
         setError('');
         try {
           const data = await getProductDetail(productId);
+          // API에서 받아온 사이즈 데이터에 measurements가 누락된 경우 기본값을 채워줍니다.
+          if (data.sizes && data.sizes.length > 0) {
+            data.sizes = data.sizes.map((item) => ({
+              size: item.size,
+              measurements: item.measurements || { 어깨: 0, 가슴: 0, 총장: 0 },
+            }));
+          }
           setProduct(data);
           if (data.product_img && data.product_img.length > 0) {
             setImages(data.product_img);
@@ -60,15 +64,22 @@ const ProductDetail: React.FC = () => {
     }
   }, [productId]);
 
+  // DetailTopBoxes에서 변경된 데이터를 product 상태에 반영
+  const handleTopBoxesChange = (
+    changedData: Partial<ProductDetailResponse>
+  ) => {
+    setProduct((prev) => ({ ...prev!, ...changedData }));
+  };
+
   const handleBackClick = () => {
     navigate(-1);
   };
 
+  // 수정 버튼 클릭 시 API에 전체 product 상태를 업데이트 데이터로 전송
   const handleEditClick = async () => {
     if (product) {
       const updateData: UpdateProductRequest = {
-        name: product.name,
-        product_url: product.product_url,
+        ...product,
         product_img: imageLinks.filter((link) => link) as string[],
       };
       try {
@@ -86,7 +97,7 @@ const ProductDetail: React.FC = () => {
   const handleEndClick = async () => {
     if (product) {
       const terminationUpdate: UpdateProductRequest = {
-        // 종료처리 필요한 필드 채워 넣기
+        // 종료처리에 필요한 필드를 채워 넣습니다.
       };
       try {
         const updated = await updateProduct(product.id, terminationUpdate);
@@ -104,6 +115,7 @@ const ProductDetail: React.FC = () => {
     e.preventDefault();
   };
 
+  // 이미지 업로드, 삭제, 링크 변경 및 재정렬 핸들러
   const handleImageUpload = (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
@@ -112,10 +124,16 @@ const ProductDetail: React.FC = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
+        const uploadedImage = reader.result as string;
         setImages((prev) => {
           const newImages = [...prev];
-          newImages[index] = reader.result as string;
+          newImages[index] = uploadedImage;
           return newImages;
+        });
+        setImageLinks((prev) => {
+          const newLinks = [...prev];
+          newLinks[index] = uploadedImage;
+          return newLinks;
         });
       };
       reader.readAsDataURL(file);
@@ -185,13 +203,15 @@ const ProductDetail: React.FC = () => {
 
       {product && (
         <>
-          <DetailTopBoxes product={product} />
+          <DetailTopBoxes
+            product={product}
+            editable={true}
+            onChange={handleTopBoxesChange}
+          />
           <MiddleDivider />
           <FormWrapper onSubmit={handleSubmit}>
             <TwoColumnRow>
-              <SizeGuideSection
-                product={product} /* onSizesChange 콜백 추가 가능 */
-              />
+              <SizeGuideSection product={product} />
               <SizeDisplaySection
                 product={product}
                 sizeProductImg={product.size_picture}
@@ -213,11 +233,7 @@ const ProductDetail: React.FC = () => {
             />
             <MiddleDivider />
             <ProductImageSection
-              images={
-                product.product_img && product.product_img.length > 0
-                  ? product.product_img
-                  : images
-              }
+              images={images}
               imageLinks={imageLinks}
               handleImageUpload={handleImageUpload}
               handleImageDelete={handleImageDelete}
@@ -234,7 +250,7 @@ const ProductDetail: React.FC = () => {
 
 export default ProductDetail;
 
-/* Styled Components */
+/* Styled Components for ProductDetail */
 const Container = styled.div`
   width: 100%;
   margin: 0 auto;
@@ -242,12 +258,14 @@ const Container = styled.div`
   box-sizing: border-box;
   font-family: 'NanumSquare Neo OTF', sans-serif;
 `;
+
 const HeaderRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
 `;
+
 const Title = styled.h1`
   font-family: 'NanumSquare Neo OTF';
   font-weight: 700;
@@ -255,6 +273,7 @@ const Title = styled.h1`
   line-height: 18px;
   color: #000;
 `;
+
 const ProductNumberWrapper = styled.div`
   display: flex;
   align-items: baseline;
@@ -262,32 +281,38 @@ const ProductNumberWrapper = styled.div`
   margin: 10px 0;
   margin-top: 34px;
 `;
+
 const ProductNumberLabel = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 12px;
   color: #000;
 `;
+
 const ProductNumberValue = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
   color: #000;
 `;
+
 const MiddleDivider = styled.hr`
   border: 0;
   border-top: 1px dashed #ddd;
   margin: 30px 0;
 `;
+
 const BottomDivider = styled.hr`
   border: 0;
   border-top: 1px solid #ddd;
   margin: 40px 0 20px;
 `;
+
 const FormWrapper = styled.form`
   display: flex;
   flex-direction: column;
 `;
+
 const TwoColumnRow = styled.div`
   display: flex;
   gap: 50px;

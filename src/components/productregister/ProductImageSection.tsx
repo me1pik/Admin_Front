@@ -1,4 +1,3 @@
-// src/components/productregister/ProductImageSection.tsx
 import React from 'react';
 import styled from 'styled-components';
 
@@ -30,7 +29,6 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
 
   // 드래그 앤 드롭 핸들러
   const onDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
-    // text/plain 타입으로 인덱스를 저장합니다.
     e.dataTransfer.setData('text/plain', index.toString());
     e.dataTransfer.effectAllowed = 'move';
   };
@@ -72,7 +70,6 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
               onDragOver={onDragOver}
               onDrop={(e) => onDrop(e, index)}
             >
-              {/* 인덱스 번호 표시 */}
               <IndexLabel>{index + 1}</IndexLabel>
               {images[index] ? (
                 <>
@@ -85,7 +82,6 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
                       <DeleteButton
                         onClick={(e) => {
                           e.stopPropagation();
-                          // 삭제 버튼 클릭 시, 부모의 handleImageDelete를 호출하여 해당 박스 전체 삭제
                           handleImageDelete(index);
                         }}
                         title='이미지 삭제'
