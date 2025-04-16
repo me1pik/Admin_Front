@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
-import ListButtonDetailSubHeader from '../components/Header/ListButtonDetailSubHeader';
+import TripleButtonDetailSubHeader from '../components/Header/TripleButtonDetailSubHeader';
 import SizeGuideSection from '../components/productregister/SizeGuideSection';
 import SizeDisplaySection from '../components/productregister/SizeDisplaySection';
 import MaterialInfoSection from '../components/productregister/MaterialInfoSection';
@@ -30,26 +30,25 @@ const ProductDetail: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [images, setImages] = useState<(string | null)[]>(defaultImages);
 
-  // 제품정보 수정용 모달 상태
+  // 모달 상태 관리 (확인 및 알림용)
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [modalCallback, setModalCallback] = useState<(() => void) | null>(null);
 
-  // 종료처리용 모달 상태
   const [endModalOpen, setEndModalOpen] = useState(false);
   const [endModalMessage, setEndModalMessage] = useState('');
   const [endModalCallback, setEndModalCallback] = useState<(() => void) | null>(
     null
   );
 
-  // 제품정보 수정 모달: 열기 함수
+  // 모달 열기 함수 (확인 모달 용)
   const showModal = (message: string, callback?: () => void) => {
     setModalMessage(message);
     setModalCallback(() => callback || null);
     setModalOpen(true);
   };
 
-  // 종료처리 모달: 열기 함수
+  // 종료(취소) 모달 열기 함수
   const showEndModal = (message: string, callback?: () => void) => {
     setEndModalMessage(message);
     setEndModalCallback(() => callback || null);
@@ -106,30 +105,76 @@ const ProductDetail: React.FC = () => {
     navigate(-1);
   };
 
-  // "정보수정" 버튼 클릭 시 중앙 상태(product)를 API로 업데이트 후 모달 표시
-  const handleEditClick = async () => {
+  // 등록완료 버튼 클릭 시 (registration: 1)
+  const handleRegisterCompletedClick = () => {
     if (product) {
-      const updateData: UpdateProductRequest = {
-        ...product,
-        product_img: images.filter((img) => img) as string[],
-        product_url: product.product_url,
-      };
-      try {
-        const updated = await updateProduct(product.id, updateData);
-        setProduct(updated);
-        showModal('제품 정보가 수정되었습니다!', () =>
-          navigate('/productlist')
-        );
-      } catch (error) {
-        console.error('제품 정보 수정 실패', error);
-        showModal('제품 정보 수정에 실패하였습니다.');
-      }
+      showModal("제품 상태를 '등록완료'로 변경하시겠습니까?", async () => {
+        try {
+          const updateData: UpdateProductRequest = {
+            ...product,
+            product_img: images.filter((img) => img) as string[],
+            product_url: product.product_url,
+            registration: 1, // 등록완료 상태 코드 (예시)
+          };
+          const updated = await updateProduct(product.id, updateData);
+          setProduct(updated);
+          showModal('제품 상태가 등록완료로 변경되었습니다!', () =>
+            navigate('/productlist')
+          );
+        } catch (error) {
+          console.error('등록완료 업데이트 실패', error);
+          showModal('제품 상태 변경에 실패했습니다.');
+        }
+      });
     }
   };
 
-  // "종료처리" 버튼 클릭 시 종료처리 전용 모달 열기
-  const handleEndClick = () => {
-    showEndModal('수정사항을 취소하시겠습니까?', () => navigate(-1));
+  // 등록대기 버튼 클릭 시 (registration: 0)
+  const handlePendingClick = () => {
+    if (product) {
+      showModal("제품 상태를 '등록대기'로 변경하시겠습니까?", async () => {
+        try {
+          const updateData: UpdateProductRequest = {
+            ...product,
+            product_img: images.filter((img) => img) as string[],
+            product_url: product.product_url,
+            registration: 0, // 등록대기 상태 코드 (예시)
+          };
+          const updated = await updateProduct(product.id, updateData);
+          setProduct(updated);
+          showModal('제품 상태가 등록대기로 변경되었습니다!', () =>
+            navigate('/productlist')
+          );
+        } catch (error) {
+          console.error('등록대기 업데이트 실패', error);
+          showModal('제품 상태 변경에 실패했습니다.');
+        }
+      });
+    }
+  };
+
+  // 판매완료 버튼 클릭 시 (registration: 2)
+  const handleSoldOutClick = () => {
+    if (product) {
+      showModal("제품 상태를 '판매완료'로 변경하시겠습니까?", async () => {
+        try {
+          const updateData: UpdateProductRequest = {
+            ...product,
+            product_img: images.filter((img) => img) as string[],
+            product_url: product.product_url,
+            registration: 2, // 판매완료 상태 코드 (예시)
+          };
+          const updated = await updateProduct(product.id, updateData);
+          setProduct(updated);
+          showModal('제품 상태가 판매완료로 변경되었습니다!', () =>
+            navigate('/productlist')
+          );
+        } catch (error) {
+          console.error('판매완료 업데이트 실패', error);
+          showModal('제품 상태 변경에 실패했습니다.');
+        }
+      });
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -182,11 +227,6 @@ const ProductDetail: React.FC = () => {
     });
   };
 
-  // 제품 URL 변경 핸들러
-  const handleProductUrlChange = (value: string) => {
-    handleProductChange({ product_url: value });
-  };
-
   if (loading) return <Container>Loading...</Container>;
   if (error) return <Container>{error}</Container>;
 
@@ -195,13 +235,15 @@ const ProductDetail: React.FC = () => {
       <HeaderRow>
         <Title>제품관리</Title>
       </HeaderRow>
-      <ListButtonDetailSubHeader
+      <TripleButtonDetailSubHeader
         backLabel='목록이동'
         onBackClick={handleBackClick}
-        editLabel='정보수정'
-        onEditClick={handleEditClick}
-        endLabel='종료처리'
-        onEndClick={handleEndClick}
+        registerCompletedLabel='등록완료'
+        onRegisterCompletedClick={handleRegisterCompletedClick}
+        pendingLabel='등록대기'
+        onPendingClick={handlePendingClick}
+        soldOutLabel='판매완료'
+        onSoldOutClick={handleSoldOutClick}
       />
       <ProductNumberWrapper>
         <ProductNumberLabel>번호</ProductNumberLabel>
@@ -252,7 +294,6 @@ const ProductDetail: React.FC = () => {
         </>
       )}
 
-      {/* 정보수정용 모달 */}
       <ReusableModal
         isOpen={modalOpen}
         onClose={() => {
@@ -288,6 +329,7 @@ const ProductDetail: React.FC = () => {
 };
 
 export default ProductDetail;
+
 /* Styled Components for ProductDetail */
 const Container = styled.div`
   width: 100%;
