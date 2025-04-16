@@ -1,5 +1,5 @@
-import React from "react";
-import styled from "styled-components";
+import React from 'react';
+import styled from 'styled-components';
 
 type ModalProps = {
   isOpen: boolean;
@@ -16,8 +16,8 @@ const ReusableModal: React.FC<ModalProps> = ({
   onClose,
   title,
   children,
-  width = "100%",
-  height = "360px",
+  width = '100%',
+  height = '360px',
   actions,
 }) => {
   if (!isOpen) return null;
@@ -44,20 +44,17 @@ export default ReusableModal;
 
 const StyledModal = styled.div`
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 27px;
   z-index: 9999;
-  width: 90vw;
-  height: 100vh;
-  max-width: 600px;
 `;
-
 const ModalContent = styled.div<{ width: string; height: string }>`
   background-color: #ffffff;
   padding: 20px;

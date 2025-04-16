@@ -9,6 +9,9 @@ import MaterialInfoSection from '../components/productregister/MaterialInfoSecti
 import FabricInfoSection from '../components/productregister/FabricInfoSection';
 import ProductImageSection from '../components/productregister/ProductImageSection';
 import DetailTopBoxes from '../components/DetailTopBoxes';
+import ReusableModal from '../components/ReusableModal';
+import ReusableModal2 from '../components/ReusableModal2';
+
 import {
   getProductDetail,
   updateProduct,
@@ -16,7 +19,6 @@ import {
   UpdateProductRequest,
 } from '../api/adminProduct';
 
-// 기본 이미지 배열은 빈 배열
 const defaultImages: (string | null)[] = [];
 
 const ProductDetail: React.FC = () => {
@@ -27,12 +29,37 @@ const ProductDetail: React.FC = () => {
   const [product, setProduct] = useState<ProductDetailResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
-  // API에서 받아온 이미지를 상태로 관리
   const [images, setImages] = useState<(string | null)[]>(defaultImages);
   const [imageLinks, setImageLinks] =
     useState<(string | null)[]>(defaultImages);
 
-  // 중앙 업데이트 함수: 모든 변경 내용을 product 상태에 반영 (메모이제이션)
+  // 제품정보 수정용 모달 상태
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalCallback, setModalCallback] = useState<(() => void) | null>(null);
+
+  // 종료처리용 모달 상태
+  const [endModalOpen, setEndModalOpen] = useState(false);
+  const [endModalMessage, setEndModalMessage] = useState('');
+  const [endModalCallback, setEndModalCallback] = useState<(() => void) | null>(
+    null
+  );
+
+  // 제품정보 수정 모달: 열기 함수
+  const showModal = (message: string, callback?: () => void) => {
+    setModalMessage(message);
+    setModalCallback(() => callback || null);
+    setModalOpen(true);
+  };
+
+  // 종료처리 모달: 열기 함수
+  const showEndModal = (message: string, callback?: () => void) => {
+    setEndModalMessage(message);
+    setEndModalCallback(() => callback || null);
+    setEndModalOpen(true);
+  };
+
+  // 중앙 업데이트 함수 (메모이제이션)
   const handleProductChange = useCallback(
     (data: Partial<ProductDetailResponse>) => {
       setProduct((prev) => ({ ...prev!, ...data }));
@@ -40,9 +67,8 @@ const ProductDetail: React.FC = () => {
     []
   );
 
-  // onSizesChange에 전달할 콜백을 별도로 메모이제이션
   const handleSizesChange = useCallback(
-    (sizes) => {
+    (sizes: ProductDetailResponse['sizes']) => {
       handleProductChange({ sizes });
     },
     [handleProductChange]
@@ -55,7 +81,6 @@ const ProductDetail: React.FC = () => {
         setError('');
         try {
           const data = await getProductDetail(productId);
-          // API에서 받아온 사이즈 데이터에 measurements가 누락된 경우 기본값 채우기
           if (data.sizes && data.sizes.length > 0) {
             data.sizes = data.sizes.map((item) => ({
               size: item.size,
@@ -85,7 +110,7 @@ const ProductDetail: React.FC = () => {
     navigate(-1);
   };
 
-  // "정보수정" 버튼 클릭 시 중앙 상태(product)를 API로 업데이트
+  // "정보수정" 버튼 클릭 시 중앙 상태(product)를 API로 업데이트 후 모달 표시
   const handleEditClick = async () => {
     if (product) {
       const updateData: UpdateProductRequest = {
@@ -95,37 +120,26 @@ const ProductDetail: React.FC = () => {
       try {
         const updated = await updateProduct(product.id, updateData);
         setProduct(updated);
-        alert('제품 정보가 수정되었습니다!');
-        navigate('/productlist');
+        showModal('제품 정보가 수정되었습니다!', () =>
+          navigate('/productlist')
+        );
       } catch (error) {
         console.error('제품 정보 수정 실패', error);
-        alert('제품 정보 수정에 실패하였습니다.');
+        showModal('제품 정보 수정에 실패하였습니다.');
       }
     }
   };
 
-  const handleEndClick = async () => {
-    if (product) {
-      const terminationUpdate: UpdateProductRequest = {
-        // 종료처리에 필요한 필드를 채워 넣습니다.
-      };
-      try {
-        const updated = await updateProduct(product.id, terminationUpdate);
-        setProduct(updated);
-        alert('종료 처리가 완료되었습니다!');
-        navigate('/productlist');
-      } catch (error) {
-        console.error('종료 처리 실패', error);
-        alert('종료 처리에 실패하였습니다.');
-      }
-    }
+  // "종료처리" 버튼 클릭 시 종료처리 전용 모달 열기
+  const handleEndClick = () => {
+    showEndModal('수정사항을 취소하시겠습니까?', () => navigate(-1));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
   };
 
-  // 이미지 관련 핸들러들: 수정 시 중앙 상태에도 반영
+  // 이미지 관련 핸들러들
   const handleImageUpload = (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
@@ -143,7 +157,6 @@ const ProductDetail: React.FC = () => {
         setImageLinks((prev) => {
           const newLinks = [...prev];
           newLinks[index] = uploadedImage;
-          // 중앙 상태 업데이트: product_img 필드 업데이트
           handleProductChange({
             product_img: newLinks.filter((link) => !!link) as string[],
           });
@@ -207,7 +220,6 @@ const ProductDetail: React.FC = () => {
       <HeaderRow>
         <Title>제품관리</Title>
       </HeaderRow>
-
       <ListButtonDetailSubHeader
         backLabel='목록이동'
         onBackClick={handleBackClick}
@@ -216,14 +228,12 @@ const ProductDetail: React.FC = () => {
         endLabel='종료처리'
         onEndClick={handleEndClick}
       />
-
       <ProductNumberWrapper>
         <ProductNumberLabel>번호</ProductNumberLabel>
         <ProductNumberValue>
           {product ? product.id : '로딩 중...'}
         </ProductNumberValue>
       </ProductNumberWrapper>
-
       {product && (
         <>
           <DetailTopBoxes
@@ -267,6 +277,40 @@ const ProductDetail: React.FC = () => {
           </FormWrapper>
         </>
       )}
+
+      {/* 정보수정용 모달 */}
+      <ReusableModal
+        isOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          if (modalCallback) modalCallback();
+        }}
+        onConfirm={() => {
+          setModalOpen(false);
+          if (modalCallback) modalCallback();
+        }}
+        title='알림'
+        width='400px'
+        height='200px'
+      >
+        {modalMessage}
+      </ReusableModal>
+
+      <ReusableModal2
+        isOpen={endModalOpen}
+        // "아니요" 버튼 클릭 시 단순히 모달만 닫도록 onClose에 callback을 제거
+        onClose={() => setEndModalOpen(false)}
+        // "네" 버튼 클릭 시 callback 실행 후 모달 닫기
+        onConfirm={() => {
+          setEndModalOpen(false);
+          if (endModalCallback) endModalCallback();
+        }}
+        title='알림'
+        width='400px'
+        height='200px'
+      >
+        {endModalMessage}
+      </ReusableModal2>
     </Container>
   );
 };
