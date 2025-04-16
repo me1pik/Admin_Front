@@ -1,23 +1,47 @@
-// src/components/productregister/MaterialInfoSection.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { ProductDetailResponse } from '../../api/adminProduct';
 
 interface MaterialInfoSectionProps {
   product: ProductDetailResponse;
   onChange?: (data: Partial<ProductDetailResponse>) => void;
+  editable?: boolean;
 }
 
 const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
   product,
   onChange,
+  editable = false,
 }) => {
-  // 체크박스 변화 시 호출되는 핸들러
+  // 초기 선택값은 product에서 받아오거나, 없으면 기본값으로 설정
+  const [selectedOptions, setSelectedOptions] = useState({
+    thickness: product.thickness || '적당',
+    elasticity: product.elasticity || '없음',
+    lining: product.lining || '기모안감',
+    touch: product.touch || '적당',
+    transparency: product.transparency || '적당',
+  });
+
+  // 제품 prop이 변경되면 내부 상태도 업데이트 (수정 후 저장 후 부모에서 다시 내려줄 경우)
+  useEffect(() => {
+    setSelectedOptions({
+      thickness: product.thickness || '적당',
+      elasticity: product.elasticity || '없음',
+      lining: product.lining || '기모안감',
+      touch: product.touch || '적당',
+      transparency: product.transparency || '적당',
+    });
+  }, [product]);
+
+  // 체크박스 클릭 시 해당 그룹의 값을 업데이트하여 단일 선택을 구현
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, checked } = e.target;
+    if (!editable) return; // 수정 모드가 아니라면 이벤트 무시
+    const { name, value } = e.target;
+    if (selectedOptions[name as keyof typeof selectedOptions] === value) return;
+    const newOptions = { ...selectedOptions, [name]: value };
+    setSelectedOptions(newOptions);
     if (onChange) {
-      // 체크되면 해당 value, 아니면 빈 문자열을 전달
-      onChange({ [name]: checked ? value : '' });
+      onChange({ [name]: value });
     }
   };
 
@@ -29,6 +53,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
       </SectionHeader>
       <VerticalLine />
       <Column>
+        {/* 두께감 그룹 */}
         <CheckGroupRow>
           <Label>두께감</Label>
           <SizeCheckGroup>
@@ -37,7 +62,9 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
                 type='checkbox'
                 name='thickness'
                 value='매우 두꺼움'
+                checked={selectedOptions.thickness === '매우 두꺼움'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
               매우 두꺼움
             </SizeCheckboxLabel>
@@ -46,7 +73,9 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
                 type='checkbox'
                 name='thickness'
                 value='두꺼움'
+                checked={selectedOptions.thickness === '두꺼움'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
               두꺼움
             </SizeCheckboxLabel>
@@ -55,8 +84,9 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
                 type='checkbox'
                 name='thickness'
                 value='적당'
-                defaultChecked
+                checked={selectedOptions.thickness === '적당'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
               적당
             </SizeCheckboxLabel>
@@ -65,13 +95,16 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
                 type='checkbox'
                 name='thickness'
                 value='얇음'
+                checked={selectedOptions.thickness === '얇음'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
               얇음
             </SizeCheckboxLabel>
           </SizeCheckGroup>
         </CheckGroupRow>
 
+        {/* 신축성 그룹 */}
         <CheckGroupRow>
           <Label>신축성</Label>
           <SizeCheckGroup>
@@ -80,26 +113,31 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
                 type='checkbox'
                 name='elasticity'
                 value='좋음'
+                checked={selectedOptions.elasticity === '좋음'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
-              {product.elasticity || '좋음'}
+              좋음
             </SizeCheckboxLabel>
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
               <SizeCheckbox
                 type='checkbox'
                 name='elasticity'
                 value='약간있음'
+                checked={selectedOptions.elasticity === '약간있음'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
-              {product.elasticity || '약간있음'}
+              약간있음
             </SizeCheckboxLabel>
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
               <SizeCheckbox
                 type='checkbox'
                 name='elasticity'
                 value='없음'
-                defaultChecked
+                checked={selectedOptions.elasticity === '없음'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
               없음
             </SizeCheckboxLabel>
@@ -108,13 +146,16 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
                 type='checkbox'
                 name='elasticity'
                 value='허리벤딩'
+                checked={selectedOptions.elasticity === '허리벤딩'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
               허리벤딩
             </SizeCheckboxLabel>
           </SizeCheckGroup>
         </CheckGroupRow>
 
+        {/* 안감 그룹 */}
         <CheckGroupRow>
           <Label>안감</Label>
           <SizeCheckGroup>
@@ -123,7 +164,9 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
                 type='checkbox'
                 name='lining'
                 value='정체안감'
+                checked={selectedOptions.lining === '정체안감'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
               정체안감
             </SizeCheckboxLabel>
@@ -132,7 +175,9 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
                 type='checkbox'
                 name='lining'
                 value='부분안감'
+                checked={selectedOptions.lining === '부분안감'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
               부분안감
             </SizeCheckboxLabel>
@@ -141,8 +186,9 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
                 type='checkbox'
                 name='lining'
                 value='기모안감'
-                defaultChecked
+                checked={selectedOptions.lining === '기모안감'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
               기모안감
             </SizeCheckboxLabel>
@@ -151,13 +197,16 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
                 type='checkbox'
                 name='lining'
                 value='안감없음'
+                checked={selectedOptions.lining === '안감없음'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
               안감없음
             </SizeCheckboxLabel>
           </SizeCheckGroup>
         </CheckGroupRow>
 
+        {/* 촉감 그룹 */}
         <CheckGroupRow>
           <Label>촉감</Label>
           <SizeCheckGroup>
@@ -166,7 +215,9 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
                 type='checkbox'
                 name='touch'
                 value='뻣뻣함'
+                checked={selectedOptions.touch === '뻣뻣함'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
               뻣뻣함
             </SizeCheckboxLabel>
@@ -175,7 +226,9 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
                 type='checkbox'
                 name='touch'
                 value='까슬함'
+                checked={selectedOptions.touch === '까슬함'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
               까슬함
             </SizeCheckboxLabel>
@@ -184,8 +237,9 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
                 type='checkbox'
                 name='touch'
                 value='적당'
-                defaultChecked
+                checked={selectedOptions.touch === '적당'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
               적당
             </SizeCheckboxLabel>
@@ -194,13 +248,16 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
                 type='checkbox'
                 name='touch'
                 value='부드러움'
+                checked={selectedOptions.touch === '부드러움'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
               부드러움
             </SizeCheckboxLabel>
           </SizeCheckGroup>
         </CheckGroupRow>
 
+        {/* 비침 그룹 */}
         <CheckGroupRow>
           <Label>비침</Label>
           <SizeCheckGroup>
@@ -209,7 +266,9 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
                 type='checkbox'
                 name='transparency'
                 value='비침있음'
+                checked={selectedOptions.transparency === '비침있음'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
               비침있음
             </SizeCheckboxLabel>
@@ -218,7 +277,9 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
                 type='checkbox'
                 name='transparency'
                 value='약간있음'
+                checked={selectedOptions.transparency === '약간있음'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
               약간있음
             </SizeCheckboxLabel>
@@ -227,8 +288,9 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
                 type='checkbox'
                 name='transparency'
                 value='적당'
-                defaultChecked
+                checked={selectedOptions.transparency === '적당'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
               적당
             </SizeCheckboxLabel>
@@ -237,7 +299,9 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
                 type='checkbox'
                 name='transparency'
                 value='비침없음'
+                checked={selectedOptions.transparency === '비침없음'}
                 onChange={handleCheckboxChange}
+                disabled={!editable}
               />
               비침없음
             </SizeCheckboxLabel>
@@ -250,6 +314,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
 
 export default MaterialInfoSection;
 
+/* styled-components 스타일 */
 const SectionBox = styled.div`
   position: relative;
   margin-bottom: 20px;

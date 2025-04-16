@@ -75,7 +75,7 @@ const ProductDetail: React.FC = () => {
     navigate(-1);
   };
 
-  // 수정 버튼 클릭 시 API에 전체 product 상태를 업데이트 데이터로 전송
+  // "정보수정" 버튼 클릭 시 제품 전체 상태를 업데이트 API로 전송
   const handleEditClick = async () => {
     if (product) {
       const updateData: UpdateProductRequest = {
@@ -218,8 +218,10 @@ const ProductDetail: React.FC = () => {
               />
             </TwoColumnRow>
             <MiddleDivider />
+            {/* MaterialInfoSection는 항상 수정 가능 */}
             <MaterialInfoSection
               product={product}
+              editable={true}
               onChange={(data: Partial<ProductDetailResponse>) =>
                 setProduct((prev) => ({ ...prev!, ...data }))
               }
