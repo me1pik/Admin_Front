@@ -9,6 +9,7 @@ interface ProductImageSectionProps {
   ) => void;
   handleImageDelete: (index: number) => void;
   handleImageReorder: (dragIndex: number, hoverIndex: number) => void;
+  productUrl: string;
 }
 
 const ProductImageSection: React.FC<ProductImageSectionProps> = ({
@@ -16,6 +17,7 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
   handleImageUpload,
   handleImageDelete,
   handleImageReorder,
+  productUrl,
 }) => {
   const imageLabels = new Array(10)
     .fill('')
@@ -136,6 +138,13 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
           </ImageColumn>
         ))}
       </ImageGrid>
+      {/* API에서 받아온 제품 URL 표시 */}
+      <ProductUrlContainer>
+        <ProductUrlLabel>제품 URL</ProductUrlLabel>
+        <ProductUrlText>
+          {productUrl || '등록된 URL이 없습니다.'}
+        </ProductUrlText>
+      </ProductUrlContainer>
     </SectionBox>
   );
 };
@@ -307,4 +316,25 @@ const ImageLabel = styled.div`
   font-weight: 700;
   margin-top: 20px;
   text-align: center;
+`;
+
+/* 제품 URL 입력란 관련 Styled Components */
+const ProductUrlContainer = styled.div`
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+`;
+
+const ProductUrlLabel = styled.label`
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #000;
+`;
+
+const ProductUrlText = styled.div`
+  font-size: 14px;
+  color: #000;
+  word-break: break-all;
+  margin-top: 4px;
 `;

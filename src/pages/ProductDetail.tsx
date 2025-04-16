@@ -1,4 +1,3 @@
-// ProductDetail.tsx
 import React, { useEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -30,8 +29,6 @@ const ProductDetail: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [images, setImages] = useState<(string | null)[]>(defaultImages);
-  const [imageLinks, setImageLinks] =
-    useState<(string | null)[]>(defaultImages);
 
   // 제품정보 수정용 모달 상태
   const [modalOpen, setModalOpen] = useState(false);
@@ -90,7 +87,6 @@ const ProductDetail: React.FC = () => {
           setProduct(data);
           if (data.product_img && data.product_img.length > 0) {
             setImages(data.product_img);
-            setImageLinks(data.product_img);
           }
         } catch (err) {
           console.error('제품 상세 정보를 불러오는데 실패했습니다.', err);
@@ -115,7 +111,8 @@ const ProductDetail: React.FC = () => {
     if (product) {
       const updateData: UpdateProductRequest = {
         ...product,
-        product_img: imageLinks.filter((link) => link) as string[],
+        product_img: images.filter((img) => img) as string[],
+        product_url: product.product_url,
       };
       try {
         const updated = await updateProduct(product.id, updateData);
@@ -152,15 +149,10 @@ const ProductDetail: React.FC = () => {
         setImages((prev) => {
           const newImages = [...prev];
           newImages[index] = uploadedImage;
-          return newImages;
-        });
-        setImageLinks((prev) => {
-          const newLinks = [...prev];
-          newLinks[index] = uploadedImage;
           handleProductChange({
-            product_img: newLinks.filter((link) => !!link) as string[],
+            product_img: newImages.filter((img) => !!img) as string[],
           });
-          return newLinks;
+          return newImages;
         });
       };
       reader.readAsDataURL(file);
@@ -171,26 +163,10 @@ const ProductDetail: React.FC = () => {
     setImages((prev) => {
       const newImages = [...prev];
       newImages[index] = null;
+      handleProductChange({
+        product_img: newImages.filter((img) => !!img) as string[],
+      });
       return newImages;
-    });
-    setImageLinks((prev) => {
-      const newLinks = [...prev];
-      newLinks[index] = '';
-      handleProductChange({
-        product_img: newLinks.filter((link) => !!link) as string[],
-      });
-      return newLinks;
-    });
-  };
-
-  const handleImageLinkChange = (index: number, value: string) => {
-    setImageLinks((prev) => {
-      const newLinks = [...prev];
-      newLinks[index] = value;
-      handleProductChange({
-        product_img: newLinks.filter((link) => !!link) as string[],
-      });
-      return newLinks;
     });
   };
 
@@ -199,17 +175,16 @@ const ProductDetail: React.FC = () => {
       const next = [...prev];
       const [removed] = next.splice(dragIndex, 1);
       next.splice(hoverIndex, 0, removed);
-      return next;
-    });
-    setImageLinks((prev) => {
-      const next = [...prev];
-      const [removed] = next.splice(dragIndex, 1);
-      next.splice(hoverIndex, 0, removed);
       handleProductChange({
-        product_img: next.filter((link) => !!link) as string[],
+        product_img: next.filter((img) => !!img) as string[],
       });
       return next;
     });
+  };
+
+  // 제품 URL 변경 핸들러
+  const handleProductUrlChange = (value: string) => {
+    handleProductChange({ product_url: value });
   };
 
   if (loading) return <Container>Loading...</Container>;
@@ -267,11 +242,10 @@ const ProductDetail: React.FC = () => {
             <MiddleDivider />
             <ProductImageSection
               images={images}
-              imageLinks={imageLinks}
               handleImageUpload={handleImageUpload}
               handleImageDelete={handleImageDelete}
-              handleImageLinkChange={handleImageLinkChange}
               handleImageReorder={handleImageReorder}
+              productUrl={product.product_url}
             />
             <BottomDivider />
           </FormWrapper>
@@ -298,9 +272,7 @@ const ProductDetail: React.FC = () => {
 
       <ReusableModal2
         isOpen={endModalOpen}
-        // "아니요" 버튼 클릭 시 단순히 모달만 닫도록 onClose에 callback을 제거
         onClose={() => setEndModalOpen(false)}
-        // "네" 버튼 클릭 시 callback 실행 후 모달 닫기
         onConfirm={() => {
           setEndModalOpen(false);
           if (endModalCallback) endModalCallback();
@@ -316,7 +288,6 @@ const ProductDetail: React.FC = () => {
 };
 
 export default ProductDetail;
-
 /* Styled Components for ProductDetail */
 const Container = styled.div`
   width: 100%;
