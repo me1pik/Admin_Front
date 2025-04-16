@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { FaTimes, FaPlus } from 'react-icons/fa'; // FaTimes와 FaPlus 아이콘 임포트
 
 interface ProductImageSectionProps {
   images?: (string | null)[];
@@ -81,7 +82,7 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
                         }}
                         title='이미지 삭제'
                       >
-                        x
+                        <FaTimes size={16} color='#d32f2f' />
                       </DeleteButton>
                     </ThumbnailImageBox>
                   ) : (
@@ -97,7 +98,7 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
                         }}
                         title='이미지 삭제'
                       >
-                        x
+                        <FaTimes size={16} color='#d32f2f' />
                       </DeleteButton>
                     </ImageBox>
                   )}
@@ -111,7 +112,7 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
                         onClick={() => onSlotAddClick(index)}
                         title='이미지 추가'
                       >
-                        +
+                        <FaPlus size={14} color='#0026fc' />
                       </SlotAddButton>
                     </ThumbnailImageBox>
                   ) : (
@@ -121,7 +122,7 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
                         onClick={() => onSlotAddClick(index)}
                         title='이미지 추가'
                       >
-                        +
+                        <FaPlus size={14} color='#0026fc' />
                       </SlotAddButton>
                     </ImageBox>
                   )}
@@ -274,15 +275,20 @@ const DeleteButton = styled.button`
   top: 4px;
   right: 4px;
   background: #fff;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  font-weight: bold;
-  padding: 2px 6px;
+  border: none;
+  padding: 4px;
   cursor: pointer;
   border-radius: 4px;
   z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 0.2s,
+    background-color 0.2s;
   &:hover {
-    opacity: 0.8;
+    transform: scale(1.1);
+    background-color: #fce4ec;
   }
 `;
 
@@ -291,9 +297,9 @@ const SlotAddButton = styled.button`
   bottom: 4px;
   right: 4px;
   background: #fff;
-  border: 1px solid #ccc;
+  border: none;
+  padding: 4px;
   font-size: 18px;
-  font-weight: bold;
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -302,8 +308,12 @@ const SlotAddButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+  transition:
+    transform 0.2s,
+    background-color 0.2s;
   &:hover {
-    opacity: 0.8;
+    transform: scale(1.1);
+    background-color: #e3f2fd;
   }
 `;
 
@@ -318,7 +328,6 @@ const ImageLabel = styled.div`
   text-align: center;
 `;
 
-/* 제품 URL 입력란 관련 Styled Components */
 const ProductUrlContainer = styled.div`
   margin-top: 20px;
   display: flex;
