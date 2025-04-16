@@ -8,8 +8,11 @@ import { ProductDetailResponse } from '../api/adminProduct';
 
 interface DetailTopBoxesProps {
   product: ProductDetailResponse;
+  // rental 필드는 onChange를 통해 전달 가능하므로 ProductDetailResponse에 포함되지 않아도 됨
   editable?: boolean;
-  onChange?: (data: Partial<ProductDetailResponse>) => void;
+  onChange?: (
+    data: Partial<ProductDetailResponse> & { rental?: number }
+  ) => void;
 }
 
 const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
@@ -18,6 +21,10 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   onChange,
 }) => {
   const defaultSizes = ['44', '55', '66', '77', 'Free'];
+
+  // 기존 연산을 제거하고, product 객체의 rental 값을 직접 사용
+  // ProductDetailResponse에 rental이 없으므로, 타입 단언을 통해 접근합니다.
+  const rentalValue = (product as any).rental ?? 0;
 
   // 사이즈 박스 토글 함수: 선택되어 있으면 제거, 없으면 추가
   const handleToggle = (defaultSize: string) => {
@@ -216,11 +223,19 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
             </Row>
             <Row>
               <Label>대여</Label>
-              <Value>
-                {(
-                  product.price.originalPrice - product.price.finalPrice
-                ).toLocaleString()}
-              </Value>
+              {editable ? (
+                <Input
+                  type='number'
+                  value={rentalValue}
+                  onChange={(e) =>
+                    onChange &&
+                    // 대여 값은 product 객체의 최상위 rental 속성으로 업데이트
+                    onChange({ rental: Number(e.target.value) })
+                  }
+                />
+              ) : (
+                <Value>{rentalValue.toLocaleString()}</Value>
+              )}
             </Row>
           </Content>
         </Box>
