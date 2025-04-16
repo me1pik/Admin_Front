@@ -46,7 +46,9 @@ const ListButtonDetailSubHeader: React.FC<DetailSubHeaderProps> = ({
         {backLabel}
       </LeftButton>
       <RightButtons>
-        <EditButton onClick={handleEdit}>{editLabel}</EditButton>
+        <EditButton onClick={handleEdit} single={!endLabel || !onEndClick}>
+          {editLabel}
+        </EditButton>
         {endLabel && onEndClick && (
           <EndButton onClick={handleEnd}>{endLabel}</EndButton>
         )}
@@ -105,7 +107,8 @@ const RightButtons = styled.div`
   gap: 0px;
 `;
 
-const EditButton = styled.button`
+// 수정된 EditButton: 단독인 경우 양쪽 모두 둥글게 처리
+const EditButton = styled.button<{ single?: boolean }>`
   width: 100px;
   height: 40px;
   font-family: 'NanumSquare Neo OTF';
@@ -117,7 +120,7 @@ const EditButton = styled.button`
   background-color: #ffffff;
   color: #000000;
   cursor: pointer;
-  border-radius: 8px 0 0 8px;
+  border-radius: ${(props) => (props.single ? '8px' : '8px 0 0 8px')};
   &:hover {
     background-color: #dddddd;
   }

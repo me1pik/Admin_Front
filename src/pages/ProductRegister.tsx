@@ -214,14 +214,6 @@ const ProductRegister: React.FC = () => {
     });
   };
 
-  const handleImageLinkChange = (index: number, value: string) => {
-    setImageLinks((prev) => {
-      const newLinks = [...prev];
-      newLinks[index] = value;
-      return newLinks;
-    });
-  };
-
   const handleImageReorder = (dragIndex: number, hoverIndex: number) => {
     setImages((prev) => {
       const next = [...prev];
@@ -300,11 +292,10 @@ const ProductRegister: React.FC = () => {
 
         <ProductImageSection
           images={productDetail.product_img}
-          imageLinks={imageLinks}
           handleImageUpload={handleImageUpload}
           handleImageDelete={handleImageDelete}
-          handleImageLinkChange={handleImageLinkChange}
           handleImageReorder={handleImageReorder}
+          productUrl={productDetail.product_url}
         />
 
         <BottomDivider />

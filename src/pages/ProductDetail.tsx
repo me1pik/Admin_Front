@@ -1,3 +1,4 @@
+// src/pages/ProductDetail.tsx
 import React, { useEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -9,7 +10,7 @@ import FabricInfoSection from '../components/productregister/FabricInfoSection';
 import ProductImageSection from '../components/productregister/ProductImageSection';
 import DetailTopBoxes from '../components/DetailTopBoxes';
 import ReusableModal from '../components/ReusableModal';
-import ReusableModal2 from '../components/ReusableModal2';
+// ※ ReusableModal2는 더 이상 사용되지 않으므로 import하지 않습니다.
 
 import {
   getProductDetail,
@@ -35,24 +36,18 @@ const ProductDetail: React.FC = () => {
   const [modalMessage, setModalMessage] = useState('');
   const [modalCallback, setModalCallback] = useState<(() => void) | null>(null);
 
-  const [endModalOpen, setEndModalOpen] = useState(false);
-  const [endModalMessage, setEndModalMessage] = useState('');
-  const [endModalCallback, setEndModalCallback] = useState<(() => void) | null>(
-    null
-  );
+  // 사용하지 않는 showEndModal 함수 삭제
+  // const showEndModal = (message: string, callback?: () => void) => {
+  //   setEndModalMessage(message);
+  //   setEndModalCallback(() => callback || null);
+  //   setEndModalOpen(true);
+  // };
 
   // 모달 열기 함수 (확인 모달 용)
   const showModal = (message: string, callback?: () => void) => {
     setModalMessage(message);
     setModalCallback(() => callback || null);
     setModalOpen(true);
-  };
-
-  // 종료(취소) 모달 열기 함수
-  const showEndModal = (message: string, callback?: () => void) => {
-    setEndModalMessage(message);
-    setEndModalCallback(() => callback || null);
-    setEndModalOpen(true);
   };
 
   // 중앙 업데이트 함수 (메모이제이션)
@@ -114,7 +109,7 @@ const ProductDetail: React.FC = () => {
             ...product,
             product_img: images.filter((img) => img) as string[],
             product_url: product.product_url,
-            registration: 1, // 등록완료 상태 코드 (예시)
+            registration: 1, // 등록완료 상태 코드
           };
           const updated = await updateProduct(product.id, updateData);
           setProduct(updated);
@@ -138,7 +133,7 @@ const ProductDetail: React.FC = () => {
             ...product,
             product_img: images.filter((img) => img) as string[],
             product_url: product.product_url,
-            registration: 0, // 등록대기 상태 코드 (예시)
+            registration: 0, // 등록대기 상태 코드
           };
           const updated = await updateProduct(product.id, updateData);
           setProduct(updated);
@@ -162,7 +157,7 @@ const ProductDetail: React.FC = () => {
             ...product,
             product_img: images.filter((img) => img) as string[],
             product_url: product.product_url,
-            registration: 2, // 판매완료 상태 코드 (예시)
+            registration: 2, // 판매완료 상태 코드
           };
           const updated = await updateProduct(product.id, updateData);
           setProduct(updated);
@@ -310,20 +305,6 @@ const ProductDetail: React.FC = () => {
       >
         {modalMessage}
       </ReusableModal>
-
-      <ReusableModal2
-        isOpen={endModalOpen}
-        onClose={() => setEndModalOpen(false)}
-        onConfirm={() => {
-          setEndModalOpen(false);
-          if (endModalCallback) endModalCallback();
-        }}
-        title='알림'
-        width='400px'
-        height='200px'
-      >
-        {endModalMessage}
-      </ReusableModal2>
     </Container>
   );
 };
