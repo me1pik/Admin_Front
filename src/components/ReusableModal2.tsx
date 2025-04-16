@@ -4,14 +4,15 @@ import styled from 'styled-components';
 type ModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm?: () => void;
+  onConfirm?: () => void; // onConfirm을 선택적 프로퍼티로 추가합니다.
   title?: string;
   children: React.ReactNode;
   width?: string;
   height?: string;
+  actions?: React.ReactNode;
 };
 
-const ReusableModal2: React.FC<ModalProps> = ({
+const ReusableModal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
   onConfirm,
@@ -19,12 +20,16 @@ const ReusableModal2: React.FC<ModalProps> = ({
   children,
   width = '100%',
   height = '360px',
+  actions,
 }) => {
   if (!isOpen) return null;
 
-  const handleConfirmClick = () => {
-    if (onConfirm) onConfirm();
-    onClose(); // ✅ 네 버튼 클릭 시 모달 닫기
+  // onConfirm이 있다면 호출하고, 없다면 onClose를 호출합니다.
+  const handleButtonClick = () => {
+    if (onConfirm) {
+      onConfirm();
+    }
+    onClose();
   };
 
   return (
@@ -36,16 +41,16 @@ const ReusableModal2: React.FC<ModalProps> = ({
           </ModalHeader>
         )}
         <ModalBody>{children}</ModalBody>
+        {actions && <ModalActions>{actions}</ModalActions>}
         <CloseButtonWrapper>
-          <NoButton onClick={onClose}>아니요</NoButton>
-          {onConfirm && <YesButton onClick={handleConfirmClick}>네</YesButton>}
+          <CloseButton onClick={handleButtonClick}>확인</CloseButton>
         </CloseButtonWrapper>
       </ModalContent>
     </StyledModal>
   );
 };
 
-export default ReusableModal2;
+export default ReusableModal;
 
 const StyledModal = styled.div`
   position: fixed;
@@ -69,25 +74,28 @@ const ModalContent = styled.div<{ width: string; height: string }>`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  max-width: 600px;
 `;
 
 const ModalHeader = styled.div`
   display: flex;
   flex-direction: column;
+  margin-bottom: 10px;
 `;
 
 const ModalTitle = styled.h2`
-  font-size: 16px;
+  font-size: 18px;
+  text-align: left;
   font-weight: bold;
+  color: #000000;
+  margin: 0;
 `;
 
 const ModalBody = styled.div`
+  flex: 1;
   font-size: 14px;
   font-weight: 400;
+  color: #333333;
   text-align: center;
-  /* max-height: 230px; */
-  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -97,25 +105,11 @@ const ModalBody = styled.div`
 
 const CloseButtonWrapper = styled.div`
   display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 10px;
+  justify-content: center;
 `;
 
-const NoButton = styled.button`
-  flex: 1;
-  height: 50px;
-  background: #cccccc;
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
-`;
-
-const YesButton = styled.button`
-  flex: 1;
+const CloseButton = styled.button`
+  width: 100%;
   height: 50px;
   background-color: #000000;
   color: #ffffff;
@@ -124,4 +118,11 @@ const YesButton = styled.button`
   cursor: pointer;
   font-size: 16px;
   font-weight: bold;
+`;
+
+const ModalActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
 `;

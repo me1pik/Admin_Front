@@ -4,6 +4,7 @@ import styled from 'styled-components';
 type ModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  onConfirm?: () => void; // onConfirm 프로퍼티 추가 (옵션)
   title?: string;
   children: React.ReactNode;
   width?: string;
@@ -14,6 +15,7 @@ type ModalProps = {
 const ReusableModal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
+  onConfirm,
   title,
   children,
   width = '100%',
@@ -21,6 +23,14 @@ const ReusableModal: React.FC<ModalProps> = ({
   actions,
 }) => {
   if (!isOpen) return null;
+
+  // onConfirm이 존재하면 클릭 시 onConfirm을 호출하고, 그 후 onClose를 호출합니다.
+  const handleButtonClick = () => {
+    if (onConfirm) {
+      onConfirm();
+    }
+    onClose();
+  };
 
   return (
     <StyledModal>
@@ -33,7 +43,7 @@ const ReusableModal: React.FC<ModalProps> = ({
         <ModalBody>{children}</ModalBody>
         {actions && <ModalActions>{actions}</ModalActions>}
         <CloseButtonWrapper>
-          <CloseButton onClick={onClose}>확인</CloseButton>
+          <CloseButton onClick={handleButtonClick}>확인</CloseButton>
         </CloseButtonWrapper>
       </ModalContent>
     </StyledModal>
@@ -64,13 +74,11 @@ const ModalContent = styled.div<{ width: string; height: string }>`
   flex-direction: column;
   justify-content: space-between;
 `;
-
 const ModalHeader = styled.div`
   display: flex;
   flex-direction: column;
   margin-bottom: 10px;
 `;
-
 const ModalTitle = styled.h2`
   font-size: 18px;
   text-align: left;
@@ -78,7 +86,6 @@ const ModalTitle = styled.h2`
   color: #000000;
   margin: 0;
 `;
-
 const ModalBody = styled.div`
   flex: 1;
   font-size: 14px;
@@ -91,12 +98,10 @@ const ModalBody = styled.div`
   border-top: 2px solid #e0e0e0;
   border-bottom: 2px solid #e0e0e0;
 `;
-
 const CloseButtonWrapper = styled.div`
   display: flex;
   justify-content: center;
 `;
-
 const CloseButton = styled.button`
   width: 100%;
   height: 50px;
@@ -108,7 +113,6 @@ const CloseButton = styled.button`
   font-size: 16px;
   font-weight: bold;
 `;
-
 const ModalActions = styled.div`
   display: flex;
   justify-content: flex-end;

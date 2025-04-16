@@ -10,6 +10,8 @@ import SizeDisplaySection from '../components/productregister/SizeDisplaySection
 import MaterialInfoSection from '../components/productregister/MaterialInfoSection';
 import FabricInfoSection from '../components/productregister/FabricInfoSection';
 import ProductImageSection from '../components/productregister/ProductImageSection';
+import ReusableModal from '../components/ReusableModal';
+import ReusableModal2 from '../components/ReusableModal2';
 import {
   getProductDetail,
   updateProduct,
@@ -17,6 +19,7 @@ import {
   UpdateProductRequest,
 } from '../api/adminProduct';
 
+// 신규 등록용 빈 제품 정보
 const newEmptyProduct: ProductDetailResponse = {
   id: 0,
   name: '',
@@ -52,6 +55,7 @@ const newEmptyProduct: ProductDetailResponse = {
 const ProductRegister: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  // 수정 모드일 경우 productId가 존재, 신규 등록이면 null
   const productId = id ? parseInt(id, 10) : null;
 
   const [productDetail, setProductDetail] = useState<ProductDetailResponse>(
@@ -62,6 +66,32 @@ const ProductRegister: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(!!productId);
   const [error, setError] = useState<string>('');
 
+  // 정보수정(또는 등록 완료)용 모달 상태
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalCallback, setModalCallback] = useState<(() => void) | null>(null);
+
+  // 종료처리용 모달 상태 (수정 모드에서만 사용)
+  const [endModalOpen, setEndModalOpen] = useState(false);
+  const [endModalMessage, setEndModalMessage] = useState('');
+  const [endModalCallback, setEndModalCallback] = useState<(() => void) | null>(
+    null
+  );
+
+  // 모달 열기 함수들
+  const showModal = (message: string, callback?: () => void) => {
+    setModalMessage(message);
+    setModalCallback(() => callback || null);
+    setModalOpen(true);
+  };
+
+  const showEndModal = (message: string, callback?: () => void) => {
+    setEndModalMessage(message);
+    setEndModalCallback(() => callback || null);
+    setEndModalOpen(true);
+  };
+
+  // 수정 모드라면 productId가 존재할 때 API로 제품 정보를 불러옴
   useEffect(() => {
     if (productId) {
       const fetchProductDetail = async () => {
@@ -89,9 +119,10 @@ const ProductRegister: React.FC = () => {
     navigate(-1);
   };
 
+  // 수정 모드 또는 신규 등록 완료 시 호출되는 함수
   const handleEditOrRegister = async () => {
     if (productId) {
-      // 수정 모드
+      // 수정 모드인 경우 API를 통해 업데이트
       const updateData: UpdateProductRequest = {
         name: productDetail.name,
         product_url: productDetail.product_url,
@@ -100,41 +131,24 @@ const ProductRegister: React.FC = () => {
       try {
         const updated = await updateProduct(productDetail.id, updateData);
         setProductDetail(updated);
-        alert('제품 정보가 수정되었습니다!');
-        navigate('/productlist');
+        showModal('제품 정보가 수정되었습니다!', () =>
+          navigate('/productlist')
+        );
       } catch (error) {
         console.error('제품 정보 수정 실패', error);
-        alert('제품 정보 수정에 실패하였습니다.');
+        showModal('제품 정보 수정에 실패하였습니다.');
       }
     } else {
-      // 신규 등록
+      // 신규 등록 모드: API 호출 없이 진행
       console.log('신규 등록 데이터:', productDetail, images, imageLinks);
-      alert('제품이 등록되었습니다!');
-      navigate('/productlist');
+      showModal('제품이 등록되었습니다!', () => navigate('/productlist'));
     }
   };
 
-  const handleEndClick = async () => {
-    if (productId) {
-      const terminationUpdate: UpdateProductRequest = {
-        // 종료 처리에 필요한 필드 채워 넣기
-      };
-      try {
-        const updated = await updateProduct(
-          productDetail.id,
-          terminationUpdate
-        );
-        setProductDetail(updated);
-        alert('종료 처리가 완료되었습니다!');
-        navigate('/productlist');
-      } catch (error) {
-        console.error('종료 처리 실패', error);
-        alert('종료 처리에 실패하였습니다.');
-      }
-    }
+  // 종료처리 버튼 클릭 시
+  const handleEndClick = () => {
+    showEndModal('등록 중인 내용을 취소하시겠습니까?', () => navigate(-1));
   };
-
-  // handleInputChange 함수는 사용하지 않으므로 삭제
 
   // 사이즈 변경 콜백
   const handleSizesChange = (
@@ -146,6 +160,7 @@ const ProductRegister: React.FC = () => {
     setProductDetail((prev) => ({ ...prev, sizes }));
   };
 
+  // ListButtonDetailSubHeader에 전달할 props (수정 모드면 종료처리 버튼 활성화)
   const detailSubHeaderProps = productId
     ? {
         backLabel: '목록이동',
@@ -162,6 +177,7 @@ const ProductRegister: React.FC = () => {
         onEditClick: handleEditOrRegister,
       };
 
+  // 이미지 관련 핸들러들
   const handleImageUpload = (
     index: number,
     e: ChangeEvent<HTMLInputElement>
@@ -174,6 +190,11 @@ const ProductRegister: React.FC = () => {
           const newImgs = [...prev];
           newImgs[index] = reader.result as string;
           return newImgs;
+        });
+        setImageLinks((prev) => {
+          const newLinks = [...prev];
+          newLinks[index] = reader.result as string;
+          return newLinks;
         });
       };
       reader.readAsDataURL(file);
@@ -234,7 +255,12 @@ const ProductRegister: React.FC = () => {
         </ProductNumberValue>
       </ProductNumberWrapper>
 
-      {productId && productDetail && <DetailTopBoxes product={productDetail} />}
+      {/* 신규 등록 모드에서도 DetailTopBoxes 컴포넌트를 항상 렌더링 */}
+      <DetailTopBoxes
+        product={productDetail}
+        editable={!productId} // 신규 등록인 경우 편집 가능하도록 처리
+        onChange={(data) => setProductDetail((prev) => ({ ...prev, ...data }))}
+      />
 
       <MiddleDivider />
 
@@ -252,8 +278,10 @@ const ProductRegister: React.FC = () => {
 
         <MiddleDivider />
 
+        {/* MaterialInfoSection에 editable을 명시적으로 전달합니다. 신규 등록일 때는 true */}
         <MaterialInfoSection
           product={productDetail}
+          editable={!productId}
           onChange={(data: Partial<ProductDetailResponse>) =>
             setProductDetail((prev) => ({ ...prev, ...data }))
           }
@@ -281,6 +309,37 @@ const ProductRegister: React.FC = () => {
 
         <BottomDivider />
       </FormWrapper>
+
+      <ReusableModal
+        isOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          if (modalCallback) modalCallback();
+        }}
+        onConfirm={() => {
+          setModalOpen(false);
+          if (modalCallback) modalCallback();
+        }}
+        title='알림'
+        width='400px'
+        height='200px'
+      >
+        {modalMessage}
+      </ReusableModal>
+
+      <ReusableModal2
+        isOpen={endModalOpen}
+        onClose={() => setEndModalOpen(false)}
+        onConfirm={() => {
+          setEndModalOpen(false);
+          if (endModalCallback) endModalCallback();
+        }}
+        title='알림'
+        width='400px'
+        height='200px'
+      >
+        {endModalMessage}
+      </ReusableModal2>
     </Container>
   );
 };
