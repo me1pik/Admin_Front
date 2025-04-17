@@ -1,9 +1,46 @@
+// src/components/DetailTopBoxes.tsx
 import React from 'react';
 import styled from 'styled-components';
 import DetailBoxSvg1 from '../assets/DetailTopBoxesSvg1.svg';
 import DetailBoxSvg2 from '../assets/DetailTopBoxesSvg2.svg';
 import DetailBoxSvg3 from '../assets/DetailTopBoxesSvg3.svg';
 import { ProductDetailResponse } from '../api/adminProduct';
+
+// 컬러 옵션 목록
+const colorOptions = [
+  '화이트',
+  '블랙',
+  '그레이',
+  '네이비',
+  '아이보리',
+  '베이지',
+  '브라운',
+  '카키',
+  '그린',
+  '블루',
+  '퍼플',
+  '버건디',
+  '레드',
+  '핑크',
+  '옐로우',
+  '오렌지',
+];
+
+const categoryOptions = [
+  { label: '미니원피스', value: 'MiniDress' },
+  { label: '미디원피스', value: 'MidiDress' },
+  { label: '롱 원피스', value: 'LongDress' },
+  { label: '투피스', value: 'TowDress' },
+  { label: '점프수트', value: 'JumpSuit' },
+  { label: '블라우스', value: 'Blouse' },
+  { label: '니트 상의', value: 'KnitTop' },
+  { label: '셔츠 상의', value: 'ShirtTop' },
+  { label: '미니 스커트', value: 'MiniSkirt' },
+  { label: '미디 스커트', value: 'MidiSkirt' },
+  { label: '팬츠', value: 'Pants' },
+  { label: '자켓', value: 'Jacket' },
+  { label: '코트', value: 'Coat' },
+];
 
 interface DetailTopBoxesProps {
   product: ProductDetailResponse;
@@ -97,12 +134,21 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
             <Row>
               <Label>종류</Label>
               {editable ? (
-                <Input
+                <Select
                   value={product.category}
                   onChange={(e) => onChange?.({ category: e.target.value })}
-                />
+                >
+                  {categoryOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </Select>
               ) : (
-                <Value>{product.category}</Value>
+                <Value>
+                  {categoryOptions.find((opt) => opt.value === product.category)
+                    ?.label || product.category}
+                </Value>
               )}
             </Row>
             <Row>
@@ -133,10 +179,17 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
             <Row>
               <Label>색상</Label>
               {editable ? (
-                <Input
+                <Select
                   value={product.color}
                   onChange={(e) => onChange?.({ color: e.target.value })}
-                />
+                >
+                  <option value=''>선택</option>
+                  {colorOptions.map((col) => (
+                    <option key={col} value={col}>
+                      {col}
+                    </option>
+                  ))}
+                </Select>
               ) : (
                 <Value>{product.color}</Value>
               )}
@@ -260,6 +313,12 @@ const Value = styled.div`
   font-size: 12px;
 `;
 const Input = styled.input`
+  font-size: 12px;
+  padding: 2px 4px;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+`;
+const Select = styled.select`
   font-size: 12px;
   padding: 2px 4px;
   border: 1px solid #ccc;
