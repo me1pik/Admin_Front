@@ -1,15 +1,14 @@
+// src/components/Header/TripleButtonDetailSubHeader.tsx
 import React from 'react';
 import styled from 'styled-components';
 
 export interface TripleButtonDetailSubHeaderProps {
   backLabel: string;
   onBackClick?: () => void;
-  registerCompletedLabel: string;
-  onRegisterCompletedClick?: () => void;
-  pendingLabel: string;
-  onPendingClick?: () => void;
-  soldOutLabel: string;
-  onSoldOutClick?: () => void;
+  saveLabel: string;
+  onSaveClick?: () => void;
+  deleteLabel: string;
+  onDeleteClick?: () => void;
 }
 
 const TripleButtonDetailSubHeader: React.FC<
@@ -17,37 +16,14 @@ const TripleButtonDetailSubHeader: React.FC<
 > = ({
   backLabel,
   onBackClick,
-  registerCompletedLabel,
-  onRegisterCompletedClick,
-  pendingLabel,
-  onPendingClick,
-  soldOutLabel,
-  onSoldOutClick,
+  saveLabel,
+  onSaveClick,
+  deleteLabel,
+  onDeleteClick,
 }) => {
   const handleBack = () => {
-    if (onBackClick) {
-      onBackClick();
-    } else {
-      window.history.back();
-    }
-  };
-
-  const handleRegisterCompleted = () => {
-    if (onRegisterCompletedClick) {
-      onRegisterCompletedClick();
-    }
-  };
-
-  const handlePending = () => {
-    if (onPendingClick) {
-      onPendingClick();
-    }
-  };
-
-  const handleSoldOut = () => {
-    if (onSoldOutClick) {
-      onSoldOutClick();
-    }
+    if (onBackClick) onBackClick();
+    else window.history.back();
   };
 
   return (
@@ -57,11 +33,8 @@ const TripleButtonDetailSubHeader: React.FC<
         {backLabel}
       </LeftButton>
       <RightButtons>
-        <StateButton onClick={handleRegisterCompleted}>
-          {registerCompletedLabel}
-        </StateButton>
-        <StateButton onClick={handlePending}>{pendingLabel}</StateButton>
-        <StateButton onClick={handleSoldOut}>{soldOutLabel}</StateButton>
+        <ActionButton onClick={onSaveClick}>{saveLabel}</ActionButton>
+        <ActionButton onClick={onDeleteClick}>{deleteLabel}</ActionButton>
       </RightButtons>
     </HeaderContainer>
   );
@@ -90,14 +63,12 @@ const LeftButton = styled.button`
   font-family: 'NanumSquare Neo OTF';
   font-weight: 700;
   font-size: 12px;
-  line-height: 13px;
-  text-align: center;
   border: 1px solid #dddddd;
   background-color: #ffffff;
   color: #000000;
   cursor: pointer;
-  /* 좌측 버튼은 이미 좌측 모서리에 radius 적용 */
-  border-radius: 8px 0 0 8px;
+  border-radius: 8px;
+
   &:hover {
     background-color: #eeeeee;
   }
@@ -115,32 +86,32 @@ const BulletIcon = styled.div`
 const RightButtons = styled.div`
   display: flex;
   margin-left: auto;
-  gap: 0px;
 `;
 
-const StateButton = styled.button`
+const ActionButton = styled.button`
   width: 100px;
   height: 40px;
   font-family: 'NanumSquare Neo OTF';
   font-weight: 700;
   font-size: 12px;
-  line-height: 13px;
-  text-align: center;
   border: 1px solid #dddddd;
   background-color: #ffffff;
   color: #000000;
   cursor: pointer;
   border-left: none;
+
   &:hover {
     background-color: #dddddd;
   }
-  /* 오른쪽 그룹 내 첫번째 버튼 : 왼쪽 위/아래에 radius 추가 */
+
+  /* 첫 번째 버튼(변경저장)의 왼쪽 모서리 둥글게 */
   &:first-child {
     border-left: 1px solid #dddddd;
     border-top-left-radius: 8px;
     border-bottom-left-radius: 8px;
   }
-  /* 오른쪽 그룹 내 마지막 버튼 : 오른쪽 위/아래에 radius 추가 */
+
+  /* 마지막 버튼(삭제)의 오른쪽 모서리 둥글게 */
   &:last-child {
     border-top-right-radius: 8px;
     border-bottom-right-radius: 8px;

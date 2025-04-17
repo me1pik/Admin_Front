@@ -1,4 +1,3 @@
-// src/components/DetailTopBoxes.tsx
 import React from 'react';
 import styled from 'styled-components';
 import DetailBoxSvg1 from '../assets/DetailTopBoxesSvg1.svg';
@@ -6,7 +5,6 @@ import DetailBoxSvg2 from '../assets/DetailTopBoxesSvg2.svg';
 import DetailBoxSvg3 from '../assets/DetailTopBoxesSvg3.svg';
 import { ProductDetailResponse } from '../api/adminProduct';
 
-// 컬러 옵션 목록
 const colorOptions = [
   '화이트',
   '블랙',
@@ -42,6 +40,12 @@ const categoryOptions = [
   { label: '코트', value: 'Coat' },
 ];
 
+const statusOptions = [
+  { label: '등록대기', value: 0 },
+  { label: '등록완료', value: 1 },
+  { label: '판매종료', value: 2 },
+];
+
 interface DetailTopBoxesProps {
   product: ProductDetailResponse;
   editable?: boolean;
@@ -56,7 +60,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   onChange,
 }) => {
   const defaultSizes = ['44', '55', '66', '77', 'Free'];
-  const rentalValue = (product as any).rental ?? 0;
+  const rentalValue = (product as any).rental ?? '';
 
   const handleToggleSize = (sz: string) => {
     if (!onChange) return;
@@ -81,7 +85,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   return (
     <Container>
       <BoxWrapper>
-        {/* 박스1: 브랜드 / 품번 / 시즌 */}
+        {/* 박스1: 브랜드 / 품번 / 상태 */}
         <Box>
           <IconWrapper>
             <Icon src={DetailBoxSvg1} />
@@ -91,7 +95,8 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               <Label>브랜드</Label>
               {editable ? (
                 <Input
-                  value={product.brand}
+                  placeholder={product.brand ? '' : '입력하세요'}
+                  value={product.brand || ''}
                   onChange={(e) => onChange?.({ brand: e.target.value })}
                 />
               ) : (
@@ -102,7 +107,8 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               <Label>품번</Label>
               {editable ? (
                 <Input
-                  value={product.product_num}
+                  placeholder={product.product_num ? '' : '입력하세요'}
+                  value={product.product_num || ''}
                   onChange={(e) => onChange?.({ product_num: e.target.value })}
                 />
               ) : (
@@ -110,14 +116,35 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               )}
             </Row>
             <Row>
-              <Label>시즌</Label>
+              <Label>상태</Label>
               {editable ? (
-                <Input
-                  value={product.season}
-                  onChange={(e) => onChange?.({ season: e.target.value })}
-                />
+                <Select
+                  value={
+                    product.registration != null
+                      ? String(product.registration)
+                      : ''
+                  }
+                  onChange={(e) =>
+                    onChange?.({ registration: Number(e.target.value) })
+                  }
+                >
+                  <option value='' disabled hidden>
+                    옵션을 선택하세요
+                  </option>
+                  {statusOptions.map((opt) => (
+                    <option key={opt.value} value={String(opt.value)}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </Select>
               ) : (
-                <Value>{product.season}</Value>
+                <Value>
+                  {
+                    statusOptions.find(
+                      (opt) => opt.value === product.registration
+                    )?.label
+                  }
+                </Value>
               )}
             </Row>
           </InfoCol>
@@ -135,14 +162,25 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               <Label>종류</Label>
               {editable ? (
                 <Select
-                  value={product.category}
+                  value={product.category || ''}
                   onChange={(e) => onChange?.({ category: e.target.value })}
                 >
+                  <option value='' disabled hidden>
+                    옵션을 선택하세요
+                  </option>
                   {categoryOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>
                       {opt.label}
                     </option>
                   ))}
+                  {product.category &&
+                    !categoryOptions.find(
+                      (opt) => opt.value === product.category
+                    ) && (
+                      <option value={product.category}>
+                        {product.category}
+                      </option>
+                    )}
                 </Select>
               ) : (
                 <Value>
@@ -180,15 +218,20 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               <Label>색상</Label>
               {editable ? (
                 <Select
-                  value={product.color}
+                  value={product.color || ''}
                   onChange={(e) => onChange?.({ color: e.target.value })}
                 >
-                  <option value=''>선택</option>
+                  <option value='' disabled hidden>
+                    옵션을 선택하세요
+                  </option>
                   {colorOptions.map((col) => (
                     <option key={col} value={col}>
                       {col}
                     </option>
                   ))}
+                  {product.color && !colorOptions.includes(product.color) && (
+                    <option value={product.color}>{product.color}</option>
+                  )}
                 </Select>
               ) : (
                 <Value>{product.color}</Value>
@@ -210,7 +253,16 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               {editable ? (
                 <Input
                   type='number'
-                  value={product.price.originalPrice}
+                  placeholder={
+                    product.price?.originalPrice !== undefined
+                      ? ''
+                      : '입력하세요'
+                  }
+                  value={
+                    product.price?.originalPrice !== undefined
+                      ? product.price.originalPrice
+                      : ''
+                  }
                   onChange={(e) =>
                     onChange?.({
                       price: {
@@ -229,7 +281,14 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               {editable ? (
                 <Input
                   type='number'
-                  value={product.price.finalPrice}
+                  placeholder={
+                    product.price?.finalPrice !== undefined ? '' : '입력하세요'
+                  }
+                  value={
+                    product.price?.finalPrice !== undefined
+                      ? product.price.finalPrice
+                      : ''
+                  }
                   onChange={(e) =>
                     onChange?.({
                       price: {
@@ -248,13 +307,18 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               {editable ? (
                 <Input
                   type='number'
+                  placeholder={rentalValue !== '' ? '' : '입력하세요'}
                   value={rentalValue}
                   onChange={(e) =>
                     onChange?.({ rental: Number(e.target.value) })
                   }
                 />
               ) : (
-                <Value>{rentalValue.toLocaleString()}</Value>
+                <Value>
+                  {rentalValue !== ''
+                    ? Number(rentalValue).toLocaleString()
+                    : '-'}
+                </Value>
               )}
             </Row>
           </InfoCol>
@@ -268,7 +332,7 @@ export default DetailTopBoxes;
 
 /* Styled Components */
 const Container = styled.div`
-  min-width: 1100px;
+  min-width: 1000px;
 `;
 const BoxWrapper = styled.div`
   display: flex;
@@ -279,6 +343,7 @@ const Box = styled.div`
   flex: 1;
   display: flex;
   padding: 10px;
+  align-items: center;
 `;
 const IconWrapper = styled.div`
   width: 72px;
@@ -314,15 +379,31 @@ const Value = styled.div`
 `;
 const Input = styled.input`
   font-size: 12px;
-  padding: 2px 4px;
+  height: 28px;
+  padding: 0 8px;
   border: 1px solid #ccc;
-  border-radius: 2px;
+  border-radius: 4px;
+  line-height: 28px;
 `;
 const Select = styled.select`
   font-size: 12px;
-  padding: 2px 4px;
-  border: 1px solid #ccc;
-  border-radius: 2px;
+  height: 30px;
+  width: 145px;
+  padding: 0 8px;
+  line-height: 28px;
+  border: 1px solid #000000;
+  border-radius: 4px;
+  background-color: #fff;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l5 6 5-6H0z' fill='%23666'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 10px 6px;
+  &:focus {
+    outline: none;
+    border-color: #888;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  }
 `;
 const Divider = styled.div`
   width: 1px;

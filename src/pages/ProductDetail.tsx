@@ -1,3 +1,4 @@
+// src/pages/ProductDetail.tsx
 import React, { useEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -9,6 +10,7 @@ import FabricInfoSection from '../components/productregister/FabricInfoSection';
 import ProductImageSection from '../components/productregister/ProductImageSection';
 import DetailTopBoxes from '../components/DetailTopBoxes';
 import ReusableModal from '../components/ReusableModal';
+import ReusableModal2 from '../components/ReusableModal2';
 
 import {
   getProductDetail,
@@ -25,23 +27,33 @@ const ProductDetail: React.FC = () => {
   const navigate = useNavigate();
 
   const [product, setProduct] = useState<ProductDetailResponse | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [images, setImages] = useState<(string | null)[]>(defaultImages);
 
+  // 확인용 모달
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [modalCallback, setModalCallback] = useState<(() => void) | null>(null);
 
-  const showModal = (message: string, callback?: () => void) => {
-    setModalMessage(message);
-    setModalCallback(() => callback || null);
+  // 실패 메시지 모달
+  const [resultModalOpen, setResultModalOpen] = useState(false);
+  const [resultModalMessage, setResultModalMessage] = useState('');
+
+  const showModal = (msg: string, cb?: () => void) => {
+    setModalMessage(msg);
+    setModalCallback(() => cb || null);
     setModalOpen(true);
+  };
+
+  const showResultModal = (msg: string) => {
+    setResultModalMessage(msg);
+    setResultModalOpen(true);
   };
 
   const handleProductChange = useCallback(
     (data: Partial<ProductDetailResponse>) => {
-      setProduct((prev) => ({ ...prev!, ...data }));
+      setProduct((prev) => (prev ? { ...prev, ...data } : prev));
     },
     []
   );
@@ -54,146 +66,119 @@ const ProductDetail: React.FC = () => {
   );
 
   useEffect(() => {
-    if (productId) {
-      const fetchProduct = async () => {
-        setLoading(true);
-        setError('');
-        try {
-          const data = await getProductDetail(productId);
-          if (data.sizes && data.sizes.length > 0) {
-            data.sizes = data.sizes.map((item) => ({
-              size: item.size,
-              measurements: item.measurements || { 어깨: 0, 가슴: 0, 총장: 0 },
-            }));
-          }
-          setProduct(data);
-          if (data.product_img && data.product_img.length > 0) {
-            setImages(data.product_img);
-          }
-        } catch (err) {
-          console.error('제품 상세 정보를 불러오는데 실패했습니다.', err);
-          setError('제품 상세 정보를 불러오는데 실패했습니다.');
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchProduct();
-    } else {
+    if (!productId) {
       setError('유효한 제품 ID가 없습니다.');
       setLoading(false);
+      return;
     }
+    (async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const data = await getProductDetail(productId);
+        if (data.sizes?.length) {
+          data.sizes = data.sizes.map((item) => ({
+            size: item.size,
+            measurements: item.measurements || { 어깨: 0, 가슴: 0, 총장: 0 },
+          }));
+        }
+        setProduct(data);
+        if (data.product_img?.length) setImages(data.product_img);
+      } catch {
+        setError('제품 상세 정보를 불러오는데 실패했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [productId]);
 
   const handleBackClick = () => navigate(-1);
 
-  const handleRegisterCompletedClick = () => {
+  // 변경 저장
+  const handleSave = () => {
     if (!product) return;
-    showModal("제품 상태를 '등록완료'로 변경하시겠습니까?", async () => {
+    showModal('변경 내용을 저장하시겠습니까?', async () => {
       try {
-        const updateData: UpdateProductRequest = {
-          ...product,
-          product_img: images.filter((img) => img) as string[],
-          product_url: product.product_url,
-          registration: 1,
-        };
+        // UpdateProductRequest 타입에 맞춰 필드만 선택적으로 포함
+        const updateData: UpdateProductRequest = {};
+        if (product.name !== undefined) {
+          updateData.name = product.name;
+        }
+        if (product.product_url !== undefined) {
+          updateData.product_url = product.product_url;
+        }
+        const imgs = images.filter((img) => !!img) as string[];
+        if (imgs.length > 0) {
+          updateData.product_img = imgs;
+        }
+        if (product.registration !== undefined) {
+          updateData.registration = product.registration;
+        }
+        if (product.price.discountRate !== undefined) {
+          updateData.discount_rate = product.price.discountRate;
+        }
         const updated = await updateProduct(product.id, updateData);
         setProduct(updated);
-        showModal('제품 상태가 등록완료로 변경되었습니다!', () =>
-          navigate('/productlist')
-        );
-      } catch (error) {
-        console.error('등록완료 업데이트 실패', error);
-        showModal('제품 상태 변경에 실패했습니다.');
+        showModal('저장되었습니다.', () => navigate('/productlist'));
+      } catch {
+        showResultModal('저장에 실패했습니다.');
       }
     });
   };
 
-  const handlePendingClick = () => {
+  // 삭제
+  const handleDelete = () => {
     if (!product) return;
-    showModal("제품 상태를 '등록대기'로 변경하시겠습니까?", async () => {
-      try {
-        const updateData: UpdateProductRequest = {
-          ...product,
-          product_img: images.filter((img) => img) as string[],
-          product_url: product.product_url,
-          registration: 0,
-        };
-        const updated = await updateProduct(product.id, updateData);
-        setProduct(updated);
-        showModal('제품 상태가 등록대기로 변경되었습니다!', () =>
-          navigate('/productlist')
-        );
-      } catch (error) {
-        console.error('등록대기 업데이트 실패', error);
-        showModal('제품 상태 변경에 실패했습니다.');
+    showModal('정말 삭제하시겠습니까?', () => {
+      // TODO: 삭제 API 호출
+      const didFail = true;
+      if (didFail) {
+        showResultModal('삭제에 실패했습니다.');
+      } else {
+        navigate('/productlist');
       }
     });
   };
 
-  const handleSoldOutClick = () => {
-    if (!product) return;
-    showModal("제품 상태를 '판매완료'로 변경하시겠습니까?", async () => {
-      try {
-        const updateData: UpdateProductRequest = {
-          ...product,
-          product_img: images.filter((img) => img) as string[],
-          product_url: product.product_url,
-          registration: 2,
-        };
-        const updated = await updateProduct(product.id, updateData);
-        setProduct(updated);
-        showModal('제품 상태가 판매완료로 변경되었습니다!', () =>
-          navigate('/productlist')
-        );
-      } catch (error) {
-        console.error('판매완료 업데이트 실패', error);
-        showModal('제품 상태 변경에 실패했습니다.');
-      }
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => e.preventDefault();
-
+  // 이미지 업로드
   const handleImageUpload = (
-    index: number,
+    idx: number,
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onloadend = () => {
-      const uploadedImage = reader.result as string;
+      const dataUrl = reader.result as string;
       setImages((prev) => {
-        const newImages = [...prev];
-        newImages[index] = uploadedImage;
+        const next = [...prev];
+        next[idx] = dataUrl;
         handleProductChange({
-          product_img: newImages.filter((img) => !!img) as string[],
+          product_img: next.filter((x) => !!x) as string[],
         });
-        return newImages;
+        return next;
       });
     };
     reader.readAsDataURL(file);
   };
 
-  const handleImageDelete = (index: number) => {
+  // 이미지 삭제
+  const handleImageDelete = (idx: number) => {
     setImages((prev) => {
-      const newImages = [...prev];
-      newImages[index] = null;
-      handleProductChange({
-        product_img: newImages.filter((img) => !!img) as string[],
-      });
-      return newImages;
+      const next = [...prev];
+      next[idx] = null;
+      handleProductChange({ product_img: next.filter((x) => !!x) as string[] });
+      return next;
     });
   };
 
-  const handleImageReorder = (dragIndex: number, hoverIndex: number) => {
+  // 이미지 순서 변경
+  const handleImageReorder = (from: number, to: number) => {
     setImages((prev) => {
       const next = [...prev];
-      const [removed] = next.splice(dragIndex, 1);
-      next.splice(hoverIndex, 0, removed);
-      handleProductChange({
-        product_img: next.filter((img) => !!img) as string[],
-      });
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      handleProductChange({ product_img: next.filter((x) => !!x) as string[] });
       return next;
     });
   };
@@ -209,28 +194,25 @@ const ProductDetail: React.FC = () => {
       <TripleButtonDetailSubHeader
         backLabel='목록이동'
         onBackClick={handleBackClick}
-        registerCompletedLabel='등록완료'
-        onRegisterCompletedClick={handleRegisterCompletedClick}
-        pendingLabel='등록대기'
-        onPendingClick={handlePendingClick}
-        soldOutLabel='판매완료'
-        onSoldOutClick={handleSoldOutClick}
+        saveLabel='변경저장'
+        onSaveClick={handleSave}
+        deleteLabel='삭제'
+        onDeleteClick={handleDelete}
       />
       <ProductNumberWrapper>
         <ProductNumberLabel>번호</ProductNumberLabel>
-        <ProductNumberValue>{product?.id ?? '로딩 중...'}</ProductNumberValue>
+        <ProductNumberValue>{product?.id}</ProductNumberValue>
       </ProductNumberWrapper>
-
       {product && (
         <>
           <DetailTopBoxes
             product={product}
-            editable={true}
+            editable
             onChange={handleProductChange}
           />
           <MiddleDivider />
-          <FormWrapper onSubmit={handleSubmit}>
-            <TwoColumnRow>
+          <Form onSubmit={(e) => e.preventDefault()}>
+            <TwoColumn>
               <SizeGuideSection
                 sizes={product.sizes}
                 onSizesChange={handleSizesChange}
@@ -239,12 +221,11 @@ const ProductDetail: React.FC = () => {
                 product={product}
                 sizeProductImg={product.size_picture}
               />
-            </TwoColumnRow>
-
+            </TwoColumn>
             <MiddleDivider />
             <MaterialInfoSection
               product={product}
-              editable={true}
+              editable
               onChange={handleProductChange}
             />
             <MiddleDivider />
@@ -261,12 +242,14 @@ const ProductDetail: React.FC = () => {
               productUrl={product.product_url}
             />
             <BottomDivider />
-          </FormWrapper>
+          </Form>
         </>
       )}
-
       <ReusableModal
         isOpen={modalOpen}
+        title='알림'
+        width='400px'
+        height='200px'
         onClose={() => {
           setModalOpen(false);
           modalCallback?.();
@@ -275,12 +258,18 @@ const ProductDetail: React.FC = () => {
           setModalOpen(false);
           modalCallback?.();
         }}
-        title='알림'
-        width='400px'
-        height='200px'
       >
         {modalMessage}
       </ReusableModal>
+      <ReusableModal2
+        isOpen={resultModalOpen}
+        title='오류'
+        width='400px'
+        height='200px'
+        onClose={() => setResultModalOpen(false)}
+      >
+        {resultModalMessage}
+      </ReusableModal2>
     </Container>
   );
 };
@@ -290,42 +279,32 @@ export default ProductDetail;
 /* Styled Components */
 const Container = styled.div`
   width: 100%;
-  margin: 0 auto;
   padding: 20px;
   box-sizing: border-box;
   font-family: 'NanumSquare Neo OTF', sans-serif;
 `;
 const HeaderRow = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
 `;
 const Title = styled.h1`
-  font-family: 'NanumSquare Neo OTF';
-  font-weight: 700;
   font-size: 16px;
-  line-height: 18px;
-  color: #000;
+  font-weight: 700;
 `;
 const ProductNumberWrapper = styled.div`
   display: flex;
   align-items: baseline;
   gap: 5px;
-  margin: 10px 0;
-  margin-top: 34px;
+  margin: 10px 0 34px;
 `;
 const ProductNumberLabel = styled.div`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 12px;
-  color: #000;
 `;
 const ProductNumberValue = styled.div`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
-  color: #000;
 `;
 const MiddleDivider = styled.hr`
   border: 0;
@@ -337,11 +316,11 @@ const BottomDivider = styled.hr`
   border-top: 1px solid #ddd;
   margin: 40px 0 20px;
 `;
-const FormWrapper = styled.form`
+const Form = styled.form`
   display: flex;
   flex-direction: column;
 `;
-const TwoColumnRow = styled.div`
+const TwoColumn = styled.div`
   display: flex;
   gap: 50px;
   margin-bottom: 10px;

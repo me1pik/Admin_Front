@@ -1,4 +1,4 @@
-// FabricInfoSection.tsx
+// src/components/productregister/FabricInfoSection.tsx
 import React from 'react';
 import styled from 'styled-components';
 import { ProductDetailResponse } from '../../api/adminProduct';
@@ -12,6 +12,14 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
   product,
   onChange,
 }) => {
+  // fabricComposition이 null일 경우 기본 객체 사용
+  const fabricComp = product.fabricComposition ?? {
+    겉감: '',
+    안감: '',
+    배색: '',
+    부속: '',
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (onChange) {
@@ -39,127 +47,51 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
         <tbody>
           <tr>
             <td>겉감</td>
-            <td>
-              <Input
-                name='fabric_겉감_1'
-                placeholder={product.fabricComposition.겉감 || '-'}
-                onChange={handleInputChange}
-              />
-            </td>
-            <td>
-              <Input
-                name='fabric_겉감_2'
-                placeholder={product.fabricComposition.겉감 || '-'}
-                onChange={handleInputChange}
-              />
-            </td>
-            <td>
-              <Input
-                name='fabric_겉감_3'
-                placeholder={product.fabricComposition.겉감 || '-'}
-                onChange={handleInputChange}
-              />
-            </td>
-            <td>
-              <Input
-                name='fabric_겉감_4'
-                placeholder={product.fabricComposition.겉감 || '-'}
-                onChange={handleInputChange}
-              />
-            </td>
+            {[1, 2, 3, 4].map((i) => (
+              <td key={`outer-${i}`}>
+                <Input
+                  name={`fabric_겉감_${i}`}
+                  placeholder={fabricComp.겉감 || '-'}
+                  onChange={handleInputChange}
+                />
+              </td>
+            ))}
           </tr>
           <tr>
             <td>안감</td>
-            <td>
-              <Input
-                name='fabric_안감_1'
-                placeholder={product.fabricComposition.안감 || '-'}
-                onChange={handleInputChange}
-              />
-            </td>
-            <td>
-              <Input
-                name='fabric_안감_2'
-                placeholder={product.fabricComposition.안감 || '-'}
-                onChange={handleInputChange}
-              />
-            </td>
-            <td>
-              <Input
-                name='fabric_안감_3'
-                placeholder={product.fabricComposition.안감 || '-'}
-                onChange={handleInputChange}
-              />
-            </td>
-            <td>
-              <Input
-                name='fabric_안감_4'
-                placeholder={product.fabricComposition.안감 || '-'}
-                onChange={handleInputChange}
-              />
-            </td>
+            {[1, 2, 3, 4].map((i) => (
+              <td key={`lining-${i}`}>
+                <Input
+                  name={`fabric_안감_${i}`}
+                  placeholder={fabricComp.안감 || '-'}
+                  onChange={handleInputChange}
+                />
+              </td>
+            ))}
           </tr>
           <tr>
             <td>배색</td>
-            <td>
-              <Input
-                name='fabric_배색_1'
-                placeholder='-'
-                onChange={handleInputChange}
-              />
-            </td>
-            <td>
-              <Input
-                name='fabric_배색_2'
-                placeholder='-'
-                onChange={handleInputChange}
-              />
-            </td>
-            <td>
-              <Input
-                name='fabric_배색_3'
-                placeholder='-'
-                onChange={handleInputChange}
-              />
-            </td>
-            <td>
-              <Input
-                name='fabric_배색_4'
-                placeholder='-'
-                onChange={handleInputChange}
-              />
-            </td>
+            {[1, 2, 3, 4].map((i) => (
+              <td key={`contrast-${i}`}>
+                <Input
+                  name={`fabric_배색_${i}`}
+                  placeholder={fabricComp.배색 || '-'}
+                  onChange={handleInputChange}
+                />
+              </td>
+            ))}
           </tr>
           <tr>
             <td>부속</td>
-            <td>
-              <Input
-                name='fabric_부속_1'
-                placeholder='-'
-                onChange={handleInputChange}
-              />
-            </td>
-            <td>
-              <Input
-                name='fabric_부속_2'
-                placeholder='-'
-                onChange={handleInputChange}
-              />
-            </td>
-            <td>
-              <Input
-                name='fabric_부속_3'
-                placeholder='-'
-                onChange={handleInputChange}
-              />
-            </td>
-            <td>
-              <Input
-                name='fabric_부속_4'
-                placeholder='-'
-                onChange={handleInputChange}
-              />
-            </td>
+            {[1, 2, 3, 4].map((i) => (
+              <td key={`accessory-${i}`}>
+                <Input
+                  name={`fabric_부속_${i}`}
+                  placeholder={fabricComp.부속 || '-'}
+                  onChange={handleInputChange}
+                />
+              </td>
+            ))}
           </tr>
         </tbody>
       </FabricTable>
@@ -169,6 +101,7 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
 
 export default FabricInfoSection;
 
+/* Styled Components */
 const SectionBox = styled.div`
   position: relative;
   margin-bottom: 20px;
