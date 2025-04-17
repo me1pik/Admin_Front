@@ -31,12 +31,10 @@ const ProductDetail: React.FC = () => {
   const [error, setError] = useState('');
   const [images, setImages] = useState<(string | null)[]>(defaultImages);
 
-  // 확인용 모달
+  // 모달 상태들
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [modalCallback, setModalCallback] = useState<(() => void) | null>(null);
-
-  // 실패 메시지 모달
   const [resultModalOpen, setResultModalOpen] = useState(false);
   const [resultModalMessage, setResultModalMessage] = useState('');
 
@@ -45,12 +43,12 @@ const ProductDetail: React.FC = () => {
     setModalCallback(() => cb || null);
     setModalOpen(true);
   };
-
   const showResultModal = (msg: string) => {
     setResultModalMessage(msg);
     setResultModalOpen(true);
   };
 
+  // product 상태 갱신 헬퍼
   const handleProductChange = useCallback(
     (data: Partial<ProductDetailResponse>) => {
       setProduct((prev) => (prev ? { ...prev, ...data } : prev));
@@ -58,6 +56,7 @@ const ProductDetail: React.FC = () => {
     []
   );
 
+  // 사이즈 가이드에서 올라오는 변경
   const handleSizesChange = useCallback(
     (sizes: ProductDetailResponse['sizes']) => {
       handleProductChange({ sizes });
@@ -65,6 +64,7 @@ const ProductDetail: React.FC = () => {
     [handleProductChange]
   );
 
+  // 초기 데이터 로드
   useEffect(() => {
     if (!productId) {
       setError('유효한 제품 ID가 없습니다.');
@@ -76,12 +76,6 @@ const ProductDetail: React.FC = () => {
       setError('');
       try {
         const data = await getProductDetail(productId);
-        if (data.sizes?.length) {
-          data.sizes = data.sizes.map((item) => ({
-            size: item.size,
-            measurements: item.measurements || { 어깨: 0, 가슴: 0, 총장: 0 },
-          }));
-        }
         setProduct(data);
         if (data.product_img?.length) setImages(data.product_img);
       } catch {
@@ -94,29 +88,20 @@ const ProductDetail: React.FC = () => {
 
   const handleBackClick = () => navigate(-1);
 
-  // 변경 저장
+  // 저장: product 상태 전체를 Partial<ProductDetailResponse>로 전송
   const handleSave = () => {
     if (!product) return;
     showModal('변경 내용을 저장하시겠습니까?', async () => {
       try {
-        // UpdateProductRequest 타입에 맞춰 필드만 선택적으로 포함
-        const updateData: UpdateProductRequest = {};
-        if (product.name !== undefined) {
-          updateData.name = product.name;
-        }
-        if (product.product_url !== undefined) {
-          updateData.product_url = product.product_url;
-        }
-        const imgs = images.filter((img) => !!img) as string[];
-        if (imgs.length > 0) {
-          updateData.product_img = imgs;
-        }
-        if (product.registration !== undefined) {
-          updateData.registration = product.registration;
-        }
-        if (product.price.discountRate !== undefined) {
-          updateData.discount_rate = product.price.discountRate;
-        }
+        // 복사한 뒤 null/undefined/빈배열 필드 제거
+        const updateData: UpdateProductRequest = { ...product };
+        Object.keys(updateData).forEach((key) => {
+          const k = key as keyof UpdateProductRequest;
+          const v = updateData[k];
+          if (v == null || (Array.isArray(v) && (v as any[]).length === 0)) {
+            delete updateData[k];
+          }
+        });
         const updated = await updateProduct(product.id, updateData);
         setProduct(updated);
         showModal('저장되었습니다.', () => navigate('/productlist'));
@@ -126,21 +111,17 @@ const ProductDetail: React.FC = () => {
     });
   };
 
-  // 삭제
+  // 삭제 (추후 API 연동)
   const handleDelete = () => {
     if (!product) return;
     showModal('정말 삭제하시겠습니까?', () => {
-      // TODO: 삭제 API 호출
       const didFail = true;
-      if (didFail) {
-        showResultModal('삭제에 실패했습니다.');
-      } else {
-        navigate('/productlist');
-      }
+      if (didFail) showResultModal('삭제에 실패했습니다.');
+      else navigate('/productlist');
     });
   };
 
-  // 이미지 업로드
+  // 이미지 업로드/삭제/순서 변경
   const handleImageUpload = (
     idx: number,
     e: React.ChangeEvent<HTMLInputElement>
@@ -161,8 +142,6 @@ const ProductDetail: React.FC = () => {
     };
     reader.readAsDataURL(file);
   };
-
-  // 이미지 삭제
   const handleImageDelete = (idx: number) => {
     setImages((prev) => {
       const next = [...prev];
@@ -171,8 +150,6 @@ const ProductDetail: React.FC = () => {
       return next;
     });
   };
-
-  // 이미지 순서 변경
   const handleImageReorder = (from: number, to: number) => {
     setImages((prev) => {
       const next = [...prev];
@@ -191,6 +168,7 @@ const ProductDetail: React.FC = () => {
       <HeaderRow>
         <Title>제품관리</Title>
       </HeaderRow>
+
       <TripleButtonDetailSubHeader
         backLabel='목록이동'
         onBackClick={handleBackClick}
@@ -199,10 +177,12 @@ const ProductDetail: React.FC = () => {
         deleteLabel='삭제'
         onDeleteClick={handleDelete}
       />
+
       <ProductNumberWrapper>
         <ProductNumberLabel>번호</ProductNumberLabel>
         <ProductNumberValue>{product?.id}</ProductNumberValue>
       </ProductNumberWrapper>
+
       {product && (
         <>
           <DetailTopBoxes
@@ -210,7 +190,9 @@ const ProductDetail: React.FC = () => {
             editable
             onChange={handleProductChange}
           />
+
           <MiddleDivider />
+
           <Form onSubmit={(e) => e.preventDefault()}>
             <TwoColumn>
               <SizeGuideSection
@@ -222,18 +204,24 @@ const ProductDetail: React.FC = () => {
                 sizeProductImg={product.size_picture}
               />
             </TwoColumn>
+
             <MiddleDivider />
+
             <MaterialInfoSection
               product={product}
               editable
               onChange={handleProductChange}
             />
+
             <MiddleDivider />
+
             <FabricInfoSection
               product={product}
               onChange={handleProductChange}
             />
+
             <MiddleDivider />
+
             <ProductImageSection
               images={images}
               handleImageUpload={handleImageUpload}
@@ -241,10 +229,12 @@ const ProductDetail: React.FC = () => {
               handleImageReorder={handleImageReorder}
               productUrl={product.product_url}
             />
+
             <BottomDivider />
           </Form>
         </>
       )}
+
       <ReusableModal
         isOpen={modalOpen}
         title='알림'
@@ -261,6 +251,7 @@ const ProductDetail: React.FC = () => {
       >
         {modalMessage}
       </ReusableModal>
+
       <ReusableModal2
         isOpen={resultModalOpen}
         title='오류'

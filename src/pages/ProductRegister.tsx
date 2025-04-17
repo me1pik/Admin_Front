@@ -48,10 +48,10 @@ const newEmptyProduct: ProductDetailResponse = {
   transparency: '',
   thickness: '',
   lining: '',
+  touch: '', // ← 이 줄을 추가하세요
   fit: '',
   sizes: [{ size: '', measurements: { 어깨: 0, 가슴: 0, 총장: 0 } }],
 };
-
 const ProductRegister: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();

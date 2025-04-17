@@ -2,20 +2,23 @@
 import { Axios } from './Axios';
 
 /**
- * 제품 목록 조회 (List)
+ * 제품 목록 조회 파라미터 (관리자용)
  * GET /admin/products-management/list
  */
 export interface ProductListParams {
-  status?: string; // 등록대기 / 등록완료 / 판매종료 (default: all)
-  search?: string; // 제품명, 브랜드명, 카테고리 등 키워드 검색
-  category?: string; // 예: 원피스, 블라우스 등
-  page?: number; // 기본: 1
-  limit?: number; // 기본: 10
+  limit?: number; // 페이지당 항목 수
+  page?: number; // 페이지 번호
+  search?: string; // 검색 키워드
+  status?: string; // 제품 상태값 (등록완료 / 등록대기 / 판매종료)
 }
 
+/**
+ * 제품 목록 아이템 타입
+ * Table 컴포넌트에 전달되는 필드들
+ */
 export interface ProductItem {
-  no: number;
-  styleCode: string;
+  no: number; // 고유 ID
+  styleCode: string; // 스타일 코드
   brand: string;
   category: string;
   color: string;
@@ -25,6 +28,9 @@ export interface ProductItem {
   status: string;
 }
 
+/**
+ * 제품 목록 조회 응답 타입
+ */
 export interface ProductListResponse {
   items: ProductItem[];
   totalCount: number;
@@ -33,7 +39,7 @@ export interface ProductListResponse {
 }
 
 /**
- * 제품 상세 조회 (Detail)
+ * 제품 상세 조회 타입
  * GET /admin/products-management/{id}
  */
 export interface ProductDetailResponse {
@@ -48,26 +54,26 @@ export interface ProductDetailResponse {
     discountRate: number;
     finalPrice: number;
   };
+  rental?: number;
   registration: number;
   registration_date: string;
-
   product_url: string;
   product_img: string[];
   size_picture: string;
-
   season: string;
   manufacturer: string;
   description: string;
   fabricComposition: {
     겉감: string;
     안감: string;
-    배색?: string; // optional 처리
+    배색?: string;
     부속?: string;
   };
   elasticity: string;
   transparency: string;
   thickness: string;
   lining: string;
+  touch: string;
   fit: string;
   sizes: Array<{
     size: string;
@@ -80,21 +86,14 @@ export interface ProductDetailResponse {
 }
 
 /**
- * 제품 정보 수정 (Update)
+ * 제품 정보 수정 요청 타입
  * PATCH /admin/products-management/{id}
+ * — 모든 필드를 부분 업데이트할 수 있도록 Partial<ProductDetailResponse> 사용
  */
-export interface UpdateProductRequest {
-  name?: string;
-  product_url?: string;
-  product_img?: string[];
-  registration?: number;
-  discount_rate?: number;
-}
+export type UpdateProductRequest = Partial<ProductDetailResponse>;
 
 /**
- * 제품 목록 조회 API 호출 함수
- * @param params - 제품 목록 필터링 파라미터
- * @returns 제품 목록 데이터를 반환
+ * 제품 목록 조회
  */
 export const getProducts = async (
   params?: ProductListParams
@@ -106,9 +105,7 @@ export const getProducts = async (
 };
 
 /**
- * 제품 상세 조회 API 호출 함수
- * @param id - 제품 고유 ID
- * @returns 제품 상세 정보를 반환
+ * 제품 상세 조회
  */
 export const getProductDetail = async (
   id: number
@@ -118,10 +115,7 @@ export const getProductDetail = async (
 };
 
 /**
- * 제품 정보 수정 API 호출 함수
- * @param id - 제품 고유 ID
- * @param updateData - 수정할 정보 (전송하지 않은 필드는 유지됨)
- * @returns 수정 후의 제품 상세 정보를 반환
+ * 제품 정보 수정
  */
 export const updateProduct = async (
   id: number,
