@@ -179,7 +179,7 @@ const Header = styled.div`
 `;
 const Bullet = styled.div`
   position: absolute;
-  left: -27px;
+  left: -7px;
   top: 0;
   width: 14px;
   height: 14px;
@@ -217,8 +217,8 @@ const AddColButton = styled.button`
 const Line = styled.div`
   position: absolute;
   left: 0;
-  top: 28px;
-  bottom: 0;
+  top: 15px;
+  bottom: 112px;
   width: 1px;
   background: #ddd;
 `;
