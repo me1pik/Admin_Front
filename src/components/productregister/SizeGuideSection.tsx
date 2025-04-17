@@ -16,11 +16,12 @@ export interface SizeGuideSectionProps {
   ) => void;
 }
 
+const defaultSizes = ['44', '55', '66', '77', 'Free'];
+
 const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   product,
   onSizesChange,
 }) => {
-  // 초기 컬럼
   const initialColumns: Column[] = [
     { key: 'size', label: '사이즈' },
     { key: '어깨', label: 'A(어깨)' },
@@ -31,8 +32,8 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   ];
 
   const [columns, setColumns] = useState<Column[]>(initialColumns);
+  const [rows, setRows] = useState<RowData[]>([]);
 
-  // 초기 행 데이터
   const makeInitialRows = (): RowData[] => {
     if (product.sizes && product.sizes.length > 0) {
       return product.sizes.map((item) => ({
@@ -46,8 +47,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
         총길이: '',
       }));
     }
-    // 기본값
-    return ['44', '55', '66', '77', 'Free'].map((sz) => {
+    return defaultSizes.map((sz) => {
       const row: RowData = {};
       initialColumns.forEach((col) => {
         row[col.key] = col.key === 'size' ? sz : '';
@@ -56,30 +56,12 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     });
   };
 
-  const [rows, setRows] = useState<RowData[]>(makeInitialRows);
+  // product.sizes 변경 시 rows 동기화
+  useEffect(() => {
+    setRows(makeInitialRows());
+  }, [product.sizes]);
 
-  // 컬럼 추가
-  const handleAddColumn = () => {
-    const newKey = `col${Date.now()}`;
-    const newLabel = ''; // 처음엔 빈 라벨, 사용자가 편집 가능
-    setColumns((prev) => [...prev, { key: newKey, label: newLabel }]);
-    setRows((prev) => prev.map((r) => ({ ...r, [newKey]: '' })));
-  };
-
-  // 컬럼 삭제
-  const handleDeleteColumn = (colIndex: number) => {
-    const keyToRemove = columns[colIndex].key;
-    setColumns((prev) => prev.filter((_, i) => i !== colIndex));
-    setRows((prev) =>
-      prev.map((r) => {
-        const { _omit, ...rest } = r;
-        delete rest[keyToRemove];
-        return rest;
-      })
-    );
-  };
-
-  // 셀 변경
+  // 셀 편집 핸들러
   const handleCellChange = (
     rowIndex: number,
     key: string,
@@ -87,14 +69,44 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   ) => {
     const value =
       key === 'size' ? e.target.value.replace(/[^0-9]/g, '') : e.target.value;
-    setRows((prev) => {
-      const newRows = [...prev];
-      newRows[rowIndex] = { ...newRows[rowIndex], [key]: value };
-      return newRows;
-    });
+    const newRows = rows.map((r, i) =>
+      i === rowIndex ? { ...r, [key]: value } : r
+    );
+    setRows(newRows);
+
+    // 수정된 행을 상위에 전달
+    onSizesChange?.(
+      newRows.map((r) => ({
+        size: r['size'],
+        measurements: {
+          어깨: Number(r['어깨']) || 0,
+          가슴: Number(r['가슴']) || 0,
+          총장: Number(r['허리']) || 0,
+        },
+      }))
+    );
   };
 
-  // 라벨 변경
+  // 열 추가 (사이즈 데이터 변경 아님)
+  const handleAddColumn = () => {
+    const newKey = `col${Date.now()}`;
+    setColumns((prev) => [...prev, { key: newKey, label: '' }]);
+    setRows((prev) => prev.map((r) => ({ ...r, [newKey]: '' })));
+  };
+
+  // 열 삭제
+  const handleDeleteColumn = (colIndex: number) => {
+    const keyToRemove = columns[colIndex].key;
+    setColumns((prev) => prev.filter((_, i) => i !== colIndex));
+    setRows((prev) =>
+      prev.map((r) => {
+        const { [keyToRemove]: _, ...rest } = r;
+        return rest;
+      })
+    );
+  };
+
+  // 헤더 라벨 변경
   const handleLabelChange = (
     colIndex: number,
     e: ChangeEvent<HTMLInputElement>
@@ -106,21 +118,6 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
       return newCols;
     });
   };
-
-  // 부모 콜백 호출
-  useEffect(() => {
-    if (onSizesChange) {
-      const sizes = rows.map((row) => ({
-        size: row['size'],
-        measurements: {
-          어깨: Number(row['어깨']) || 0,
-          가슴: Number(row['가슴']) || 0,
-          총장: Number(row['허리']) || 0,
-        },
-      }));
-      onSizesChange(sizes);
-    }
-  }, [rows]);
 
   return (
     <SectionBox>
