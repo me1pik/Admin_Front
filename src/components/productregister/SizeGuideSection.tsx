@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, ChangeEvent, useCallback } from 'react';
 import styled from 'styled-components';
 import { FaTimes, FaPlus } from 'react-icons/fa';
 import { SizeRow } from '../../api/adminProduct';
@@ -30,16 +30,25 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   const [columns, setColumns] = useState<Column[]>(initialColumns);
   const [rows, setRows] = useState<RowData[]>([]);
 
+  // 사이즈 데이터로부터 테이블 행 생성
   const makeInitialRows = useCallback((): RowData[] => {
     if (sizes && sizes.length > 0) {
       return sizes.map((item) => {
         const row: RowData = {};
-        Object.entries(item).forEach(([k, v]) => {
-          row[k] = String(v);
+        columns.forEach((col) => {
+          if (col.key === 'size') {
+            // size 값에서 숫자만
+            row.size = String(item.size).replace(/[^0-9]/g, '');
+          } else {
+            // 빈 값(0이거나 undefined)은 빈 문자열로 처리
+            const v = item[col.key];
+            row[col.key] = v === 0 || v == null ? '' : String(v);
+          }
         });
         return row;
       });
     }
+    // 신규 등록 시 기본 사이즈
     return defaultSizes.map((sz) => {
       const row: RowData = {};
       columns.forEach((col) => {
@@ -53,11 +62,12 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     setRows(makeInitialRows());
   }, [makeInitialRows]);
 
+  // 사용자 입력 반영 후 상위로 전달
   const emitChange = (newRows: RowData[]) => {
     const out: SizeRow[] = newRows.map((r) => {
-      const sr: SizeRow = { size: r['size'] || '' };
+      const sr: SizeRow = { size: r['size'] };
       Object.entries(r).forEach(([k, v]) => {
-        if (k === 'size') return;
+        if (k === 'size' || v === '') return; // 빈 문자열은 제외
         sr[k] = isNaN(Number(v)) ? v : Number(v);
       });
       return sr;
@@ -71,9 +81,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     e: ChangeEvent<HTMLInputElement>
   ) => {
     const val =
-      key === 'size'
-        ? e.target.value.replace(/[^0-9A-Za-z]/g, '')
-        : e.target.value;
+      key === 'size' ? e.target.value.replace(/[^0-9]/g, '') : e.target.value;
     const newRows = rows.map((r, i) =>
       i === rowIndex ? { ...r, [key]: val } : r
     );
