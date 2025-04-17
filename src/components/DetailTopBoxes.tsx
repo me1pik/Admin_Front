@@ -1,4 +1,3 @@
-// DetailTopBoxes.tsx
 import React from 'react';
 import styled from 'styled-components';
 import DetailBoxSvg1 from '../assets/DetailTopBoxesSvg1.svg';
@@ -8,7 +7,6 @@ import { ProductDetailResponse } from '../api/adminProduct';
 
 interface DetailTopBoxesProps {
   product: ProductDetailResponse;
-  // rental 필드는 onChange를 통해 전달 가능하므로 ProductDetailResponse에 포함되지 않아도 됨
   editable?: boolean;
   onChange?: (
     data: Partial<ProductDetailResponse> & { rental?: number }
@@ -21,58 +19,43 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   onChange,
 }) => {
   const defaultSizes = ['44', '55', '66', '77', 'Free'];
-
-  // 기존 연산을 제거하고, product 객체의 rental 값을 직접 사용
-  // ProductDetailResponse에 rental이 없으므로, 타입 단언을 통해 접근합니다.
   const rentalValue = (product as any).rental ?? 0;
 
-  // 사이즈 박스 토글 함수: 선택되어 있으면 제거, 없으면 추가
-  const handleToggle = (defaultSize: string) => {
-    if (onChange) {
-      const isActive =
-        product.sizes &&
-        product.sizes.some((item) => {
-          if (defaultSize === 'Free') {
-            return item.size.toLowerCase().includes('free');
-          }
-          return item.size.replace(/[^0-9]/g, '') === defaultSize;
-        });
-      let newSizes = product.sizes ? [...product.sizes] : [];
-      if (isActive) {
-        newSizes = newSizes.filter((item) => {
-          if (defaultSize === 'Free') {
-            return !item.size.toLowerCase().includes('free');
-          }
-          return item.size.replace(/[^0-9]/g, '') !== defaultSize;
-        });
-      } else {
-        newSizes.push({
-          size: defaultSize,
-          measurements: { 어깨: 0, 가슴: 0, 총장: 0 },
-        });
-      }
-      onChange({ sizes: newSizes });
+  const handleToggleSize = (sz: string) => {
+    if (!onChange) return;
+    const exists = product.sizes?.some((item) =>
+      sz === 'Free'
+        ? item.size.toLowerCase().includes('free')
+        : item.size.replace(/[^0-9]/g, '') === sz
+    );
+    let newSizes = product.sizes ? [...product.sizes] : [];
+    if (exists) {
+      newSizes = newSizes.filter((item) =>
+        sz === 'Free'
+          ? !item.size.toLowerCase().includes('free')
+          : item.size.replace(/[^0-9]/g, '') !== sz
+      );
+    } else {
+      newSizes.push({ size: sz, measurements: { 어깨: 0, 가슴: 0, 총장: 0 } });
     }
+    onChange({ sizes: newSizes });
   };
 
   return (
     <Container>
       <BoxWrapper>
-        {/* 첫 번째 박스: 브랜드, 품번, 시즌 */}
+        {/* 박스1: 브랜드 / 품번 / 시즌 */}
         <Box>
-          <IconPlaceholder>
-            <IconImage src={DetailBoxSvg1} alt='브랜드 아이콘' />
-          </IconPlaceholder>
-          <Content>
+          <IconWrapper>
+            <Icon src={DetailBoxSvg1} />
+          </IconWrapper>
+          <InfoCol>
             <Row>
               <Label>브랜드</Label>
               {editable ? (
                 <Input
-                  type='text'
                   value={product.brand}
-                  onChange={(e) =>
-                    onChange && onChange({ brand: e.target.value })
-                  }
+                  onChange={(e) => onChange?.({ brand: e.target.value })}
                 />
               ) : (
                 <Value>{product.brand}</Value>
@@ -82,11 +65,8 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               <Label>품번</Label>
               {editable ? (
                 <Input
-                  type='text'
                   value={product.product_num}
-                  onChange={(e) =>
-                    onChange && onChange({ product_num: e.target.value })
-                  }
+                  onChange={(e) => onChange?.({ product_num: e.target.value })}
                 />
               ) : (
                 <Value>{product.product_num}</Value>
@@ -96,34 +76,30 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               <Label>시즌</Label>
               {editable ? (
                 <Input
-                  type='text'
                   value={product.season}
-                  onChange={(e) =>
-                    onChange && onChange({ season: e.target.value })
-                  }
+                  onChange={(e) => onChange?.({ season: e.target.value })}
                 />
               ) : (
-                <ValueBox>{product.season}</ValueBox>
+                <Value>{product.season}</Value>
               )}
             </Row>
-          </Content>
+          </InfoCol>
         </Box>
+
         <Divider />
-        {/* 두 번째 박스: 종류, 사이즈, 색상 */}
+
+        {/* 박스2: 종류 / 사이즈 / 색상 */}
         <Box>
-          <IconPlaceholder>
-            <IconImage src={DetailBoxSvg2} alt='종류 아이콘' />
-          </IconPlaceholder>
-          <Content>
+          <IconWrapper>
+            <Icon src={DetailBoxSvg2} />
+          </IconWrapper>
+          <InfoCol>
             <Row>
               <Label>종류</Label>
               {editable ? (
                 <Input
-                  type='text'
                   value={product.category}
-                  onChange={(e) =>
-                    onChange && onChange({ category: e.target.value })
-                  }
+                  onChange={(e) => onChange?.({ category: e.target.value })}
                 />
               ) : (
                 <Value>{product.category}</Value>
@@ -131,56 +107,51 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
             </Row>
             <Row>
               <Label>사이즈</Label>
-              <SizeBoxRow>
-                {defaultSizes.map((defaultSize, i) => {
-                  const active =
-                    product.sizes &&
-                    product.sizes.some((item) => {
-                      if (defaultSize === 'Free') {
-                        return item.size.toLowerCase().includes('free');
-                      }
-                      return item.size.replace(/[^0-9]/g, '') === defaultSize;
-                    });
-                  return (
-                    <React.Fragment key={i}>
-                      {editable ? (
-                        <EditableSizeBox
-                          $active={active}
-                          onClick={() => handleToggle(defaultSize)}
-                        >
-                          {defaultSize}
-                        </EditableSizeBox>
-                      ) : (
-                        <SizeBox $active={active}>{defaultSize}</SizeBox>
-                      )}
-                    </React.Fragment>
+              <SizeRow>
+                {defaultSizes.map((sz) => {
+                  const active = product.sizes?.some((item) =>
+                    sz === 'Free'
+                      ? item.size.toLowerCase().includes('free')
+                      : item.size.replace(/[^0-9]/g, '') === sz
+                  );
+                  return editable ? (
+                    <SizeBoxEditable
+                      key={sz}
+                      $active={active}
+                      onClick={() => handleToggleSize(sz)}
+                    >
+                      {sz}
+                    </SizeBoxEditable>
+                  ) : (
+                    <SizeBox key={sz} $active={active}>
+                      {sz}
+                    </SizeBox>
                   );
                 })}
-              </SizeBoxRow>
+              </SizeRow>
             </Row>
             <Row>
               <Label>색상</Label>
               {editable ? (
                 <Input
-                  type='text'
                   value={product.color}
-                  onChange={(e) =>
-                    onChange && onChange({ color: e.target.value })
-                  }
+                  onChange={(e) => onChange?.({ color: e.target.value })}
                 />
               ) : (
-                <ValueBox>{product.color}</ValueBox>
+                <Value>{product.color}</Value>
               )}
             </Row>
-          </Content>
+          </InfoCol>
         </Box>
+
         <Divider />
-        {/* 세 번째 박스: 가격 정보 */}
+
+        {/* 박스3: 가격 */}
         <Box>
-          <IconPlaceholder>
-            <IconImage src={DetailBoxSvg3} alt='가격 아이콘' />
-          </IconPlaceholder>
-          <Content>
+          <IconWrapper>
+            <Icon src={DetailBoxSvg3} />
+          </IconWrapper>
+          <InfoCol>
             <Row>
               <Label>리테일</Label>
               {editable ? (
@@ -188,8 +159,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                   type='number'
                   value={product.price.originalPrice}
                   onChange={(e) =>
-                    onChange &&
-                    onChange({
+                    onChange?.({
                       price: {
                         ...product.price,
                         originalPrice: Number(e.target.value),
@@ -208,8 +178,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                   type='number'
                   value={product.price.finalPrice}
                   onChange={(e) =>
-                    onChange &&
-                    onChange({
+                    onChange?.({
                       price: {
                         ...product.price,
                         finalPrice: Number(e.target.value),
@@ -228,16 +197,14 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                   type='number'
                   value={rentalValue}
                   onChange={(e) =>
-                    onChange &&
-                    // 대여 값은 product 객체의 최상위 rental 속성으로 업데이트
-                    onChange({ rental: Number(e.target.value) })
+                    onChange?.({ rental: Number(e.target.value) })
                   }
                 />
               ) : (
                 <Value>{rentalValue.toLocaleString()}</Value>
               )}
             </Row>
-          </Content>
+          </InfoCol>
         </Box>
       </BoxWrapper>
     </Container>
@@ -247,110 +214,76 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
 export default DetailTopBoxes;
 
 /* Styled Components */
-const Input = styled.input`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
-  font-size: 12px;
-  padding: 2px 4px;
-  border: 1px solid #cccccc;
-  border-radius: 2px;
-`;
 const Container = styled.div`
   min-width: 1100px;
 `;
 const BoxWrapper = styled.div`
   display: flex;
-  align-items: stretch;
-  border: 1px solid #dddddd;
+  border: 1px solid #ddd;
   border-radius: 4px;
 `;
 const Box = styled.div`
   flex: 1;
   display: flex;
-  align-items: center;
   padding: 10px;
 `;
-const Divider = styled.div`
-  width: 1px;
-  background-color: #dddddd;
-  align-self: stretch;
-  margin: 10px;
-`;
-const IconPlaceholder = styled.div`
+const IconWrapper = styled.div`
   width: 72px;
   height: 72px;
-  border: 1px solid #dddddd;
+  border: 1px solid #ddd;
   border-radius: 50%;
-  margin-right: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-right: 15px;
 `;
-const IconImage = styled.img`
+const Icon = styled.img`
   max-width: 100%;
   max-height: 100%;
 `;
-const Content = styled.div`
+const InfoCol = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 `;
 const Row = styled.div`
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
 `;
 const Label = styled.div`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
+  width: 50px;
   font-weight: 800;
   font-size: 12px;
-  color: #000;
-  min-width: 40px;
 `;
 const Value = styled.div`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
-  font-weight: 400;
   font-size: 12px;
-  color: #000;
 `;
-const ValueBox = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 70px;
-  height: 20px;
-  background: #fff;
-  border: 1px solid #aaaaaa;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
-  font-weight: 900;
-  font-size: 10px;
-  line-height: 11px;
-  text-align: center;
-  color: #000;
+const Input = styled.input`
+  font-size: 12px;
+  padding: 2px 4px;
+  border: 1px solid #ccc;
+  border-radius: 2px;
 `;
-const SizeBoxRow = styled.div`
+const Divider = styled.div`
+  width: 1px;
+  background: #ddd;
+  margin: 10px;
+`;
+const SizeRow = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: nowrap;
 `;
-/* transient prop $active로 전달하여 DOM에 속성이 남지 않도록 처리 */
 const SizeBox = styled.div<{ $active?: boolean }>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 24px;
-  background: ${(props) => (props.$active ? '#f0c040' : '#fff')};
-  border: ${(props) =>
-    props.$active ? '2px solid #f0a020' : '1px solid #aaaaaa'};
-  font-family: 'NanumSquare Neo OTF', sans-serif;
-  font-weight: ${(props) => (props.$active ? 900 : 400)};
-  font-size: 10px;
-  color: #000;
+  padding: 2px 6px;
   border-radius: 4px;
-  cursor: pointer;
-  padding: 0 6px;
+  font-size: 10px;
+  background: ${(p) => (p.$active ? '#f0c040' : '#fff')};
+  border: ${(p) => (p.$active ? '2px solid #f0a020' : '1px solid #aaa')};
 `;
-const EditableSizeBox = styled(SizeBox)`
+const SizeBoxEditable = styled(SizeBox)`
+  cursor: pointer;
   &:hover {
     border-color: #f0a020;
   }

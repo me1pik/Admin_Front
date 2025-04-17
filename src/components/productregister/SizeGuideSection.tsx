@@ -1,8 +1,10 @@
-// SizeGuideSection.tsx
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import styled from 'styled-components';
 import { FaTimes, FaPlus } from 'react-icons/fa';
 import { ProductDetailResponse } from '../../api/adminProduct';
+
+type Column = { key: string; label: string };
+type RowData = Record<string, string>;
 
 export interface SizeGuideSectionProps {
   product: ProductDetailResponse;
@@ -14,241 +16,158 @@ export interface SizeGuideSectionProps {
   ) => void;
 }
 
-export interface SizeRow {
-  size: string;
-  어깨: string;
-  가슴: string;
-  허리: string; // measurements 총장을 '허리'로 사용
-  팔길이: string;
-  총길이: string;
-}
-
-interface Headers {
-  size: string;
-  어깨: string;
-  가슴: string;
-  허리: string;
-  팔길이: string;
-  총길이: string;
-}
-
 const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   product,
   onSizesChange,
 }) => {
-  const defaultRows: SizeRow[] = [
-    { size: '44', 어깨: '', 가슴: '', 허리: '', 팔길이: '', 총길이: '' },
-    { size: '55', 어깨: '', 가슴: '', 허리: '', 팔길이: '', 총길이: '' },
-    { size: '66', 어깨: '', 가슴: '', 허리: '', 팔길이: '', 총길이: '' },
-    { size: '77', 어깨: '', 가슴: '', 허리: '', 팔길이: '', 총길이: '' },
-    { size: 'Free', 어깨: '', 가슴: '', 허리: '', 팔길이: '', 총길이: '' },
+  // 초기 컬럼
+  const initialColumns: Column[] = [
+    { key: 'size', label: '사이즈' },
+    { key: '어깨', label: 'A(어깨)' },
+    { key: '가슴', label: 'B(가슴)' },
+    { key: '허리', label: 'C(허리)' },
+    { key: '팔길이', label: 'D(팔길이)' },
+    { key: '총길이', label: 'E(총길이)' },
   ];
 
-  const initialRows: SizeRow[] =
-    product.sizes && product.sizes.length > 0
-      ? product.sizes.map((item) => ({
-          size:
-            item.size.toLowerCase().includes('free') ||
-            item.size.trim().toLowerCase() === 'free'
-              ? 'Free'
-              : item.size.replace(/[^0-9]/g, ''),
-          어깨: item.measurements?.어깨?.toString() || '',
-          가슴: item.measurements?.가슴?.toString() || '',
-          허리: item.measurements?.총장?.toString() || '',
-          팔길이: '',
-          총길이: '',
-        }))
-      : defaultRows;
+  const [columns, setColumns] = useState<Column[]>(initialColumns);
 
-  const [sizeData, setSizeData] = useState<SizeRow[]>(initialRows);
-  const [headers, setHeaders] = useState<Headers>({
-    size: '사이즈',
-    어깨: 'A(어깨)',
-    가슴: 'B(가슴)',
-    허리: 'C(허리)',
-    팔길이: 'D(팔길이)',
-    총길이: 'E(총길이)',
-  });
+  // 초기 행 데이터
+  const makeInitialRows = (): RowData[] => {
+    if (product.sizes && product.sizes.length > 0) {
+      return product.sizes.map((item) => ({
+        size: item.size.toLowerCase().includes('free')
+          ? 'Free'
+          : item.size.replace(/[^0-9]/g, ''),
+        어깨: item.measurements?.어깨?.toString() || '',
+        가슴: item.measurements?.가슴?.toString() || '',
+        허리: item.measurements?.총장?.toString() || '',
+        팔길이: '',
+        총길이: '',
+      }));
+    }
+    // 기본값
+    return ['44', '55', '66', '77', 'Free'].map((sz) => {
+      const row: RowData = {};
+      initialColumns.forEach((col) => {
+        row[col.key] = col.key === 'size' ? sz : '';
+      });
+      return row;
+    });
+  };
 
+  const [rows, setRows] = useState<RowData[]>(makeInitialRows);
+
+  // 컬럼 추가
+  const handleAddColumn = () => {
+    const newKey = `col${Date.now()}`;
+    const newLabel = ''; // 처음엔 빈 라벨, 사용자가 편집 가능
+    setColumns((prev) => [...prev, { key: newKey, label: newLabel }]);
+    setRows((prev) => prev.map((r) => ({ ...r, [newKey]: '' })));
+  };
+
+  // 컬럼 삭제
+  const handleDeleteColumn = (colIndex: number) => {
+    const keyToRemove = columns[colIndex].key;
+    setColumns((prev) => prev.filter((_, i) => i !== colIndex));
+    setRows((prev) =>
+      prev.map((r) => {
+        const { _omit, ...rest } = r;
+        delete rest[keyToRemove];
+        return rest;
+      })
+    );
+  };
+
+  // 셀 변경
+  const handleCellChange = (
+    rowIndex: number,
+    key: string,
+    e: ChangeEvent<HTMLInputElement>
+  ) => {
+    const value =
+      key === 'size' ? e.target.value.replace(/[^0-9]/g, '') : e.target.value;
+    setRows((prev) => {
+      const newRows = [...prev];
+      newRows[rowIndex] = { ...newRows[rowIndex], [key]: value };
+      return newRows;
+    });
+  };
+
+  // 라벨 변경
+  const handleLabelChange = (
+    colIndex: number,
+    e: ChangeEvent<HTMLInputElement>
+  ) => {
+    const newLabel = e.target.value;
+    setColumns((prev) => {
+      const newCols = [...prev];
+      newCols[colIndex] = { ...newCols[colIndex], label: newLabel };
+      return newCols;
+    });
+  };
+
+  // 부모 콜백 호출
   useEffect(() => {
     if (onSizesChange) {
-      const sizes = sizeData.map((row) => ({
-        size: row.size,
+      const sizes = rows.map((row) => ({
+        size: row['size'],
         measurements: {
-          어깨: Number(row.어깨) || 0,
-          가슴: Number(row.가슴) || 0,
-          총장: Number(row.허리) || 0,
+          어깨: Number(row['어깨']) || 0,
+          가슴: Number(row['가슴']) || 0,
+          총장: Number(row['허리']) || 0,
         },
       }));
       onSizesChange(sizes);
     }
-    // sizeData 변경시에만 실행
-  }, [sizeData]);
-
-  const handleCellChange = (
-    rowIndex: number,
-    field: keyof SizeRow,
-    e: ChangeEvent<HTMLInputElement>
-  ) => {
-    let newValue = e.target.value;
-    if (field === 'size') {
-      newValue = newValue.replace(/[^0-9]/g, '');
-    }
-    setSizeData((prevData) => {
-      const newData = [...prevData];
-      newData[rowIndex] = { ...newData[rowIndex], [field]: newValue };
-      return newData;
-    });
-  };
-
-  const handleHeaderChange = (
-    field: keyof Headers,
-    e: ChangeEvent<HTMLInputElement>
-  ) => {
-    const newValue = e.target.value;
-    setHeaders((prev) => ({ ...prev, [field]: newValue }));
-  };
-
-  const handleAddRow = () => {
-    const newRow: SizeRow = {
-      size: '',
-      어깨: '',
-      가슴: '',
-      허리: '',
-      팔길이: '',
-      총길이: '',
-    };
-    setSizeData((prev) => [...prev, newRow]);
-  };
-
-  const handleDeleteRow = (rowIndex: number) => {
-    setSizeData((prev) => prev.filter((_, idx) => idx !== rowIndex));
-  };
-
-  const preventEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') e.preventDefault();
-  };
+  }, [rows]);
 
   return (
     <SectionBox>
-      <SectionHeaderContainer>
+      <SectionHeader>
         <Bullet />
         <SectionTitle>사이즈 가이드</SectionTitle>
-      </SectionHeaderContainer>
+        <IconButton onClick={handleAddColumn} title='열 추가'>
+          <FaPlus /> 열 추가
+        </IconButton>
+      </SectionHeader>
       <VerticalLine />
       <SizeGuideTable>
         <thead>
           <tr>
-            <EditableTh>
-              <HeaderInput
-                value={headers.size}
-                onChange={(e) => handleHeaderChange('size', e)}
-                onKeyDown={preventEnter}
-              />
-            </EditableTh>
-            <EditableTh>
-              <HeaderInput
-                value={headers.어깨}
-                onChange={(e) => handleHeaderChange('어깨', e)}
-                onKeyDown={preventEnter}
-              />
-            </EditableTh>
-            <EditableTh>
-              <HeaderInput
-                value={headers.가슴}
-                onChange={(e) => handleHeaderChange('가슴', e)}
-                onKeyDown={preventEnter}
-              />
-            </EditableTh>
-            <EditableTh>
-              <HeaderInput
-                value={headers.허리}
-                onChange={(e) => handleHeaderChange('허리', e)}
-                onKeyDown={preventEnter}
-              />
-            </EditableTh>
-            <EditableTh>
-              <HeaderInput
-                value={headers.팔길이}
-                onChange={(e) => handleHeaderChange('팔길이', e)}
-                onKeyDown={preventEnter}
-              />
-            </EditableTh>
-            <EditableTh>
-              <HeaderInput
-                value={headers.총길이}
-                onChange={(e) => handleHeaderChange('총길이', e)}
-                onKeyDown={preventEnter}
-              />
-            </EditableTh>
-            <Th>관리</Th>
+            {columns.map((col, idx) => (
+              <EditableTh key={col.key}>
+                <HeaderInput
+                  value={col.label}
+                  placeholder='열 이름'
+                  onChange={(e) => handleLabelChange(idx, e)}
+                />
+                {idx > 0 && (
+                  <DeleteColButton
+                    onClick={() => handleDeleteColumn(idx)}
+                    title='열 삭제'
+                  >
+                    <FaTimes />
+                  </DeleteColButton>
+                )}
+              </EditableTh>
+            ))}
           </tr>
         </thead>
         <tbody>
-          {sizeData.map((row, idx) => (
-            <tr key={idx}>
-              <Td>
-                <InputSmall
-                  value={row.size}
-                  onChange={(e) => handleCellChange(idx, 'size', e)}
-                  onKeyDown={preventEnter}
-                />
-              </Td>
-              <Td>
-                <InputSmall
-                  value={row.어깨}
-                  onChange={(e) => handleCellChange(idx, '어깨', e)}
-                  onKeyDown={preventEnter}
-                />
-              </Td>
-              <Td>
-                <InputSmall
-                  value={row.가슴}
-                  onChange={(e) => handleCellChange(idx, '가슴', e)}
-                  onKeyDown={preventEnter}
-                />
-              </Td>
-              <Td>
-                <InputSmall
-                  value={row.허리}
-                  onChange={(e) => handleCellChange(idx, '허리', e)}
-                  onKeyDown={preventEnter}
-                />
-              </Td>
-              <Td>
-                <InputSmall
-                  value={row.팔길이}
-                  onChange={(e) => handleCellChange(idx, '팔길이', e)}
-                  onKeyDown={preventEnter}
-                />
-              </Td>
-              <Td>
-                <InputSmall
-                  value={row.총길이}
-                  onChange={(e) => handleCellChange(idx, '총길이', e)}
-                  onKeyDown={preventEnter}
-                />
-              </Td>
-              <Td>
-                <IconButton
-                  onClick={() => handleDeleteRow(idx)}
-                  title='행 삭제'
-                >
-                  <FaTimes size={16} color='#d32f2f' />
-                </IconButton>
-              </Td>
+          {rows.map((row, rIdx) => (
+            <tr key={rIdx}>
+              {columns.map((col) => (
+                <Td key={`${rIdx}-${col.key}`}>
+                  <InputSmall
+                    value={row[col.key]}
+                    onChange={(e) => handleCellChange(rIdx, col.key, e)}
+                  />
+                </Td>
+              ))}
             </tr>
           ))}
         </tbody>
-        <tfoot>
-          <tr>
-            <TfootCell colSpan={7}>
-              <IconButton onClick={handleAddRow} title='행 추가'>
-                <FaPlus size={16} color='#0026fc' /> <AddText>행 추가</AddText>
-              </IconButton>
-            </TfootCell>
-          </tr>
-        </tfoot>
       </SizeGuideTable>
     </SectionBox>
   );
@@ -262,10 +181,9 @@ const SectionBox = styled.div`
   margin-bottom: 20px;
   padding-left: 20px;
 `;
-const SectionHeaderContainer = styled.div`
+const SectionHeader = styled.div`
   display: flex;
   align-items: center;
-  position: relative;
   margin-bottom: 10px;
 `;
 const Bullet = styled.div`
@@ -299,7 +217,7 @@ const VerticalLine = styled.div`
   position: absolute;
   left: 0;
   top: 14px;
-  bottom: 55px;
+  bottom: 0;
   width: 1px;
   background: #dddddd;
 `;
@@ -315,7 +233,7 @@ const SizeGuideTable = styled.table`
     font-weight: 900;
     font-size: 12px;
     line-height: 13px;
-    color: #000000;
+    color: #000;
     padding: 4px;
     position: relative;
   }
@@ -323,34 +241,20 @@ const SizeGuideTable = styled.table`
   td:first-child {
     padding-left: 10px;
   }
-  td:first-child::before {
-    content: '';
-    position: absolute;
-    left: -20px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 1px;
-    background: #dddddd;
-  }
-  th {
-    background-color: #f9f9f9;
-  }
 `;
 const EditableTh = styled.th`
   padding: 0;
 `;
-const Th = styled.th``;
 const Td = styled.td``;
 const InputSmall = styled.input`
-  width: 50px;
+  width: 100%;
   height: 28px;
   border: 1px solid #ddd;
   font-size: 12px;
   text-align: center;
 `;
 const HeaderInput = styled.input`
-  width: 100%;
+  width: calc(100% - 24px);
   height: 100%;
   border: none;
   text-align: center;
@@ -365,25 +269,21 @@ const HeaderInput = styled.input`
 const IconButton = styled.button`
   border: none;
   background: none;
-  font-size: 18px;
-  cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition:
-    transform 0.2s,
-    opacity 0.2s;
-  &:hover {
-    transform: scale(1.1);
-    opacity: 0.8;
+  font-size: 14px;
+  cursor: pointer;
+  margin-left: auto;
+  & svg {
+    margin-right: 4px;
   }
 `;
-const TfootCell = styled.td`
-  padding: 10px;
-  text-align: center;
-`;
-const AddText = styled.span`
-  margin-left: 6px;
-  font-size: 14px;
-  font-family: 'NanumSquare Neo OTF';
+const DeleteColButton = styled.button`
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 12px;
 `;
