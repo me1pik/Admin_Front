@@ -259,7 +259,7 @@ const ProductRegister: React.FC = () => {
       <FormWrapper onSubmit={(e) => e.preventDefault()}>
         <TwoColumnRow>
           <SizeGuideSection
-            product={productDetail}
+            sizes={productDetail.sizes ?? []}
             onSizesChange={handleSizesChange}
           />
           <SizeDisplaySection

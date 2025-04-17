@@ -1,4 +1,3 @@
-// src/pages/ProductDetail.tsx
 import React, { useEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -10,7 +9,6 @@ import FabricInfoSection from '../components/productregister/FabricInfoSection';
 import ProductImageSection from '../components/productregister/ProductImageSection';
 import DetailTopBoxes from '../components/DetailTopBoxes';
 import ReusableModal from '../components/ReusableModal';
-// ※ ReusableModal2는 더 이상 사용되지 않으므로 import하지 않습니다.
 
 import {
   getProductDetail,
@@ -31,26 +29,16 @@ const ProductDetail: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [images, setImages] = useState<(string | null)[]>(defaultImages);
 
-  // 모달 상태 관리 (확인 및 알림용)
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [modalCallback, setModalCallback] = useState<(() => void) | null>(null);
 
-  // 사용하지 않는 showEndModal 함수 삭제
-  // const showEndModal = (message: string, callback?: () => void) => {
-  //   setEndModalMessage(message);
-  //   setEndModalCallback(() => callback || null);
-  //   setEndModalOpen(true);
-  // };
-
-  // 모달 열기 함수 (확인 모달 용)
   const showModal = (message: string, callback?: () => void) => {
     setModalMessage(message);
     setModalCallback(() => callback || null);
     setModalOpen(true);
   };
 
-  // 중앙 업데이트 함수 (메모이제이션)
   const handleProductChange = useCallback(
     (data: Partial<ProductDetailResponse>) => {
       setProduct((prev) => ({ ...prev!, ...data }));
@@ -96,107 +84,95 @@ const ProductDetail: React.FC = () => {
     }
   }, [productId]);
 
-  const handleBackClick = () => {
-    navigate(-1);
-  };
+  const handleBackClick = () => navigate(-1);
 
-  // 등록완료 버튼 클릭 시 (registration: 1)
   const handleRegisterCompletedClick = () => {
-    if (product) {
-      showModal("제품 상태를 '등록완료'로 변경하시겠습니까?", async () => {
-        try {
-          const updateData: UpdateProductRequest = {
-            ...product,
-            product_img: images.filter((img) => img) as string[],
-            product_url: product.product_url,
-            registration: 1, // 등록완료 상태 코드
-          };
-          const updated = await updateProduct(product.id, updateData);
-          setProduct(updated);
-          showModal('제품 상태가 등록완료로 변경되었습니다!', () =>
-            navigate('/productlist')
-          );
-        } catch (error) {
-          console.error('등록완료 업데이트 실패', error);
-          showModal('제품 상태 변경에 실패했습니다.');
-        }
-      });
-    }
+    if (!product) return;
+    showModal("제품 상태를 '등록완료'로 변경하시겠습니까?", async () => {
+      try {
+        const updateData: UpdateProductRequest = {
+          ...product,
+          product_img: images.filter((img) => img) as string[],
+          product_url: product.product_url,
+          registration: 1,
+        };
+        const updated = await updateProduct(product.id, updateData);
+        setProduct(updated);
+        showModal('제품 상태가 등록완료로 변경되었습니다!', () =>
+          navigate('/productlist')
+        );
+      } catch (error) {
+        console.error('등록완료 업데이트 실패', error);
+        showModal('제품 상태 변경에 실패했습니다.');
+      }
+    });
   };
 
-  // 등록대기 버튼 클릭 시 (registration: 0)
   const handlePendingClick = () => {
-    if (product) {
-      showModal("제품 상태를 '등록대기'로 변경하시겠습니까?", async () => {
-        try {
-          const updateData: UpdateProductRequest = {
-            ...product,
-            product_img: images.filter((img) => img) as string[],
-            product_url: product.product_url,
-            registration: 0, // 등록대기 상태 코드
-          };
-          const updated = await updateProduct(product.id, updateData);
-          setProduct(updated);
-          showModal('제품 상태가 등록대기로 변경되었습니다!', () =>
-            navigate('/productlist')
-          );
-        } catch (error) {
-          console.error('등록대기 업데이트 실패', error);
-          showModal('제품 상태 변경에 실패했습니다.');
-        }
-      });
-    }
+    if (!product) return;
+    showModal("제품 상태를 '등록대기'로 변경하시겠습니까?", async () => {
+      try {
+        const updateData: UpdateProductRequest = {
+          ...product,
+          product_img: images.filter((img) => img) as string[],
+          product_url: product.product_url,
+          registration: 0,
+        };
+        const updated = await updateProduct(product.id, updateData);
+        setProduct(updated);
+        showModal('제품 상태가 등록대기로 변경되었습니다!', () =>
+          navigate('/productlist')
+        );
+      } catch (error) {
+        console.error('등록대기 업데이트 실패', error);
+        showModal('제품 상태 변경에 실패했습니다.');
+      }
+    });
   };
 
-  // 판매완료 버튼 클릭 시 (registration: 2)
   const handleSoldOutClick = () => {
-    if (product) {
-      showModal("제품 상태를 '판매완료'로 변경하시겠습니까?", async () => {
-        try {
-          const updateData: UpdateProductRequest = {
-            ...product,
-            product_img: images.filter((img) => img) as string[],
-            product_url: product.product_url,
-            registration: 2, // 판매완료 상태 코드
-          };
-          const updated = await updateProduct(product.id, updateData);
-          setProduct(updated);
-          showModal('제품 상태가 판매완료로 변경되었습니다!', () =>
-            navigate('/productlist')
-          );
-        } catch (error) {
-          console.error('판매완료 업데이트 실패', error);
-          showModal('제품 상태 변경에 실패했습니다.');
-        }
-      });
-    }
+    if (!product) return;
+    showModal("제품 상태를 '판매완료'로 변경하시겠습니까?", async () => {
+      try {
+        const updateData: UpdateProductRequest = {
+          ...product,
+          product_img: images.filter((img) => img) as string[],
+          product_url: product.product_url,
+          registration: 2,
+        };
+        const updated = await updateProduct(product.id, updateData);
+        setProduct(updated);
+        showModal('제품 상태가 판매완료로 변경되었습니다!', () =>
+          navigate('/productlist')
+        );
+      } catch (error) {
+        console.error('판매완료 업데이트 실패', error);
+        showModal('제품 상태 변경에 실패했습니다.');
+      }
+    });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-  };
+  const handleSubmit = (e: React.FormEvent) => e.preventDefault();
 
-  // 이미지 관련 핸들러들
   const handleImageUpload = (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const file = e.target.files && e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const uploadedImage = reader.result as string;
-        setImages((prev) => {
-          const newImages = [...prev];
-          newImages[index] = uploadedImage;
-          handleProductChange({
-            product_img: newImages.filter((img) => !!img) as string[],
-          });
-          return newImages;
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const uploadedImage = reader.result as string;
+      setImages((prev) => {
+        const newImages = [...prev];
+        newImages[index] = uploadedImage;
+        handleProductChange({
+          product_img: newImages.filter((img) => !!img) as string[],
         });
-      };
-      reader.readAsDataURL(file);
-    }
+        return newImages;
+      });
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleImageDelete = (index: number) => {
@@ -242,10 +218,9 @@ const ProductDetail: React.FC = () => {
       />
       <ProductNumberWrapper>
         <ProductNumberLabel>번호</ProductNumberLabel>
-        <ProductNumberValue>
-          {product ? product.id : '로딩 중...'}
-        </ProductNumberValue>
+        <ProductNumberValue>{product?.id ?? '로딩 중...'}</ProductNumberValue>
       </ProductNumberWrapper>
+
       {product && (
         <>
           <DetailTopBoxes
@@ -257,7 +232,7 @@ const ProductDetail: React.FC = () => {
           <FormWrapper onSubmit={handleSubmit}>
             <TwoColumnRow>
               <SizeGuideSection
-                product={product}
+                sizes={product.sizes}
                 onSizesChange={handleSizesChange}
               />
               <SizeDisplaySection
@@ -265,6 +240,7 @@ const ProductDetail: React.FC = () => {
                 sizeProductImg={product.size_picture}
               />
             </TwoColumnRow>
+
             <MiddleDivider />
             <MaterialInfoSection
               product={product}
@@ -293,11 +269,11 @@ const ProductDetail: React.FC = () => {
         isOpen={modalOpen}
         onClose={() => {
           setModalOpen(false);
-          if (modalCallback) modalCallback();
+          modalCallback?.();
         }}
         onConfirm={() => {
           setModalOpen(false);
-          if (modalCallback) modalCallback();
+          modalCallback?.();
         }}
         title='알림'
         width='400px'
@@ -311,7 +287,7 @@ const ProductDetail: React.FC = () => {
 
 export default ProductDetail;
 
-/* Styled Components for ProductDetail */
+/* Styled Components */
 const Container = styled.div`
   width: 100%;
   margin: 0 auto;
@@ -319,14 +295,12 @@ const Container = styled.div`
   box-sizing: border-box;
   font-family: 'NanumSquare Neo OTF', sans-serif;
 `;
-
 const HeaderRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
 `;
-
 const Title = styled.h1`
   font-family: 'NanumSquare Neo OTF';
   font-weight: 700;
@@ -334,7 +308,6 @@ const Title = styled.h1`
   line-height: 18px;
   color: #000;
 `;
-
 const ProductNumberWrapper = styled.div`
   display: flex;
   align-items: baseline;
@@ -342,38 +315,32 @@ const ProductNumberWrapper = styled.div`
   margin: 10px 0;
   margin-top: 34px;
 `;
-
 const ProductNumberLabel = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 12px;
   color: #000;
 `;
-
 const ProductNumberValue = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
   color: #000;
 `;
-
 const MiddleDivider = styled.hr`
   border: 0;
   border-top: 1px dashed #ddd;
   margin: 30px 0;
 `;
-
 const BottomDivider = styled.hr`
   border: 0;
   border-top: 1px solid #ddd;
   margin: 40px 0 20px;
 `;
-
 const FormWrapper = styled.form`
   display: flex;
   flex-direction: column;
 `;
-
 const TwoColumnRow = styled.div`
   display: flex;
   gap: 50px;

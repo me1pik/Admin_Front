@@ -1,13 +1,15 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import styled from 'styled-components';
 import { FaTimes, FaPlus } from 'react-icons/fa';
-import { ProductDetailResponse } from '../../api/adminProduct';
 
 type Column = { key: string; label: string };
 type RowData = Record<string, string>;
 
 export interface SizeGuideSectionProps {
-  product: ProductDetailResponse;
+  sizes: Array<{
+    size: string;
+    measurements: { 어깨: number; 가슴: number; 총장: number };
+  }>;
   onSizesChange?: (
     sizes: {
       size: string;
@@ -19,7 +21,7 @@ export interface SizeGuideSectionProps {
 const defaultSizes = ['44', '55', '66', '77', 'Free'];
 
 const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
-  product,
+  sizes,
   onSizesChange,
 }) => {
   const initialColumns: Column[] = [
@@ -35,8 +37,8 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   const [rows, setRows] = useState<RowData[]>([]);
 
   const makeInitialRows = (): RowData[] => {
-    if (product.sizes && product.sizes.length > 0) {
-      return product.sizes.map((item) => ({
+    if (sizes && sizes.length > 0) {
+      return sizes.map((item) => ({
         size: item.size.toLowerCase().includes('free')
           ? 'Free'
           : item.size.replace(/[^0-9]/g, ''),
@@ -58,7 +60,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
 
   useEffect(() => {
     setRows(makeInitialRows());
-  }, [product.sizes]);
+  }, [sizes]);
 
   const handleCellChange = (
     rowIndex: number,
@@ -73,7 +75,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     setRows(newRows);
     onSizesChange?.(
       newRows.map((r) => ({
-        size: r['size'],
+        size: r.size,
         measurements: {
           어깨: Number(r['어깨']) || 0,
           가슴: Number(r['가슴']) || 0,
@@ -106,41 +108,39 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   ) => {
     const newLabel = e.target.value;
     setColumns((prev) => {
-      const newCols = [...prev];
-      newCols[colIndex] = { ...newCols[colIndex], label: newLabel };
-      return newCols;
+      const copy = [...prev];
+      copy[colIndex] = { ...copy[colIndex], label: newLabel };
+      return copy;
     });
   };
 
   return (
     <SectionBox>
-      <SectionHeaderContainer>
+      <Header>
         <Bullet />
-        <SectionTitle>사이즈 가이드</SectionTitle>
-        <IconButton onClick={handleAddColumn} title='열 추가'>
+        <Title>사이즈 가이드</Title>
+        <AddColButton onClick={handleAddColumn}>
           <FaPlus /> 열 추가
-        </IconButton>
-      </SectionHeaderContainer>
-      <VerticalLine />
-      <SizeGuideTable>
+        </AddColButton>
+      </Header>
+
+      <Line />
+      <Table>
         <thead>
           <tr>
             {columns.map((col, idx) => (
-              <EditableTh key={col.key}>
-                <HeaderInput
+              <Th key={col.key}>
+                <LabelInput
                   value={col.label}
                   placeholder='열 이름'
                   onChange={(e) => handleLabelChange(idx, e)}
                 />
                 {idx > 0 && (
-                  <DeleteColButton
-                    onClick={() => handleDeleteColumn(idx)}
-                    title='열 삭제'
-                  >
+                  <DelColButton onClick={() => handleDeleteColumn(idx)}>
                     <FaTimes />
-                  </DeleteColButton>
+                  </DelColButton>
                 )}
-              </EditableTh>
+              </Th>
             ))}
           </tr>
         </thead>
@@ -149,7 +149,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
             <tr key={rIdx}>
               {columns.map((col) => (
                 <Td key={`${rIdx}-${col.key}`}>
-                  <InputSmall
+                  <CellInput
                     value={row[col.key]}
                     onChange={(e) => handleCellChange(rIdx, col.key, e)}
                   />
@@ -158,36 +158,32 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
             </tr>
           ))}
         </tbody>
-      </SizeGuideTable>
+      </Table>
     </SectionBox>
   );
 };
 
 export default SizeGuideSection;
 
-/* Styled Components */
+/* styled-components */
 const SectionBox = styled.div`
   position: relative;
-  margin-bottom: 20px;
   padding-left: 20px;
-  /* 하단 여백 추가: VerticalLine이 테이블 끝까지 연장될 수 있도록 */
   padding-bottom: 10px;
+  margin-bottom: 20px;
 `;
-
-const SectionHeaderContainer = styled.div`
+const Header = styled.div`
   display: flex;
   align-items: center;
-  position: relative;
   margin-bottom: 10px;
 `;
-
 const Bullet = styled.div`
   position: absolute;
   left: -27px;
   top: 0;
   width: 14px;
   height: 14px;
-  border: 1px solid #dddddd;
+  border: 1px solid #ddd;
   border-radius: 50%;
   background: #fff;
   &::after {
@@ -201,79 +197,64 @@ const Bullet = styled.div`
     border-radius: 50%;
   }
 `;
-
-const SectionTitle = styled.div`
-  font-family: 'NanumSquare Neo OTF';
+const Title = styled.div`
   font-weight: 800;
   font-size: 14px;
-  line-height: 15px;
   margin-left: 10px;
 `;
-
-const VerticalLine = styled.div`
+const AddColButton = styled.button`
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  & svg {
+    margin-right: 4px;
+  }
+`;
+const Line = styled.div`
   position: absolute;
   left: 0;
-  top: 14px;
-  bottom: 112px;
+  top: 28px;
+  bottom: 0;
   width: 1px;
-  background: #dddddd;
+  background: #ddd;
 `;
-
-const SizeGuideTable = styled.table`
+const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
-
   th,
   td {
     border: 1px solid #ddd;
     text-align: center;
-    font-family: 'NanumSquare Neo OTF';
-    font-weight: 900;
-    font-size: 12px;
-    line-height: 13px;
-    color: #000;
     padding: 4px;
+    font-size: 12px;
     position: relative;
   }
-
   th:first-child,
   td:first-child {
     padding-left: 10px;
   }
-
   td:first-child::before {
     content: '';
     position: absolute;
     left: -20px;
     top: 50%;
-    transform: translateY(-50%);
     width: 20px;
     height: 1px;
-    background: #dddddd;
+    background: #ddd;
   }
 `;
-
-const EditableTh = styled.th`
+const Th = styled.th`
   padding: 0;
 `;
-
-const Td = styled.td``;
-
-const InputSmall = styled.input`
-  width: 50px;
-  height: 28px;
-  border: 1px solid #ddd;
-  font-size: 12px;
-  text-align: center;
-`;
-
-const HeaderInput = styled.input`
+const LabelInput = styled.input`
   width: calc(100% - 24px);
-  height: 100%;
   border: none;
   text-align: center;
-  font-family: 'NanumSquare Neo OTF';
   font-weight: 900;
   font-size: 12px;
   background: transparent;
@@ -281,26 +262,19 @@ const HeaderInput = styled.input`
     outline: none;
   }
 `;
-
-const IconButton = styled.button`
-  border: none;
-  background: none;
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  cursor: pointer;
-  margin-left: auto;
-  & svg {
-    margin-right: 4px;
-  }
-`;
-
-const DeleteColButton = styled.button`
+const DelColButton = styled.button`
   position: absolute;
   top: 2px;
   right: 2px;
-  border: none;
   background: none;
+  border: none;
   cursor: pointer;
+`;
+const Td = styled.td``;
+const CellInput = styled.input`
+  width: 50px;
+  height: 28px;
+  border: 1px solid #ddd;
   font-size: 12px;
+  text-align: center;
 `;
