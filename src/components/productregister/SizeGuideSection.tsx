@@ -56,12 +56,10 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     });
   };
 
-  // product.sizes 변경 시 rows 동기화
   useEffect(() => {
     setRows(makeInitialRows());
   }, [product.sizes]);
 
-  // 셀 편집 핸들러
   const handleCellChange = (
     rowIndex: number,
     key: string,
@@ -73,8 +71,6 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
       i === rowIndex ? { ...r, [key]: value } : r
     );
     setRows(newRows);
-
-    // 수정된 행을 상위에 전달
     onSizesChange?.(
       newRows.map((r) => ({
         size: r['size'],
@@ -87,14 +83,12 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     );
   };
 
-  // 열 추가 (사이즈 데이터 변경 아님)
   const handleAddColumn = () => {
     const newKey = `col${Date.now()}`;
     setColumns((prev) => [...prev, { key: newKey, label: '' }]);
     setRows((prev) => prev.map((r) => ({ ...r, [newKey]: '' })));
   };
 
-  // 열 삭제
   const handleDeleteColumn = (colIndex: number) => {
     const keyToRemove = columns[colIndex].key;
     setColumns((prev) => prev.filter((_, i) => i !== colIndex));
@@ -106,7 +100,6 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     );
   };
 
-  // 헤더 라벨 변경
   const handleLabelChange = (
     colIndex: number,
     e: ChangeEvent<HTMLInputElement>
@@ -121,13 +114,13 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
 
   return (
     <SectionBox>
-      <SectionHeader>
+      <SectionHeaderContainer>
         <Bullet />
         <SectionTitle>사이즈 가이드</SectionTitle>
         <IconButton onClick={handleAddColumn} title='열 추가'>
           <FaPlus /> 열 추가
         </IconButton>
-      </SectionHeader>
+      </SectionHeaderContainer>
       <VerticalLine />
       <SizeGuideTable>
         <thead>
@@ -177,13 +170,17 @@ const SectionBox = styled.div`
   position: relative;
   margin-bottom: 20px;
   padding-left: 20px;
-  min-width: 500px;
+  /* 하단 여백 추가: VerticalLine이 테이블 끝까지 연장될 수 있도록 */
+  padding-bottom: 10px;
 `;
-const SectionHeader = styled.div`
+
+const SectionHeaderContainer = styled.div`
   display: flex;
   align-items: center;
+  position: relative;
   margin-bottom: 10px;
 `;
+
 const Bullet = styled.div`
   position: absolute;
   left: -27px;
@@ -204,6 +201,7 @@ const Bullet = styled.div`
     border-radius: 50%;
   }
 `;
+
 const SectionTitle = styled.div`
   font-family: 'NanumSquare Neo OTF';
   font-weight: 800;
@@ -211,18 +209,21 @@ const SectionTitle = styled.div`
   line-height: 15px;
   margin-left: 10px;
 `;
+
 const VerticalLine = styled.div`
   position: absolute;
   left: 0;
   top: 14px;
-  bottom: 0;
+  bottom: 112px;
   width: 1px;
   background: #dddddd;
 `;
+
 const SizeGuideTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
+
   th,
   td {
     border: 1px solid #ddd;
@@ -235,22 +236,38 @@ const SizeGuideTable = styled.table`
     padding: 4px;
     position: relative;
   }
+
   th:first-child,
   td:first-child {
     padding-left: 10px;
   }
+
+  td:first-child::before {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 1px;
+    background: #dddddd;
+  }
 `;
+
 const EditableTh = styled.th`
   padding: 0;
 `;
+
 const Td = styled.td``;
+
 const InputSmall = styled.input`
-  width: 90%;
+  width: 50px;
   height: 28px;
   border: 1px solid #ddd;
   font-size: 12px;
   text-align: center;
 `;
+
 const HeaderInput = styled.input`
   width: calc(100% - 24px);
   height: 100%;
@@ -264,6 +281,7 @@ const HeaderInput = styled.input`
     outline: none;
   }
 `;
+
 const IconButton = styled.button`
   border: none;
   background: none;
@@ -276,6 +294,7 @@ const IconButton = styled.button`
     margin-right: 4px;
   }
 `;
+
 const DeleteColButton = styled.button`
   position: absolute;
   top: 2px;
