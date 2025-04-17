@@ -61,6 +61,8 @@ export interface ProductDetailResponse {
   fabricComposition: {
     겉감: string;
     안감: string;
+    배색?: string; // optional 처리
+    부속?: string;
   };
   elasticity: string;
   transparency: string;
