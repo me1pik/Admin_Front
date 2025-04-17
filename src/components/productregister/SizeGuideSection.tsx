@@ -32,29 +32,37 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
 
   // 사이즈 데이터로부터 테이블 행 생성
   const makeInitialRows = useCallback((): RowData[] => {
+    let initialRows: RowData[];
     if (sizes && sizes.length > 0) {
-      return sizes.map((item) => {
+      initialRows = sizes.map((item) => {
         const row: RowData = {};
         columns.forEach((col) => {
           if (col.key === 'size') {
-            // size 값에서 숫자만
-            row.size = String(item.size).replace(/[^0-9]/g, '');
+            // API에서 온 사이즈, 'Free'는 그대로, 숫자만 추출
+            const raw = String(item.size);
+            row.size = /free/i.test(raw) ? 'Free' : raw.replace(/[^0-9]/g, '');
           } else {
-            // 빈 값(0이거나 undefined)은 빈 문자열로 처리
             const v = item[col.key];
             row[col.key] = v === 0 || v == null ? '' : String(v);
           }
         });
         return row;
       });
-    }
-    // 신규 등록 시 기본 사이즈
-    return defaultSizes.map((sz) => {
-      const row: RowData = {};
-      columns.forEach((col) => {
-        row[col.key] = col.key === 'size' ? sz : '';
+    } else {
+      // 신규 등록 시 기본 사이즈
+      initialRows = defaultSizes.map((sz) => {
+        const row: RowData = {};
+        columns.forEach((col) => {
+          row[col.key] = col.key === 'size' ? sz : '';
+        });
+        return row;
       });
-      return row;
+    }
+    // 오름차순 정렬: 숫자 크기 순, 'Free'는 항상 마지막
+    return initialRows.sort((a, b) => {
+      const aval = a.size === 'Free' ? Infinity : Number(a.size);
+      const bval = b.size === 'Free' ? Infinity : Number(b.size);
+      return aval - bval;
     });
   }, [sizes, columns]);
 
@@ -67,7 +75,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     const out: SizeRow[] = newRows.map((r) => {
       const sr: SizeRow = { size: r['size'] };
       Object.entries(r).forEach(([k, v]) => {
-        if (k === 'size' || v === '') return; // 빈 문자열은 제외
+        if (k === 'size' || v === '') return;
         sr[k] = isNaN(Number(v)) ? v : Number(v);
       });
       return sr;
