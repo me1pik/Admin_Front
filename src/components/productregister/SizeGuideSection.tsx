@@ -177,6 +177,7 @@ const SectionBox = styled.div`
   position: relative;
   margin-bottom: 20px;
   padding-left: 20px;
+  min-width: 500px;
 `;
 const SectionHeader = styled.div`
   display: flex;
@@ -244,7 +245,7 @@ const EditableTh = styled.th`
 `;
 const Td = styled.td``;
 const InputSmall = styled.input`
-  width: 100%;
+  width: 90%;
   height: 28px;
   border: 1px solid #ddd;
   font-size: 12px;
