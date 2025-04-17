@@ -1,6 +1,6 @@
 // src/pages/ProductList.tsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import ProductTable, { ProductItem } from '../components/Table/ProductTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
@@ -10,7 +10,7 @@ import {
   getProducts,
   ProductListParams,
   ProductListResponse,
-} from '../api/adminProduct'; // API 모듈 import
+} from '../api/adminProduct';
 
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
@@ -21,72 +21,68 @@ const tabs: TabItem[] = [
 
 const ProductList: React.FC = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
+  const [searchParams] = useSearchParams();
+  const searchTerm = searchParams.get('search') ?? '';
 
-  // API 호출 결과를 저장할 상태값들
+  const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
   const [productData, setProductData] = useState<ProductItem[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [page, setPage] = useState(1);
-  const limit = 10; // 페이지당 아이템 수
+  const [page, setPage] = useState<number>(1);
+  const limit = 10;
 
-  // 탭 변경 시, 페이지를 1로 초기화하고 상태 업데이트
+  // 탭 변경 시 페이지 초기화
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
     setPage(1);
   };
 
-  // 검색어, 탭, 페이지가 변경될 때마다 API 호출
+  // 검색어, 탭, 페이지가 바뀔 때마다 API 호출
   useEffect(() => {
     const fetchProducts = async () => {
+      const params: ProductListParams = {
+        status:
+          selectedTab.label !== '전체보기' ? selectedTab.label : undefined,
+        search: searchTerm || undefined,
+        page,
+        limit,
+      };
       try {
-        const params: ProductListParams = {
-          status:
-            selectedTab.label !== '전체보기' ? selectedTab.label : undefined,
-          search: searchTerm.trim() ? searchTerm : undefined,
-          page,
-          limit,
-        };
-        const response: ProductListResponse = await getProducts(params);
-        setProductData(response.items);
-        setTotalCount(response.totalCount);
-        setTotalPages(response.totalPages);
-      } catch (error) {
-        console.error('제품 목록을 불러오는데 실패했습니다.', error);
+        const res: ProductListResponse = await getProducts(params);
+        setProductData(res.items);
+        setTotalCount(res.totalCount);
+        setTotalPages(res.totalPages);
+      } catch (err) {
+        console.error('제품 목록 로드 실패', err);
       }
     };
-
     fetchProducts();
   }, [selectedTab, searchTerm, page]);
 
-  // 상세 페이지 이동 함수
-  const handleEdit = (_styleCode: string, no: number) => {
+  const handleEdit = (_: string, no: number) => {
     navigate(`/productdetail/${no}`);
   };
 
-  // 제품 등록 버튼 클릭 시 이동
-  const handleRegisterClick = () => {
+  const handleRegister = () => {
     navigate('/productregister');
   };
 
   return (
     <Content>
       <HeaderTitle>제품관리</HeaderTitle>
-      <SubHeader
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        tabs={tabs}
-        onTabChange={handleTabChange}
-      />
+
+      <SubHeader tabs={tabs} onTabChange={handleTabChange} />
+
       <InfoBar>
         <TotalCount>Total: {totalCount}</TotalCount>
       </InfoBar>
+
       <TableContainer>
         <ProductTable filteredData={productData} handleEdit={handleEdit} />
       </TableContainer>
+
       <FooterRow>
-        <RegisterButton text='제품등록' onClick={handleRegisterClick} />
+        <RegisterButton text='제품등록' onClick={handleRegister} />
         <Pagination page={page} setPage={setPage} totalPages={totalPages} />
       </FooterRow>
     </Content>

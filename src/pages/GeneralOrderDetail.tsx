@@ -1,4 +1,6 @@
+// src/pages/GeneralOrderDetail.tsx
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import GeneralOrderDetailTable, {
   GeneralOrderDetailItem,
@@ -17,7 +19,7 @@ const dummyGeneralOrderDetail: GeneralOrderDetailItem[] = [
     size: '55 (M)',
     color: 'BLACK',
     paymentMethod: '일시불',
-    paymentStatus: '결제완료', // 초록 (#4AA361)
+    paymentStatus: '결제완료',
   },
   {
     no: 13487,
@@ -28,7 +30,7 @@ const dummyGeneralOrderDetail: GeneralOrderDetailItem[] = [
     size: '55 (M)',
     color: 'PINK',
     paymentMethod: '카드결제',
-    paymentStatus: '결제대기', // 파랑 (#3071B2)
+    paymentStatus: '결제대기',
   },
   {
     no: 13488,
@@ -39,7 +41,7 @@ const dummyGeneralOrderDetail: GeneralOrderDetailItem[] = [
     size: '55 (M)',
     color: 'PINK',
     paymentMethod: '24개월 할부',
-    paymentStatus: '결제완료', // 초록 (#4AA361)
+    paymentStatus: '결제완료',
   },
   {
     no: 13489,
@@ -50,7 +52,7 @@ const dummyGeneralOrderDetail: GeneralOrderDetailItem[] = [
     size: '55 (M)',
     color: 'BLACK',
     paymentMethod: '계좌이체',
-    paymentStatus: '결제완료', // 초록 (#4AA361)
+    paymentStatus: '결제완료',
   },
   {
     no: 13490,
@@ -61,7 +63,7 @@ const dummyGeneralOrderDetail: GeneralOrderDetailItem[] = [
     size: '55 (M)',
     color: 'BLACK',
     paymentMethod: '카드결제',
-    paymentStatus: '취소요청', // 검정 (#000000)
+    paymentStatus: '취소요청',
   },
   {
     no: 13491,
@@ -72,7 +74,7 @@ const dummyGeneralOrderDetail: GeneralOrderDetailItem[] = [
     size: '55 (M)',
     color: 'LIGHT BEIGE',
     paymentMethod: '카드결제',
-    paymentStatus: '환불 진행중', // 벽돌색 (#CD5542)
+    paymentStatus: '환불 진행중',
   },
   {
     no: 13492,
@@ -83,7 +85,7 @@ const dummyGeneralOrderDetail: GeneralOrderDetailItem[] = [
     size: '55 (M)',
     color: 'GRAY',
     paymentMethod: '24개월 할부',
-    paymentStatus: '결제완료', // 초록 (#4AA361)
+    paymentStatus: '결제완료',
   },
   {
     no: 13493,
@@ -94,7 +96,7 @@ const dummyGeneralOrderDetail: GeneralOrderDetailItem[] = [
     size: '55 (M)',
     color: 'LIGHT BLUE',
     paymentMethod: '카드결제',
-    paymentStatus: '환불완료', // 주황 (#F39C12)
+    paymentStatus: '환불완료',
   },
 ];
 
@@ -106,29 +108,24 @@ const tabs: TabItem[] = [
 ];
 
 const GeneralOrderDetail: React.FC = () => {
-  // 검색 상태
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchParams] = useSearchParams();
+  const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
 
-  // 현재 선택된 탭 상태 (기본값: "전체보기")
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-
-  // 일반주문내역 목록 (임시 데이터)
   const [GeneralOrderDetailData] = useState<GeneralOrderDetailItem[]>(
     dummyGeneralOrderDetail
   );
 
-  // 탭 변경 시
+  const [page, setPage] = useState(1);
+  const limit = 10;
+
+  // 탭 변경
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
     setPage(1);
   };
 
-  /**
-   * 탭 필터링:
-   * - "전체보기": 모든 데이터
-   * - "진행내역": 결제상태가 '취소요청', '환불 진행중', '결제실패'가 아닌 항목
-   * - "취소내역": 결제상태가 '취소요청', '환불 진행중', '결제실패'인 항목
-   */
+  // 탭 필터링
   const dataByTab = GeneralOrderDetailData.filter((item) => {
     if (selectedTab.label === '전체보기') return true;
     if (selectedTab.label === '진행내역') {
@@ -148,31 +145,28 @@ const GeneralOrderDetail: React.FC = () => {
     return true;
   });
 
-  // 검색 로직: 모든 문자열 필드 및 번호(no)도 문자열 변환 후 검색
+  // URL 검색어로 필터링
   const filteredData = dataByTab.filter((item) => {
-    const lowerTerm = searchTerm.toLowerCase();
+    const t = searchTerm;
     return (
-      String(item.no).includes(lowerTerm) ||
-      item.orderDate.toLowerCase().includes(lowerTerm) ||
-      item.buyerAccount.toLowerCase().includes(lowerTerm) ||
-      item.brand.toLowerCase().includes(lowerTerm) ||
-      item.styleCode.toLowerCase().includes(lowerTerm) ||
-      item.size.toLowerCase().includes(lowerTerm) ||
-      item.color.toLowerCase().includes(lowerTerm) ||
-      item.paymentMethod.toLowerCase().includes(lowerTerm) ||
-      item.paymentStatus.toLowerCase().includes(lowerTerm)
+      String(item.no).includes(t) ||
+      item.orderDate.toLowerCase().includes(t) ||
+      item.buyerAccount.toLowerCase().includes(t) ||
+      item.brand.toLowerCase().includes(t) ||
+      item.styleCode.toLowerCase().includes(t) ||
+      item.size.toLowerCase().includes(t) ||
+      item.color.toLowerCase().includes(t) ||
+      item.paymentMethod.toLowerCase().includes(t) ||
+      item.paymentStatus.toLowerCase().includes(t)
     );
   });
 
-  // 페이지네이션 상태
-  const [page, setPage] = useState(1);
-  const limit = 10;
+  // 페이지네이션 계산
   const totalCount = filteredData.length;
-  const totalPages = Math.ceil(totalCount / limit);
+  const totalPages = Math.max(1, Math.ceil(totalCount / limit));
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  // 주문자(계정) 클릭 시 이벤트
   const handleEdit = (account: string) => {
     alert(`주문자 계정(${account}) 클릭됨`);
   };
@@ -180,21 +174,20 @@ const GeneralOrderDetail: React.FC = () => {
   return (
     <Content>
       <HeaderTitle>일반주문 내역</HeaderTitle>
-      <SubHeader
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        tabs={tabs}
-        onTabChange={handleTabChange}
-      />
+
+      <SubHeader tabs={tabs} onTabChange={handleTabChange} />
+
       <InfoBar>
         <TotalCountText>Total: {totalCount}</TotalCountText>
       </InfoBar>
+
       <TableContainer>
         <GeneralOrderDetailTable
           filteredData={currentPageData}
           handleEdit={handleEdit}
         />
       </TableContainer>
+
       <FooterRow>
         <Pagination page={page} setPage={setPage} totalPages={totalPages} />
       </FooterRow>

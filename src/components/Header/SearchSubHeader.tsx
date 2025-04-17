@@ -1,7 +1,8 @@
-// src/components/SubHeader.tsx
-import React, { useState } from 'react';
+// src/components/Header/SubHeader.tsx
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FiSearch } from 'react-icons/fi';
+import { useSearchParams } from 'react-router-dom';
 import NewIcon from '../../assets/New.svg';
 
 export interface TabItem {
@@ -10,38 +11,46 @@ export interface TabItem {
 }
 
 interface SubHeaderProps {
-  searchTerm: string;
-  setSearchTerm: (value: string) => void;
   tabs: TabItem[];
   onTabChange?: (tab: TabItem) => void;
 }
 
-const SubHeader: React.FC<SubHeaderProps> = ({
-  searchTerm,
-  setSearchTerm,
-  tabs,
-  onTabChange,
-}) => {
-  // 기본 활성 탭은 첫 번째 탭(예: "전체보기")
+const SubHeader: React.FC<SubHeaderProps> = ({ tabs, onTabChange }) => {
   const [activeTab, setActiveTab] = useState<string>(tabs[0].label);
+  const [inputValue, setInputValue] = useState<string>('');
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // 탭 클릭 시 activeTab 업데이트 및 부모 콜백 호출
+  // URL 쿼리(search)가 바뀔 때마다 inputValue 동기화
+  useEffect(() => {
+    setInputValue(searchParams.get('search') ?? '');
+  }, [searchParams]);
+
   const handleTabClick = (tab: TabItem) => {
     setActiveTab(tab.label);
-    if (onTabChange) {
-      onTabChange(tab);
+    onTabChange?.(tab);
+  };
+
+  // Enter 키로만 URL 갱신
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      const trimmed = inputValue.trim();
+      if (trimmed) {
+        setSearchParams({ search: trimmed });
+      } else {
+        setSearchParams({});
+      }
     }
   };
 
   return (
     <HeaderContainer>
       <TabContainer>
-        {tabs.map((tab, index) => (
+        {tabs.map((tab, idx) => (
           <TabButton
-            key={index}
+            key={idx}
             active={activeTab === tab.label}
-            isFirst={index === 0}
-            isLast={index === tabs.length - 1}
+            isFirst={idx === 0}
+            isLast={idx === tabs.length - 1}
             onClick={() => handleTabClick(tab)}
           >
             {tab.label}
@@ -53,10 +62,11 @@ const SubHeader: React.FC<SubHeaderProps> = ({
         <SearchInput
           type='text'
           placeholder='검색'
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
         />
-        <SearchIcon />
+        <SearchIcon /> {/* 클릭 이벤트 제거 */}
       </SearchContainer>
     </HeaderContainer>
   );
@@ -73,18 +83,16 @@ const HeaderContainer = styled.div`
   background: #f9f9f9;
   border: 1px solid #dddddd;
   margin-bottom: 34px;
-
   min-width: 800px;
 `;
 
 const TabContainer = styled.div`
   display: flex;
   align-items: center;
-  margin-right: auto; /* 탭 영역을 왼쪽에 배치 */
+  margin-right: auto;
   background: #eeeeee;
   border: 1px solid #dddddd;
   border-radius: 8px;
-  overflow: visible;
 `;
 
 interface TabButtonProps {
@@ -147,6 +155,6 @@ const SearchInput = styled.input`
 const SearchIcon = styled(FiSearch)`
   position: absolute;
   right: 10px;
-  color: #6c757d;
   font-size: 16px;
+  color: #6c757d;
 `;

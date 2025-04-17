@@ -1,5 +1,6 @@
+// src/pages/BrandList.tsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import BrandTable, { BrandItem } from '../components/Table/BrandTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
@@ -107,53 +108,50 @@ const tabs: TabItem[] = [
 
 const BrandList: React.FC = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchParams] = useSearchParams();
+  const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
+
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
   const [BrandData] = useState<BrandItem[]>(dummyBrands);
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
-  // 탭 변경 시
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
     setPage(1);
   };
 
-  // 탭 필터링
-  const dataByTab = BrandData.filter((item) => {
-    if (selectedTab.label === '전체보기') return true;
-    return item.status === selectedTab.label;
-  });
+  // 탭별 1차 필터링
+  const dataByTab = BrandData.filter((item) =>
+    selectedTab.label === '전체보기' ? true : item.status === selectedTab.label
+  );
 
-  // 검색 로직
+  // URL 검색어로 2차 필터링
   const filteredData = dataByTab.filter((item) => {
-    const lowerTerm = searchTerm.toLowerCase();
+    const t = searchTerm;
     return (
-      String(item.no).toLowerCase().includes(lowerTerm) ||
-      item.group.toLowerCase().includes(lowerTerm) ||
-      item.brand.toLowerCase().includes(lowerTerm) ||
-      String(item.quantity).includes(lowerTerm) ||
-      String(item.discount).includes(lowerTerm) ||
-      item.manager.toLowerCase().includes(lowerTerm) ||
-      item.contact.toLowerCase().includes(lowerTerm) ||
-      item.registerDate.toLowerCase().includes(lowerTerm) ||
-      item.status.toLowerCase().includes(lowerTerm)
+      String(item.no).includes(t) ||
+      item.group.toLowerCase().includes(t) ||
+      item.brand.toLowerCase().includes(t) ||
+      String(item.quantity).includes(t) ||
+      String(item.discount).includes(t) ||
+      item.manager.toLowerCase().includes(t) ||
+      item.contact.toLowerCase().includes(t) ||
+      item.registerDate.toLowerCase().includes(t) ||
+      item.status.toLowerCase().includes(t)
     );
   });
 
-  // 페이지네이션 상태
-  const [page, setPage] = useState(1);
-  const limit = 10;
+  // 페이지네이션 계산
   const totalCount = filteredData.length;
-  const totalPages = Math.ceil(totalCount / limit);
+  const totalPages = Math.max(1, Math.ceil(totalCount / limit));
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  // 리스트에서 행 클릭 시 상세 이동
   const handleEdit = (no: number) => {
-    // 예: /Branddetail/:no 로 이동
     navigate(`/Branddetail/${no}`);
   };
 
-  // 브랜드 등록 버튼 클릭 시 -> Brandregister 페이지로 이동
   const handleRegisterClick = () => {
     navigate('/Brandregister');
   };
@@ -161,19 +159,17 @@ const BrandList: React.FC = () => {
   return (
     <Content>
       <HeaderTitle>브랜드 관리</HeaderTitle>
-      <SubHeader
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        tabs={tabs}
-        onTabChange={handleTabChange}
-      />
+
+      <SubHeader tabs={tabs} onTabChange={handleTabChange} />
+
       <InfoBar>
         <TotalCount>Total: {totalCount}</TotalCount>
       </InfoBar>
+
       <TableContainer>
         <BrandTable filteredData={currentPageData} handleEdit={handleEdit} />
       </TableContainer>
-      {/* 하단에 버튼과 페이지네이션을 한 줄(row)로 정렬 */}
+
       <FooterRow>
         <RegisterButton text='브랜드등록' onClick={handleRegisterClick} />
         <Pagination page={page} setPage={setPage} totalPages={totalPages} />
@@ -196,18 +192,14 @@ const Content = styled.div`
 `;
 
 const HeaderTitle = styled.h1`
-  text-align: left;
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 16px;
-  line-height: 18px;
-  color: #000000;
   margin-bottom: 18px;
 `;
 
 const InfoBar = styled.div`
   display: flex;
-  align-items: center;
   justify-content: space-between;
   margin-bottom: 15px;
 `;
@@ -216,7 +208,6 @@ const TotalCount = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
-  color: #000000;
 `;
 
 const TableContainer = styled.div`

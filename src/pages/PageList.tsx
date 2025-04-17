@@ -1,6 +1,6 @@
 // src/pages/Pagelist.tsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import PageTable, { User } from '../components/Table/PageTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
@@ -91,43 +91,38 @@ const dummyData: User[] = [
 
 const Pagelist: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
 
-  // 검색어
-  const [searchTerm, setSearchTerm] = useState('');
-
-  // 탭 상태
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-
-  // 페이지네이션 상태
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  // 탭 변경 시
+  // 탭 변경
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
     setPage(1);
   };
 
-  // 탭에 따른 데이터 필터링
-  const dataByTab = dummyData.filter((item) => {
-    if (selectedTab.label === '전체보기') return true;
-    return item.grade === selectedTab.path; // "일반" / "블럭"
-  });
+  // 탭에 따른 필터링
+  const dataByTab = dummyData.filter((item) =>
+    selectedTab.label === '전체보기' ? true : item.grade === selectedTab.path
+  );
 
-  // 검색어 필터링
+  // URL 검색어로 필터링
   const filteredData = dataByTab.filter((item) => {
-    const lowerTerm = searchTerm.toLowerCase();
+    const t = searchTerm;
     return (
-      String(item.no).toLowerCase().includes(lowerTerm) ||
-      item.grade.toLowerCase().includes(lowerTerm) ||
-      item.name.toLowerCase().includes(lowerTerm) ||
-      item.nickname.toLowerCase().includes(lowerTerm) ||
-      item.instagram.toLowerCase().includes(lowerTerm) ||
-      item.season.toLowerCase().includes(lowerTerm) ||
-      String(item.contentsCount).includes(lowerTerm) ||
-      String(item.submitCount).includes(lowerTerm) ||
-      String(item.average).includes(lowerTerm) ||
-      String(item.totalSum).includes(lowerTerm)
+      String(item.no).includes(t) ||
+      item.grade.toLowerCase().includes(t) ||
+      item.name.toLowerCase().includes(t) ||
+      item.nickname.toLowerCase().includes(t) ||
+      item.instagram.toLowerCase().includes(t) ||
+      item.season.toLowerCase().includes(t) ||
+      item.contentsCount.toLowerCase().includes(t) ||
+      item.submitCount.toLowerCase().includes(t) ||
+      String(item.average).includes(t) ||
+      String(item.totalSum).includes(t)
     );
   });
 
@@ -137,27 +132,25 @@ const Pagelist: React.FC = () => {
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  // 인스타 계정 클릭 시, 해당 no로 상세 페이지 이동
+  // 인스타 계정 클릭 시 상세 페이지 이동
   const handleEdit = (no: number) => {
-    // 예: 상세 페이지가 /userdetail/:no 라면
     navigate(`/userdetail/${no}`);
   };
 
   return (
     <Content>
       <HeaderTitle>페이지 목록</HeaderTitle>
-      <SubHeader
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        tabs={tabs}
-        onTabChange={handleTabChange}
-      />
+
+      <SubHeader tabs={tabs} onTabChange={handleTabChange} />
+
       <InfoBar>
         <TotalCountText>Total: {totalCount}</TotalCountText>
       </InfoBar>
+
       <TableContainer>
         <PageTable filteredData={currentPageData} handleEdit={handleEdit} />
       </TableContainer>
+
       <FooterRow>
         <Pagination page={page} setPage={setPage} totalPages={totalPages} />
       </FooterRow>
@@ -184,13 +177,11 @@ const HeaderTitle = styled.h1`
   font-weight: 700;
   font-size: 16px;
   line-height: 18px;
-  color: #000000;
   margin-bottom: 18px;
 `;
 
 const InfoBar = styled.div`
   display: flex;
-  align-items: center;
   justify-content: space-between;
   margin-bottom: 15px;
 `;
@@ -199,7 +190,6 @@ const TotalCountText = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
-  color: #000000;
 `;
 
 const TableContainer = styled.div`

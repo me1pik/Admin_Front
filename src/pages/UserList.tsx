@@ -1,5 +1,6 @@
+// src/pages/UserList.tsx
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import UserTable, { User } from '../components/Table/UserTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
@@ -14,7 +15,9 @@ const tabs: TabItem[] = [
 
 const UserList: React.FC = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchParams] = useSearchParams();
+  const searchTerm = searchParams.get('search')?.toLowerCase() ?? '';
+
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
   const [userData, setUserData] = useState<User[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
@@ -22,19 +25,17 @@ const UserList: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const limit = 10;
 
-  // ✅ totalPages 계산 추가
+  // totalPages 계산
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
 
   // 유저 데이터 요청
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      let res;
-      if (selectedTab.label === '블럭회원') {
-        res = await getBlockedUsers(limit, page);
-      } else {
-        res = await getAllUsers(limit, page);
-      }
+      const res =
+        selectedTab.label === '블럭회원'
+          ? await getBlockedUsers(limit, page)
+          : await getAllUsers(limit, page);
 
       const users: User[] = res.users.map((u: any) => ({
         no: u.id,
@@ -57,6 +58,7 @@ const UserList: React.FC = () => {
     }
   };
 
+  // 페이지나 탭이 바뀔 때마다 재요청
   useEffect(() => {
     fetchUsers();
   }, [page, selectedTab]);
@@ -66,18 +68,18 @@ const UserList: React.FC = () => {
     setPage(1);
   };
 
+  // URL 검색어로 필터링
   const filteredData = userData.filter((item) => {
-    const lowerTerm = searchTerm.toLowerCase();
     return (
-      String(item.no).toLowerCase().includes(lowerTerm) ||
-      item.name.toLowerCase().includes(lowerTerm) ||
-      item.nickname.toLowerCase().includes(lowerTerm) ||
-      item.instagram.toLowerCase().includes(lowerTerm) ||
-      item.followingFollower.toLowerCase().includes(lowerTerm) ||
-      item.serviceArea.toLowerCase().includes(lowerTerm) ||
-      item.status.toLowerCase().includes(lowerTerm) ||
-      item.grade.toLowerCase().includes(lowerTerm) ||
-      item.joinDate.toLowerCase().includes(lowerTerm)
+      String(item.no).includes(searchTerm) ||
+      item.name.toLowerCase().includes(searchTerm) ||
+      item.nickname.toLowerCase().includes(searchTerm) ||
+      item.instagram.toLowerCase().includes(searchTerm) ||
+      item.followingFollower.toLowerCase().includes(searchTerm) ||
+      item.serviceArea.toLowerCase().includes(searchTerm) ||
+      item.status.toLowerCase().includes(searchTerm) ||
+      item.grade.toLowerCase().includes(searchTerm) ||
+      item.joinDate.toLowerCase().includes(searchTerm)
     );
   });
 
@@ -88,15 +90,13 @@ const UserList: React.FC = () => {
   return (
     <Content>
       <HeaderTitle>유저 목록</HeaderTitle>
-      <SubHeader
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        tabs={tabs}
-        onTabChange={handleTabChange}
-      />
+
+      <SubHeader tabs={tabs} onTabChange={handleTabChange} />
+
       <InfoBar>
         <TotalCountText>Total: {filteredData.length}</TotalCountText>
       </InfoBar>
+
       <TableContainer>
         {loading ? (
           <LoadingText>로딩중...</LoadingText>
@@ -104,6 +104,7 @@ const UserList: React.FC = () => {
           <UserTable filteredData={filteredData} handleEdit={handleEdit} />
         )}
       </TableContainer>
+
       <FooterRow>
         <Pagination page={page} setPage={setPage} totalPages={totalPages} />
       </FooterRow>
@@ -112,6 +113,8 @@ const UserList: React.FC = () => {
 };
 
 export default UserList;
+
+/* ====================== Styled Components ====================== */
 
 const Content = styled.div`
   display: flex;

@@ -1,8 +1,7 @@
 // src/pages/DetailsSales.tsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
-// 파일명에 맞춰 import 이름 변경
 import DetailsSalesTable, { User } from '../components/Table/DetailsSalesTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
 import Pagination from '../components/Pagination';
@@ -14,7 +13,7 @@ const tabs: TabItem[] = [
   { label: '블럭회원', path: '블럭' },
 ];
 
-/** 더미 데이터 (이미지 예시 기반) */
+/** 더미 데이터 */
 const dummyData: User[] = [
   {
     no: 13486,
@@ -23,10 +22,10 @@ const dummyData: User[] = [
     nickname: '홍길동',
     instagram: 'mivin',
     season: '2025 / 1분기',
-    contentsCount: '8개', // 등록 제품수
-    submitCount: '30', // 구매 횟수
-    average: 12, // 구매 갯수
-    totalSum: 1840000, // 총 판매금액
+    contentsCount: '8개',
+    submitCount: '30',
+    average: 12,
+    totalSum: 1840000,
   },
   {
     no: 13485,
@@ -92,54 +91,47 @@ const dummyData: User[] = [
 
 const DetailsSales: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
 
-  // 검색어
-  const [searchTerm, setSearchTerm] = useState('');
-
-  // 탭 상태
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-
-  // 페이지네이션 상태
+  const [data] = useState<User[]>(dummyData);
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  // 탭 변경
-  const handleTabChange = (tab: TabItem) => {
-    setSelectedTab(tab);
-    setPage(1);
-  };
+  // 탭 필터링
+  const dataByTab = data.filter((item) =>
+    selectedTab.label === '전체보기' ? true : item.grade === selectedTab.path
+  );
 
-  // 탭에 따른 데이터 필터링
-  const dataByTab = dummyData.filter((item) => {
-    if (selectedTab.label === '전체보기') return true;
-    return item.grade === selectedTab.path.replace('회원', '');
-    // '일반회원' -> '일반', '블럭회원' -> '블럭'
-  });
-
-  // 검색어 필터링
+  // URL 검색어 필터링
   const filteredData = dataByTab.filter((item) => {
-    const lowerTerm = searchTerm.toLowerCase();
+    const t = searchTerm;
     return (
-      String(item.no).toLowerCase().includes(lowerTerm) ||
-      item.grade.toLowerCase().includes(lowerTerm) ||
-      item.name.toLowerCase().includes(lowerTerm) ||
-      item.nickname.toLowerCase().includes(lowerTerm) ||
-      item.instagram.toLowerCase().includes(lowerTerm) ||
-      item.season.toLowerCase().includes(lowerTerm) ||
-      item.contentsCount.toLowerCase().includes(lowerTerm) ||
-      item.submitCount.toLowerCase().includes(lowerTerm) ||
-      String(item.average).includes(lowerTerm) ||
-      String(item.totalSum).includes(lowerTerm)
+      String(item.no).includes(t) ||
+      item.grade.toLowerCase().includes(t) ||
+      item.name.toLowerCase().includes(t) ||
+      item.nickname.toLowerCase().includes(t) ||
+      item.instagram.toLowerCase().includes(t) ||
+      item.season.toLowerCase().includes(t) ||
+      item.contentsCount.toLowerCase().includes(t) ||
+      item.submitCount.toLowerCase().includes(t) ||
+      String(item.average).includes(t) ||
+      String(item.totalSum).includes(t)
     );
   });
 
-  // 페이지네이션 계산
+  // 페이지네이션
   const totalCount = filteredData.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  // 인스타 계정 클릭 시 상세 페이지 이동
+  const handleTabChange = (tab: TabItem) => {
+    setSelectedTab(tab);
+    setPage(1);
+  };
+
   const handleEdit = (no: number) => {
     navigate(`/userdetail/${no}`);
   };
@@ -147,21 +139,20 @@ const DetailsSales: React.FC = () => {
   return (
     <Content>
       <HeaderTitle>판매내역</HeaderTitle>
-      <SubHeader
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        tabs={tabs}
-        onTabChange={handleTabChange}
-      />
+
+      <SubHeader tabs={tabs} onTabChange={handleTabChange} />
+
       <InfoBar>
         <TotalCountText>Total: {totalCount}</TotalCountText>
       </InfoBar>
+
       <TableContainer>
         <DetailsSalesTable
           filteredData={currentPageData}
           handleEdit={handleEdit}
         />
       </TableContainer>
+
       <FooterRow>
         <Pagination page={page} setPage={setPage} totalPages={totalPages} />
       </FooterRow>
@@ -183,18 +174,14 @@ const Content = styled.div`
 `;
 
 const HeaderTitle = styled.h1`
-  text-align: left;
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 16px;
-  line-height: 18px;
-  color: #000000;
   margin-bottom: 18px;
 `;
 
 const InfoBar = styled.div`
   display: flex;
-  align-items: center;
   justify-content: space-between;
   margin-bottom: 15px;
 `;
@@ -203,7 +190,6 @@ const TotalCountText = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
-  color: #000000;
 `;
 
 const TableContainer = styled.div`

@@ -1,6 +1,6 @@
 // src/pages/CalculateList.tsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import CalculateListTable, {
   User,
@@ -24,10 +24,10 @@ const dummyData: User[] = [
     nickname: '홍길동',
     instagram: 'styleweex',
     season: '2025 / 1분기',
-    sellCount: '8개', // 판매 제출수
-    totalSum: 1840000, // 총 판매금액
-    profit: 184000, // 정산 수익
-    expectedProfit: 92000, // 정산 예정금액
+    sellCount: '8개',
+    totalSum: 1840000,
+    profit: 184000,
+    expectedProfit: 92000,
   },
   {
     no: 13485,
@@ -115,17 +115,12 @@ const dummyData: User[] = [
   },
 ];
 
-/** CalculateList 페이지 */
 const CalculateList: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
 
-  // 검색어
-  const [searchTerm, setSearchTerm] = useState('');
-
-  // 탭 상태
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-
-  // 페이지네이션 상태
   const [page, setPage] = useState(1);
   const limit = 10;
 
@@ -135,27 +130,25 @@ const CalculateList: React.FC = () => {
     setPage(1);
   };
 
-  // 탭에 따른 데이터 필터링
-  const dataByTab = dummyData.filter((item) => {
-    if (selectedTab.label === '전체보기') return true;
-    // '일반회원' -> '일반', '블럭회원' -> '블럭'
-    return item.grade === selectedTab.path.replace('회원', '');
-  });
+  // 탭에 따른 필터링
+  const dataByTab = dummyData.filter((item) =>
+    selectedTab.label === '전체보기' ? true : item.grade === selectedTab.path
+  );
 
-  // 검색어 필터링
+  // URL 검색어로 2차 필터링
   const filteredData = dataByTab.filter((item) => {
-    const lowerTerm = searchTerm.toLowerCase();
+    const t = searchTerm;
     return (
-      String(item.no).toLowerCase().includes(lowerTerm) ||
-      item.grade.toLowerCase().includes(lowerTerm) ||
-      item.name.toLowerCase().includes(lowerTerm) ||
-      item.nickname.toLowerCase().includes(lowerTerm) ||
-      item.instagram.toLowerCase().includes(lowerTerm) ||
-      item.season.toLowerCase().includes(lowerTerm) ||
-      item.sellCount.toLowerCase().includes(lowerTerm) ||
-      String(item.totalSum).includes(lowerTerm) ||
-      String(item.profit).includes(lowerTerm) ||
-      String(item.expectedProfit).includes(lowerTerm)
+      String(item.no).includes(t) ||
+      item.grade.toLowerCase().includes(t) ||
+      item.name.toLowerCase().includes(t) ||
+      item.nickname.toLowerCase().includes(t) ||
+      item.instagram.toLowerCase().includes(t) ||
+      item.season.toLowerCase().includes(t) ||
+      item.sellCount.toLowerCase().includes(t) ||
+      String(item.totalSum).includes(t) ||
+      String(item.profit).includes(t) ||
+      String(item.expectedProfit).includes(t)
     );
   });
 
@@ -165,7 +158,6 @@ const CalculateList: React.FC = () => {
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  // 인스타 계정 클릭 시 상세 페이지 이동
   const handleEdit = (no: number) => {
     navigate(`/userdetail/${no}`);
   };
@@ -173,21 +165,20 @@ const CalculateList: React.FC = () => {
   return (
     <Content>
       <HeaderTitle>정산내역</HeaderTitle>
-      <SubHeader
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        tabs={tabs}
-        onTabChange={handleTabChange}
-      />
+
+      <SubHeader tabs={tabs} onTabChange={handleTabChange} />
+
       <InfoBar>
         <TotalCountText>Total: {totalCount}</TotalCountText>
       </InfoBar>
+
       <TableContainer>
         <CalculateListTable
           filteredData={currentPageData}
           handleEdit={handleEdit}
         />
       </TableContainer>
+
       <FooterRow>
         <Pagination page={page} setPage={setPage} totalPages={totalPages} />
       </FooterRow>
@@ -213,14 +204,11 @@ const HeaderTitle = styled.h1`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 16px;
-  line-height: 18px;
-  color: #000000;
   margin-bottom: 18px;
 `;
 
 const InfoBar = styled.div`
   display: flex;
-  align-items: center;
   justify-content: space-between;
   margin-bottom: 15px;
 `;
@@ -229,7 +217,6 @@ const TotalCountText = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
-  color: #000000;
 `;
 
 const TableContainer = styled.div`

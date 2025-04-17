@@ -1,4 +1,3 @@
-// src/pages/ProductRegister.tsx
 import React, { useState, useEffect, ChangeEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -17,6 +16,7 @@ import {
   updateProduct,
   ProductDetailResponse,
   UpdateProductRequest,
+  SizeRow,
 } from '../api/adminProduct';
 
 // 신규 등록용 빈 제품 정보
@@ -32,6 +32,7 @@ const newEmptyProduct: ProductDetailResponse = {
     discountRate: 0,
     finalPrice: 0,
   },
+  rental: undefined,
   registration: 0,
   registration_date: '',
   product_url: '',
@@ -48,14 +49,14 @@ const newEmptyProduct: ProductDetailResponse = {
   transparency: '',
   thickness: '',
   lining: '',
-  touch: '', // ← 이 줄을 추가하세요
+  touch: '',
   fit: '',
-  sizes: [{ size: '', measurements: { 어깨: 0, 가슴: 0, 총장: 0 } }],
+  sizes: [{ size: '', 어깨: 0, 가슴: 0, 총장: 0 } as SizeRow],
 };
+
 const ProductRegister: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  // 수정 모드일 경우 productId가 존재, 신규 등록이면 null
   const productId = id ? parseInt(id, 10) : null;
 
   const [productDetail, setProductDetail] = useState<ProductDetailResponse>(
@@ -66,19 +67,16 @@ const ProductRegister: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(!!productId);
   const [error, setError] = useState<string>('');
 
-  // 정보수정(또는 등록 완료)용 모달 상태
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [modalCallback, setModalCallback] = useState<(() => void) | null>(null);
 
-  // 종료처리용 모달 상태 (수정 모드에서만 사용)
   const [endModalOpen, setEndModalOpen] = useState(false);
   const [endModalMessage, setEndModalMessage] = useState('');
   const [endModalCallback, setEndModalCallback] = useState<(() => void) | null>(
     null
   );
 
-  // 모달 열기 함수들
   const showModal = (message: string, callback?: () => void) => {
     setModalMessage(message);
     setModalCallback(() => callback || null);
@@ -91,7 +89,6 @@ const ProductRegister: React.FC = () => {
     setEndModalOpen(true);
   };
 
-  // 수정 모드라면 productId가 존재할 때 API로 제품 정보를 불러옴
   useEffect(() => {
     if (productId) {
       const fetchProductDetail = async () => {
@@ -100,7 +97,7 @@ const ProductRegister: React.FC = () => {
         try {
           const data = await getProductDetail(productId);
           setProductDetail(data);
-          if (data.product_img && data.product_img.length > 0) {
+          if (data.product_img.length > 0) {
             setImages(data.product_img);
             setImageLinks(data.product_img);
           }
@@ -115,14 +112,10 @@ const ProductRegister: React.FC = () => {
     }
   }, [productId]);
 
-  const handleBackClick = () => {
-    navigate(-1);
-  };
+  const handleBackClick = () => navigate(-1);
 
-  // 수정 모드 또는 신규 등록 완료 시 호출되는 함수
   const handleEditOrRegister = async () => {
     if (productId) {
-      // 수정 모드인 경우 API를 통해 업데이트
       const updateData: UpdateProductRequest = {
         name: productDetail.name,
         product_url: productDetail.product_url,
@@ -134,33 +127,24 @@ const ProductRegister: React.FC = () => {
         showModal('제품 정보가 수정되었습니다!', () =>
           navigate('/productlist')
         );
-      } catch (error) {
-        console.error('제품 정보 수정 실패', error);
+      } catch (err) {
+        console.error('제품 정보 수정 실패', err);
         showModal('제품 정보 수정에 실패하였습니다.');
       }
     } else {
-      // 신규 등록 모드: API 호출 없이 진행
       console.log('신규 등록 데이터:', productDetail, images, imageLinks);
       showModal('제품이 등록되었습니다!', () => navigate('/productlist'));
     }
   };
 
-  // 종료처리 버튼 클릭 시
-  const handleEndClick = () => {
+  const handleEndClick = () =>
     showEndModal('등록 중인 내용을 취소하시겠습니까?', () => navigate(-1));
-  };
 
-  // 사이즈 변경 콜백
-  const handleSizesChange = (
-    sizes: {
-      size: string;
-      measurements: { 어깨: number; 가슴: number; 총장: number };
-    }[]
-  ) => {
+  // 수정: SizeRow[] 타입으로 변경
+  const handleSizesChange = (sizes: SizeRow[]) => {
     setProductDetail((prev) => ({ ...prev, sizes }));
   };
 
-  // ListButtonDetailSubHeader에 전달할 props (수정 모드면 종료처리 버튼 활성화)
   const detailSubHeaderProps = productId
     ? {
         backLabel: '목록이동',
@@ -177,24 +161,23 @@ const ProductRegister: React.FC = () => {
         onEditClick: handleEditOrRegister,
       };
 
-  // 이미지 관련 핸들러들
   const handleImageUpload = (
     index: number,
     e: ChangeEvent<HTMLInputElement>
   ) => {
-    const file = e.target.files && e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImages((prev) => {
-          const newImgs = [...prev];
-          newImgs[index] = reader.result as string;
-          return newImgs;
+          const a = [...prev];
+          a[index] = reader.result as string;
+          return a;
         });
         setImageLinks((prev) => {
-          const newLinks = [...prev];
-          newLinks[index] = reader.result as string;
-          return newLinks;
+          const a = [...prev];
+          a[index] = reader.result as string;
+          return a;
         });
       };
       reader.readAsDataURL(file);
@@ -203,29 +186,29 @@ const ProductRegister: React.FC = () => {
 
   const handleImageDelete = (index: number) => {
     setImages((prev) => {
-      const newImgs = [...prev];
-      newImgs[index] = null;
-      return newImgs;
+      const a = [...prev];
+      a[index] = null;
+      return a;
     });
     setImageLinks((prev) => {
-      const newLinks = [...prev];
-      newLinks[index] = '';
-      return newLinks;
+      const a = [...prev];
+      a[index] = '';
+      return a;
     });
   };
 
   const handleImageReorder = (dragIndex: number, hoverIndex: number) => {
     setImages((prev) => {
-      const next = [...prev];
-      const [removed] = next.splice(dragIndex, 1);
-      next.splice(hoverIndex, 0, removed);
-      return next;
+      const a = [...prev];
+      const [b] = a.splice(dragIndex, 1);
+      a.splice(hoverIndex, 0, b);
+      return a;
     });
     setImageLinks((prev) => {
-      const next = [...prev];
-      const [removed] = next.splice(dragIndex, 1);
-      next.splice(hoverIndex, 0, removed);
-      return next;
+      const a = [...prev];
+      const [b] = a.splice(dragIndex, 1);
+      a.splice(hoverIndex, 0, b);
+      return a;
     });
   };
 
@@ -237,9 +220,7 @@ const ProductRegister: React.FC = () => {
       <HeaderRow>
         <Title>제품등록</Title>
       </HeaderRow>
-
       <ListButtonDetailSubHeader {...detailSubHeaderProps} />
-
       <ProductNumberWrapper>
         <ProductNumberLabel>번호</ProductNumberLabel>
         <ProductNumberValue>
@@ -247,10 +228,9 @@ const ProductRegister: React.FC = () => {
         </ProductNumberValue>
       </ProductNumberWrapper>
 
-      {/* 신규 등록 모드에서도 DetailTopBoxes 컴포넌트를 항상 렌더링 */}
       <DetailTopBoxes
         product={productDetail}
-        editable={!productId} // 신규 등록인 경우 편집 가능하도록 처리
+        editable={!productId}
         onChange={(data) => setProductDetail((prev) => ({ ...prev, ...data }))}
       />
 
@@ -259,7 +239,7 @@ const ProductRegister: React.FC = () => {
       <FormWrapper onSubmit={(e) => e.preventDefault()}>
         <TwoColumnRow>
           <SizeGuideSection
-            sizes={productDetail.sizes ?? []}
+            sizes={productDetail.sizes}
             onSizesChange={handleSizesChange}
           />
           <SizeDisplaySection
@@ -270,11 +250,10 @@ const ProductRegister: React.FC = () => {
 
         <MiddleDivider />
 
-        {/* MaterialInfoSection에 editable을 명시적으로 전달합니다. 신규 등록일 때는 true */}
         <MaterialInfoSection
           product={productDetail}
           editable={!productId}
-          onChange={(data: Partial<ProductDetailResponse>) =>
+          onChange={(data) =>
             setProductDetail((prev) => ({ ...prev, ...data }))
           }
         />
@@ -283,7 +262,7 @@ const ProductRegister: React.FC = () => {
 
         <FabricInfoSection
           product={productDetail}
-          onChange={(data: Partial<ProductDetailResponse>) =>
+          onChange={(data) =>
             setProductDetail((prev) => ({ ...prev, ...data }))
           }
         />
@@ -305,11 +284,11 @@ const ProductRegister: React.FC = () => {
         isOpen={modalOpen}
         onClose={() => {
           setModalOpen(false);
-          if (modalCallback) modalCallback();
+          modalCallback?.();
         }}
         onConfirm={() => {
           setModalOpen(false);
-          if (modalCallback) modalCallback();
+          modalCallback?.();
         }}
         title='알림'
         width='400px'
@@ -323,7 +302,7 @@ const ProductRegister: React.FC = () => {
         onClose={() => setEndModalOpen(false)}
         onConfirm={() => {
           setEndModalOpen(false);
-          if (endModalCallback) endModalCallback();
+          endModalCallback?.();
         }}
         title='알림'
         width='400px'
@@ -396,3 +375,8 @@ const TwoColumnRow = styled.div`
   gap: 50px;
   margin-bottom: 10px;
 `;
+// const InfoCol = styled.div``;
+// const Divider = styled.div``;
+// const SizeRowStyled = styled.div``;
+// const SizeBox = styled.div``;
+// const SizeBoxEditable = styled.div``;

@@ -1,6 +1,6 @@
 // src/pages/ProductEvaluation.tsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import ProductEvaluationTable, {
   User,
@@ -35,8 +35,8 @@ const dummyData: User[] = [
     instagram: 'Cobrasin',
     productStatus: '5',
     serviceQuality: '5',
-    productReview: '이번에 이용한 제품은 정말 맘에 들었어...',
-    registeredAt: '2024-11-15',
+    productReview: '가성비 최고였어요!',
+    registeredAt: '2024-11-10',
   },
   {
     no: 13484,
@@ -44,77 +44,41 @@ const dummyData: User[] = [
     name: '홍길동',
     nickname: '홍길동',
     instagram: 'mert_eunse',
-    productStatus: '5',
-    serviceQuality: '5',
-    productReview: '이번에 이용한 제품은 정말 맘에 들었어...',
-    registeredAt: '2024-11-15',
+    productStatus: '4',
+    serviceQuality: '4',
+    productReview: '배송이 조금 늦었네요.',
+    registeredAt: '2024-11-12',
   },
-  {
-    no: 13483,
-    grade: '일반',
-    name: '홍길동',
-    nickname: '홍길동',
-    instagram: 'jimmy.stayann',
-    productStatus: '5',
-    serviceQuality: '5',
-    productReview: '이번에 이용한 제품은 정말 맘에 들었어...',
-    registeredAt: '2024-11-15',
-  },
-  {
-    no: 13482,
-    grade: '일반',
-    name: '홍길동',
-    nickname: '홍길동',
-    instagram: 'mikyong___x',
-    productStatus: '5',
-    serviceQuality: '5',
-    productReview: '이번에 이용한 제품은 정말 맘에 들었어...',
-    registeredAt: '2024-11-15',
-  },
-  {
-    no: 13481,
-    grade: '블럭',
-    name: '홍길동',
-    nickname: '홍길동',
-    instagram: 'blossom520',
-    productStatus: '5',
-    serviceQuality: '5',
-    productReview: '이번에 이용한 제품은 정말 맘에 들었어...',
-    registeredAt: '2024-11-15',
-  },
+  // ... 그 외 데이터 생략
 ];
 
 const ProductEvaluation: React.FC = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchParams] = useSearchParams();
+  const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
+
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  const handleTabChange = (tab: TabItem) => {
-    setSelectedTab(tab);
-    setPage(1);
-  };
+  // 탭별 1차 필터링
+  const dataByTab = dummyData.filter((item) =>
+    selectedTab.label === '전체보기' ? true : item.grade === selectedTab.path
+  );
 
-  // 탭에 따른 데이터 필터링
-  const dataByTab = dummyData.filter((item) => {
-    if (selectedTab.label === '전체보기') return true;
-    return item.grade === selectedTab.path;
-  });
-
-  // 검색어 필터링
+  // URL 검색어로 2차 필터링
   const filteredData = dataByTab.filter((item) => {
-    const lowerTerm = searchTerm.toLowerCase();
+    const t = searchTerm;
     return (
-      String(item.no).toLowerCase().includes(lowerTerm) ||
-      item.grade.toLowerCase().includes(lowerTerm) ||
-      item.name.toLowerCase().includes(lowerTerm) ||
-      item.nickname.toLowerCase().includes(lowerTerm) ||
-      item.instagram.toLowerCase().includes(lowerTerm) ||
-      item.productStatus.toLowerCase().includes(lowerTerm) ||
-      item.serviceQuality.toLowerCase().includes(lowerTerm) ||
-      item.productReview.toLowerCase().includes(lowerTerm) ||
-      item.registeredAt.toLowerCase().includes(lowerTerm)
+      String(item.no).includes(t) ||
+      item.grade.toLowerCase().includes(t) ||
+      item.name.toLowerCase().includes(t) ||
+      item.nickname.toLowerCase().includes(t) ||
+      item.instagram.toLowerCase().includes(t) ||
+      item.productStatus.toLowerCase().includes(t) ||
+      item.serviceQuality.toLowerCase().includes(t) ||
+      item.productReview.toLowerCase().includes(t) ||
+      item.registeredAt.toLowerCase().includes(t)
     );
   });
 
@@ -124,7 +88,11 @@ const ProductEvaluation: React.FC = () => {
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  // 인스타 계정 클릭 시
+  const handleTabChange = (tab: TabItem) => {
+    setSelectedTab(tab);
+    setPage(1);
+  };
+
   const handleEdit = (no: number) => {
     navigate(`/userdetail/${no}`);
   };
@@ -132,21 +100,20 @@ const ProductEvaluation: React.FC = () => {
   return (
     <Content>
       <HeaderTitle>제품평가</HeaderTitle>
-      <SubHeader
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        tabs={tabs}
-        onTabChange={handleTabChange}
-      />
+
+      <SubHeader tabs={tabs} onTabChange={handleTabChange} />
+
       <InfoBar>
         <TotalCountText>Total: {totalCount}</TotalCountText>
       </InfoBar>
+
       <TableContainer>
         <ProductEvaluationTable
           filteredData={currentPageData}
           handleEdit={handleEdit}
         />
       </TableContainer>
+
       <FooterRow>
         <Pagination page={page} setPage={setPage} totalPages={totalPages} />
       </FooterRow>
@@ -168,18 +135,14 @@ const Content = styled.div`
 `;
 
 const HeaderTitle = styled.h1`
-  text-align: left;
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 16px;
-  line-height: 18px;
-  color: #000000;
   margin-bottom: 18px;
 `;
 
 const InfoBar = styled.div`
   display: flex;
-  align-items: center;
   justify-content: space-between;
   margin-bottom: 15px;
 `;
@@ -188,7 +151,6 @@ const TotalCountText = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
-  color: #000000;
 `;
 
 const TableContainer = styled.div`

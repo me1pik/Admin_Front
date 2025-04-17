@@ -1,6 +1,6 @@
 // src/pages/FAQList.tsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import FAQTable, { FAQItem } from '../components/Table/Setting/FAQTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
@@ -16,51 +16,51 @@ const dummyFAQ: FAQItem[] = [
     createdAt: '2025.04.01',
   },
   {
-    no: 13486,
+    no: 13487,
     type: '서비스',
     content: '멜픽서비스의 포인트는 어떻게 사용하나요?',
     author: '홍길동 (등급)',
     createdAt: '2025.04.01',
   },
   {
-    no: 13486,
+    no: 13488,
     type: '서비스',
     content: '멜픽서비스의 포인트는 어떻게 사용하나요?',
     author: '홍길동 (등급)',
     createdAt: '2025.04.01',
   },
   {
-    no: 13486,
+    no: 13489,
     type: '서비스',
     content: '멜픽서비스의 포인트는 어떻게 사용하나요?',
     author: '김민수 (등급)',
     createdAt: '2025.04.01',
   },
   {
-    no: 13486,
-    type: '서비스',
-    content: '멜픽서비스의 포인트는 어떻게 사용하나요?',
+    no: 13490,
+    type: '주문/결제',
+    content: '주문 취소는 어떻게 하나요?',
     author: '김민수 (등급)',
     createdAt: '2025.04.01',
   },
   {
-    no: 13486,
-    type: '서비스',
-    content: '멜픽서비스의 포인트는 어떻게 사용하나요?',
+    no: 13491,
+    type: '배송/반품',
+    content: '반품 신청은 어디서 하나요?',
     author: '김민수 (등급)',
     createdAt: '2025.04.01',
   },
   {
-    no: 13486,
-    type: '서비스',
-    content: '멜픽서비스의 포인트는 어떻게 사용하나요?',
+    no: 13492,
+    type: '이용권',
+    content: '이용권 환불은 가능한가요?',
     author: '김민수 (등급)',
     createdAt: '2025.04.01',
   },
   {
-    no: 13486,
-    type: '서비스',
-    content: '멜픽서비스의 포인트는 어떻게 사용하나요?',
+    no: 13493,
+    type: '이용권',
+    content: '이용권 갱신은 어떻게 하나요?',
     author: '김민수 (등급)',
     createdAt: '2025.04.01',
   },
@@ -74,7 +74,7 @@ const tabs: TabItem[] = [
   { label: '이용권', path: '이용권' },
 ];
 
-// FAQ용 selectOptions (TabItem 배열) – 각 목록 페이지마다 달라질 수 있음.
+// 상세페이지로 전달할 selectOptions
 const faqSelectOptions: TabItem[] = [
   { label: '서비스', path: '서비스' },
   { label: '주문/결제', path: '주문/결제' },
@@ -84,41 +84,42 @@ const faqSelectOptions: TabItem[] = [
 
 const FAQList: React.FC = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchParams] = useSearchParams();
+  const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
+
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
   const [FAQData] = useState<FAQItem[]>(dummyFAQ);
+  const [page, setPage] = useState(1);
+  const limit = 10;
+
+  // 1차 탭 필터링
+  const dataByTab = FAQData.filter((item) =>
+    selectedTab.label === '전체보기' ? true : item.type === selectedTab.label
+  );
+
+  // 2차 URL 검색어 필터링
+  const filteredData = dataByTab.filter((item) =>
+    [
+      String(item.no),
+      item.type,
+      item.content,
+      item.author,
+      item.createdAt,
+    ].some((field) => field.toLowerCase().includes(searchTerm))
+  );
+
+  // 페이지네이션
+  const totalCount = filteredData.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+  const offset = (page - 1) * limit;
+  const currentPageData = filteredData.slice(offset, offset + limit);
 
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
     setPage(1);
   };
 
-  const dataByTab = FAQData.filter((item) => {
-    if (selectedTab.label === '전체보기') return true;
-    return item.type === selectedTab.label;
-  });
-
-  const filteredData = dataByTab.filter((item) => {
-    const lowerTerm = searchTerm.toLowerCase();
-    return (
-      String(item.no).includes(lowerTerm) ||
-      item.type.toLowerCase().includes(lowerTerm) ||
-      item.content.toLowerCase().includes(lowerTerm) ||
-      item.author.toLowerCase().includes(lowerTerm) ||
-      item.createdAt.toLowerCase().includes(lowerTerm)
-    );
-  });
-
-  // 페이지네이션 상태
-  const [page, setPage] = useState(1);
-  const limit = 10;
-  const totalCount = filteredData.length;
-  const totalPages = Math.ceil(totalCount / limit);
-  const offset = (page - 1) * limit;
-  const currentPageData = filteredData.slice(offset, offset + limit);
-
-  const handleAuthorClick = (_author: string, no: number) => {
-    // _author는 의도적으로 사용하지 않음
+  const handleAuthorClick = (_: string, no: number) => {
     navigate(`/settingsDetail/${no}`, {
       state: { selectOptions: faqSelectOptions },
     });
@@ -126,22 +127,21 @@ const FAQList: React.FC = () => {
 
   return (
     <Content>
-      <HeaderTitle>자주묻는 질문 (FAQ)</HeaderTitle>
-      <SubHeader
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        tabs={tabs}
-        onTabChange={handleTabChange}
-      />
+      <HeaderTitle>자주 묻는 질문 (FAQ)</HeaderTitle>
+
+      <SubHeader tabs={tabs} onTabChange={handleTabChange} />
+
       <InfoBar>
         <TotalCountText>Total: {totalCount}</TotalCountText>
       </InfoBar>
+
       <TableContainer>
         <FAQTable
           filteredData={currentPageData}
           handleEdit={handleAuthorClick}
         />
       </TableContainer>
+
       <FooterRow>
         <Pagination page={page} setPage={setPage} totalPages={totalPages} />
       </FooterRow>
@@ -152,6 +152,7 @@ const FAQList: React.FC = () => {
 export default FAQList;
 
 /* ====================== Styled Components ====================== */
+
 const Content = styled.div`
   display: flex;
   flex-direction: column;
@@ -162,18 +163,14 @@ const Content = styled.div`
 `;
 
 const HeaderTitle = styled.h1`
-  text-align: left;
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 16px;
-  line-height: 18px;
-  color: #000000;
   margin-bottom: 18px;
 `;
 
 const InfoBar = styled.div`
   display: flex;
-  align-items: center;
   justify-content: space-between;
   margin-bottom: 15px;
 `;
@@ -182,7 +179,6 @@ const TotalCountText = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
-  color: #000000;
 `;
 
 const TableContainer = styled.div`

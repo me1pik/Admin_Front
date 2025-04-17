@@ -1,6 +1,6 @@
 // src/pages/PrivacyList.tsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import PrivacyTable, {
   PrivacyItem,
@@ -35,39 +35,42 @@ const privacySelectOptions: TabItem[] = [
 
 const PrivacyList: React.FC = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchParams] = useSearchParams();
+  const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
+
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-  const [PrivacyData] = useState<PrivacyItem[]>(dummyPrivacy);
+  const [privacyData] = useState<PrivacyItem[]>(dummyPrivacy);
+  const [page, setPage] = useState(1);
+  const limit = 10;
+
+  // 탭별 1차 필터링
+  const dataByTab = privacyData.filter((item) =>
+    selectedTab.label === '전체보기' ? true : item.type === selectedTab.label
+  );
+
+  // URL 검색어로 2차 필터링
+  const filteredData = dataByTab.filter((item) =>
+    [
+      String(item.no),
+      item.type,
+      item.content,
+      item.author,
+      item.createdAt,
+    ].some((field) => field.toLowerCase().includes(searchTerm))
+  );
+
+  // 페이지네이션 계산
+  const totalCount = filteredData.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+  const offset = (page - 1) * limit;
+  const currentPageData = filteredData.slice(offset, offset + limit);
 
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
     setPage(1);
   };
 
-  const dataByTab = PrivacyData.filter((item) => {
-    if (selectedTab.label === '전체보기') return true;
-    return item.type === selectedTab.label;
-  });
-
-  const filteredData = dataByTab.filter((item) => {
-    const lowerTerm = searchTerm.toLowerCase();
-    return (
-      String(item.no).includes(lowerTerm) ||
-      item.type.toLowerCase().includes(lowerTerm) ||
-      item.content.toLowerCase().includes(lowerTerm) ||
-      item.author.toLowerCase().includes(lowerTerm) ||
-      item.createdAt.toLowerCase().includes(lowerTerm)
-    );
-  });
-
-  const [page, setPage] = useState(1);
-  const limit = 10;
-  const totalCount = filteredData.length;
-  const totalPages = Math.ceil(totalCount / limit);
-  const offset = (page - 1) * limit;
-  const currentPageData = filteredData.slice(offset, offset + limit);
-
-  const handleAuthorClick = (_author: string, no: number) => {
+  const handleAuthorClick = (_: string, no: number) => {
     navigate(`/settingsDetail/${no}`, {
       state: { selectOptions: privacySelectOptions },
     });
@@ -76,21 +79,20 @@ const PrivacyList: React.FC = () => {
   return (
     <Content>
       <HeaderTitle>개인정보보호</HeaderTitle>
-      <SubHeader
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        tabs={tabs}
-        onTabChange={handleTabChange}
-      />
+
+      <SubHeader tabs={tabs} onTabChange={handleTabChange} />
+
       <InfoBar>
         <TotalCountText>Total: {totalCount}</TotalCountText>
       </InfoBar>
+
       <TableContainer>
         <PrivacyTable
           filteredData={currentPageData}
           handleEdit={handleAuthorClick}
         />
       </TableContainer>
+
       <FooterRow>
         <Pagination page={page} setPage={setPage} totalPages={totalPages} />
       </FooterRow>
@@ -101,6 +103,7 @@ const PrivacyList: React.FC = () => {
 export default PrivacyList;
 
 /* ====================== Styled Components ====================== */
+
 const Content = styled.div`
   display: flex;
   flex-direction: column;
@@ -111,18 +114,14 @@ const Content = styled.div`
 `;
 
 const HeaderTitle = styled.h1`
-  text-align: left;
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 16px;
-  line-height: 18px;
-  color: #000000;
   margin-bottom: 18px;
 `;
 
 const InfoBar = styled.div`
   display: flex;
-  align-items: center;
   justify-content: space-between;
   margin-bottom: 15px;
 `;
@@ -131,7 +130,6 @@ const TotalCountText = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
-  color: #000000;
 `;
 
 const TableContainer = styled.div`

@@ -1,6 +1,6 @@
 // src/pages/AdminList.tsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import AdminTable, { Admin } from '../components/Table/AdminTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
@@ -17,92 +17,75 @@ const tabs: TabItem[] = [
 
 const AdminList: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
 
-  // 검색 상태
-  const [searchTerm, setSearchTerm] = useState('');
-  // 현재 선택된 탭 상태
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-  // API에서 불러온 관리자 목록 (AdminResponse를 Admin 타입으로 변환)
   const [adminData, setAdminData] = useState<Admin[]>([]);
-  // 전체 관리자 수 (API 응답)
   const [totalCount, setTotalCount] = useState(0);
-  // 페이지네이션 상태
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  // API 응답(AdminResponse)을 AdminTable 컴포넌트에서 사용하는 Admin 타입으로 변환하는 함수
-  const mapAdminData = (admins: any[]): Admin[] => {
-    return admins.map((admin) => ({
+  const mapAdminData = (admins: any[]): Admin[] =>
+    admins.map((admin) => ({
       no: admin.no,
       status: admin.status,
       id: admin.id,
-      // API에 team 필드가 없다면 기본값 또는 role 정보를 사용하도록 함
       team: admin.role || '',
       name: admin.name,
       email: admin.email,
-      // lastLogin은 API에 없으므로 기본값 '-' 처리
       lastLogin: '-',
-      // 등록일자는 signupDate가 있으면 사용하고 없으면 createdAt 사용
       registeredAt: admin.signupDate || admin.createdAt,
     }));
-  };
 
-  // 선택된 탭이나 페이지가 변경될 때 API를 호출합니다.
   useEffect(() => {
     const fetchAdmins = async () => {
       try {
-        let response: GetAdminsResponse;
+        let res: GetAdminsResponse;
         if (selectedTab.label === '전체보기') {
-          response = await getAllAdmins(limit, page);
+          res = await getAllAdmins(limit, page);
         } else if (selectedTab.label === '관리자') {
-          response = await getActiveAdmins(limit, page);
-        } else if (selectedTab.label === '블럭') {
-          response = await getBlockedAdmins(limit, page);
+          res = await getActiveAdmins(limit, page);
         } else {
-          response = { admins: [], total: 0 };
+          res = await getBlockedAdmins(limit, page);
         }
-        setAdminData(mapAdminData(response.admins));
-        setTotalCount(response.total);
-      } catch (error) {
-        console.error('관리자 데이터를 불러오는 중 에러 발생', error);
+        setAdminData(mapAdminData(res.admins));
+        setTotalCount(res.total);
+      } catch (err) {
+        console.error('관리자 데이터 로드 실패', err);
       }
     };
     fetchAdmins();
-  }, [page, selectedTab]);
+  }, [selectedTab, page]);
 
-  // 탭 변경 시 호출되는 콜백
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
     setPage(1);
   };
 
-  // 클라이언트측 검색 로직: 여러 항목에서 검색
   const filteredData = adminData.filter((item) => {
-    const lowerTerm = searchTerm.toLowerCase();
+    const t = searchTerm;
     return (
-      String(item.no).toLowerCase().includes(lowerTerm) ||
-      item.id.toLowerCase().includes(lowerTerm) ||
-      item.name.toLowerCase().includes(lowerTerm) ||
-      item.email.toLowerCase().includes(lowerTerm) ||
-      item.team.toLowerCase().includes(lowerTerm) ||
-      item.status.toLowerCase().includes(lowerTerm) ||
-      item.registeredAt.toLowerCase().includes(lowerTerm) ||
-      item.lastLogin.toLowerCase().includes(lowerTerm)
+      String(item.no).includes(t) ||
+      item.id.toLowerCase().includes(t) ||
+      item.name.toLowerCase().includes(t) ||
+      item.email.toLowerCase().includes(t) ||
+      item.team.toLowerCase().includes(t) ||
+      item.status.toLowerCase().includes(t) ||
+      item.registeredAt.toLowerCase().includes(t) ||
+      item.lastLogin.toLowerCase().includes(t)
     );
   });
 
-  // 페이지네이션을 위해 필터된 데이터에서 현재 페이지 데이터만 선택합니다.
-  const currentPageData = filteredData.slice(0, limit);
+  // client-side pagination after filtering
+  const offset = (page - 1) * limit;
+  const currentPageData = filteredData.slice(offset, offset + limit);
 
-  // 이메일 클릭 시 상세 페이지 이동 (AdminTable에서 id(string)을 인자로 전달)
   const handleEdit = (id: string) => {
-    const admin = adminData.find((admin) => admin.id === id);
-    if (admin) {
-      navigate(`/admindetail/${admin.no}`);
-    }
+    const admin = adminData.find((a) => a.id === id);
+    if (admin) navigate(`/admindetail/${admin.no}`);
   };
 
-  // RegisterButton 클릭 시 처리
   const handleRegisterClick = () => {
     navigate('/admin-create');
   };
@@ -110,20 +93,19 @@ const AdminList: React.FC = () => {
   return (
     <Content>
       <HeaderTitle>관리자 목록</HeaderTitle>
-      <SubHeader
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        tabs={tabs}
-        onTabChange={handleTabChange}
-      />
+
+      <SubHeader tabs={tabs} onTabChange={handleTabChange} />
+
       <InfoBar>
         <TotalCountText>Total: {totalCount}</TotalCountText>
       </InfoBar>
+
       <TableContainer>
         <AdminTable filteredData={currentPageData} handleEdit={handleEdit} />
       </TableContainer>
+
       <FooterRow>
-        <RegisterButton text='제품등록' onClick={handleRegisterClick} />
+        <RegisterButton text='관리자등록' onClick={handleRegisterClick} />
         <Pagination
           page={page}
           setPage={setPage}
@@ -136,28 +118,26 @@ const AdminList: React.FC = () => {
 
 export default AdminList;
 
+/* ====================== Styled Components ====================== */
+
 const Content = styled.div`
   display: flex;
   flex-direction: column;
-  background-color: #ffffff;
+  background: #fff;
   flex-grow: 1;
   font-size: 14px;
   padding: 10px;
 `;
 
 const HeaderTitle = styled.h1`
-  text-align: left;
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 16px;
-  line-height: 18px;
-  color: #000000;
   margin-bottom: 18px;
 `;
 
 const InfoBar = styled.div`
   display: flex;
-  align-items: center;
   justify-content: space-between;
   margin-bottom: 15px;
 `;
@@ -166,7 +146,6 @@ const TotalCountText = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
-  color: #000000;
 `;
 
 const TableContainer = styled.div`
