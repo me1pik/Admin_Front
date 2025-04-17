@@ -1,6 +1,7 @@
+// src/components/productregister/ProductImageSection.tsx
 import React from 'react';
 import styled from 'styled-components';
-import { FaTimes, FaPlus } from 'react-icons/fa'; // FaTimes와 FaPlus 아이콘 임포트
+import { FaTimes, FaPlus } from 'react-icons/fa';
 
 interface ProductImageSectionProps {
   images?: (string | null)[];
@@ -139,12 +140,20 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
           </ImageColumn>
         ))}
       </ImageGrid>
-      {/* API에서 받아온 제품 URL 표시 */}
+
       <ProductUrlContainer>
         <ProductUrlLabel>제품 URL</ProductUrlLabel>
-        <ProductUrlText>
-          {productUrl || '등록된 URL이 없습니다.'}
-        </ProductUrlText>
+        {productUrl ? (
+          <ProductUrlLink
+            href={productUrl}
+            target='_blank'
+            rel='noopener noreferrer'
+          >
+            {productUrl}
+          </ProductUrlLink>
+        ) : (
+          <ProductUrlText>등록된 URL이 없습니다.</ProductUrlText>
+        )}
       </ProductUrlContainer>
     </SectionBox>
   );
@@ -299,7 +308,6 @@ const SlotAddButton = styled.button`
   background: #fff;
   border: none;
   padding: 4px;
-  font-size: 18px;
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -346,4 +354,16 @@ const ProductUrlText = styled.div`
   color: #000;
   word-break: break-all;
   margin-top: 4px;
+`;
+
+const ProductUrlLink = styled.a`
+  font-size: 14px;
+  color: #1e88e5;
+  text-decoration: underline;
+  word-break: break-all;
+  margin-top: 4px;
+
+  &:hover {
+    color: #1565c0;
+  }
 `;
