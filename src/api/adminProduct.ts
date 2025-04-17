@@ -2,9 +2,13 @@
 import { Axios } from './Axios';
 
 /**
- * 제품 목록 조회 파라미터 (관리자용)
- * GET /admin/products-management/list
+ * “열 이름”을 키로, “셀 값”을 값으로 갖는 한 행(Row) 타입
  */
+export type SizeRow = {
+  size: string;
+  [column: string]: string | number;
+};
+
 export interface ProductListParams {
   limit?: number; // 페이지당 항목 수
   page?: number; // 페이지 번호
@@ -12,10 +16,6 @@ export interface ProductListParams {
   status?: string; // 제품 상태값 (등록완료 / 등록대기 / 판매종료)
 }
 
-/**
- * 제품 목록 아이템 타입
- * Table 컴포넌트에 전달되는 필드들
- */
 export interface ProductItem {
   no: number; // 고유 ID
   styleCode: string; // 스타일 코드
@@ -28,9 +28,6 @@ export interface ProductItem {
   status: string;
 }
 
-/**
- * 제품 목록 조회 응답 타입
- */
 export interface ProductListResponse {
   items: ProductItem[];
   totalCount: number;
@@ -75,26 +72,15 @@ export interface ProductDetailResponse {
   lining: string;
   touch: string;
   fit: string;
-  sizes: Array<{
-    size: string;
-    measurements: {
-      어깨: number;
-      가슴: number;
-      총장: number;
-    };
-  }>;
+  /**
+   * 동적 행·열 모두 허용되는 사이즈 가이드
+   */
+  sizes: SizeRow[];
 }
 
-/**
- * 제품 정보 수정 요청 타입
- * PATCH /admin/products-management/{id}
- * — 모든 필드를 부분 업데이트할 수 있도록 Partial<ProductDetailResponse> 사용
- */
 export type UpdateProductRequest = Partial<ProductDetailResponse>;
 
-/**
- * 제품 목록 조회
- */
+/** 제품 목록 조회 */
 export const getProducts = async (
   params?: ProductListParams
 ): Promise<ProductListResponse> => {
@@ -104,9 +90,7 @@ export const getProducts = async (
   return response.data;
 };
 
-/**
- * 제품 상세 조회
- */
+/** 제품 상세 조회 */
 export const getProductDetail = async (
   id: number
 ): Promise<ProductDetailResponse> => {
@@ -114,9 +98,7 @@ export const getProductDetail = async (
   return response.data;
 };
 
-/**
- * 제품 정보 수정
- */
+/** 제품 정보 수정 */
 export const updateProduct = async (
   id: number,
   updateData: UpdateProductRequest

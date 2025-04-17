@@ -17,6 +17,7 @@ import {
   updateProduct,
   ProductDetailResponse,
   UpdateProductRequest,
+  SizeRow,
 } from '../api/adminProduct';
 
 const defaultImages: (string | null)[] = [];
@@ -27,11 +28,9 @@ const ProductDetail: React.FC = () => {
   const navigate = useNavigate();
 
   const [product, setProduct] = useState<ProductDetailResponse | null>(null);
+  const [images, setImages] = useState<(string | null)[]>(defaultImages);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [images, setImages] = useState<(string | null)[]>(defaultImages);
-
-  // 모달 상태들
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [modalCallback, setModalCallback] = useState<(() => void) | null>(null);
@@ -48,23 +47,17 @@ const ProductDetail: React.FC = () => {
     setResultModalOpen(true);
   };
 
-  // product 상태 갱신 헬퍼
   const handleProductChange = useCallback(
-    (data: Partial<ProductDetailResponse>) => {
-      setProduct((prev) => (prev ? { ...prev, ...data } : prev));
-    },
+    (data: Partial<ProductDetailResponse>) =>
+      setProduct((prev) => (prev ? { ...prev, ...data } : prev)),
     []
   );
 
-  // 사이즈 가이드에서 올라오는 변경
   const handleSizesChange = useCallback(
-    (sizes: ProductDetailResponse['sizes']) => {
-      handleProductChange({ sizes });
-    },
+    (sizes: SizeRow[]) => handleProductChange({ sizes }),
     [handleProductChange]
   );
 
-  // 초기 데이터 로드
   useEffect(() => {
     if (!productId) {
       setError('유효한 제품 ID가 없습니다.');
@@ -88,12 +81,10 @@ const ProductDetail: React.FC = () => {
 
   const handleBackClick = () => navigate(-1);
 
-  // 저장: product 상태 전체를 Partial<ProductDetailResponse>로 전송
   const handleSave = () => {
     if (!product) return;
     showModal('변경 내용을 저장하시겠습니까?', async () => {
       try {
-        // 복사한 뒤 null/undefined/빈배열 필드 제거
         const updateData: UpdateProductRequest = { ...product };
         Object.keys(updateData).forEach((key) => {
           const k = key as keyof UpdateProductRequest;
@@ -111,7 +102,6 @@ const ProductDetail: React.FC = () => {
     });
   };
 
-  // 삭제 (추후 API 연동)
   const handleDelete = () => {
     if (!product) return;
     showModal('정말 삭제하시겠습니까?', () => {
@@ -121,7 +111,6 @@ const ProductDetail: React.FC = () => {
     });
   };
 
-  // 이미지 업로드/삭제/순서 변경
   const handleImageUpload = (
     idx: number,
     e: React.ChangeEvent<HTMLInputElement>
@@ -267,7 +256,7 @@ const ProductDetail: React.FC = () => {
 
 export default ProductDetail;
 
-/* Styled Components */
+/* styled-components */
 const Container = styled.div`
   width: 100%;
   padding: 20px;

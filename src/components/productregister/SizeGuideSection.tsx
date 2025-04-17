@@ -1,115 +1,108 @@
-import React, { useState, ChangeEvent, useEffect } from 'react';
+import React, { useState, ChangeEvent, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { FaTimes, FaPlus } from 'react-icons/fa';
+import { SizeRow } from '../../api/adminProduct';
 
 type Column = { key: string; label: string };
 type RowData = Record<string, string>;
 
 export interface SizeGuideSectionProps {
-  sizes: Array<{
-    size: string;
-    measurements: { 어깨: number; 가슴: number; 총장: number };
-  }>;
-  onSizesChange?: (
-    sizes: {
-      size: string;
-      measurements: { 어깨: number; 가슴: number; 총장: number };
-    }[]
-  ) => void;
+  sizes: SizeRow[];
+  onSizesChange?: (sizes: SizeRow[]) => void;
 }
 
 const defaultSizes = ['44', '55', '66', '77', 'Free'];
+
+// 기본으로 보여질 열과 라벨
+const initialColumns: Column[] = [
+  { key: 'size', label: '사이즈' },
+  { key: '어깨', label: 'A(어깨)' },
+  { key: '가슴', label: 'B(가슴)' },
+  { key: '허리', label: 'C(허리)' },
+  { key: '팔길이', label: 'D(팔길이)' },
+  { key: '총길이', label: 'E(총길이)' },
+];
 
 const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   sizes,
   onSizesChange,
 }) => {
-  const initialColumns: Column[] = [
-    { key: 'size', label: '사이즈' },
-    { key: '어깨', label: 'A(어깨)' },
-    { key: '가슴', label: 'B(가슴)' },
-    { key: '허리', label: 'C(허리)' },
-    { key: '팔길이', label: 'D(팔길이)' },
-    { key: '총길이', label: 'E(총길이)' },
-  ];
-
   const [columns, setColumns] = useState<Column[]>(initialColumns);
   const [rows, setRows] = useState<RowData[]>([]);
 
-  const makeInitialRows = (): RowData[] => {
+  const makeInitialRows = useCallback((): RowData[] => {
     if (sizes && sizes.length > 0) {
-      return sizes.map((item) => ({
-        size: item.size.toLowerCase().includes('free')
-          ? 'Free'
-          : item.size.replace(/[^0-9]/g, ''),
-        어깨: item.measurements?.어깨?.toString() || '',
-        가슴: item.measurements?.가슴?.toString() || '',
-        허리: item.measurements?.총장?.toString() || '',
-        팔길이: '',
-        총길이: '',
-      }));
+      return sizes.map((item) => {
+        const row: RowData = {};
+        Object.entries(item).forEach(([k, v]) => {
+          row[k] = String(v);
+        });
+        return row;
+      });
     }
     return defaultSizes.map((sz) => {
       const row: RowData = {};
-      initialColumns.forEach((col) => {
+      columns.forEach((col) => {
         row[col.key] = col.key === 'size' ? sz : '';
       });
       return row;
     });
-  };
+  }, [sizes, columns]);
 
   useEffect(() => {
     setRows(makeInitialRows());
-  }, [sizes]);
+  }, [makeInitialRows]);
+
+  const emitChange = (newRows: RowData[]) => {
+    const out: SizeRow[] = newRows.map((r) => {
+      const sr: SizeRow = { size: r['size'] || '' };
+      Object.entries(r).forEach(([k, v]) => {
+        if (k === 'size') return;
+        sr[k] = isNaN(Number(v)) ? v : Number(v);
+      });
+      return sr;
+    });
+    onSizesChange?.(out);
+  };
 
   const handleCellChange = (
     rowIndex: number,
     key: string,
     e: ChangeEvent<HTMLInputElement>
   ) => {
-    const value =
-      key === 'size' ? e.target.value.replace(/[^0-9]/g, '') : e.target.value;
+    const val =
+      key === 'size'
+        ? e.target.value.replace(/[^0-9A-Za-z]/g, '')
+        : e.target.value;
     const newRows = rows.map((r, i) =>
-      i === rowIndex ? { ...r, [key]: value } : r
+      i === rowIndex ? { ...r, [key]: val } : r
     );
     setRows(newRows);
-    onSizesChange?.(
-      newRows.map((r) => ({
-        size: r.size,
-        measurements: {
-          어깨: Number(r['어깨']) || 0,
-          가슴: Number(r['가슴']) || 0,
-          총장: Number(r['허리']) || 0,
-        },
-      }))
-    );
+    emitChange(newRows);
   };
 
   const handleAddColumn = () => {
-    const newKey = `col${Date.now()}`;
-    setColumns((prev) => [...prev, { key: newKey, label: '' }]);
-    setRows((prev) => prev.map((r) => ({ ...r, [newKey]: '' })));
+    const newKey = `col_${Date.now()}`;
+    setColumns((cols) => [...cols, { key: newKey, label: '열 이름' }]);
+    setRows((rs) => rs.map((r) => ({ ...r, [newKey]: '' })));
   };
 
-  const handleDeleteColumn = (colIndex: number) => {
-    const keyToRemove = columns[colIndex].key;
-    setColumns((prev) => prev.filter((_, i) => i !== colIndex));
-    setRows((prev) =>
-      prev.map((r) => {
-        const { [keyToRemove]: _, ...rest } = r;
+  const handleDeleteColumn = (idx: number) => {
+    const key = columns[idx].key;
+    setColumns((cols) => cols.filter((_, i) => i !== idx));
+    setRows((rs) =>
+      rs.map((r) => {
+        const { [key]: _, ...rest } = r;
         return rest;
       })
     );
   };
 
-  const handleLabelChange = (
-    colIndex: number,
-    e: ChangeEvent<HTMLInputElement>
-  ) => {
-    const newLabel = e.target.value;
-    setColumns((prev) => {
-      const copy = [...prev];
-      copy[colIndex] = { ...copy[colIndex], label: newLabel };
+  const handleLabelChange = (idx: number, e: ChangeEvent<HTMLInputElement>) => {
+    const lbl = e.target.value;
+    setColumns((cols) => {
+      const copy = [...cols];
+      copy[idx] = { ...copy[idx], label: lbl };
       return copy;
     });
   };
@@ -119,24 +112,25 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
       <Header>
         <Bullet />
         <Title>사이즈 가이드</Title>
-        <AddColButton onClick={handleAddColumn}>
+        <AddColButton type='button' onClick={handleAddColumn}>
           <FaPlus /> 열 추가
         </AddColButton>
       </Header>
-
       <Line />
       <Table>
         <thead>
           <tr>
-            {columns.map((col, idx) => (
+            {columns.map((col, i) => (
               <Th key={col.key}>
                 <LabelInput
                   value={col.label}
-                  placeholder='열 이름'
-                  onChange={(e) => handleLabelChange(idx, e)}
+                  onChange={(e) => handleLabelChange(i, e)}
                 />
-                {idx > 0 && (
-                  <DelColButton onClick={() => handleDeleteColumn(idx)}>
+                {i > 0 && (
+                  <DelColButton
+                    type='button'
+                    onClick={() => handleDeleteColumn(i)}
+                  >
                     <FaTimes />
                   </DelColButton>
                 )}
@@ -145,13 +139,13 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, rIdx) => (
-            <tr key={rIdx}>
+          {rows.map((row, ri) => (
+            <tr key={ri}>
               {columns.map((col) => (
-                <Td key={`${rIdx}-${col.key}`}>
+                <Td key={`${ri}-${col.key}`}>
                   <CellInput
-                    value={row[col.key]}
-                    onChange={(e) => handleCellChange(rIdx, col.key, e)}
+                    value={row[col.key] || ''}
+                    onChange={(e) => handleCellChange(ri, col.key, e)}
                   />
                 </Td>
               ))}
