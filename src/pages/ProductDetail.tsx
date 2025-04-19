@@ -34,7 +34,6 @@ const ProductDetail: React.FC = () => {
 
   const [product, setProduct] = useState<ProductDetailResponse | null>(null);
   const [images, setImages] = useState<(string | null)[]>(defaultImages);
-  // 변경된 필드만 모아두는 객체
   const [changedFields, setChangedFields] = useState<
     Partial<ProductDetailResponse>
   >({});
@@ -56,7 +55,6 @@ const ProductDetail: React.FC = () => {
     setResultModalOpen(true);
   };
 
-  // 각 컴포넌트의 onChange → 이 콜백으로 통합
   const handleProductChange = useCallback(
     (data: Partial<ProductDetailResponse>) => {
       setProduct((prev) => (prev ? { ...prev, ...data } : prev));
@@ -69,7 +67,6 @@ const ProductDetail: React.FC = () => {
     [handleProductChange]
   );
 
-  // 최초 로딩
   useEffect(() => {
     if (!productId) {
       setError('유효한 제품 ID가 없습니다.');
@@ -92,13 +89,11 @@ const ProductDetail: React.FC = () => {
 
   const handleBackClick = () => navigate(-1);
 
-  // 저장: changedFields만 payload로 정리해서 전송
   const handleSave = () => {
     if (!product) return;
     showModal('변경 내용을 저장하시겠습니까?', async () => {
       try {
         const payload: any = { ...changedFields };
-        // sizes가 바뀌었으면 구조 맞춰 변환
         if (changedFields.sizes) {
           payload.sizes = (changedFields.sizes as SizeRow[]).map((row) => {
             const measurements: Record<string, number> = {};
@@ -108,7 +103,6 @@ const ProductDetail: React.FC = () => {
             return { size: row.size, measurements };
           });
         }
-        // 빈 값 정리
         Object.keys(payload).forEach((key) => {
           const v = payload[key];
           if (
@@ -132,12 +126,10 @@ const ProductDetail: React.FC = () => {
 
   const handleDelete = () => {
     showModal('정말 삭제하시겠습니까?', () => {
-      // TODO: delete API 추가
       showResultModal('삭제에 실패했습니다.');
     });
   };
 
-  // 이미지 업로드/삭제/순서변경 시에도 changedFields 업데이트
   const handleImageUpload = (idx: number, e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -188,7 +180,6 @@ const ProductDetail: React.FC = () => {
       <HeaderRow>
         <Title>제품관리</Title>
       </HeaderRow>
-
       <TripleButtonDetailSubHeader
         backLabel='목록이동'
         onBackClick={handleBackClick}
@@ -197,12 +188,10 @@ const ProductDetail: React.FC = () => {
         deleteLabel='삭제'
         onDeleteClick={handleDelete}
       />
-
       <ProductNumberWrapper>
         <ProductNumberLabel>번호</ProductNumberLabel>
         <ProductNumberValue>{product?.id}</ProductNumberValue>
       </ProductNumberWrapper>
-
       {product && (
         <>
           <DetailTopBoxes
@@ -210,9 +199,7 @@ const ProductDetail: React.FC = () => {
             editable
             onChange={handleProductChange}
           />
-
           <MiddleDivider />
-
           <Form onSubmit={(e: FormEvent) => e.preventDefault()}>
             <TwoColumn>
               <SizeGuideSection
@@ -224,24 +211,18 @@ const ProductDetail: React.FC = () => {
                 sizeProductImg={product.size_picture}
               />
             </TwoColumn>
-
             <MiddleDivider />
-
             <MaterialInfoSection
               product={product}
               editable
               onChange={handleProductChange}
             />
-
             <MiddleDivider />
-
             <FabricInfoSection
               product={product}
               onChange={handleProductChange}
             />
-
             <MiddleDivider />
-
             <ProductImageSection
               images={images}
               handleImageUpload={handleImageUpload}
@@ -249,12 +230,10 @@ const ProductDetail: React.FC = () => {
               handleImageReorder={handleImageReorder}
               productUrl={product.product_url}
             />
-
             <BottomDivider />
           </Form>
         </>
       )}
-
       <ReusableModal
         isOpen={modalOpen}
         title='알림'
@@ -271,7 +250,6 @@ const ProductDetail: React.FC = () => {
       >
         {modalMessage}
       </ReusableModal>
-
       <ReusableModal2
         isOpen={resultModalOpen}
         title='오류'
@@ -287,12 +265,10 @@ const ProductDetail: React.FC = () => {
 
 export default ProductDetail;
 
-/* Styled-components */
 const Container = styled.div`
   width: 100%;
   padding: 20px;
   box-sizing: border-box;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
 `;
 const HeaderRow = styled.div`
   display: flex;
