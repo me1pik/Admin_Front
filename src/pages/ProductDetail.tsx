@@ -1,4 +1,3 @@
-// src/pages/ProductDetail.tsx
 import React, {
   useEffect,
   useState,
@@ -25,40 +24,60 @@ import {
   SizeRow,
 } from '../api/adminProduct';
 
-const defaultImages: (string | null)[] = [];
+// Helper to remove empty or null fields
+const cleanPayload = <T extends object>(obj: T): Partial<T> => {
+  const result = { ...obj } as Partial<T>;
+  Object.entries(result).forEach(([key, value]) => {
+    if (
+      value == null ||
+      (Array.isArray(value) && value.length === 0) ||
+      (typeof value === 'object' &&
+        !Array.isArray(value) &&
+        Object.keys(value).length === 0)
+    ) {
+      delete result[key as keyof T];
+    }
+  });
+  return result;
+};
 
 const ProductDetail: React.FC = () => {
   const { no } = useParams<{ no: string }>();
-  const productId = no ? parseInt(no, 10) : null;
+  const productId = no ? Number(no) : null;
   const navigate = useNavigate();
 
   const [product, setProduct] = useState<ProductDetailResponse | null>(null);
-  const [images, setImages] = useState<(string | null)[]>(defaultImages);
-  const [changedFields, setChangedFields] = useState<
+  const [images, setImages] = useState<string[]>([]);
+  const [changed, setChanged] = useState<
     Partial<ProductDetailResponse & { sizes: SizeRow[] }>
   >({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
-  const [modalCallback, setModalCallback] = useState<(() => void) | null>(null);
-  const [resultModalOpen, setResultModalOpen] = useState(false);
-  const [resultModalMessage, setResultModalMessage] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  const showModal = (msg: string, cb?: () => void) => {
-    setModalMessage(msg);
-    setModalCallback(() => cb || null);
-    setModalOpen(true);
+  // confirmation modal config
+  const [confirmConfig, setConfirmConfig] = useState<{
+    open: boolean;
+    message: string;
+    onConfirm?: () => Promise<void>;
+  }>({ open: false, message: '' });
+  // result modal config
+  const [resultConfig, setResultConfig] = useState<{
+    open: boolean;
+    message: string;
+  }>({ open: false, message: '' });
+
+  const openConfirm = (message: string, onConfirm?: () => Promise<void>) => {
+    setConfirmConfig({ open: true, message, onConfirm });
   };
-  const showResultModal = (msg: string) => {
-    setResultModalMessage(msg);
-    setResultModalOpen(true);
+
+  const openResult = (message: string) => {
+    setResultConfig({ open: true, message });
   };
 
   const handleProductChange = useCallback(
     (data: Partial<ProductDetailResponse & { sizes: SizeRow[] }>) => {
       setProduct((prev) => (prev ? { ...prev, ...data } : prev));
-      setChangedFields((prev) => ({ ...prev, ...data }));
+      setChanged((prev) => ({ ...prev, ...data }));
     },
     []
   );
@@ -67,63 +86,65 @@ const ProductDetail: React.FC = () => {
     [handleProductChange]
   );
 
+  // Fetch detail
+  const fetchDetail = async (id: number) => {
+    try {
+      const data = await getProductDetail(id);
+      setProduct(data);
+      setImages(data.product_img || []);
+    } catch {
+      setError('제품 상세 정보를 불러오는데 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!productId) {
       setError('유효한 제품 ID가 없습니다.');
       setLoading(false);
       return;
     }
-    (async () => {
-      setLoading(true);
-      try {
-        const data = await getProductDetail(productId);
-        setProduct(data);
-        setImages(data.product_img ?? []);
-      } catch {
-        setError('제품 상세 정보를 불러오는데 실패했습니다.');
-      } finally {
-        setLoading(false);
-      }
-    })();
+    fetchDetail(productId);
   }, [productId]);
 
-  const handleBackClick = () => navigate(-1);
+  const handleBack = () => navigate(-1);
 
   const handleSave = () => {
     if (!product) return;
-    showModal('변경 내용을 저장하시겠습니까?', async () => {
+    openConfirm('변경 내용을 저장하시겠습니까?', async () => {
       try {
-        const payload: any = { ...changedFields };
+        const payload: any = { ...changed };
         if (product.sizes) {
           payload.sizes = product.sizes.map((row) => ({
             size: row.size,
             measurements: { ...row.measurements },
           }));
         }
-        Object.keys(payload).forEach((key) => {
-          const v = payload[key];
-          if (
-            v == null ||
-            (Array.isArray(v) && v.length === 0) ||
-            (typeof v === 'object' &&
-              !Array.isArray(v) &&
-              Object.keys(v).length === 0)
-          )
-            delete payload[key];
-        });
-        const updated = await updateProduct(product.id, payload);
-        setProduct(updated);
-        setChangedFields({});
-        showResultModal('저장되었습니다.');
+        const cleaned = cleanPayload(payload);
+        const updated = await updateProduct(product.id, cleaned);
+        // 재로딩
+        await fetchDetail(updated.id);
+        setChanged({});
+        openResult('수정 완료되었습니다.');
       } catch {
-        showResultModal('저장에 실패했습니다.');
+        openResult('수정에 실패했습니다.');
       }
     });
   };
 
   const handleDelete = () => {
-    showModal('정말 삭제하시겠습니까?', () => {
-      showResultModal('삭제에 실패했습니다.');
+    openConfirm('정말 삭제하시겠습니까?', async () => {
+      openResult('삭제에 실패했습니다.');
+    });
+  };
+
+  const updateImage = (idx: number, dataUrl: string | null) => {
+    setImages((prev) => {
+      const next = [...prev];
+      next[idx] = dataUrl || '';
+      handleProductChange({ product_img: next.filter((x) => x) });
+      return next;
     });
   };
 
@@ -131,40 +152,16 @@ const ProductDetail: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onloadend = () => {
-      const dataUrl = reader.result as string;
-      setImages((prev) => {
-        const next = [...prev];
-        next[idx] = dataUrl;
-        setChangedFields((cf) => ({
-          ...cf,
-          product_img: next.filter((x) => !!x) as string[],
-        }));
-        return next;
-      });
-    };
+    reader.onloadend = () => updateImage(idx, reader.result as string);
     reader.readAsDataURL(file);
   };
-  const handleImageDelete = (idx: number) => {
-    setImages((prev) => {
-      const next = [...prev];
-      next[idx] = null;
-      setChangedFields((cf) => ({
-        ...cf,
-        product_img: next.filter((x) => !!x) as string[],
-      }));
-      return next;
-    });
-  };
+  const handleImageDelete = (idx: number) => updateImage(idx, null);
   const handleImageReorder = (from: number, to: number) => {
     setImages((prev) => {
       const next = [...prev];
       const [moved] = next.splice(from, 1);
       next.splice(to, 0, moved);
-      setChangedFields((cf) => ({
-        ...cf,
-        product_img: next.filter((x) => !!x) as string[],
-      }));
+      handleProductChange({ product_img: next.filter((x) => x) });
       return next;
     });
   };
@@ -179,7 +176,7 @@ const ProductDetail: React.FC = () => {
       </HeaderRow>
       <TripleButtonDetailSubHeader
         backLabel='목록이동'
-        onBackClick={handleBackClick}
+        onBackClick={handleBack}
         saveLabel='변경저장'
         onSaveClick={handleSave}
         deleteLabel='삭제'
@@ -232,29 +229,26 @@ const ProductDetail: React.FC = () => {
         </>
       )}
       <ReusableModal
-        isOpen={modalOpen}
+        isOpen={confirmConfig.open}
         title='알림'
         width='400px'
         height='200px'
-        onClose={() => {
-          setModalOpen(false);
-          modalCallback?.();
-        }}
-        onConfirm={() => {
-          setModalOpen(false);
-          modalCallback?.();
+        onClose={() => setConfirmConfig((c) => ({ ...c, open: false }))}
+        onConfirm={async () => {
+          setConfirmConfig((c) => ({ ...c, open: false }));
+          if (confirmConfig.onConfirm) await confirmConfig.onConfirm();
         }}
       >
-        {modalMessage}
+        {confirmConfig.message}
       </ReusableModal>
       <ReusableModal2
-        isOpen={resultModalOpen}
-        title='오류'
+        isOpen={resultConfig.open}
+        title='알림'
         width='400px'
         height='200px'
-        onClose={() => setResultModalOpen(false)}
+        onClose={() => setResultConfig((c) => ({ ...c, open: false }))}
       >
-        {resultModalMessage}
+        {resultConfig.message}
       </ReusableModal2>
     </Container>
   );
