@@ -35,7 +35,7 @@ const ProductDetail: React.FC = () => {
   const [product, setProduct] = useState<ProductDetailResponse | null>(null);
   const [images, setImages] = useState<(string | null)[]>(defaultImages);
   const [changedFields, setChangedFields] = useState<
-    Partial<ProductDetailResponse>
+    Partial<ProductDetailResponse & { sizes: SizeRow[] }>
   >({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -56,7 +56,7 @@ const ProductDetail: React.FC = () => {
   };
 
   const handleProductChange = useCallback(
-    (data: Partial<ProductDetailResponse>) => {
+    (data: Partial<ProductDetailResponse & { sizes: SizeRow[] }>) => {
       setProduct((prev) => (prev ? { ...prev, ...data } : prev));
       setChangedFields((prev) => ({ ...prev, ...data }));
     },
@@ -94,14 +94,11 @@ const ProductDetail: React.FC = () => {
     showModal('변경 내용을 저장하시겠습니까?', async () => {
       try {
         const payload: any = { ...changedFields };
-        if (changedFields.sizes) {
-          payload.sizes = (changedFields.sizes as SizeRow[]).map((row) => {
-            const measurements: Record<string, number> = {};
-            Object.entries(row).forEach(([k, v]) => {
-              if (k !== 'size' && typeof v === 'number') measurements[k] = v;
-            });
-            return { size: row.size, measurements };
-          });
+        if (product.sizes) {
+          payload.sizes = product.sizes.map((row) => ({
+            size: row.size,
+            measurements: { ...row.measurements },
+          }));
         }
         Object.keys(payload).forEach((key) => {
           const v = payload[key];

@@ -1,10 +1,11 @@
+// src/components/productregister/SizeGuideSection.tsx
 import React, { useState, useEffect, ChangeEvent, useCallback } from 'react';
 import styled from 'styled-components';
 import { FaTimes, FaPlus } from 'react-icons/fa';
 import { SizeRow } from '../../api/adminProduct';
 
 type Column = { key: string; label: string };
-type RowData = Record<string, string>;
+type RowData = Record<string, string>; // size와 각 열 키에 대응하는 문자열 값
 
 export interface SizeGuideSectionProps {
   sizes: SizeRow[];
@@ -13,7 +14,6 @@ export interface SizeGuideSectionProps {
 
 const defaultSizes = ['44', '55', '66', '77', 'Free'];
 
-// 기본으로 보여질 열과 라벨
 const initialColumns: Column[] = [
   { key: 'size', label: '사이즈' },
   { key: '어깨', label: 'A(어깨)' },
@@ -30,7 +30,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   const [columns, setColumns] = useState<Column[]>(initialColumns);
   const [rows, setRows] = useState<RowData[]>([]);
 
-  // 사이즈 데이터로부터 테이블 행 생성
+  // API에서 온 nested measurements를 풀어서 테이블용 RowData로 변환
   const makeInitialRows = useCallback((): RowData[] => {
     let initialRows: RowData[];
     if (sizes && sizes.length > 0) {
@@ -38,18 +38,16 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
         const row: RowData = {};
         columns.forEach((col) => {
           if (col.key === 'size') {
-            // API에서 온 사이즈, 'Free'는 그대로, 숫자만 추출
-            const raw = String(item.size);
+            const raw = item.size;
             row.size = /free/i.test(raw) ? 'Free' : raw.replace(/[^0-9]/g, '');
           } else {
-            const v = item[col.key];
-            row[col.key] = v === 0 || v == null ? '' : String(v);
+            const m = item.measurements?.[col.key] ?? 0;
+            row[col.key] = m === 0 ? '' : String(m);
           }
         });
         return row;
       });
     } else {
-      // 신규 등록 시 기본 사이즈
       initialRows = defaultSizes.map((sz) => {
         const row: RowData = {};
         columns.forEach((col) => {
@@ -58,7 +56,6 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
         return row;
       });
     }
-    // 오름차순 정렬: 숫자 크기 순, 'Free'는 항상 마지막
     return initialRows.sort((a, b) => {
       const aval = a.size === 'Free' ? Infinity : Number(a.size);
       const bval = b.size === 'Free' ? Infinity : Number(b.size);
@@ -70,15 +67,15 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     setRows(makeInitialRows());
   }, [makeInitialRows]);
 
-  // 사용자 입력 반영 후 상위로 전달
+  // RowData 배열을 SizeRow[] (nested measurements)로 변환하여 부모에 전달
   const emitChange = (newRows: RowData[]) => {
     const out: SizeRow[] = newRows.map((r) => {
-      const sr: SizeRow = { size: r['size'] };
-      Object.entries(r).forEach(([k, v]) => {
-        if (k === 'size' || v === '') return;
-        sr[k] = isNaN(Number(v)) ? v : Number(v);
+      const measurements: Record<string, number> = {};
+      columns.forEach((col) => {
+        if (col.key === 'size') return;
+        measurements[col.key] = r[col.key] !== '' ? Number(r[col.key]) : 0;
       });
-      return sr;
+      return { size: r.size, measurements };
     });
     onSizesChange?.(out);
   };
@@ -175,18 +172,20 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
 
 export default SizeGuideSection;
 
-/* styled-components */
+// styled-components
 const SectionBox = styled.div`
   position: relative;
   padding-left: 20px;
   padding-bottom: 10px;
   margin-bottom: 20px;
 `;
+
 const Header = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 10px;
 `;
+
 const Bullet = styled.div`
   position: absolute;
   left: -7px;
@@ -207,11 +206,13 @@ const Bullet = styled.div`
     border-radius: 50%;
   }
 `;
+
 const Title = styled.div`
   font-weight: 800;
   font-size: 14px;
   margin-left: 10px;
 `;
+
 const AddColButton = styled.button`
   margin-left: auto;
   background: none;
@@ -224,6 +225,7 @@ const AddColButton = styled.button`
     margin-right: 4px;
   }
 `;
+
 const Line = styled.div`
   position: absolute;
   left: 0;
@@ -232,6 +234,7 @@ const Line = styled.div`
   width: 1px;
   background: #ddd;
 `;
+
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
@@ -258,9 +261,11 @@ const Table = styled.table`
     background: #ddd;
   }
 `;
+
 const Th = styled.th`
   padding: 0;
 `;
+
 const LabelInput = styled.input`
   width: calc(100% - 24px);
   border: none;
@@ -272,6 +277,7 @@ const LabelInput = styled.input`
     outline: none;
   }
 `;
+
 const DelColButton = styled.button`
   position: absolute;
   top: 2px;
@@ -280,7 +286,9 @@ const DelColButton = styled.button`
   border: none;
   cursor: pointer;
 `;
+
 const Td = styled.td``;
+
 const CellInput = styled.input`
   width: 50px;
   height: 28px;

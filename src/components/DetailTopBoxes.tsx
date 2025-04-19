@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import DetailBoxSvg1 from '../assets/DetailTopBoxesSvg1.svg';
 import DetailBoxSvg2 from '../assets/DetailTopBoxesSvg2.svg';
 import DetailBoxSvg3 from '../assets/DetailTopBoxesSvg3.svg';
-import { ProductDetailResponse } from '../api/adminProduct';
+import { ProductDetailResponse, SizeRow } from '../api/adminProduct';
 
 const colorOptions = [
   '화이트',
@@ -51,17 +51,27 @@ interface DetailTopBoxesProps {
   product: ProductDetailResponse;
   editable?: boolean;
   onChange?: (
-    data: Partial<ProductDetailResponse> & { rental?: number }
+    data: Partial<ProductDetailResponse & { sizes: SizeRow[] }>
   ) => void;
 }
+
+const defaultSizes = ['44', '55', '66', '77', 'Free'];
+
+// 측정값 초기 템플릿
+const defaultMeasurementsTemplate = {
+  어깨: 0,
+  가슴: 0,
+  허리: 0,
+  팔길이: 0,
+  총길이: 0,
+};
 
 const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   product,
   editable = false,
   onChange,
 }) => {
-  const defaultSizes = ['44', '55', '66', '77', 'Free'];
-  const rentalValue = product.rental ?? '';
+  const rentalValue = (product as any).rental ?? '';
 
   const handleToggleSize = (sz: string) => {
     if (!onChange) return;
@@ -78,13 +88,10 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
           : item.size.replace(/[^0-9]/g, '') !== sz
       );
     } else {
-      // SizeRow 타입에 맞게 measurements 필드를 펼쳐서 직접 지정
       newSizes.push({
         size: sz,
-        어깨: 0,
-        가슴: 0,
-        총장: 0,
-      } as any);
+        measurements: { ...defaultMeasurementsTemplate },
+      });
     }
     onChange({ sizes: newSizes });
   };
@@ -92,7 +99,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   return (
     <Container>
       <BoxWrapper>
-        {/* 박스1: 브랜드 / 품번 / 상태 */}
+        {/* 박스1 */}
         <Box>
           <IconWrapper>
             <Icon src={DetailBoxSvg1} />
@@ -102,8 +109,8 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               <Label>브랜드</Label>
               {editable ? (
                 <Input
-                  placeholder='입력하세요'
                   value={product.brand}
+                  placeholder='입력하세요'
                   onChange={(e) => onChange?.({ brand: e.target.value })}
                 />
               ) : (
@@ -114,8 +121,8 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               <Label>품번</Label>
               {editable ? (
                 <Input
-                  placeholder='입력하세요'
                   value={product.product_num}
+                  placeholder='입력하세요'
                   onChange={(e) => onChange?.({ product_num: e.target.value })}
                 />
               ) : (
@@ -134,18 +141,17 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                   <option value='' disabled hidden>
                     옵션을 선택하세요
                   </option>
-                  {statusOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
+                  {statusOptions.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
                     </option>
                   ))}
                 </Select>
               ) : (
                 <Value>
                   {
-                    statusOptions.find(
-                      (opt) => opt.value === product.registration
-                    )?.label
+                    statusOptions.find((o) => o.value === product.registration)
+                      ?.label
                   }
                 </Value>
               )}
@@ -155,7 +161,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
 
         <Divider />
 
-        {/* 박스2: 종류 / 사이즈 / 색상 */}
+        {/* 박스2 */}
         <Box>
           <IconWrapper>
             <Icon src={DetailBoxSvg2} />
@@ -171,22 +177,22 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                   <option value='' disabled hidden>
                     옵션을 선택하세요
                   </option>
-                  {categoryOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
+                  {categoryOptions.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
                     </option>
                   ))}
                 </Select>
               ) : (
                 <Value>
-                  {categoryOptions.find((opt) => opt.value === product.category)
+                  {categoryOptions.find((o) => o.value === product.category)
                     ?.label || product.category}
                 </Value>
               )}
             </Row>
             <Row>
               <Label>사이즈</Label>
-              <SizeRow>
+              <SizeRowWrapper>
                 {defaultSizes.map((sz) => {
                   const active = product.sizes?.some((item) =>
                     sz === 'Free'
@@ -201,13 +207,14 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                     >
                       {sz}
                     </SizeBoxEditable>
-                  ) : (
-                    <SizeBox key={sz} $active={active}>
-                      {sz}
-                    </SizeBox>
-                  );
+                  ) : active ? (
+                    <SizeBox key={sz}>{sz}</SizeBox>
+                  ) : null;
                 })}
-              </SizeRow>
+                {!editable && product.sizes?.length === 0 && (
+                  <EmptyText>선택된 사이즈 없음</EmptyText>
+                )}
+              </SizeRowWrapper>
             </Row>
             <Row>
               <Label>색상</Label>
@@ -219,9 +226,9 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                   <option value='' disabled hidden>
                     옵션을 선택하세요
                   </option>
-                  {colorOptions.map((col) => (
-                    <option key={col} value={col}>
-                      {col}
+                  {colorOptions.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
                     </option>
                   ))}
                 </Select>
@@ -234,7 +241,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
 
         <Divider />
 
-        {/* 박스3: 가격 */}
+        {/* 박스3 */}
         <Box>
           <IconWrapper>
             <Icon src={DetailBoxSvg3} />
@@ -388,21 +395,24 @@ const Divider = styled.div`
   background: #ddd;
   margin: 10px;
 `;
-const SizeRow = styled.div`
+const SizeRowWrapper = styled.div`
   display: flex;
   gap: 8px;
+  align-items: center;
 `;
-const SizeBox = styled.div<{ $active?: boolean }>`
+const SizeBox = styled.div`
   padding: 2px 6px;
   font-size: 10px;
   border-radius: 4px;
-  background: ${({ $active }) => ($active ? '#f0c040' : '#fff')};
-  border: ${({ $active }) =>
-    $active ? '2px solid #f0a020' : '1px solid #aaa'};
+  background: #f6f6f6;
+  border: 1px solid #aaa;
 `;
-const SizeBoxEditable = styled(SizeBox)`
+const SizeBoxEditable = styled(SizeBox)<{ $active?: boolean }>`
   cursor: pointer;
-  &:hover {
-    border-color: #f0a020;
-  }
+  background: ${(p) => (p.$active ? '#f0c040' : '#fff')};
+  border: ${(p) => (p.$active ? '2px solid #f0a020' : '1px solid #aaa')};
+`;
+const EmptyText = styled.div`
+  font-size: 12px;
+  color: #999;
 `;
