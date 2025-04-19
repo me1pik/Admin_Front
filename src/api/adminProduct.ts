@@ -1,23 +1,21 @@
+// src/api/adminProduct.ts
 import { Axios } from './Axios';
 
-/**
- * “열 이름”을 키로, “셀 값”을 값으로 갖는 한 행(Row) 타입
- */
 export type SizeRow = {
   size: string;
   [column: string]: string | number;
 };
 
 export interface ProductListParams {
-  limit?: number; // 페이지당 항목 수
-  page?: number; // 페이지 번호
-  search?: string; // 검색 키워드
-  status?: string; // 제품 상태값 (등록완료 / 등록대기 / 판매종료)
+  limit?: number;
+  page?: number;
+  search?: string;
+  status?: string;
 }
 
 export interface ProductItem {
-  no: number; // 고유 ID
-  styleCode: string; // 스타일 코드
+  no: number;
+  styleCode: string;
   brand: string;
   category: string;
   color: string;
@@ -34,10 +32,6 @@ export interface ProductListResponse {
   currentPage: number;
 }
 
-/**
- * 제품 상세 조회 타입
- * GET /admin/products-management/{id}
- */
 export interface ProductDetailResponse {
   id: number;
   name: string;
@@ -79,7 +73,6 @@ export type CreateProductRequest = Partial<
   Pick<ProductDetailResponse, 'fabricComposition'>
 >;
 
-/** 제품 목록 조회 */
 export const getProducts = async (
   params?: ProductListParams
 ): Promise<ProductListResponse> => {
@@ -89,7 +82,6 @@ export const getProducts = async (
   return response.data;
 };
 
-/** 제품 상세 조회 */
 export const getProductDetail = async (
   id: number
 ): Promise<ProductDetailResponse> => {
@@ -97,7 +89,6 @@ export const getProductDetail = async (
   return response.data;
 };
 
-/** 제품 정보 수정 */
 export const updateProduct = async (
   id: number,
   updateData: UpdateProductRequest
@@ -109,7 +100,6 @@ export const updateProduct = async (
   return response.data;
 };
 
-/** 신규 제품 수기 등록 */
 export const createProduct = async (
   productData: CreateProductRequest
 ): Promise<ProductDetailResponse> => {
