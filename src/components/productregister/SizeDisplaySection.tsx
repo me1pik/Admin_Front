@@ -1,5 +1,5 @@
-// SizeDisplaySection.tsx
-import React, { useState, ChangeEvent } from 'react';
+// src/components/productregister/SizeDisplaySection.tsx
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import styled from 'styled-components';
 import { ProductDetailResponse } from '../../api/adminProduct';
 
@@ -8,44 +8,39 @@ interface SizeDisplaySectionProps {
   sizeProductImg: string;
 }
 
-interface Labels {
-  title: string;
-  specTitle: string;
-  specA: string;
-  specB: string;
-  specC: string;
-  specD: string;
-  specE: string;
-  note: string;
-}
-
 const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
+  product,
   sizeProductImg,
 }) => {
-  const [labels, setLabels] = useState<Labels>({
+  // 1) product.sizes에서 측정 키 목록 추출
+  const sizes = product?.sizes ?? [];
+  const measurementKeys = sizes.length
+    ? Object.keys(sizes[0].measurements)
+    : [];
+
+  // 2) 고정 라벨(title, specTitle, note)
+  const [labels, setLabels] = useState({
     title: '사이즈 표기',
     specTitle: '[ 사이즈 표기 ]',
-    specA: 'A. 어깨넓이',
-    specB: 'B. 가슴둘레',
-    specC: 'C. 허리둘레',
-    specD: 'D. 팔길이',
-    specE: 'E. 총길이',
     note: '*측정 위치에 따라 약간의 오차 있음.',
   });
 
+  // 3) 측정 키를 알파벳 순으로 정렬하여 라벨로 사용
+  const [specLabels, setSpecLabels] = useState<string[]>([]);
+  useEffect(() => {
+    const sorted = [...measurementKeys].sort((a, b) => a.localeCompare(b));
+    setSpecLabels(sorted);
+  }, [measurementKeys.join(',')]);
+
   const handleLabelChange = (
-    field: keyof Labels,
+    field: keyof typeof labels,
     e: ChangeEvent<HTMLInputElement>
   ) => {
-    const newValue = e.target.value;
-    setLabels((prev) => ({
-      ...prev,
-      [field]: newValue,
-    }));
+    setLabels((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
   return (
-    <SectionBox style={{ flex: '0 0 auto' }}>
+    <SectionBox>
       <SectionHeader>
         <Bullet />
         <SectionTitleInput value={labels.title} readOnly />
@@ -62,41 +57,11 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
               onChange={(e) => handleLabelChange('specTitle', e)}
             />
             <SpaceColumn>
-              <SpecItemRow>
-                <SpecLabelInput
-                  value={labels.specA}
-                  onChange={(e) => handleLabelChange('specA', e)}
-                />
-                <Unit>( cm 기준 )</Unit>
-              </SpecItemRow>
-              <SpecItemRow>
-                <SpecLabelInput
-                  value={labels.specB}
-                  onChange={(e) => handleLabelChange('specB', e)}
-                />
-                <Unit>( cm 기준 )</Unit>
-              </SpecItemRow>
-              <SpecItemRow>
-                <SpecLabelInput
-                  value={labels.specC}
-                  onChange={(e) => handleLabelChange('specC', e)}
-                />
-                <Unit>( cm 기준 )</Unit>
-              </SpecItemRow>
-              <SpecItemRow>
-                <SpecLabelInput
-                  value={labels.specD}
-                  onChange={(e) => handleLabelChange('specD', e)}
-                />
-                <Unit>( cm 기준 )</Unit>
-              </SpecItemRow>
-              <SpecItemRow>
-                <SpecLabelInput
-                  value={labels.specE}
-                  onChange={(e) => handleLabelChange('specE', e)}
-                />
-                <Unit>( cm 기준 )</Unit>
-              </SpecItemRow>
+              {specLabels.map((lbl) => (
+                <SpecItemRow key={lbl}>
+                  <SpecLabelInput value={lbl} readOnly />
+                </SpecItemRow>
+              ))}
             </SpaceColumn>
             <NoteInput
               value={labels.note}
@@ -227,22 +192,14 @@ const SpaceColumn = styled.div`
 const SpecItemRow = styled.div`
   display: flex;
   align-items: baseline;
-  gap: 5px;
 `;
 
 const SpecLabelInput = styled.input`
   font-size: 12px;
   font-weight: 700;
-  width: 80px;
   text-align: left;
   border: none;
   background: transparent;
-`;
-
-const Unit = styled.div`
-  font-size: 10px;
-  font-weight: 400;
-  color: #999999;
 `;
 
 const NoteInput = styled.input`
