@@ -1,5 +1,11 @@
 // src/pages/ProductDetail.tsx
-import React, { useEffect, useState, useCallback } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  ChangeEvent,
+  FormEvent,
+} from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
 import TripleButtonDetailSubHeader from '../components/Header/TripleButtonDetailSubHeader';
@@ -16,7 +22,6 @@ import {
   getProductDetail,
   updateProduct,
   ProductDetailResponse,
-  UpdateProductRequest,
   SizeRow,
 } from '../api/adminProduct';
 
@@ -70,7 +75,7 @@ const ProductDetail: React.FC = () => {
       try {
         const data = await getProductDetail(productId);
         setProduct(data);
-        if (data.product_img?.length) setImages(data.product_img);
+        setImages(data.product_img ?? []);
       } catch {
         setError('제품 상세 정보를 불러오는데 실패했습니다.');
       } finally {
@@ -85,15 +90,52 @@ const ProductDetail: React.FC = () => {
     if (!product) return;
     showModal('변경 내용을 저장하시겠습니까?', async () => {
       try {
-        const updateData: UpdateProductRequest = { ...product };
-        Object.keys(updateData).forEach((key) => {
-          const k = key as keyof UpdateProductRequest;
-          const v = updateData[k];
-          if (v == null || (Array.isArray(v) && (v as any[]).length === 0)) {
-            delete updateData[k];
+        // 1) 원본 복사
+        const copy: any = { ...product };
+
+        // 2) 서버 관리 필드 삭제
+        delete copy.id;
+        delete copy.registration_date;
+        delete copy.status;
+
+        // 3) 이미지 배열 업데이트
+        copy.product_img = images.filter((x) => x) as string[];
+
+        // 4) flat Sizes → nested measurements 변환
+        if (Array.isArray(copy.sizes)) {
+          copy.sizes = copy.sizes.map((row: any) => {
+            const { size, ...rest } = row;
+            // rest 에 measurement 키가 이미 있을 경우 그대로 두고,
+            // flat 필드들이 있으면 그걸로 measurements 객체 생성
+            if (row.measurements)
+              return { size, measurements: row.measurements };
+            // flat 구조: rest 에 어깨, 가슴, 허리, 팔길이, 총길이 key
+            const measurements: Record<string, number> = {};
+            ['어깨', '가슴', '허리', '팔길이', '총길이'].forEach((key) => {
+              if (rest[key] != null) measurements[key] = Number(rest[key]);
+            });
+            return { size, measurements };
+          });
+        }
+
+        // 5) fabric_* 필드는 FabricInfoSection 에서 이미 fabricComposition 으로 변경되었다 가정
+
+        // 6) 빈 값/빈 배열/빈 객체/null 삭제
+        Object.keys(copy).forEach((key) => {
+          const v = copy[key];
+          if (
+            v == null ||
+            (Array.isArray(v) && v.length === 0) ||
+            (typeof v === 'object' &&
+              !Array.isArray(v) &&
+              Object.keys(v).length === 0)
+          ) {
+            delete copy[key];
           }
         });
-        const updated = await updateProduct(product.id, updateData);
+
+        // 7) API 호출
+        const updated = await updateProduct(product.id, copy);
         setProduct(updated);
         showModal('저장되었습니다.', () => navigate('/productlist'));
       } catch {
@@ -103,18 +145,13 @@ const ProductDetail: React.FC = () => {
   };
 
   const handleDelete = () => {
-    if (!product) return;
     showModal('정말 삭제하시겠습니까?', () => {
-      const didFail = true;
-      if (didFail) showResultModal('삭제에 실패했습니다.');
-      else navigate('/productlist');
+      // TODO: delete API 로직 추가
+      showResultModal('삭제에 실패했습니다.');
     });
   };
 
-  const handleImageUpload = (
-    idx: number,
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleImageUpload = (idx: number, e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
@@ -135,7 +172,9 @@ const ProductDetail: React.FC = () => {
     setImages((prev) => {
       const next = [...prev];
       next[idx] = null;
-      handleProductChange({ product_img: next.filter((x) => !!x) as string[] });
+      handleProductChange({
+        product_img: next.filter((x) => !!x) as string[],
+      });
       return next;
     });
   };
@@ -144,7 +183,9 @@ const ProductDetail: React.FC = () => {
       const next = [...prev];
       const [moved] = next.splice(from, 1);
       next.splice(to, 0, moved);
-      handleProductChange({ product_img: next.filter((x) => !!x) as string[] });
+      handleProductChange({
+        product_img: next.filter((x) => !!x) as string[],
+      });
       return next;
     });
   };
@@ -182,7 +223,7 @@ const ProductDetail: React.FC = () => {
 
           <MiddleDivider />
 
-          <Form onSubmit={(e) => e.preventDefault()}>
+          <Form onSubmit={(e: FormEvent) => e.preventDefault()}>
             <TwoColumn>
               <SizeGuideSection
                 sizes={product.sizes}
@@ -256,7 +297,7 @@ const ProductDetail: React.FC = () => {
 
 export default ProductDetail;
 
-/* styled-components */
+/* Styled-components */
 const Container = styled.div`
   width: 100%;
   padding: 20px;

@@ -1,4 +1,3 @@
-// src/api/adminProduct.ts
 import { Axios } from './Axios';
 
 /**
@@ -61,8 +60,8 @@ export interface ProductDetailResponse {
   manufacturer: string;
   description: string;
   fabricComposition: {
-    겉감: string;
-    안감: string;
+    겉감?: string;
+    안감?: string;
     배색?: string;
     부속?: string;
   };
@@ -72,13 +71,13 @@ export interface ProductDetailResponse {
   lining: string;
   touch: string;
   fit: string;
-  /**
-   * 동적 행·열 모두 허용되는 사이즈 가이드
-   */
   sizes: SizeRow[];
 }
 
 export type UpdateProductRequest = Partial<ProductDetailResponse>;
+export type CreateProductRequest = Partial<
+  Pick<ProductDetailResponse, 'fabricComposition'>
+>;
 
 /** 제품 목록 조회 */
 export const getProducts = async (
@@ -110,8 +109,17 @@ export const updateProduct = async (
   return response.data;
 };
 
+/** 신규 제품 수기 등록 */
+export const createProduct = async (
+  productData: CreateProductRequest
+): Promise<ProductDetailResponse> => {
+  const response = await Axios.post('/admin/products-management', productData);
+  return response.data;
+};
+
 export default {
   getProducts,
   getProductDetail,
   updateProduct,
+  createProduct,
 };

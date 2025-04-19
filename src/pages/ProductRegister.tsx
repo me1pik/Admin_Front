@@ -1,4 +1,5 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
+// src/pages/ProductRegister.tsx
+import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import ListButtonDetailSubHeader from '../components/Header/ListButtonDetailSubHeader';
@@ -11,11 +12,14 @@ import FabricInfoSection from '../components/productregister/FabricInfoSection';
 import ProductImageSection from '../components/productregister/ProductImageSection';
 import ReusableModal from '../components/ReusableModal';
 import ReusableModal2 from '../components/ReusableModal2';
+
 import {
   getProductDetail,
   updateProduct,
+  createProduct,
   ProductDetailResponse,
   UpdateProductRequest,
+  CreateProductRequest,
   SizeRow,
 } from '../api/adminProduct';
 
@@ -44,6 +48,8 @@ const newEmptyProduct: ProductDetailResponse = {
   fabricComposition: {
     겉감: '',
     안감: '',
+    배색: '',
+    부속: '',
   },
   elasticity: '',
   transparency: '',
@@ -82,84 +88,92 @@ const ProductRegister: React.FC = () => {
     setModalCallback(() => callback || null);
     setModalOpen(true);
   };
-
   const showEndModal = (message: string, callback?: () => void) => {
     setEndModalMessage(message);
     setEndModalCallback(() => callback || null);
     setEndModalOpen(true);
   };
 
+  // 상세 or 신규 초기화
   useEffect(() => {
     if (productId) {
-      const fetchProductDetail = async () => {
+      (async () => {
         setLoading(true);
         setError('');
         try {
           const data = await getProductDetail(productId);
           setProductDetail(data);
-          if (data.product_img.length > 0) {
-            setImages(data.product_img);
-            setImageLinks(data.product_img);
-          }
+          setImages(data.product_img.map((src) => src));
+          setImageLinks(data.product_img.map((src) => src));
         } catch (err) {
           console.error('제품 상세 정보를 불러오는데 실패했습니다.', err);
           setError('제품 상세 정보를 불러오는데 실패했습니다.');
         } finally {
           setLoading(false);
         }
-      };
-      fetchProductDetail();
+      })();
+    } else {
+      // 신규 등록일 땐 4개의 빈 슬롯
+      setImages(new Array(4).fill(null));
+      setImageLinks(new Array(4).fill(null));
+      setLoading(false);
     }
   }, [productId]);
 
   const handleBackClick = () => navigate(-1);
 
-  const handleEditOrRegister = async () => {
-    if (productId) {
-      const updateData: UpdateProductRequest = {
-        name: productDetail.name,
-        product_url: productDetail.product_url,
-        product_img: imageLinks.filter((link) => link) as string[],
-      };
-      try {
-        const updated = await updateProduct(productDetail.id, updateData);
-        setProductDetail(updated);
-        showModal('제품 정보가 수정되었습니다!', () =>
-          navigate('/productlist')
-        );
-      } catch (err) {
-        console.error('제품 정보 수정 실패', err);
-        showModal('제품 정보 수정에 실패하였습니다.');
+  const handleEditOrRegister = () => {
+    showModal(
+      productId ? '제품 정보를 수정하시겠습니까?' : '제품을 등록하시겠습니까?',
+      async () => {
+        setModalOpen(false);
+        try {
+          // payload 준비: 빈 값/빈 객체 제거
+          const payload: any = {
+            ...productDetail,
+            product_img: imageLinks.filter((l) => !!l),
+          };
+          Object.keys(payload).forEach((key) => {
+            const v = payload[key];
+            if (
+              v == null ||
+              (Array.isArray(v) && v.length === 0) ||
+              (typeof v === 'object' &&
+                !Array.isArray(v) &&
+                Object.keys(v).length === 0)
+            ) {
+              delete payload[key];
+            }
+          });
+
+          if (productId) {
+            // 수정
+            const updateData: UpdateProductRequest = payload;
+            const updated = await updateProduct(productDetail.id, updateData);
+            setProductDetail(updated);
+            showModal('제품 정보가 수정되었습니다!', () =>
+              navigate('/productlist')
+            );
+          } else {
+            // 등록
+            const createData: CreateProductRequest = payload;
+            await createProduct(createData); // ← 반환값은 사용하지 않습니다
+            showModal('제품이 등록되었습니다!', () => navigate('/productlist'));
+          }
+        } catch (err) {
+          console.error('등록/수정 실패', err);
+          showModal('등록/수정에 실패했습니다.');
+        }
       }
-    } else {
-      console.log('신규 등록 데이터:', productDetail, images, imageLinks);
-      showModal('제품이 등록되었습니다!', () => navigate('/productlist'));
-    }
+    );
   };
 
   const handleEndClick = () =>
     showEndModal('등록 중인 내용을 취소하시겠습니까?', () => navigate(-1));
 
-  // 수정: SizeRow[] 타입으로 변경
   const handleSizesChange = (sizes: SizeRow[]) => {
     setProductDetail((prev) => ({ ...prev, sizes }));
   };
-
-  const detailSubHeaderProps = productId
-    ? {
-        backLabel: '목록이동',
-        onBackClick: handleBackClick,
-        editLabel: '정보수정',
-        onEditClick: handleEditOrRegister,
-        endLabel: '종료처리',
-        onEndClick: handleEndClick,
-      }
-    : {
-        backLabel: '목록이동',
-        onBackClick: handleBackClick,
-        editLabel: '등록 완료',
-        onEditClick: handleEditOrRegister,
-      };
 
   const handleImageUpload = (
     index: number,
@@ -169,15 +183,16 @@ const ProductRegister: React.FC = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
+        const url = reader.result as string;
         setImages((prev) => {
-          const a = [...prev];
-          a[index] = reader.result as string;
-          return a;
+          const arr = [...prev];
+          arr[index] = url;
+          return arr;
         });
         setImageLinks((prev) => {
-          const a = [...prev];
-          a[index] = reader.result as string;
-          return a;
+          const arr = [...prev];
+          arr[index] = url;
+          return arr;
         });
       };
       reader.readAsDataURL(file);
@@ -186,41 +201,58 @@ const ProductRegister: React.FC = () => {
 
   const handleImageDelete = (index: number) => {
     setImages((prev) => {
-      const a = [...prev];
-      a[index] = null;
-      return a;
+      const arr = [...prev];
+      arr[index] = null;
+      return arr;
     });
     setImageLinks((prev) => {
-      const a = [...prev];
-      a[index] = '';
-      return a;
+      const arr = [...prev];
+      arr[index] = null;
+      return arr;
     });
   };
 
-  const handleImageReorder = (dragIndex: number, hoverIndex: number) => {
+  const handleImageReorder = (from: number, to: number) => {
     setImages((prev) => {
-      const a = [...prev];
-      const [b] = a.splice(dragIndex, 1);
-      a.splice(hoverIndex, 0, b);
-      return a;
+      const arr = [...prev];
+      const [m] = arr.splice(from, 1);
+      arr.splice(to, 0, m);
+      return arr;
     });
     setImageLinks((prev) => {
-      const a = [...prev];
-      const [b] = a.splice(dragIndex, 1);
-      a.splice(hoverIndex, 0, b);
-      return a;
+      const arr = [...prev];
+      const [m] = arr.splice(from, 1);
+      arr.splice(to, 0, m);
+      return arr;
     });
   };
 
   if (loading) return <Container>Loading...</Container>;
   if (error) return <Container>{error}</Container>;
 
+  const headerProps = productId
+    ? {
+        backLabel: '목록이동',
+        onBackClick: handleBackClick,
+        editLabel: '정보수정',
+        onEditClick: handleEditOrRegister,
+        endLabel: '취소',
+        onEndClick: handleEndClick,
+      }
+    : {
+        backLabel: '목록이동',
+        onBackClick: handleBackClick,
+        editLabel: '등록완료',
+        onEditClick: handleEditOrRegister,
+      };
+
   return (
     <Container>
       <HeaderRow>
         <Title>제품등록</Title>
       </HeaderRow>
-      <ListButtonDetailSubHeader {...detailSubHeaderProps} />
+      <ListButtonDetailSubHeader {...headerProps} />
+
       <ProductNumberWrapper>
         <ProductNumberLabel>번호</ProductNumberLabel>
         <ProductNumberValue>
@@ -236,7 +268,7 @@ const ProductRegister: React.FC = () => {
 
       <MiddleDivider />
 
-      <FormWrapper onSubmit={(e) => e.preventDefault()}>
+      <FormWrapper onSubmit={(e: FormEvent) => e.preventDefault()}>
         <TwoColumnRow>
           <SizeGuideSection
             sizes={productDetail.sizes}
@@ -270,7 +302,7 @@ const ProductRegister: React.FC = () => {
         <MiddleDivider />
 
         <ProductImageSection
-          images={productDetail.product_img}
+          images={images}
           handleImageUpload={handleImageUpload}
           handleImageDelete={handleImageDelete}
           handleImageReorder={handleImageReorder}
@@ -282,6 +314,9 @@ const ProductRegister: React.FC = () => {
 
       <ReusableModal
         isOpen={modalOpen}
+        title='알림'
+        width='400px'
+        height='200px'
         onClose={() => {
           setModalOpen(false);
           modalCallback?.();
@@ -290,23 +325,20 @@ const ProductRegister: React.FC = () => {
           setModalOpen(false);
           modalCallback?.();
         }}
-        title='알림'
-        width='400px'
-        height='200px'
       >
         {modalMessage}
       </ReusableModal>
 
       <ReusableModal2
         isOpen={endModalOpen}
+        title='알림'
+        width='400px'
+        height='200px'
         onClose={() => setEndModalOpen(false)}
         onConfirm={() => {
           setEndModalOpen(false);
           endModalCallback?.();
         }}
-        title='알림'
-        width='400px'
-        height='200px'
       >
         {endModalMessage}
       </ReusableModal2>
@@ -326,35 +358,26 @@ const Container = styled.div`
 `;
 const HeaderRow = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
 `;
 const Title = styled.h1`
-  font-family: 'NanumSquare Neo OTF';
   font-weight: 700;
   font-size: 16px;
-  line-height: 18px;
-  color: #000;
 `;
 const ProductNumberWrapper = styled.div`
   display: flex;
   align-items: baseline;
   gap: 5px;
-  margin: 10px 0;
-  margin-top: 34px;
+  margin: 10px 0 34px;
 `;
 const ProductNumberLabel = styled.div`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 12px;
-  color: #000;
 `;
 const ProductNumberValue = styled.div`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
-  color: #000;
 `;
 const MiddleDivider = styled.hr`
   border: 0;
@@ -375,8 +398,3 @@ const TwoColumnRow = styled.div`
   gap: 50px;
   margin-bottom: 10px;
 `;
-// const InfoCol = styled.div``;
-// const Divider = styled.div``;
-// const SizeRowStyled = styled.div``;
-// const SizeBox = styled.div``;
-// const SizeBoxEditable = styled.div``;
