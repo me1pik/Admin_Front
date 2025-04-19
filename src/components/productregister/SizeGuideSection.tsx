@@ -12,43 +12,59 @@ export interface SizeGuideSectionProps {
   onSizesChange?: (sizes: SizeRow[]) => void;
 }
 
+// 데이터 없을 때 기본 사이즈
 const defaultSizes = ['44', '55', '66', '77', 'Free'];
-
-const initialColumns: Column[] = [
-  { key: 'size', label: '사이즈' },
-  { key: '어깨', label: 'A(어깨)' },
-  { key: '가슴', label: 'B(가슴)' },
-  { key: '허리', label: 'C(허리)' },
-  { key: '팔길이', label: 'D(팔길이)' },
-  { key: '총길이', label: 'E(총길이)' },
-];
 
 const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   sizes,
   onSizesChange,
 }) => {
-  const [columns, setColumns] = useState<Column[]>(initialColumns);
+  // columns: size + measurements 키
+  const [columns, setColumns] = useState<Column[]>([
+    { key: 'size', label: '사이즈' },
+  ]);
   const [rows, setRows] = useState<RowData[]>([]);
 
-  // API에서 온 nested measurements를 풀어서 테이블용 RowData로 변환
-  const makeInitialRows = useCallback((): RowData[] => {
-    let initialRows: RowData[];
+  // 1) sizes 전체에서 모든 measurement 키를 모아 헤더 구성
+  useEffect(() => {
     if (sizes && sizes.length > 0) {
-      initialRows = sizes.map((item) => {
-        const row: RowData = {};
-        columns.forEach((col) => {
-          if (col.key === 'size') {
-            const raw = item.size;
-            row.size = /free/i.test(raw) ? 'Free' : raw.replace(/[^0-9]/g, '');
-          } else {
-            const m = item.measurements?.[col.key] ?? 0;
-            row[col.key] = m === 0 ? '' : String(m);
-          }
-        });
-        return row;
-      });
+      const allKeys = Array.from(
+        new Set(sizes.flatMap((item) => Object.keys(item.measurements)))
+      );
+      setColumns([
+        { key: 'size', label: '사이즈' },
+        ...allKeys.map((k) => ({ key: k, label: k })),
+      ]);
     } else {
-      initialRows = defaultSizes.map((sz) => {
+      setColumns([{ key: 'size', label: '사이즈' }]);
+    }
+  }, [sizes]);
+
+  // 2) rows 생성
+  const makeInitialRows = useCallback((): RowData[] => {
+    if (sizes && sizes.length > 0) {
+      return sizes
+        .map((item) => {
+          const row: RowData = {};
+          columns.forEach((col) => {
+            if (col.key === 'size') {
+              row.size = /free/i.test(item.size)
+                ? 'Free'
+                : item.size.replace(/[^0-9]/g, '');
+            } else {
+              const v = item.measurements[col.key] ?? 0;
+              row[col.key] = v === 0 ? '' : String(v);
+            }
+          });
+          return row;
+        })
+        .sort((a, b) => {
+          const na = a.size === 'Free' ? Infinity : Number(a.size);
+          const nb = b.size === 'Free' ? Infinity : Number(b.size);
+          return na - nb;
+        });
+    } else {
+      return defaultSizes.map((sz) => {
         const row: RowData = {};
         columns.forEach((col) => {
           row[col.key] = col.key === 'size' ? sz : '';
@@ -56,30 +72,27 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
         return row;
       });
     }
-    return initialRows.sort((a, b) => {
-      const aval = a.size === 'Free' ? Infinity : Number(a.size);
-      const bval = b.size === 'Free' ? Infinity : Number(b.size);
-      return aval - bval;
-    });
   }, [sizes, columns]);
 
   useEffect(() => {
     setRows(makeInitialRows());
   }, [makeInitialRows]);
 
-  // RowData 배열을 SizeRow[] (nested measurements)로 변환하여 부모에 전달
+  // 3) 변경 내역 전달
   const emitChange = (newRows: RowData[]) => {
     const out: SizeRow[] = newRows.map((r) => {
       const measurements: Record<string, number> = {};
       columns.forEach((col) => {
-        if (col.key === 'size') return;
-        measurements[col.key] = r[col.key] !== '' ? Number(r[col.key]) : 0;
+        if (col.key !== 'size') {
+          measurements[col.key] = r[col.key] !== '' ? Number(r[col.key]) : 0;
+        }
       });
       return { size: r.size, measurements };
     });
     onSizesChange?.(out);
   };
 
+  // 4) 셀 변경 핸들러
   const handleCellChange = (
     rowIndex: number,
     key: string,
@@ -87,35 +100,34 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   ) => {
     const val =
       key === 'size' ? e.target.value.replace(/[^0-9]/g, '') : e.target.value;
-    const newRows = rows.map((r, i) =>
+    const next = rows.map((r, i) =>
       i === rowIndex ? { ...r, [key]: val } : r
     );
-    setRows(newRows);
-    emitChange(newRows);
+    setRows(next);
+    emitChange(next);
   };
 
+  // (옵션) 컬럼 추가/삭제/레이블 변경
   const handleAddColumn = () => {
     const newKey = `col_${Date.now()}`;
-    setColumns((cols) => [...cols, { key: newKey, label: '열 이름' }]);
+    setColumns((c) => [...c, { key: newKey, label: '열 이름' }]);
     setRows((rs) => rs.map((r) => ({ ...r, [newKey]: '' })));
   };
-
   const handleDeleteColumn = (idx: number) => {
-    const key = columns[idx].key;
-    setColumns((cols) => cols.filter((_, i) => i !== idx));
+    const delKey = columns[idx].key;
+    setColumns((c) => c.filter((_, i) => i !== idx));
     setRows((rs) =>
       rs.map((r) => {
-        const { [key]: _, ...rest } = r;
+        const { [delKey]: _, ...rest } = r;
         return rest;
       })
     );
   };
-
   const handleLabelChange = (idx: number, e: ChangeEvent<HTMLInputElement>) => {
-    const lbl = e.target.value;
-    setColumns((cols) => {
-      const copy = [...cols];
-      copy[idx] = { ...copy[idx], label: lbl };
+    const label = e.target.value;
+    setColumns((c) => {
+      const copy = [...c];
+      copy[idx] = { ...copy[idx], label };
       return copy;
     });
   };
@@ -139,11 +151,8 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
                   value={col.label}
                   onChange={(e) => handleLabelChange(i, e)}
                 />
-                {i > 0 && (
-                  <DelColButton
-                    type='button'
-                    onClick={() => handleDeleteColumn(i)}
-                  >
+                {col.key !== 'size' && (
+                  <DelColButton onClick={() => handleDeleteColumn(i)}>
                     <FaTimes />
                   </DelColButton>
                 )}
@@ -176,16 +185,13 @@ export default SizeGuideSection;
 const SectionBox = styled.div`
   position: relative;
   padding-left: 20px;
-  padding-bottom: 10px;
   margin-bottom: 20px;
 `;
-
 const Header = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 10px;
 `;
-
 const Bullet = styled.div`
   position: absolute;
   left: -7px;
@@ -206,13 +212,11 @@ const Bullet = styled.div`
     border-radius: 50%;
   }
 `;
-
 const Title = styled.div`
   font-weight: 800;
   font-size: 14px;
   margin-left: 10px;
 `;
-
 const AddColButton = styled.button`
   margin-left: auto;
   background: none;
@@ -225,16 +229,14 @@ const AddColButton = styled.button`
     margin-right: 4px;
   }
 `;
-
 const Line = styled.div`
   position: absolute;
   left: 0;
   top: 15px;
-  bottom: 112px;
+  bottom: 0;
   width: 1px;
   background: #ddd;
 `;
-
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
@@ -245,27 +247,12 @@ const Table = styled.table`
     text-align: center;
     padding: 4px;
     font-size: 12px;
-    position: relative;
-  }
-  th:first-child,
-  td:first-child {
-    padding-left: 10px;
-  }
-  td:first-child::before {
-    content: '';
-    position: absolute;
-    left: -20px;
-    top: 50%;
-    width: 20px;
-    height: 1px;
-    background: #ddd;
   }
 `;
-
 const Th = styled.th`
   padding: 0;
+  position: relative;
 `;
-
 const LabelInput = styled.input`
   width: calc(100% - 24px);
   border: none;
@@ -277,7 +264,6 @@ const LabelInput = styled.input`
     outline: none;
   }
 `;
-
 const DelColButton = styled.button`
   position: absolute;
   top: 2px;
@@ -286,9 +272,7 @@ const DelColButton = styled.button`
   border: none;
   cursor: pointer;
 `;
-
 const Td = styled.td``;
-
 const CellInput = styled.input`
   width: 50px;
   height: 28px;

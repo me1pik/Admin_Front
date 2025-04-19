@@ -57,7 +57,7 @@ const newEmptyProduct: ProductDetailResponse = {
   lining: '',
   touch: '',
   fit: '',
-  sizes: [{ size: '', 어깨: 0, 가슴: 0, 총장: 0 } as SizeRow],
+  sizes: [],
 };
 
 const ProductRegister: React.FC = () => {

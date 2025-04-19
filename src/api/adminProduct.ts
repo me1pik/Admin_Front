@@ -1,10 +1,11 @@
 // src/api/adminProduct.ts
 import { Axios } from './Axios';
 
-export type SizeRow = {
+// 변경 후
+export interface SizeRow {
   size: string;
-  [column: string]: string | number;
-};
+  measurements: Record<string, number>;
+}
 
 export interface ProductListParams {
   limit?: number;
