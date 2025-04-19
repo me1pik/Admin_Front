@@ -5,36 +5,35 @@ import { FaTimes, FaPlus } from 'react-icons/fa';
 import { SizeRow } from '../../api/adminProduct';
 
 type Column = { key: string; label: string };
-type RowData = Record<string, string>; // size와 각 열 키에 대응하는 문자열 값
+type RowData = Record<string, string>;
 
 export interface SizeGuideSectionProps {
   sizes: SizeRow[];
   onSizesChange?: (sizes: SizeRow[]) => void;
 }
 
-// 데이터 없을 때 기본 사이즈
 const defaultSizes = ['44', '55', '66', '77', 'Free'];
 
 const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   sizes,
   onSizesChange,
 }) => {
-  // columns: size + measurements 키
   const [columns, setColumns] = useState<Column[]>([
     { key: 'size', label: '사이즈' },
   ]);
   const [rows, setRows] = useState<RowData[]>([]);
 
-  // 1) sizes 전체에서 모든 measurement 키를 모아 헤더 구성
+  // 1) sizes 전체에서 모든 measurement 키를 모아 헤더 구성 (라벨 알파벳 순 정렬)
   useEffect(() => {
     if (sizes && sizes.length > 0) {
       const allKeys = Array.from(
         new Set(sizes.flatMap((item) => Object.keys(item.measurements)))
       );
-      setColumns([
-        { key: 'size', label: '사이즈' },
-        ...allKeys.map((k) => ({ key: k, label: k })),
-      ]);
+      // 측정값 컬럼 생성
+      const measureCols: Column[] = allKeys.map((k) => ({ key: k, label: k }));
+      // 라벨 기준 정렬
+      measureCols.sort((a, b) => a.label.localeCompare(b.label));
+      setColumns([{ key: 'size', label: '사이즈' }, ...measureCols]);
     } else {
       setColumns([{ key: 'size', label: '사이즈' }]);
     }
@@ -42,7 +41,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
 
   // 2) rows 생성
   const makeInitialRows = useCallback((): RowData[] => {
-    if (sizes && sizes.length > 0) {
+    if (sizes.length > 0) {
       return sizes
         .map((item) => {
           const row: RowData = {};
@@ -107,7 +106,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     emitChange(next);
   };
 
-  // (옵션) 컬럼 추가/삭제/레이블 변경
+  // (옵션) 컬럼 추가/삭제/레이블 변경 (사용자 커스텀 컬럼도 정렬 대상에 포함하려면, 여기에 정렬 로직 추가)
   const handleAddColumn = () => {
     const newKey = `col_${Date.now()}`;
     setColumns((c) => [...c, { key: newKey, label: '열 이름' }]);
