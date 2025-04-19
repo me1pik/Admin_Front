@@ -1,5 +1,5 @@
 // src/components/productregister/FabricInfoSection.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { ProductDetailResponse } from '../../api/adminProduct';
 
@@ -8,23 +8,50 @@ interface FabricInfoSectionProps {
   onChange?: (data: Partial<ProductDetailResponse>) => void;
 }
 
+const fabricKeys = ['겉감', '안감', '배색', '부속'] as const;
+const COLUMN_COUNT = 4;
+
 const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
   product,
   onChange,
 }) => {
-  // fabricComposition이 null일 경우 기본 객체 사용
-  const fabricComp = product.fabricComposition ?? {
-    겉감: '',
-    안감: '',
-    배색: '',
-    부속: '',
-  };
+  // key별로 4개의 슬롯 문자열을 관리
+  const [slots, setSlots] = useState<Record<string, string[]>>({});
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    if (onChange) {
-      onChange({ [name]: value });
-    }
+  useEffect(() => {
+    const init: Record<string, string[]> = {};
+    // fabricComposition을 Record<string,string>으로 캐스팅
+    const compMap = product.fabricComposition as
+      | Record<string, string>
+      | undefined;
+    fabricKeys.forEach((key) => {
+      const comp = compMap?.[key] ?? '';
+      // 쉼표로 분리, 빈 문자열 제거
+      const parts = comp.split(/\s*,\s*/).filter((s: string) => s);
+      // 4개 슬롯으로 맞추기
+      init[key] = Array.from(
+        { length: COLUMN_COUNT },
+        (_, i) => parts[i] || ''
+      );
+    });
+    setSlots(init);
+  }, [product.fabricComposition]);
+
+  const handleInputChange = (key: string, idx: number, value: string) => {
+    const updatedSlots = {
+      ...slots,
+      [key]: slots[key].map((v, i) => (i === idx ? value : v)),
+    };
+    setSlots(updatedSlots);
+
+    // 빈 값 제외하고 다시 합쳐서 부모로 전달
+    const newFabricComp: Record<string, string> = {};
+    fabricKeys.forEach((k) => {
+      newFabricComp[k] = updatedSlots[k]
+        .filter((v) => v.trim() !== '')
+        .join(', ');
+    });
+    onChange?.({ fabricComposition: newFabricComp });
   };
 
   return (
@@ -38,61 +65,28 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
         <thead>
           <tr>
             <th>구분</th>
-            <th>1번</th>
-            <th>2번</th>
-            <th>3번</th>
-            <th>4번</th>
+            {[1, 2, 3, 4].map((i) => (
+              <th key={i}>{i}번</th>
+            ))}
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>겉감</td>
-            {[1, 2, 3, 4].map((i) => (
-              <td key={`outer-${i}`}>
-                <Input
-                  name={`fabric_겉감_${i}`}
-                  placeholder={fabricComp.겉감 || '-'}
-                  onChange={handleInputChange}
-                />
-              </td>
-            ))}
-          </tr>
-          <tr>
-            <td>안감</td>
-            {[1, 2, 3, 4].map((i) => (
-              <td key={`lining-${i}`}>
-                <Input
-                  name={`fabric_안감_${i}`}
-                  placeholder={fabricComp.안감 || '-'}
-                  onChange={handleInputChange}
-                />
-              </td>
-            ))}
-          </tr>
-          <tr>
-            <td>배색</td>
-            {[1, 2, 3, 4].map((i) => (
-              <td key={`contrast-${i}`}>
-                <Input
-                  name={`fabric_배색_${i}`}
-                  placeholder={fabricComp.배색 || '-'}
-                  onChange={handleInputChange}
-                />
-              </td>
-            ))}
-          </tr>
-          <tr>
-            <td>부속</td>
-            {[1, 2, 3, 4].map((i) => (
-              <td key={`accessory-${i}`}>
-                <Input
-                  name={`fabric_부속_${i}`}
-                  placeholder={fabricComp.부속 || '-'}
-                  onChange={handleInputChange}
-                />
-              </td>
-            ))}
-          </tr>
+          {fabricKeys.map((key) => (
+            <tr key={key}>
+              <td>{key}</td>
+              {slots[key]?.map((val, idx) => (
+                <td key={idx}>
+                  <Input
+                    value={val}
+                    placeholder='-'
+                    onChange={(e) =>
+                      handleInputChange(key, idx, e.target.value)
+                    }
+                  />
+                </td>
+              ))}
+            </tr>
+          ))}
         </tbody>
       </FabricTable>
     </SectionBox>
