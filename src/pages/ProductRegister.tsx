@@ -36,7 +36,7 @@ const newEmptyProduct: ProductDetailResponse = {
     discountRate: 0,
     finalPrice: 0,
   },
-  rental: undefined,
+  rental_price: undefined,
   registration: 0,
   registration_date: '',
   product_url: '',

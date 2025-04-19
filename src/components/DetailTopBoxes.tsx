@@ -56,8 +56,6 @@ interface DetailTopBoxesProps {
 }
 
 const defaultSizes = ['44', '55', '66', '77', 'Free'];
-
-// 측정값 초기 템플릿
 const defaultMeasurementsTemplate = {
   어깨: 0,
   가슴: 0,
@@ -71,7 +69,18 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   editable = false,
   onChange,
 }) => {
-  const rentalValue = (product as any).rental ?? '';
+  // 렌탈 가격(정수 문자열)
+  const rentalValue =
+    product.rental_price != null
+      ? Math.floor(product.rental_price).toString()
+      : '';
+
+  // 리테일(원가) / 판매 가격 계산
+  const retailValue = product.price.originalPrice;
+  const saleValue =
+    product.price.finalPrice != null
+      ? product.price.finalPrice
+      : product.price.originalPrice;
 
   const handleToggleSize = (sz: string) => {
     if (!onChange) return;
@@ -99,7 +108,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   return (
     <Container>
       <BoxWrapper>
-        {/* 박스1 */}
+        {/* 박스1: 브랜드, 품번, 상태 */}
         <Box>
           <IconWrapper>
             <Icon src={DetailBoxSvg1} />
@@ -161,7 +170,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
 
         <Divider />
 
-        {/* 박스2 */}
+        {/* 박스2: 종류, 사이즈, 색상 */}
         <Box>
           <IconWrapper>
             <Icon src={DetailBoxSvg2} />
@@ -241,7 +250,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
 
         <Divider />
 
-        {/* 박스3 */}
+        {/* 박스3: 리테일, 판매, 대여 */}
         <Box>
           <IconWrapper>
             <Icon src={DetailBoxSvg3} />
@@ -253,7 +262,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                 <Input
                   type='number'
                   placeholder='입력하세요'
-                  value={product.price.originalPrice}
+                  value={retailValue}
                   onChange={(e) =>
                     onChange?.({
                       price: {
@@ -264,38 +273,25 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                   }
                 />
               ) : (
-                <Value>{product.price.originalPrice.toLocaleString()}</Value>
+                <Value>{retailValue.toLocaleString()}</Value>
               )}
             </Row>
             <Row>
               <Label>판매</Label>
-              {editable ? (
-                <Input
-                  type='number'
-                  placeholder='입력하세요'
-                  value={product.price.finalPrice}
-                  onChange={(e) =>
-                    onChange?.({
-                      price: {
-                        ...product.price,
-                        finalPrice: Number(e.target.value),
-                      },
-                    })
-                  }
-                />
-              ) : (
-                <Value>{product.price.finalPrice.toLocaleString()}</Value>
-              )}
+              <SaleInput value={saleValue.toLocaleString()} readOnly disabled />
             </Row>
             <Row>
               <Label>대여</Label>
               {editable ? (
                 <Input
                   type='number'
+                  step='1'
                   placeholder='입력하세요'
                   value={rentalValue}
                   onChange={(e) =>
-                    onChange?.({ rental: Number(e.target.value) })
+                    onChange?.({
+                      rental_price: Math.floor(Number(e.target.value)),
+                    })
                   }
                 />
               ) : (
@@ -389,6 +385,12 @@ const Select = styled.select`
     border-color: #888;
     box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
   }
+`;
+const SaleInput = styled(Input)`
+  background: #f0f0f0;
+  color: #999;
+  border-color: #ccc;
+  cursor: default;
 `;
 const Divider = styled.div`
   width: 1px;

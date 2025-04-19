@@ -1,7 +1,5 @@
-// src/api/adminProduct.ts
 import { Axios } from './Axios';
 
-// 변경 후
 export interface SizeRow {
   size: string;
   measurements: Record<string, number>;
@@ -45,14 +43,15 @@ export interface ProductDetailResponse {
     discountRate: number;
     finalPrice: number;
   };
-  rental?: number;
+  sale_price?: number;
+  rental_price?: number;
   registration: number;
   registration_date: string;
   product_url: string;
   product_img: string[];
   size_picture: string;
   season: string;
-  manufacturer: string;
+  manufacturer: string | null;
   description: string;
   fabricComposition: {
     겉감?: string;
@@ -69,9 +68,15 @@ export interface ProductDetailResponse {
   sizes: SizeRow[];
 }
 
-export type UpdateProductRequest = Partial<ProductDetailResponse>;
+// PATCH 시 price 필드를 부분 업데이트 가능하도록 타입 정의
+export type UpdateProductRequest = Partial<
+  Omit<ProductDetailResponse, 'price'>
+> & {
+  price?: Partial<ProductDetailResponse['price']>;
+};
+
 export type CreateProductRequest = Partial<
-  Pick<ProductDetailResponse, 'fabricComposition'>
+  Pick<ProductDetailResponse, 'fabricComposition' | 'price'>
 >;
 
 export const getProducts = async (
