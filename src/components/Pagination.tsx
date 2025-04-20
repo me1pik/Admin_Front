@@ -1,6 +1,7 @@
-// src/components/Pagination.tsx
+// === src/components/Pagination.tsx ===
 import React from 'react';
 import styled from 'styled-components';
+import { useSearchParams } from 'react-router-dom';
 
 // 활성화 아이콘
 import FirstPageIcon from '../assets/PageNationIcon1.svg';
@@ -15,88 +16,66 @@ import NextPageIconDisabled from '../assets/PageNationIcon3none.svg';
 import LastPageIconDisabled from '../assets/PageNationIcon4none.svg';
 
 interface PaginationProps {
-  page: number;
-  setPage: (page: number) => void;
   totalPages: number;
 }
 
-const Pagination: React.FC<PaginationProps> = ({
-  page,
-  setPage,
-  totalPages,
-}) => {
-  // totalPages가 0 이하일 경우 최소 1로 보정
-  const correctedTotalPages = totalPages < 1 ? 1 : totalPages;
+const Pagination: React.FC<PaginationProps> = ({ totalPages }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  // URL 쿼리로부터 현재 페이지를 파싱
+  const current = parseInt(searchParams.get('page') ?? '1', 10);
+  const correctedTotal = totalPages < 1 ? 1 : totalPages;
+  const page = Math.min(Math.max(current, 1), correctedTotal);
 
-  // 현재 페이지 보정 (1보다 작거나 totalPages보다 큰 경우)
-  let currentPage = page;
-  if (currentPage < 1) currentPage = 1;
-  if (currentPage > correctedTotalPages) currentPage = correctedTotalPages;
+  // 쿼리 유지하며 페이지만 변경
+  const changePage = (newPage: number) => {
+    const params = Object.fromEntries(searchParams.entries());
+    params['page'] = String(newPage);
+    setSearchParams(params);
+  };
 
-  // 2자리 형식(예: 01, 02...)으로 표시
-  const currentPageStr = String(currentPage).padStart(2, '0');
-  const totalPagesStr = String(correctedTotalPages).padStart(2, '0');
+  const formatted = (n: number) => String(n).padStart(2, '0');
 
   return (
     <PaginationContainer>
-      {/* 첫 페이지 이동 */}
       <PageArrow
-        disabled={currentPage === 1}
-        onClick={() => setPage(1)}
-        aria-label='첫 페이지 이동'
+        disabled={page === 1}
+        onClick={() => changePage(1)}
+        aria-label='첫 페이지'
       >
-        <Icon
-          src={currentPage === 1 ? FirstPageIconDisabled : FirstPageIcon}
-          alt='첫 페이지'
-        />
+        <Icon src={page === 1 ? FirstPageIconDisabled : FirstPageIcon} alt='' />
       </PageArrow>
-      {/* 이전 페이지 이동 */}
       <PageArrow
-        disabled={currentPage === 1}
-        onClick={() => setPage(currentPage - 1)}
-        aria-label='이전 페이지 이동'
+        disabled={page === 1}
+        onClick={() => changePage(page - 1)}
+        aria-label='이전 페이지'
       >
-        <Icon
-          src={currentPage === 1 ? PrevPageIconDisabled : PrevPageIcon}
-          alt='이전 페이지'
-        />
+        <Icon src={page === 1 ? PrevPageIconDisabled : PrevPageIcon} alt='' />
       </PageArrow>
 
-      {/* 중앙 페이지 정보 */}
       <PageInfo>
-        <CurrentPage>{currentPageStr}</CurrentPage>
+        <CurrentPage>{formatted(page)}</CurrentPage>
         <Slash>/</Slash>
-        <TotalPage>{totalPagesStr}</TotalPage>
+        <TotalPage>{formatted(correctedTotal)}</TotalPage>
       </PageInfo>
 
-      {/* 다음 페이지 이동 */}
       <PageArrow
-        disabled={currentPage === correctedTotalPages}
-        onClick={() => setPage(currentPage + 1)}
-        aria-label='다음 페이지 이동'
+        disabled={page === correctedTotal}
+        onClick={() => changePage(page + 1)}
+        aria-label='다음 페이지'
       >
         <Icon
-          src={
-            currentPage === correctedTotalPages
-              ? NextPageIconDisabled
-              : NextPageIcon
-          }
-          alt='다음 페이지'
+          src={page === correctedTotal ? NextPageIconDisabled : NextPageIcon}
+          alt=''
         />
       </PageArrow>
-      {/* 마지막 페이지 이동 */}
       <PageArrow
-        disabled={currentPage === correctedTotalPages}
-        onClick={() => setPage(correctedTotalPages)}
-        aria-label='마지막 페이지 이동'
+        disabled={page === correctedTotal}
+        onClick={() => changePage(correctedTotal)}
+        aria-label='마지막 페이지'
       >
         <Icon
-          src={
-            currentPage === correctedTotalPages
-              ? LastPageIconDisabled
-              : LastPageIcon
-          }
-          alt='마지막 페이지'
+          src={page === correctedTotal ? LastPageIconDisabled : LastPageIcon}
+          alt=''
         />
       </PageArrow>
     </PaginationContainer>
@@ -105,8 +84,7 @@ const Pagination: React.FC<PaginationProps> = ({
 
 export default Pagination;
 
-/* ====================== Styled Components ====================== */
-
+/* ================= Styled Components ================= */
 const PaginationContainer = styled.div`
   width: 100%;
   display: flex;
@@ -139,18 +117,18 @@ const PageInfo = styled.div`
 const CurrentPage = styled.span`
   font-size: 20px;
   font-weight: 800;
-  color: #000000;
+  color: #000;
 `;
 
 const Slash = styled.span`
   margin: 0 4px;
   font-size: 12px;
   font-weight: 400;
-  color: #000000;
+  color: #000;
 `;
 
 const TotalPage = styled.span`
   font-size: 12px;
   font-weight: 400;
-  color: #000000;
+  color: #000;
 `;
