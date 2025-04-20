@@ -146,12 +146,12 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
               <SizeCheckbox
                 type='checkbox'
                 name='elasticity'
-                value='허리벤딩'
-                checked={selectedOptions.elasticity === '허리벤딩'}
+                value='허리밴딩'
+                checked={selectedOptions.elasticity === '허리밴딩'}
                 onChange={handleCheckboxChange}
                 disabled={!editable}
               />
-              허리벤딩
+              허리밴딩
             </SizeCheckboxLabel>
           </SizeCheckGroup>
         </CheckGroupRow>
