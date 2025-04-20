@@ -26,22 +26,21 @@ const colorOptions = [
 ];
 
 const categoryOptions = [
+  { label: '전체', value: 'Entire' },
   { label: '미니원피스', value: 'MiniDress' },
   { label: '미디원피스', value: 'MidiDress' },
-  { label: '롱원피스', value: 'LongDress' },
-  { label: '티셔츠', value: 'TShirt' },
+  { label: '롱 원피스', value: 'LongDress' },
+  { label: '투피스', value: 'TowDress' },
+
+  { label: '점프수트', value: 'JumpSuit' },
   { label: '블라우스', value: 'Blouse' },
-  { label: '셔츠', value: 'Shirt' },
-  { label: '후드', value: 'Hood' },
-  { label: '니트', value: 'Knit' },
-  { label: '가디건', value: 'Cardigan' },
-  { label: '맨투맨', value: 'Sweatshirt' },
-  { label: '스웨터', value: 'Sweater' },
+  { label: '니트 상의', value: 'KnitTop' },
+  { label: '셔츠 상의', value: 'ShirtTop' },
+
+  { label: '미니 스커트', value: 'MiniSkirt' },
+  { label: '미디 스커트', value: 'MidiSkirt' },
   { label: '팬츠', value: 'Pants' },
-  { label: '데님', value: 'Denim' },
-  { label: '스커트', value: 'Skirt' },
-  { label: '점프수트', value: 'Jumpsuit' },
-  { label: '재킷', value: 'Jacket' },
+  { label: '자켓', value: 'Jacket' },
   { label: '코트', value: 'Coat' },
 ];
 
