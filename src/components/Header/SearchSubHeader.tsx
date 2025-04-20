@@ -30,15 +30,20 @@ const SubHeader: React.FC<SubHeaderProps> = ({ tabs, onTabChange }) => {
     onTabChange?.(tab);
   };
 
+  // 공통 검색 실행 함수
+  const handleSearch = () => {
+    const trimmed = inputValue.trim();
+    if (trimmed) {
+      setSearchParams({ search: trimmed });
+    } else {
+      setSearchParams({});
+    }
+  };
+
   // Enter 키로만 URL 갱신
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      const trimmed = inputValue.trim();
-      if (trimmed) {
-        setSearchParams({ search: trimmed });
-      } else {
-        setSearchParams({});
-      }
+      handleSearch();
     }
   };
 
@@ -66,7 +71,7 @@ const SubHeader: React.FC<SubHeaderProps> = ({ tabs, onTabChange }) => {
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
         />
-        <SearchIcon /> {/* 클릭 이벤트 제거 */}
+        <SearchIcon onClick={handleSearch} /> {/* 아이콘 클릭 시 검색 */}
       </SearchContainer>
     </HeaderContainer>
   );
@@ -157,4 +162,5 @@ const SearchIcon = styled(FiSearch)`
   right: 10px;
   font-size: 16px;
   color: #6c757d;
+  cursor: pointer; /* 클릭 가능한 커서 */
 `;
