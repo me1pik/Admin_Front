@@ -13,13 +13,13 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
   onChange,
   editable = false,
 }) => {
-  // 만약 ProductDetailResponse 타입에 touch 속성이 없다면 (product as any).touch로 캐스팅하여 사용하거나 해당 속성을 제거해주세요.
+  // 만약 ProductDetailResponse 타입에 fit 속성이 없다면 (product as any).fit로 캐스팅하여 사용하거나 해당 속성을 제거해주세요.
   const [selectedOptions, setSelectedOptions] = useState({
     thickness: product.thickness || '적당',
     elasticity: product.elasticity || '없음',
     lining: product.lining || '기모안감',
     // TS 에러가 발생하는 경우, 아래와 같이 처리할 수 있습니다.
-    touch: (product as any).touch || '적당',
+    fit: (product as any).fit || '적당',
     transparency: product.transparency || '적당',
   });
 
@@ -29,7 +29,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
       thickness: product.thickness || '적당',
       elasticity: product.elasticity || '없음',
       lining: product.lining || '기모안감',
-      touch: (product as any).touch || '적당',
+      fit: (product as any).fit || '적당',
       transparency: product.transparency || '적당',
     });
   }, [product]);
@@ -214,9 +214,9 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
               <SizeCheckbox
                 type='checkbox'
-                name='touch'
+                name='fit'
                 value='뻣뻣함'
-                checked={selectedOptions.touch === '뻣뻣함'}
+                checked={selectedOptions.fit === '뻣뻣함'}
                 onChange={handleCheckboxChange}
                 disabled={!editable}
               />
@@ -225,9 +225,9 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
               <SizeCheckbox
                 type='checkbox'
-                name='touch'
+                name='fit'
                 value='까슬함'
-                checked={selectedOptions.touch === '까슬함'}
+                checked={selectedOptions.fit === '까슬함'}
                 onChange={handleCheckboxChange}
                 disabled={!editable}
               />
@@ -236,9 +236,9 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
               <SizeCheckbox
                 type='checkbox'
-                name='touch'
+                name='fit'
                 value='적당'
-                checked={selectedOptions.touch === '적당'}
+                checked={selectedOptions.fit === '적당'}
                 onChange={handleCheckboxChange}
                 disabled={!editable}
               />
@@ -247,9 +247,9 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
               <SizeCheckbox
                 type='checkbox'
-                name='touch'
+                name='fit'
                 value='부드러움'
-                checked={selectedOptions.touch === '부드러움'}
+                checked={selectedOptions.fit === '부드러움'}
                 onChange={handleCheckboxChange}
                 disabled={!editable}
               />

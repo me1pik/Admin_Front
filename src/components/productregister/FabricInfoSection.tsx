@@ -1,6 +1,6 @@
-// src/components/productregister/FabricInfoSection.tsx
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+
 import { ProductDetailResponse } from '../../api/adminProduct';
 
 interface FabricInfoSectionProps {
@@ -15,43 +15,38 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
   product,
   onChange,
 }) => {
-  // key별로 4개의 슬롯 문자열을 관리
   const [slots, setSlots] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     const init: Record<string, string[]> = {};
-    // fabricComposition을 Record<string,string>으로 캐스팅
     const compMap = product.fabricComposition as
       | Record<string, string>
       | undefined;
+
     fabricKeys.forEach((key) => {
-      const comp = compMap?.[key] ?? '';
-      // 쉼표로 분리, 빈 문자열 제거
-      const parts = comp.split(/\s*,\s*/).filter((s: string) => s);
-      // 4개 슬롯으로 맞추기
+      const raw = compMap?.[key] ?? '';
+      const parts = raw.split(/\s*,\s*/).filter((s) => s);
       init[key] = Array.from(
         { length: COLUMN_COUNT },
         (_, i) => parts[i] || ''
       );
     });
+
     setSlots(init);
   }, [product.fabricComposition]);
 
   const handleInputChange = (key: string, idx: number, value: string) => {
-    const updatedSlots = {
+    const updated = {
       ...slots,
       [key]: slots[key].map((v, i) => (i === idx ? value : v)),
     };
-    setSlots(updatedSlots);
+    setSlots(updated);
 
-    // 빈 값 제외하고 다시 합쳐서 부모로 전달
-    const newFabricComp: Record<string, string> = {};
+    const newComp: Record<string, string> = {};
     fabricKeys.forEach((k) => {
-      newFabricComp[k] = updatedSlots[k]
-        .filter((v) => v.trim() !== '')
-        .join(', ');
+      newComp[k] = updated[k].filter((v) => v.trim()).join(', ');
     });
-    onChange?.({ fabricComposition: newFabricComp });
+    onChange?.({ fabricComposition: newComp });
   };
 
   return (
@@ -96,6 +91,7 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
 export default FabricInfoSection;
 
 /* Styled Components */
+
 const SectionBox = styled.div`
   position: relative;
   margin-bottom: 20px;
@@ -118,6 +114,7 @@ const Bullet = styled.div`
   border: 1px solid #dddddd;
   border-radius: 50%;
   background: #fff;
+
   &::after {
     content: '';
     position: absolute;
@@ -152,6 +149,7 @@ const FabricTable = styled.table`
   border-collapse: collapse;
   margin-top: 10px;
   max-width: 766px;
+
   th,
   td {
     border: 1px solid #ddd;
@@ -164,9 +162,11 @@ const FabricTable = styled.table`
     padding: 4px;
     min-width: 50px;
   }
+
   td:first-child {
     position: relative;
   }
+
   td:first-child::before {
     content: '';
     position: absolute;
@@ -177,6 +177,7 @@ const FabricTable = styled.table`
     height: 1px;
     background: #dddddd;
   }
+
   th {
     background-color: #f9f9f9;
   }

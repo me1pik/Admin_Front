@@ -13,6 +13,11 @@ import {
   ProductListResponse,
 } from '../api/adminProduct';
 
+// API에서 내려주는 원시 아이템 타입 (retailPrice 포함)
+interface RawProductItem extends ProductItem {
+  retailPrice: number;
+}
+
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
   { label: '등록완료', path: '등록완료' },
@@ -51,8 +56,8 @@ const ProductList: React.FC = () => {
       try {
         const res: ProductListResponse = await getProducts(params);
 
-        // server 에서 받은 retailPrice 를 UI 에서는 price 로 사용하도록 매핑
-        const uiItems: ProductItem[] = res.items.map(
+        // res.items는 API Raw 타입(RawProductItem)으로 간주하고 retailPrice를 price로 매핑
+        const uiItems: ProductItem[] = (res.items as RawProductItem[]).map(
           ({ retailPrice, ...rest }) => ({
             ...rest,
             price: retailPrice,
