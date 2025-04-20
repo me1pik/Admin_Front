@@ -31,12 +31,10 @@ const categoryOptions = [
   { label: '미디원피스', value: 'MidiDress' },
   { label: '롱 원피스', value: 'LongDress' },
   { label: '투피스', value: 'TowDress' },
-
   { label: '점프수트', value: 'JumpSuit' },
   { label: '블라우스', value: 'Blouse' },
   { label: '니트 상의', value: 'KnitTop' },
   { label: '셔츠 상의', value: 'ShirtTop' },
-
   { label: '미니 스커트', value: 'MiniSkirt' },
   { label: '미디 스커트', value: 'MidiSkirt' },
   { label: '팬츠', value: 'Pants' },
@@ -72,7 +70,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   editable = false,
   onChange,
 }) => {
-  // 가격은 API에서 number로 내려오므로 Math.floor 처리
+  // API에서 내려온 숫자형 가격 내림 처리
   const retailValue = Math.floor(product.price);
   const saleValue =
     product.sale_price != null ? Math.floor(product.sale_price) : retailValue;
@@ -250,7 +248,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
 
         <Divider />
 
-        {/* 박스3: 리테일 / 판매 / 대여 */}
+        {/* 박스3: 리테일 / 판매 / 대여 (항상 disabled & 회색 처리) */}
         <Box>
           <IconWrapper>
             <Icon src={DetailBoxSvg3} />
@@ -258,51 +256,20 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
           <InfoCol>
             <Row>
               <Label>리테일</Label>
-              {editable ? (
-                <Input
-                  type='number'
-                  placeholder='입력하세요'
-                  value={retailValue.toString()}
-                  onChange={(e) =>
-                    onChange?.({ price: Number(e.target.value) })
-                  }
-                />
-              ) : (
-                <Value>{retailValue.toLocaleString()}</Value>
-              )}
+              <Input type='number' disabled value={retailValue.toString()} />
             </Row>
             <Row>
               <Label>판매</Label>
-              {editable ? (
-                <Input
-                  type='number'
-                  placeholder='입력하세요'
-                  value={saleValue.toString()}
-                  onChange={(e) =>
-                    onChange?.({ sale_price: Number(e.target.value) })
-                  }
-                />
-              ) : (
-                <Value>{saleValue.toLocaleString()}</Value>
-              )}
+              <Input type='number' disabled value={saleValue.toString()} />
             </Row>
             <Row>
               <Label>대여</Label>
-              {editable ? (
-                <Input
-                  type='number'
-                  step='1'
-                  placeholder='입력하세요'
-                  value={rentalValue.toString()}
-                  onChange={(e) =>
-                    onChange?.({ rental_price: Number(e.target.value) })
-                  }
-                />
-              ) : (
-                <Value>
-                  {rentalValue ? rentalValue.toLocaleString() : '-'}
-                </Value>
-              )}
+              <Input
+                type='number'
+                disabled
+                value={rentalValue > 0 ? rentalValue.toString() : ''}
+                placeholder='-'
+              />
             </Row>
           </InfoCol>
         </Box>
@@ -367,6 +334,11 @@ const Input = styled.input`
   border: 1px solid #ccc;
   border-radius: 4px;
   line-height: 28px;
+  &:disabled {
+    background: #f5f5f5;
+    color: #777;
+    cursor: not-allowed;
+  }
 `;
 const Select = styled.select`
   font-size: 12px;

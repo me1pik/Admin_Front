@@ -85,10 +85,12 @@ const ProductDetail: React.FC = () => {
   );
 
   const fetchDetail = async (id: number) => {
+    setLoading(true);
     try {
       const data = await getProductDetail(id);
       setProduct(data);
       setImages(data.product_img || []);
+      setError(null);
     } catch {
       setError('제품 상세 정보를 불러오는데 실패했습니다.');
     } finally {
@@ -97,12 +99,12 @@ const ProductDetail: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!productId) {
+    if (productId == null) {
       setError('유효한 제품 ID가 없습니다.');
       setLoading(false);
-      return;
+    } else {
+      fetchDetail(productId);
     }
-    fetchDetail(productId);
   }, [productId]);
 
   const handleBack = () => navigate(-1);
@@ -251,7 +253,7 @@ const ProductDetail: React.FC = () => {
 
 export default ProductDetail;
 
-/* Styled Components */
+// Styled Components 아래 생략하지 않고 그대로 유지
 const Container = styled.div`
   width: 100%;
   padding: 20px;
