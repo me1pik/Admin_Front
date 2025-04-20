@@ -1,3 +1,4 @@
+// src/pages/ProductDetail.tsx
 import React, {
   useEffect,
   useState,
@@ -24,9 +25,9 @@ import {
   SizeRow,
 } from '../api/adminProduct';
 
-// Helper to remove empty or null fields
+// 빈 필드 제거 헬퍼
 const cleanPayload = <T extends object>(obj: T): Partial<T> => {
-  const result = { ...obj } as Partial<T>;
+  const result = { ...(obj as any) } as Partial<T>;
   Object.entries(result).forEach(([key, value]) => {
     if (
       value == null ||
@@ -35,7 +36,7 @@ const cleanPayload = <T extends object>(obj: T): Partial<T> => {
         !Array.isArray(value) &&
         Object.keys(value).length === 0)
     ) {
-      delete result[key as keyof T];
+      delete (result as any)[key];
     }
   });
   return result;
@@ -54,13 +55,11 @@ const ProductDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // confirmation modal config
   const [confirmConfig, setConfirmConfig] = useState<{
     open: boolean;
     message: string;
     onConfirm?: () => Promise<void>;
   }>({ open: false, message: '' });
-  // result modal config
   const [resultConfig, setResultConfig] = useState<{
     open: boolean;
     message: string;
@@ -69,7 +68,6 @@ const ProductDetail: React.FC = () => {
   const openConfirm = (message: string, onConfirm?: () => Promise<void>) => {
     setConfirmConfig({ open: true, message, onConfirm });
   };
-
   const openResult = (message: string) => {
     setResultConfig({ open: true, message });
   };
@@ -86,7 +84,6 @@ const ProductDetail: React.FC = () => {
     [handleProductChange]
   );
 
-  // Fetch detail
   const fetchDetail = async (id: number) => {
     try {
       const data = await getProductDetail(id);
@@ -123,7 +120,6 @@ const ProductDetail: React.FC = () => {
         }
         const cleaned = cleanPayload(payload);
         const updated = await updateProduct(product.id, cleaned);
-        // 재로딩
         await fetchDetail(updated.id);
         setChanged({});
         openResult('수정 완료되었습니다.');
@@ -147,7 +143,6 @@ const ProductDetail: React.FC = () => {
       return next;
     });
   };
-
   const handleImageUpload = (idx: number, e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -256,6 +251,7 @@ const ProductDetail: React.FC = () => {
 
 export default ProductDetail;
 
+/* Styled Components */
 const Container = styled.div`
   width: 100%;
   padding: 20px;

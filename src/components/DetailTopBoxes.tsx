@@ -73,22 +73,13 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   editable = false,
   onChange,
 }) => {
-  // 리테일(원가)
-  const retailValue = product.price ?? 0;
-  // 할인율
-  const discountRateValue = product.discountRate ?? 0;
-  // 판매가: 명시된 sale_price가 있으면 그걸, 없으면 할인율 적용한 값을 사용
+  // 가격은 API에서 number로 내려오므로 Math.floor 처리
+  const retailValue = Math.floor(product.price);
   const saleValue =
-    product.sale_price != null
-      ? Math.floor(product.sale_price)
-      : Math.floor((retailValue * (100 - discountRateValue)) / 100);
-  // 대여가 문자열
-  const rentalStr =
-    product.rental_price != null
-      ? Math.floor(product.rental_price).toString()
-      : '';
+    product.sale_price != null ? Math.floor(product.sale_price) : retailValue;
+  const rentalValue =
+    product.rental_price != null ? Math.floor(product.rental_price) : 0;
 
-  // 사이즈 토글 (editable 모드)
   const handleToggleSize = (sz: string) => {
     if (!onChange) return;
     const exists = product.sizes?.some((item) =>
@@ -115,7 +106,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   return (
     <Container>
       <BoxWrapper>
-        {/* 박스1: 브랜드, 품번, 상태 */}
+        {/* 박스1: 브랜드 / 품번 / 상태 */}
         <Box>
           <IconWrapper>
             <Icon src={DetailBoxSvg1} />
@@ -177,7 +168,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
 
         <Divider />
 
-        {/* 박스2: 종류, 사이즈, 색상 */}
+        {/* 박스2: 종류 / 사이즈 / 색상 */}
         <Box>
           <IconWrapper>
             <Icon src={DetailBoxSvg2} />
@@ -260,7 +251,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
 
         <Divider />
 
-        {/* 박스3: 리테일, 할인율, 판매, 대여 */}
+        {/* 박스3: 리테일 / 판매 / 대여 */}
         <Box>
           <IconWrapper>
             <Icon src={DetailBoxSvg3} />
@@ -278,28 +269,13 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                   }
                 />
               ) : (
-                <Value>{retailValue.toLocaleString()}원</Value>
-              )}
-            </Row>
-            <Row>
-              <Label>할인율</Label>
-              {editable ? (
-                <Input
-                  type='number'
-                  placeholder='입력하세요'
-                  value={discountRateValue.toString()}
-                  onChange={(e) =>
-                    onChange?.({ discountRate: Number(e.target.value) })
-                  }
-                />
-              ) : (
-                <Value>{discountRateValue}%</Value>
+                <Value>{retailValue.toLocaleString()}</Value>
               )}
             </Row>
             <Row>
               <Label>판매</Label>
               {editable ? (
-                <SaleInput
+                <Input
                   type='number'
                   placeholder='입력하세요'
                   value={saleValue.toString()}
@@ -308,7 +284,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                   }
                 />
               ) : (
-                <Value>{saleValue.toLocaleString()}원</Value>
+                <Value>{saleValue.toLocaleString()}</Value>
               )}
             </Row>
             <Row>
@@ -316,17 +292,16 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               {editable ? (
                 <Input
                   type='number'
+                  step='1'
                   placeholder='입력하세요'
-                  value={rentalStr}
+                  value={rentalValue.toString()}
                   onChange={(e) =>
-                    onChange?.({
-                      rental_price: Math.floor(Number(e.target.value)),
-                    })
+                    onChange?.({ rental_price: Number(e.target.value) })
                   }
                 />
               ) : (
                 <Value>
-                  {rentalStr ? Number(rentalStr).toLocaleString() + '원' : '-'}
+                  {rentalValue ? rentalValue.toLocaleString() : '-'}
                 </Value>
               )}
             </Row>
@@ -413,11 +388,6 @@ const Select = styled.select`
     border-color: #888;
     box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
   }
-`;
-const SaleInput = styled(Input)`
-  background: ${(p) => (p.disabled ? '#f0f0f0' : '#fff')};
-  color: ${(p) => (p.disabled ? '#999' : '#000')};
-  cursor: ${(p) => (p.disabled ? 'default' : 'text')};
 `;
 const Divider = styled.div`
   width: 1px;

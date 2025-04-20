@@ -1,5 +1,4 @@
 // src/api/adminProduct.ts
-
 import { Axios } from './Axios';
 
 export interface SizeRow {
@@ -21,7 +20,7 @@ export interface ProductItem {
   category: string;
   color: string;
   size: string;
-  price: number; // retailPrice → price
+  price: number; // 리테일가
   registerDate: string;
   status: string;
 }
@@ -40,8 +39,7 @@ export interface ProductDetailResponse {
   brand: string;
   category: string;
   color: string;
-  price: number; // 리테일 가격
-  discountRate: number; // 할인율
+  price: number; // 리테일가
   sale_price?: number; // 판매가
   rental_price?: number; // 대여가
   registration: number;
@@ -67,7 +65,7 @@ export interface ProductDetailResponse {
   sizes: SizeRow[];
 }
 
-// PATCH 시 price/sale_price/rental_price 부분 업데이트 가능
+// PATCH 시 price / sale_price / rental_price 부분도 업데이트 가능
 export type UpdateProductRequest = Partial<
   Omit<ProductDetailResponse, 'price' | 'sale_price' | 'rental_price'>
 > & {
@@ -83,6 +81,7 @@ export type CreateProductRequest = Partial<
   >
 >;
 
+/** 제품 목록 조회 */
 export const getProducts = async (
   params?: ProductListParams
 ): Promise<ProductListResponse> => {
@@ -92,6 +91,7 @@ export const getProducts = async (
   return response.data;
 };
 
+/** 제품 상세 조회 */
 export const getProductDetail = async (
   id: number
 ): Promise<ProductDetailResponse> => {
@@ -99,6 +99,7 @@ export const getProductDetail = async (
   return response.data;
 };
 
+/** 제품 수정 */
 export const updateProduct = async (
   id: number,
   updateData: UpdateProductRequest
@@ -110,6 +111,7 @@ export const updateProduct = async (
   return response.data;
 };
 
+/** 신규 제품 등록 */
 export const createProduct = async (
   productData: CreateProductRequest
 ): Promise<ProductDetailResponse> => {
