@@ -1,4 +1,5 @@
 // src/components/Table/ProductTable.tsx
+
 import React from 'react';
 import styled, { css } from 'styled-components';
 
@@ -20,6 +21,8 @@ interface ProductTableProps {
   filteredData: ProductItem[];
   // handleEdit 함수가 styleCode와 no 두 개의 인자를 받도록 수정
   handleEdit: (styleCode: string, no: number) => void;
+  /** 페이지 시작 순번 (0-based) */
+  startNo?: number;
 }
 
 // 모든 셀에 공통으로 적용할 ellipsis 스타일
@@ -32,6 +35,7 @@ const ellipsis = css`
 const ProductTable: React.FC<ProductTableProps> = ({
   filteredData,
   handleEdit,
+  startNo = 0,
 }) => {
   // 상태별 배경색 반환 함수
   const getStatusColor = (status: string) => {
@@ -50,7 +54,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
   return (
     <Table>
       <colgroup>
-        <col style={{ width: '50px' }} /> {/* No. */}
+        <col style={{ width: '50px' }} /> {/* 순번 */}
         <col style={{ width: '150px' }} /> {/* 스타일(품번) */}
         <col style={{ width: '100px' }} /> {/* 브랜드 */}
         <col style={{ width: '80px' }} /> {/* 분류 */}
@@ -68,7 +72,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
           <Th>분류</Th>
           <Th>색상</Th>
           <Th>사이즈</Th>
-          <Th>가격</Th> {/* 헤더명도 '가격'으로 변경 */}
+          <Th>가격</Th>
           <Th>등록일</Th>
           <Th>상태</Th>
         </TableRow>
@@ -76,7 +80,8 @@ const ProductTable: React.FC<ProductTableProps> = ({
       <tbody>
         {filteredData.map((item, idx) => (
           <TableRow key={idx}>
-            <Td>{item.no}</Td>
+            {/* 전체 순번 = startNo + 현재 인덱스 + 1 */}
+            <Td>{startNo + idx + 1}</Td>
             <Td onClick={() => handleEdit(item.styleCode, item.no)}>
               <StyleCodeText title={item.styleCode}>
                 {item.styleCode}

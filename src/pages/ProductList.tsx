@@ -95,7 +95,11 @@ const ProductList: React.FC = () => {
       </InfoBar>
 
       <TableContainer>
-        <ProductTable filteredData={productData} handleEdit={handleEdit} />
+        <ProductTable
+          filteredData={productData}
+          handleEdit={handleEdit}
+          startNo={(page - 1) * limit}
+        />
       </TableContainer>
 
       <FooterRow>
