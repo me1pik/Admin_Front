@@ -1,7 +1,7 @@
 // src/pages/MonitoringList.tsx
 
 import React from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import MonitoringTable, {
   MonitoringItem,
@@ -109,7 +109,6 @@ const tabs: TabItem[] = [
 ];
 
 const MonitoringList: React.FC = () => {
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
 

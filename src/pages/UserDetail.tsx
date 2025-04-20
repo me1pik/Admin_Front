@@ -360,16 +360,22 @@ const dummyEvaluations: PersonalEvaluationRow[] = [
 const UserDetail: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  // URL 쿼리에서 page 읽기
+  // URL 쿼리에서 현재 페이지 읽기
   const page = parseInt(searchParams.get('page') ?? '1', 10);
   const pageSize = 10;
 
   const [activeTab, setActiveTab] = useState<number>(0);
 
-  // DetailSubHeader 버튼 핸들러
-  const handleBackClick = () => window.history.back();
-  const handleEditClick = () => alert('정보가 수정되었습니다!');
-  const handleEndClick = () => alert('종료 처리가 완료되었습니다!');
+  /** 서브헤더 버튼 핸들러 */
+  const handleBackClick = () => {
+    navigate(-1);
+  };
+  const handleEditClick = () => {
+    alert('정보가 수정되었습니다!');
+  };
+  const handleEndClick = () => {
+    alert('종료 처리가 완료되었습니다!');
+  };
 
   const detailSubHeaderProps: DetailSubHeaderProps = {
     backLabel: '목록이동',
@@ -380,7 +386,7 @@ const UserDetail: React.FC = () => {
     onEndClick: handleEndClick,
   };
 
-  // 탭 클릭 시 page=1로 URL 리셋
+  /** 탭 클릭 시 page=1으로 리셋 */
   const handleTabClick = (index: number) => {
     setActiveTab(index);
     const params = Object.fromEntries(searchParams.entries());
@@ -388,8 +394,8 @@ const UserDetail: React.FC = () => {
     setSearchParams(params);
   };
 
-  // 활성 탭별 데이터 선택
-  const getActiveData = (): any[] => {
+  /** 현재 탭에 맞는 전체 데이터 선택 */
+  const activeData = (() => {
     switch (activeTab) {
       case 0:
         return dummyShippingData;
@@ -404,26 +410,30 @@ const UserDetail: React.FC = () => {
       default:
         return [];
     }
-  };
+  })();
 
-  const activeData = getActiveData();
+  // 전체 페이지 수
   const totalPages = Math.max(1, Math.ceil(activeData.length / pageSize));
-  // 현재 페이지 데이터 슬라이스
+  // 현재 페이지에 해당하는 데이터 슬라이스
   const slicedData = activeData.slice((page - 1) * pageSize, page * pageSize);
 
-  // 테이블 렌더링
+  /** 테이블 렌더링 */
   const renderTable = () => {
     switch (activeTab) {
       case 0:
-        return <ShippingAddressTable data={slicedData} />;
+        return <ShippingAddressTable data={slicedData as ShippingRow[]} />;
       case 1:
-        return <UsageHistoryTable data={slicedData} />;
+        return <UsageHistoryTable data={slicedData as UsageHistoryRow[]} />;
       case 2:
-        return <PointHistoryTable data={slicedData} />;
+        return <PointHistoryTable data={slicedData as PointHistoryRow[]} />;
       case 3:
-        return <AdditionalListTable data={slicedData} />;
+        return <AdditionalListTable data={slicedData as AdditionalListRow[]} />;
       case 4:
-        return <PersonalEvaluationTable data={slicedData} />;
+        return (
+          <PersonalEvaluationTable
+            data={slicedData as PersonalEvaluationRow[]}
+          />
+        );
       default:
         return null;
     }
