@@ -27,20 +27,22 @@ const tabs: TabItem[] = [
 
 const ProductList: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get('search') ?? '';
+  const page = parseInt(searchParams.get('page') ?? '1', 10);
 
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
   const [productData, setProductData] = useState<ProductItem[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [page, setPage] = useState<number>(1);
   const limit = 10;
 
-  // 탭 변경 시 페이지 초기화
+  // 탭 변경 시 페이지를 1로 리셋
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
-    setPage(1);
+    const params = Object.fromEntries(searchParams.entries());
+    params.page = '1';
+    setSearchParams(params);
   };
 
   // 검색어, 탭, 페이지가 바뀔 때마다 API 호출
@@ -56,7 +58,7 @@ const ProductList: React.FC = () => {
       try {
         const res: ProductListResponse = await getProducts(params);
 
-        // res.items는 API Raw 타입(RawProductItem)으로 간주하고 retailPrice를 price로 매핑
+        // res.items는 RawProductItem이므로 retailPrice를 price로 매핑
         const uiItems: ProductItem[] = (res.items as RawProductItem[]).map(
           ({ retailPrice, ...rest }) => ({
             ...rest,
@@ -98,7 +100,7 @@ const ProductList: React.FC = () => {
 
       <FooterRow>
         <RegisterButton text='제품등록' onClick={handleRegister} />
-        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+        <Pagination totalPages={totalPages} />
       </FooterRow>
     </Content>
   );

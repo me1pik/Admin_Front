@@ -1,4 +1,3 @@
-// src/components/Table/PageTable.tsx
 import React from 'react';
 import styled from 'styled-components';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
@@ -19,19 +18,33 @@ export interface User {
 
 /** PageTable 컴포넌트 Props */
 interface PageTableProps {
-  filteredData: User[];
+  /** 전체 사용자 데이터 */
+  data: User[];
+  /** 편집 버튼 클릭 시 호출될 콜백 */
   handleEdit: (no: number) => void;
-  totalPages: number; // 총 페이지 수
+  /** 한 페이지당 항목 수 (기본값: 10) */
+  pageSize?: number;
 }
 
 const PageTable: React.FC<PageTableProps> = ({
-  filteredData,
+  data,
   handleEdit,
-  totalPages,
+  pageSize = 10,
 }) => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const currentPage = Number(searchParams.get('page') ?? 1);
+
+  // URL ?page= 에서 현재 페이지를 읽되, 없으면 1
+  const currentPage = Number(searchParams.get('page') ?? '1');
+
+  // 전체 페이지 수 계산
+  const totalPages = Math.max(1, Math.ceil(data.length / pageSize));
+
+  // 현재 페이지에 해당하는 데이터 슬라이스
+  const slicedData = data.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   return (
     <>
@@ -63,7 +76,7 @@ const PageTable: React.FC<PageTableProps> = ({
           </TableRow>
         </thead>
         <tbody>
-          {filteredData.map((user, idx) => (
+          {slicedData.map((user, idx) => (
             <TableRow key={idx}>
               <Td>{user.no}</Td>
               <Td>{user.grade}</Td>
@@ -85,8 +98,9 @@ const PageTable: React.FC<PageTableProps> = ({
             </TableRow>
           ))}
 
-          {filteredData.length < 10 &&
-            Array.from({ length: 10 - filteredData.length }).map((_, i) => (
+          {/* 빈 행 채우기 */}
+          {slicedData.length < pageSize &&
+            Array.from({ length: pageSize - slicedData.length }).map((_, i) => (
               <TableRow key={`empty-${i}`}>
                 <Td>&nbsp;</Td>
                 <Td>&nbsp;</Td>
@@ -103,6 +117,7 @@ const PageTable: React.FC<PageTableProps> = ({
         </tbody>
       </Table>
 
+      {/* 페이지 링크 */}
       <PaginationContainer>
         {Array.from({ length: totalPages }, (_, i) => {
           const page = i + 1;

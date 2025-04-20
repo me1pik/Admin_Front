@@ -82,21 +82,21 @@ const termsSelectOptions: TabItem[] = [
 
 const TermsList: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
 
+  // URL 쿼리에서 페이지 읽기
+  const page = parseInt(searchParams.get('page') ?? '1', 10);
+
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-  const [page, setPage] = useState(1);
-
   const limit = 10;
-  const TermsData = dummyTerms;
 
-  // 탭에 맞춰 1차 필터링
-  const dataByTab = TermsData.filter((item) =>
+  // 1차 탭 필터링
+  const dataByTab = dummyTerms.filter((item) =>
     selectedTab.label === '전체보기' ? true : item.type === selectedTab.label
   );
 
-  // URL 검색어로 2차 필터링
+  // 2차 검색어 필터링
   const filteredData = dataByTab.filter((item) =>
     [
       String(item.no),
@@ -107,15 +107,18 @@ const TermsList: React.FC = () => {
     ].some((field) => field.toLowerCase().includes(searchTerm))
   );
 
-  // 페이지네이션
+  // 페이지네이션 로직
   const totalCount = filteredData.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
+  // 탭 변경 시 page=1로 리셋
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
-    setPage(1);
+    const params = Object.fromEntries(searchParams.entries());
+    params.page = '1';
+    setSearchParams(params);
   };
 
   const handleEdit = (_: string, no: number) => {
@@ -135,11 +138,12 @@ const TermsList: React.FC = () => {
       </InfoBar>
 
       <TableContainer>
+        {/* TermsTable이 요구하는 prop 이름은 filteredData 입니다 */}
         <TermsTable filteredData={currentPageData} handleEdit={handleEdit} />
       </TableContainer>
 
       <FooterRow>
-        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+        <Pagination totalPages={totalPages} />
       </FooterRow>
     </Content>
   );
@@ -148,7 +152,6 @@ const TermsList: React.FC = () => {
 export default TermsList;
 
 /* ====================== Styled Components ====================== */
-
 const Content = styled.div`
   display: flex;
   flex-direction: column;

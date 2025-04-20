@@ -1,28 +1,28 @@
-// src/pages/UserDetail.tsx
+// src/pages/AdminDetail.tsx
+
 import React, { useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import ListButtonDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../components/Header/ListButtonDetailSubHeader';
 import AdminDetailTopBoxes from '../components/AdminDetailTopBoxes';
 import ShippingTabBar from '../components/TabBar';
-// 작업내역 테이블
 import TaskHistoryTable, {
   TaskHistoryRow,
 } from '../components/Table/admin/TaskHistoryTable';
-// 권한설정 테이블 (새로운 구조)
 import PermissionSettingsTable, {
   PermissionGroup,
 } from '../components/Table/admin/PermissionSettingsTable';
-
 import Pagination from '../components/Pagination';
 
+// 예시 제품 번호
 const dummyProducts = [{ no: 5 }];
 
 // 탭 목록
 const tabs = ['작업내역', '권한설정'];
 
-/** 작업내역 더미 데이터 (동일) */
+/** 작업내역 더미 데이터 */
 const dummyTaskData: TaskHistoryRow[] = [
   {
     workDate: '서비스 > 제품목록 관리',
@@ -30,21 +30,16 @@ const dummyTaskData: TaskHistoryRow[] = [
       '변경전 작업내용을 기여합니다. 관리자 내 상세 변경된 내용을 검토 및 반영',
     changedAt: '2025-03-02 00:00:00',
   },
-  // ...생략
+  // 필요에 따라 추가...
 ];
 
-/**
- * 권한설정 더미 데이터 (이미지 구조)
- * - 카테고리: 관리자, 회원, 서비스, 고객센터
- * - 각 카테고리에 대해 여러 권한(체크박스)
- */
+/** 권한설정 더미 데이터 */
 const dummyPermissionData: PermissionGroup[] = [
   {
     category: '관리자',
     permissions: [
       { label: '관리자 관리', checked: true },
       { label: '분석정보 목록', checked: false },
-      // 필요한 만큼 추가
     ],
   },
   {
@@ -79,20 +74,19 @@ const dummyPermissionData: PermissionGroup[] = [
 ];
 
 const AdminDetail: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<number>(0);
-  const [page, setPage] = useState(1);
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // URL 쿼리에서 현재 페이지 읽어오기
+  const page = parseInt(searchParams.get('page') ?? '1', 10);
   const pageSize = 10;
 
-  /** 버튼 핸들러들 */
-  const handleBackClick = () => {
-    window.history.back();
-  };
-  const handleEditClick = () => {
-    alert('정보가 수정되었습니다!');
-  };
-  const handleEndClick = () => {
-    alert('종료 처리가 완료되었습니다!');
-  };
+  const [activeTab, setActiveTab] = useState<number>(0);
+
+  /** 서브헤더 버튼 핸들러 */
+  const handleBackClick = () => window.history.back();
+  const handleEditClick = () => alert('정보가 수정되었습니다!');
+  const handleEndClick = () => alert('종료 처리가 완료되었습니다!');
 
   const detailSubHeaderProps: DetailSubHeaderProps = {
     backLabel: '목록이동',
@@ -103,42 +97,30 @@ const AdminDetail: React.FC = () => {
     onEndClick: handleEndClick,
   };
 
-  // 탭 클릭 시 페이지를 1로 초기화
+  /** 탭 클릭 시 activeTab 설정 + 페이지 1로 리셋 */
   const handleTabClick = (index: number) => {
     setActiveTab(index);
-    setPage(1);
+    const params = Object.fromEntries(searchParams.entries());
+    params.page = '1';
+    setSearchParams(params);
   };
 
-  // 현재 활성 탭에 해당하는 전체 데이터 반환
-  const getActiveData = (): any[] => {
-    switch (activeTab) {
-      case 0:
-        return dummyTaskData;
-      case 1:
-        return dummyPermissionData;
-      default:
-        return [];
-    }
-  };
-
-  const activeData = getActiveData();
+  /** 현재 탭에 따른 전체 데이터 */
+  const activeData = activeTab === 0 ? dummyTaskData : dummyPermissionData;
   const totalPages = Math.max(1, Math.ceil(activeData.length / pageSize));
 
-  // 현재 페이지에 해당하는 데이터 슬라이스 (작업내역과 달리, 권한설정은 굳이 페이지 필요없으면 생략 가능)
+  /** 페이지에 맞춰 데이터 슬라이스 */
   const sliceData = (data: any[]) =>
     data.slice((page - 1) * pageSize, page * pageSize);
 
+  /** 테이블 렌더링 */
   const renderTable = () => {
-    const slicedData = sliceData(activeData);
-    switch (activeTab) {
-      case 0:
-        return <TaskHistoryTable data={slicedData} />;
-      case 1:
-        // 권한설정
-        return <PermissionSettingsTable data={slicedData} />;
-      default:
-        return null;
-    }
+    const sliced = sliceData(activeData as any[]);
+    return activeTab === 0 ? (
+      <TaskHistoryTable data={sliced as TaskHistoryRow[]} />
+    ) : (
+      <PermissionSettingsTable data={sliced as PermissionGroup[]} />
+    );
   };
 
   return (
@@ -167,7 +149,7 @@ const AdminDetail: React.FC = () => {
       {renderTable()}
 
       <FooterRow>
-        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+        <Pagination totalPages={totalPages} />
       </FooterRow>
     </Container>
   );
@@ -227,6 +209,7 @@ const MiddleDivider = styled.hr`
   border-top: 1px dashed #dddddd;
   margin: 30px 0;
 `;
+
 const FooterRow = styled.div`
   display: flex;
   justify-content: space-between;

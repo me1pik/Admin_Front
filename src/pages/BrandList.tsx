@@ -1,4 +1,5 @@
 // src/pages/BrandList.tsx
+
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -108,25 +109,30 @@ const tabs: TabItem[] = [
 
 const BrandList: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
+
+  // URL 쿼리에서 현재 페이지 읽기
+  const page = parseInt(searchParams.get('page') ?? '1', 10);
+  const limit = 10;
 
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
   const [BrandData] = useState<BrandItem[]>(dummyBrands);
-  const [page, setPage] = useState(1);
-  const limit = 10;
 
+  // 탭 변경 시 URL의 page=1로 리셋
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
-    setPage(1);
+    const params = Object.fromEntries(searchParams.entries());
+    params.page = '1';
+    setSearchParams(params);
   };
 
-  // 탭별 1차 필터링
+  // 1차 탭별 필터링
   const dataByTab = BrandData.filter((item) =>
     selectedTab.label === '전체보기' ? true : item.status === selectedTab.label
   );
 
-  // URL 검색어로 2차 필터링
+  // 2차 검색어 필터링
   const filteredData = dataByTab.filter((item) => {
     const t = searchTerm;
     return (
@@ -142,7 +148,7 @@ const BrandList: React.FC = () => {
     );
   });
 
-  // 페이지네이션 계산
+  // 페이지네이션 계산 및 데이터 슬라이스
   const totalCount = filteredData.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
   const offset = (page - 1) * limit;
@@ -151,7 +157,6 @@ const BrandList: React.FC = () => {
   const handleEdit = (no: number) => {
     navigate(`/Branddetail/${no}`);
   };
-
   const handleRegisterClick = () => {
     navigate('/Brandregister');
   };
@@ -172,7 +177,7 @@ const BrandList: React.FC = () => {
 
       <FooterRow>
         <RegisterButton text='브랜드등록' onClick={handleRegisterClick} />
-        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+        <Pagination totalPages={totalPages} />
       </FooterRow>
     </Content>
   );
@@ -214,7 +219,6 @@ const TableContainer = styled.div`
   box-sizing: border-box;
 `;
 
-/* FooterRow: 버튼과 페이지네이션을 한 줄(row)로 정렬 */
 const FooterRow = styled.div`
   display: flex;
   justify-content: space-between;

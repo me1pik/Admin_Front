@@ -1,4 +1,5 @@
 // src/pages/DetailsSales.tsx
+
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -91,20 +92,30 @@ const dummyData: User[] = [
 
 const DetailsSales: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
+
+  // URL 쿼리에서 현재 페이지 읽기
+  const page = parseInt(searchParams.get('page') ?? '1', 10);
+  const limit = 10;
 
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
   const [data] = useState<User[]>(dummyData);
-  const [page, setPage] = useState(1);
-  const limit = 10;
 
-  // 탭 필터링
+  // 탭 변경: selectedTab 업데이트 + page=1으로 URL 리셋
+  const handleTabChange = (tab: TabItem) => {
+    setSelectedTab(tab);
+    const params = Object.fromEntries(searchParams.entries());
+    params.page = '1';
+    setSearchParams(params);
+  };
+
+  // 탭별 1차 필터링
   const dataByTab = data.filter((item) =>
     selectedTab.label === '전체보기' ? true : item.grade === selectedTab.path
   );
 
-  // URL 검색어 필터링
+  // URL 검색어로 2차 필터링
   const filteredData = dataByTab.filter((item) => {
     const t = searchTerm;
     return (
@@ -121,16 +132,11 @@ const DetailsSales: React.FC = () => {
     );
   });
 
-  // 페이지네이션
+  // 페이지네이션 계산
   const totalCount = filteredData.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
-
-  const handleTabChange = (tab: TabItem) => {
-    setSelectedTab(tab);
-    setPage(1);
-  };
 
   const handleEdit = (no: number) => {
     navigate(`/userdetail/${no}`);
@@ -154,7 +160,7 @@ const DetailsSales: React.FC = () => {
       </TableContainer>
 
       <FooterRow>
-        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+        <Pagination totalPages={totalPages} />
       </FooterRow>
     </Content>
   );

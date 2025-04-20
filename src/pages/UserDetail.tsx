@@ -1,5 +1,7 @@
 // src/pages/UserDetail.tsx
+
 import React, { useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import ListButtonDetailSubHeader, {
   DetailSubHeaderProps,
@@ -24,11 +26,7 @@ import PersonalEvaluationTable, {
 import Pagination from '../components/Pagination';
 
 // 예시 제품 번호
-const dummyProducts = [
-  {
-    no: 5,
-  },
-];
+const dummyProducts = [{ no: 5 }];
 
 // 탭 목록
 const shippingTabs = [
@@ -360,23 +358,18 @@ const dummyEvaluations: PersonalEvaluationRow[] = [
 ];
 
 const UserDetail: React.FC = () => {
-  // 현재 활성화된 탭 인덱스와 페이지 상태 관리
-  const [activeTab, setActiveTab] = useState<number>(0);
-  const [page, setPage] = useState(1);
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  // URL 쿼리에서 page 읽기
+  const page = parseInt(searchParams.get('page') ?? '1', 10);
   const pageSize = 10;
 
-  /** 버튼 핸들러들 */
-  const handleBackClick = () => {
-    window.history.back();
-  };
+  const [activeTab, setActiveTab] = useState<number>(0);
 
-  const handleEditClick = () => {
-    alert('정보가 수정되었습니다!');
-  };
-
-  const handleEndClick = () => {
-    alert('종료 처리가 완료되었습니다!');
-  };
+  // DetailSubHeader 버튼 핸들러
+  const handleBackClick = () => window.history.back();
+  const handleEditClick = () => alert('정보가 수정되었습니다!');
+  const handleEndClick = () => alert('종료 처리가 완료되었습니다!');
 
   const detailSubHeaderProps: DetailSubHeaderProps = {
     backLabel: '목록이동',
@@ -387,13 +380,15 @@ const UserDetail: React.FC = () => {
     onEndClick: handleEndClick,
   };
 
-  // 탭 클릭 시 페이지를 1로 초기화
+  // 탭 클릭 시 page=1로 URL 리셋
   const handleTabClick = (index: number) => {
     setActiveTab(index);
-    setPage(1);
+    const params = Object.fromEntries(searchParams.entries());
+    params.page = '1';
+    setSearchParams(params);
   };
 
-  // 현재 활성 탭에 해당하는 전체 데이터 반환
+  // 활성 탭별 데이터 선택
   const getActiveData = (): any[] => {
     switch (activeTab) {
       case 0:
@@ -401,7 +396,7 @@ const UserDetail: React.FC = () => {
       case 1:
         return dummyUsageHistory;
       case 2:
-        return dummyPointHistory; // ← 포인트 내역
+        return dummyPointHistory;
       case 3:
         return dummyAdditionalList;
       case 4:
@@ -413,13 +408,11 @@ const UserDetail: React.FC = () => {
 
   const activeData = getActiveData();
   const totalPages = Math.max(1, Math.ceil(activeData.length / pageSize));
+  // 현재 페이지 데이터 슬라이스
+  const slicedData = activeData.slice((page - 1) * pageSize, page * pageSize);
 
-  // 현재 페이지에 해당하는 데이터 슬라이스
-  const sliceData = (data: any[]) =>
-    data.slice((page - 1) * pageSize, page * pageSize);
-
+  // 테이블 렌더링
   const renderTable = () => {
-    const slicedData = sliceData(activeData);
     switch (activeTab) {
       case 0:
         return <ShippingAddressTable data={slicedData} />;
@@ -462,7 +455,7 @@ const UserDetail: React.FC = () => {
       {renderTable()}
 
       <FooterRow>
-        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+        <Pagination totalPages={totalPages} />
       </FooterRow>
     </Container>
   );
@@ -488,43 +481,35 @@ const HeaderRow = styled.div`
 `;
 
 const Title = styled.h1`
-  font-family: 'NanumSquare Neo OTF';
   font-weight: 700;
   font-size: 16px;
-  line-height: 18px;
-  color: #000000;
 `;
 
 const ProductNumberWrapper = styled.div`
   display: flex;
   align-items: baseline;
   gap: 5px;
-  margin: 10px 0;
-  margin-top: 34px;
+  margin: 10px 0 34px;
 `;
 
 const ProductNumberLabel = styled.div`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 12px;
-  color: #000000;
 `;
 
 const ProductNumberValue = styled.div`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
-  color: #000000;
 `;
 
 const MiddleDivider = styled.hr`
-  border: 0;
+  border: none;
   border-top: 1px dashed #dddddd;
   margin: 30px 0;
 `;
+
 const FooterRow = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: flex-end;
   margin-top: 40px;
 `;

@@ -1,4 +1,5 @@
 // src/pages/FAQList.tsx
+
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -84,20 +85,22 @@ const faqSelectOptions: TabItem[] = [
 
 const FAQList: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
+
+  // URL 쿼리에서 현재 페이지 읽기
+  const page = parseInt(searchParams.get('page') ?? '1', 10);
+  const limit = 10;
 
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
   const [FAQData] = useState<FAQItem[]>(dummyFAQ);
-  const [page, setPage] = useState(1);
-  const limit = 10;
 
   // 1차 탭 필터링
   const dataByTab = FAQData.filter((item) =>
     selectedTab.label === '전체보기' ? true : item.type === selectedTab.label
   );
 
-  // 2차 URL 검색어 필터링
+  // 2차 검색어 필터링
   const filteredData = dataByTab.filter((item) =>
     [
       String(item.no),
@@ -108,15 +111,18 @@ const FAQList: React.FC = () => {
     ].some((field) => field.toLowerCase().includes(searchTerm))
   );
 
-  // 페이지네이션
+  // 페이지네이션 계산
   const totalCount = filteredData.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
+  // 탭 변경 시 page=1으로 URL 리셋
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
-    setPage(1);
+    const params = Object.fromEntries(searchParams.entries());
+    params.page = '1';
+    setSearchParams(params);
   };
 
   const handleAuthorClick = (_: string, no: number) => {
@@ -143,7 +149,7 @@ const FAQList: React.FC = () => {
       </TableContainer>
 
       <FooterRow>
-        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+        <Pagination totalPages={totalPages} />
       </FooterRow>
     </Content>
   );

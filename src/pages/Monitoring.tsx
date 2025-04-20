@@ -1,6 +1,7 @@
 // src/pages/MonitoringList.tsx
-import React, { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+
+import React from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import MonitoringTable, {
   MonitoringItem,
@@ -108,19 +109,18 @@ const tabs: TabItem[] = [
 ];
 
 const MonitoringList: React.FC = () => {
-  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
 
-  // 현재 선택된 탭 상태
-  const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-  // 모니터링 데이터
-  const [monitoringData] = useState<MonitoringItem[]>(dummyMonitoring);
-  // 페이지 상태
-  const [page, setPage] = useState(1);
+  // URL 쿼리에서 현재 페이지 읽기
+  const page = parseInt(searchParams.get('page') ?? '1', 10);
   const limit = 10;
 
-  // 탭별 필터링
-  const dataByTab = monitoringData.filter((item) => {
+  const [selectedTab, setSelectedTab] = React.useState<TabItem>(tabs[0]);
+
+  // 탭별 1차 필터링
+  const dataByTab = dummyMonitoring.filter((item) => {
     if (selectedTab.label === '전체보기') return true;
     if (selectedTab.label === '진행내역') return item.shippingStatus !== '취소';
     if (selectedTab.label === '취소내역') return item.shippingStatus === '취소';
@@ -149,9 +149,12 @@ const MonitoringList: React.FC = () => {
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
+  // 탭 변경 시 page=1으로 URL 리셋
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
-    setPage(1);
+    const params = Object.fromEntries(searchParams.entries());
+    params.page = '1';
+    setSearchParams(params);
   };
 
   const handleEdit = (account: string) => {
@@ -176,7 +179,7 @@ const MonitoringList: React.FC = () => {
       </TableContainer>
 
       <FooterRow>
-        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+        <Pagination totalPages={totalPages} />
       </FooterRow>
     </Content>
   );
@@ -185,6 +188,7 @@ const MonitoringList: React.FC = () => {
 export default MonitoringList;
 
 /* ====================== Styled Components ====================== */
+
 const Content = styled.div`
   display: flex;
   flex-direction: column;

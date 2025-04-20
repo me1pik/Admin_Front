@@ -1,4 +1,5 @@
 // src/pages/AdminList.tsx
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -17,15 +18,18 @@ const tabs: TabItem[] = [
 
 const AdminList: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // URL 쿼리에서 검색어와 페이지를 읽어옴
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
+  const page = parseInt(searchParams.get('page') ?? '1', 10);
 
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
   const [adminData, setAdminData] = useState<Admin[]>([]);
   const [totalCount, setTotalCount] = useState(0);
-  const [page, setPage] = useState(1);
   const limit = 10;
 
+  // API에서 내려주는 raw Admin을 테이블용 타입으로 변환
   const mapAdminData = (admins: any[]): Admin[] =>
     admins.map((admin) => ({
       no: admin.no,
@@ -38,6 +42,15 @@ const AdminList: React.FC = () => {
       registeredAt: admin.signupDate || admin.createdAt,
     }));
 
+  // 탭 변경 시 selectedTab 업데이트 + 페이지를 1로 리셋
+  const handleTabChange = (tab: TabItem) => {
+    setSelectedTab(tab);
+    const params = Object.fromEntries(searchParams.entries());
+    params.page = '1';
+    setSearchParams(params);
+  };
+
+  // selectedTab 또는 page가 바뀔 때마다 서버 호출
   useEffect(() => {
     const fetchAdmins = async () => {
       try {
@@ -58,11 +71,7 @@ const AdminList: React.FC = () => {
     fetchAdmins();
   }, [selectedTab, page]);
 
-  const handleTabChange = (tab: TabItem) => {
-    setSelectedTab(tab);
-    setPage(1);
-  };
-
+  // 클라이언트 사이드 검색어 필터링
   const filteredData = adminData.filter((item) => {
     const t = searchTerm;
     return (
@@ -77,7 +86,8 @@ const AdminList: React.FC = () => {
     );
   });
 
-  // client-side pagination after filtering
+  // 최종 페이지 수와 현재 페이지 데이터 슬라이스
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / limit));
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
@@ -106,11 +116,7 @@ const AdminList: React.FC = () => {
 
       <FooterRow>
         <RegisterButton text='관리자등록' onClick={handleRegisterClick} />
-        <Pagination
-          page={page}
-          setPage={setPage}
-          totalPages={Math.ceil(totalCount / limit)}
-        />
+        <Pagination totalPages={totalPages} />
       </FooterRow>
     </Content>
   );

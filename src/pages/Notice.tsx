@@ -1,4 +1,5 @@
 // src/pages/NoticeList.tsx
+
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -82,13 +83,15 @@ const noticeSelectOptions: TabItem[] = [
 
 const NoticeList: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
+
+  // URL 쿼리에서 현재 페이지 읽기
+  const page = parseInt(searchParams.get('page') ?? '1', 10);
+  const limit = 10;
 
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
   const [noticeData] = useState<NoticeItem[]>(dummyNotice);
-  const [page, setPage] = useState(1);
-  const limit = 10;
 
   // 탭별 1차 필터링
   const dataByTab = noticeData.filter((item) =>
@@ -112,9 +115,12 @@ const NoticeList: React.FC = () => {
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
+  // 탭 변경 시 page=1으로 URL 리셋
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
-    setPage(1);
+    const params = Object.fromEntries(searchParams.entries());
+    params.page = '1';
+    setSearchParams(params);
   };
 
   const handleAuthorClick = (_: string, no: number) => {
@@ -141,7 +147,7 @@ const NoticeList: React.FC = () => {
       </TableContainer>
 
       <FooterRow>
-        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+        <Pagination totalPages={totalPages} />
       </FooterRow>
     </Content>
   );

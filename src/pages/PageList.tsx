@@ -1,4 +1,5 @@
 // src/pages/Pagelist.tsx
+
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -148,11 +149,12 @@ const Pagelist: React.FC = () => {
       </InfoBar>
 
       <TableContainer>
-        <PageTable filteredData={currentPageData} handleEdit={handleEdit} />
+        {/* 여기서 prop 이름을 data로 변경 */}
+        <PageTable data={currentPageData} handleEdit={handleEdit} />
       </TableContainer>
 
       <FooterRow>
-        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+        <Pagination totalPages={totalPages} />
       </FooterRow>
     </Content>
   );

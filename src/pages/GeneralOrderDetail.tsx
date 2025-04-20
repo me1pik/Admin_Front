@@ -1,4 +1,5 @@
 // src/pages/GeneralOrderDetail.tsx
+
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -108,49 +109,42 @@ const tabs: TabItem[] = [
 ];
 
 const GeneralOrderDetail: React.FC = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
 
-  const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-  const [GeneralOrderDetailData] = useState<GeneralOrderDetailItem[]>(
-    dummyGeneralOrderDetail
-  );
-
-  const [page, setPage] = useState(1);
+  // URL 쿼리에서 현재 페이지 읽기
+  const page = parseInt(searchParams.get('page') ?? '1', 10);
   const limit = 10;
 
-  // 탭 변경
+  const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
+  const [data] = useState<GeneralOrderDetailItem[]>(dummyGeneralOrderDetail);
+
+  // 탭 변경 시 page=1으로 URL 리셋
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
-    setPage(1);
+    const params = Object.fromEntries(searchParams.entries());
+    params.page = '1';
+    setSearchParams(params);
   };
 
-  // 탭 필터링
-  const dataByTab = GeneralOrderDetailData.filter((item) => {
+  // 탭별 필터링
+  const dataByTab = data.filter((item) => {
     if (selectedTab.label === '전체보기') return true;
     if (selectedTab.label === '진행내역') {
-      return !(
-        item.paymentStatus === '취소요청' ||
-        item.paymentStatus === '환불 진행중' ||
-        item.paymentStatus === '결제실패'
+      return !['취소요청', '환불 진행중', '결제실패'].includes(
+        item.paymentStatus
       );
     }
-    if (selectedTab.label === '취소내역') {
-      return (
-        item.paymentStatus === '취소요청' ||
-        item.paymentStatus === '환불 진행중' ||
-        item.paymentStatus === '결제실패'
-      );
-    }
-    return true;
+    // '취소내역'
+    return ['취소요청', '환불 진행중', '결제실패'].includes(item.paymentStatus);
   });
 
-  // URL 검색어로 필터링
+  // 검색어 필터링
   const filteredData = dataByTab.filter((item) => {
     const t = searchTerm;
     return (
       String(item.no).includes(t) ||
-      item.orderDate.toLowerCase().includes(t) ||
+      item.orderDate.includes(t) ||
       item.buyerAccount.toLowerCase().includes(t) ||
       item.brand.toLowerCase().includes(t) ||
       item.styleCode.toLowerCase().includes(t) ||
@@ -189,7 +183,7 @@ const GeneralOrderDetail: React.FC = () => {
       </TableContainer>
 
       <FooterRow>
-        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+        <Pagination totalPages={totalPages} />
       </FooterRow>
     </Content>
   );
@@ -213,14 +207,11 @@ const HeaderTitle = styled.h1`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 16px;
-  line-height: 18px;
-  color: #000000;
   margin-bottom: 18px;
 `;
 
 const InfoBar = styled.div`
   display: flex;
-  align-items: center;
   justify-content: space-between;
   margin-bottom: 15px;
 `;
@@ -229,7 +220,6 @@ const TotalCountText = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
-  color: #000000;
 `;
 
 const TableContainer = styled.div`

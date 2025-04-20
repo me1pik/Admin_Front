@@ -1,4 +1,5 @@
 // src/pages/UserList.tsx
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -15,20 +16,22 @@ const tabs: TabItem[] = [
 
 const UserList: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get('search')?.toLowerCase() ?? '';
+
+  // URL 쿼리에서 current page 읽기
+  const page = parseInt(searchParams.get('page') ?? '1', 10);
+  const limit = 10;
 
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
   const [userData, setUserData] = useState<User[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const limit = 10;
 
-  // totalPages 계산
+  // 총 페이지 수
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
 
-  // 유저 데이터 요청
+  // 서버 호출 함수
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -58,30 +61,33 @@ const UserList: React.FC = () => {
     }
   };
 
-  // 페이지나 탭이 바뀔 때마다 재요청
+  // 페이지나 탭 변경 시 데이터 재요청
   useEffect(() => {
     fetchUsers();
   }, [page, selectedTab]);
 
+  // 탭 변경 핸들러: selectedTab 업데이트 + page=1으로 URL 리셋
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
-    setPage(1);
+    const params = Object.fromEntries(searchParams.entries());
+    params.page = '1';
+    setSearchParams(params);
   };
 
-  // URL 검색어로 필터링
-  const filteredData = userData.filter((item) => {
-    return (
-      String(item.no).includes(searchTerm) ||
-      item.name.toLowerCase().includes(searchTerm) ||
-      item.nickname.toLowerCase().includes(searchTerm) ||
-      item.instagram.toLowerCase().includes(searchTerm) ||
-      item.followingFollower.toLowerCase().includes(searchTerm) ||
-      item.serviceArea.toLowerCase().includes(searchTerm) ||
-      item.status.toLowerCase().includes(searchTerm) ||
-      item.grade.toLowerCase().includes(searchTerm) ||
-      item.joinDate.toLowerCase().includes(searchTerm)
-    );
-  });
+  // 클라이언트 사이드 검색 필터
+  const filteredData = userData.filter((item) =>
+    [
+      String(item.no),
+      item.name,
+      item.nickname,
+      item.instagram,
+      item.followingFollower,
+      item.serviceArea,
+      item.status,
+      item.grade,
+      item.joinDate,
+    ].some((field) => field.toLowerCase().includes(searchTerm))
+  );
 
   const handleEdit = (no: number) => {
     navigate(`/userdetail/${no}`);
@@ -106,7 +112,7 @@ const UserList: React.FC = () => {
       </TableContainer>
 
       <FooterRow>
-        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+        <Pagination totalPages={totalPages} />
       </FooterRow>
     </Content>
   );
