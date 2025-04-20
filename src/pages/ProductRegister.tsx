@@ -31,11 +31,7 @@ const newEmptyProduct: ProductDetailResponse = {
   brand: '',
   category: '',
   color: '',
-  price: {
-    originalPrice: 0,
-    discountRate: 0,
-    finalPrice: 0,
-  },
+  price: 0,
   rental_price: undefined,
   registration: 0,
   registration_date: '',

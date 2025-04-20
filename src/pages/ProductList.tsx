@@ -1,4 +1,5 @@
 // src/pages/ProductList.tsx
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -49,7 +50,16 @@ const ProductList: React.FC = () => {
       };
       try {
         const res: ProductListResponse = await getProducts(params);
-        setProductData(res.items);
+
+        // server 에서 받은 retailPrice 를 UI 에서는 price 로 사용하도록 매핑
+        const uiItems: ProductItem[] = res.items.map(
+          ({ retailPrice, ...rest }) => ({
+            ...rest,
+            price: retailPrice,
+          })
+        );
+
+        setProductData(uiItems);
         setTotalCount(res.totalCount);
         setTotalPages(res.totalPages);
       } catch (err) {
@@ -59,7 +69,7 @@ const ProductList: React.FC = () => {
     fetchProducts();
   }, [selectedTab, searchTerm, page]);
 
-  const handleEdit = (_: string, no: number) => {
+  const handleEdit = (_styleCode: string, no: number) => {
     navigate(`/productdetail/${no}`);
   };
 

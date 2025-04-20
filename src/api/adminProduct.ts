@@ -1,3 +1,5 @@
+// src/api/adminProduct.ts
+
 import { Axios } from './Axios';
 
 export interface SizeRow {
@@ -19,7 +21,7 @@ export interface ProductItem {
   category: string;
   color: string;
   size: string;
-  retailPrice: number;
+  price: number; // retailPrice → price
   registerDate: string;
   status: string;
 }
@@ -38,13 +40,10 @@ export interface ProductDetailResponse {
   brand: string;
   category: string;
   color: string;
-  price: {
-    originalPrice: number;
-    discountRate: number;
-    finalPrice: number;
-  };
-  sale_price?: number;
-  rental_price?: number;
+  price: number; // 리테일 가격
+  discountRate: number; // 할인율
+  sale_price?: number; // 판매가
+  rental_price?: number; // 대여가
   registration: number;
   registration_date: string;
   product_url: string;
@@ -68,15 +67,20 @@ export interface ProductDetailResponse {
   sizes: SizeRow[];
 }
 
-// PATCH 시 price 필드를 부분 업데이트 가능하도록 타입 정의
+// PATCH 시 price/sale_price/rental_price 부분 업데이트 가능
 export type UpdateProductRequest = Partial<
-  Omit<ProductDetailResponse, 'price'>
+  Omit<ProductDetailResponse, 'price' | 'sale_price' | 'rental_price'>
 > & {
-  price?: Partial<ProductDetailResponse['price']>;
+  price?: number;
+  sale_price?: number;
+  rental_price?: number;
 };
 
 export type CreateProductRequest = Partial<
-  Pick<ProductDetailResponse, 'fabricComposition' | 'price'>
+  Pick<
+    ProductDetailResponse,
+    'fabricComposition' | 'price' | 'sale_price' | 'rental_price'
+  >
 >;
 
 export const getProducts = async (

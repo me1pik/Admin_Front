@@ -10,7 +10,7 @@ export interface ProductItem {
   category: string;
   color: string;
   size: string; // 사이즈
-  retailPrice: number;
+  price: number; // retailPrice → price 로 변경
   registerDate: string;
   status: string;
 }
@@ -56,7 +56,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
         <col style={{ width: '80px' }} /> {/* 분류 */}
         <col style={{ width: '80px' }} /> {/* 색상 */}
         <col style={{ width: '100px' }} /> {/* 사이즈 */}
-        <col style={{ width: '100px' }} /> {/* 리테일가 */}
+        <col style={{ width: '100px' }} /> {/* 가격 */}
         <col style={{ width: '100px' }} /> {/* 등록일 */}
         <col style={{ width: '80px' }} /> {/* 상태 */}
       </colgroup>
@@ -68,7 +68,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
           <Th>분류</Th>
           <Th>색상</Th>
           <Th>사이즈</Th>
-          <Th>리테일가</Th>
+          <Th>가격</Th> {/* 헤더명도 '가격'으로 변경 */}
           <Th>등록일</Th>
           <Th>상태</Th>
         </TableRow>
@@ -77,7 +77,6 @@ const ProductTable: React.FC<ProductTableProps> = ({
         {filteredData.map((item, idx) => (
           <TableRow key={idx}>
             <Td>{item.no}</Td>
-            {/* onClick 시 두 인자(styleCode, no)를 전달 */}
             <Td onClick={() => handleEdit(item.styleCode, item.no)}>
               <StyleCodeText title={item.styleCode}>
                 {item.styleCode}
@@ -87,8 +86,8 @@ const ProductTable: React.FC<ProductTableProps> = ({
             <Td title={item.category}>{item.category}</Td>
             <Td title={item.color}>{item.color}</Td>
             <Td title={item.size}>{item.size}</Td>
-            <Td title={`${item.retailPrice.toLocaleString()}원`}>
-              {item.retailPrice.toLocaleString()}원
+            <Td title={`${item.price.toLocaleString()}원`}>
+              {item.price.toLocaleString()}원
             </Td>
             <Td title={item.registerDate}>{item.registerDate}</Td>
             <Td>
