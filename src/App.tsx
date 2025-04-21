@@ -7,7 +7,7 @@ import Monitoring from './pages/Monitoring';
 import OrderList from './pages/OrderList';
 import Layout from './Layout';
 import ProductList from './pages/ProductList';
-import ProductRegister from './pages/ProductRegister';
+// import ProductRegister from './pages/ProductRegister';
 import ProductDetail from './pages/ProductDetail';
 import UserDetail from './pages/UserDetail';
 import AdminDetail from './pages/AdminDetail';
@@ -53,7 +53,7 @@ const App: React.FC = () => {
           <Route path='/orderlist' element={<OrderList />} />
           <Route path='/monitoring' element={<Monitoring />} />
           <Route path='/productlist' element={<ProductList />} />
-          <Route path='/productregister' element={<ProductRegister />} />
+          {/* <Route path='/productregister' element={<ProductRegister />} /> */}
           <Route path='/productdetail/:no' element={<ProductDetail />} />
           <Route path='/brandlist' element={<BrandList />} />
           <Route path='/generalorderdetail' element={<GeneralOrderDetail />} />

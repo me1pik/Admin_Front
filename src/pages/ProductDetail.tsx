@@ -1,4 +1,3 @@
-// src/pages/ProductDetail.tsx
 import React, {
   useEffect,
   useState,
@@ -25,10 +24,13 @@ import {
   SizeRow,
 } from '../api/adminProduct';
 
-// 빈 필드 제거 헬퍼
+// 빈 필드 제거 헬퍼: product_img 키는 항상 유지
 const cleanPayload = <T extends object>(obj: T): Partial<T> => {
   const result = { ...(obj as any) } as Partial<T>;
   Object.entries(result).forEach(([key, value]) => {
+    // product_img는 빈 배열이라도 삭제하지 않음
+    if (key === 'product_img') return;
+
     if (
       value == null ||
       (Array.isArray(value) && value.length === 0) ||
@@ -113,7 +115,12 @@ const ProductDetail: React.FC = () => {
     if (!product) return;
     openConfirm('변경 내용을 저장하시겠습니까?', async () => {
       try {
-        const payload: any = { ...changed };
+        // 변경된 필드 + 항상 현재 이미지 배열 포함
+        const payload: any = {
+          ...changed,
+          product_img: images,
+        };
+        // sizes 변환
         if (product.sizes) {
           payload.sizes = product.sizes.map((row) => ({
             size: row.size,
@@ -253,7 +260,7 @@ const ProductDetail: React.FC = () => {
 
 export default ProductDetail;
 
-// Styled Components 아래 생략하지 않고 그대로 유지
+// Styled Components
 const Container = styled.div`
   width: 100%;
   padding: 20px;

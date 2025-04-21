@@ -1,4 +1,3 @@
-// src/api/adminProduct.ts
 import { Axios } from './Axios';
 
 export interface SizeRow {
@@ -63,6 +62,9 @@ export interface ProductDetailResponse {
   touch: string;
   fit: string;
   sizes: SizeRow[];
+  // 명세에 따라 선택적 필드 추가
+  sizeTableJson?: Record<string, Record<string, number>>;
+  size_label_guide?: Record<string, string>;
 }
 
 // PATCH 시 price / sale_price / rental_price 부분도 업데이트 가능
@@ -72,14 +74,9 @@ export type UpdateProductRequest = Partial<
   price?: number;
   sale_price?: number;
   rental_price?: number;
+  sizeTableJson?: Record<string, Record<string, number>>;
+  size_label_guide?: Record<string, string>;
 };
-
-export type CreateProductRequest = Partial<
-  Pick<
-    ProductDetailResponse,
-    'fabricComposition' | 'price' | 'sale_price' | 'rental_price'
-  >
->;
 
 /** 제품 목록 조회 */
 export const getProducts = async (
@@ -113,7 +110,12 @@ export const updateProduct = async (
 
 /** 신규 제품 등록 */
 export const createProduct = async (
-  productData: CreateProductRequest
+  productData: Partial<
+    Pick<
+      ProductDetailResponse,
+      'fabricComposition' | 'price' | 'sale_price' | 'rental_price'
+    >
+  >
 ): Promise<ProductDetailResponse> => {
   const response = await Axios.post('/admin/products-management', productData);
   return response.data;
