@@ -1,3 +1,4 @@
+// src/pages/ProductDetail.tsx
 import React, {
   useEffect,
   useState,
@@ -28,9 +29,7 @@ import {
 const cleanPayload = <T extends object>(obj: T): Partial<T> => {
   const result = { ...(obj as any) } as Partial<T>;
   Object.entries(result).forEach(([key, value]) => {
-    // product_img는 빈 배열이라도 삭제하지 않음
     if (key === 'product_img') return;
-
     if (
       value == null ||
       (Array.isArray(value) && value.length === 0) ||
@@ -49,8 +48,9 @@ const ProductDetail: React.FC = () => {
   const productId = no ? Number(no) : null;
   const navigate = useNavigate();
 
+  // 항상 길이 10 배열로 초기화
+  const [images, setImages] = useState<string[]>(() => Array(10).fill(''));
   const [product, setProduct] = useState<ProductDetailResponse | null>(null);
-  const [images, setImages] = useState<string[]>([]);
   const [changed, setChanged] = useState<
     Partial<ProductDetailResponse & { sizes: SizeRow[] }>
   >({});
@@ -74,6 +74,7 @@ const ProductDetail: React.FC = () => {
     setResultConfig({ open: true, message });
   };
 
+  // product + changed state 동기화
   const handleProductChange = useCallback(
     (data: Partial<ProductDetailResponse & { sizes: SizeRow[] }>) => {
       setProduct((prev) => (prev ? { ...prev, ...data } : prev));
@@ -86,12 +87,71 @@ const ProductDetail: React.FC = () => {
     [handleProductChange]
   );
 
+  // 단일 이미지 업데이트(공통)
+  const updateImage = (idx: number, dataUrl: string | null) => {
+    setImages((prev) => {
+      const next = [...prev];
+      next[idx] = dataUrl || '';
+      handleProductChange({ product_img: next.filter((x) => x) });
+      return next;
+    });
+  };
+
+  // 드래그 앤 드롭 파일 업로드
+  const handleImageDrop = (idx: number, file: File) => {
+    const reader = new FileReader();
+    reader.onloadend = () => updateImage(idx, reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  // 인풋 변경 시 단일 업로드
+  const handleImageUpload = (idx: number, e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    handleImageDrop(idx, file);
+  };
+
+  // 슬롯 삭제
+  const handleImageDelete = (idx: number) => updateImage(idx, null);
+
+  // 순서 변경
+  const handleImageReorder = (from: number, to: number) => {
+    setImages((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      handleProductChange({ product_img: next.filter((x) => x) });
+      return next;
+    });
+  };
+
+  // **수정된** 다중 이미지 일괄 업로드
+  const handleMultipleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    // 현재 빈 슬롯 인덱스 모으기
+    const emptySlots = images
+      .map((img, idx) => (!img ? idx : null))
+      .filter((i) => i !== null) as number[];
+
+    files.forEach((file, i) => {
+      if (i >= emptySlots.length) return;
+      const slot = emptySlots[i];
+      handleImageDrop(slot, file);
+    });
+    e.target.value = '';
+  };
+
+  // 제품 상세 가져오기 + images 패딩
   const fetchDetail = async (id: number) => {
     setLoading(true);
     try {
       const data = await getProductDetail(id);
       setProduct(data);
-      setImages(data.product_img || []);
+
+      const initial = data.product_img || [];
+      const padded = [...initial, ...Array(10 - initial.length).fill('')];
+      setImages(padded);
+
       setError(null);
     } catch {
       setError('제품 상세 정보를 불러오는데 실패했습니다.');
@@ -109,18 +169,15 @@ const ProductDetail: React.FC = () => {
     }
   }, [productId]);
 
-  const handleBack = () => navigate(-1);
-
+  // 저장/삭제
   const handleSave = () => {
     if (!product) return;
     openConfirm('변경 내용을 저장하시겠습니까?', async () => {
       try {
-        // 변경된 필드 + 항상 현재 이미지 배열 포함
         const payload: any = {
           ...changed,
-          product_img: images,
+          product_img: images.filter((x) => x),
         };
-        // sizes 변환
         if (product.sizes) {
           payload.sizes = product.sizes.map((row) => ({
             size: row.size,
@@ -137,36 +194,9 @@ const ProductDetail: React.FC = () => {
       }
     });
   };
-
   const handleDelete = () => {
     openConfirm('정말 삭제하시겠습니까?', async () => {
       openResult('삭제에 실패했습니다.');
-    });
-  };
-
-  const updateImage = (idx: number, dataUrl: string | null) => {
-    setImages((prev) => {
-      const next = [...prev];
-      next[idx] = dataUrl || '';
-      handleProductChange({ product_img: next.filter((x) => x) });
-      return next;
-    });
-  };
-  const handleImageUpload = (idx: number, e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => updateImage(idx, reader.result as string);
-    reader.readAsDataURL(file);
-  };
-  const handleImageDelete = (idx: number) => updateImage(idx, null);
-  const handleImageReorder = (from: number, to: number) => {
-    setImages((prev) => {
-      const next = [...prev];
-      const [moved] = next.splice(from, 1);
-      next.splice(to, 0, moved);
-      handleProductChange({ product_img: next.filter((x) => x) });
-      return next;
     });
   };
 
@@ -180,7 +210,7 @@ const ProductDetail: React.FC = () => {
       </HeaderRow>
       <TripleButtonDetailSubHeader
         backLabel='목록이동'
-        onBackClick={handleBack}
+        onBackClick={() => navigate(-1)}
         saveLabel='변경저장'
         onSaveClick={handleSave}
         deleteLabel='삭제'
@@ -226,6 +256,8 @@ const ProductDetail: React.FC = () => {
               handleImageUpload={handleImageUpload}
               handleImageDelete={handleImageDelete}
               handleImageReorder={handleImageReorder}
+              handleMultipleImageUpload={handleMultipleImageUpload}
+              handleImageDrop={handleImageDrop}
               productUrl={product.product_url}
             />
             <BottomDivider />
@@ -260,7 +292,7 @@ const ProductDetail: React.FC = () => {
 
 export default ProductDetail;
 
-// Styled Components
+// --- Styled Components 생략 없이 그대로 유지 ---
 const Container = styled.div`
   width: 100%;
   padding: 20px;

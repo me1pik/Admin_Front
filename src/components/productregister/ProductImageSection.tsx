@@ -1,7 +1,7 @@
 // src/components/productregister/ProductImageSection.tsx
-import React from 'react';
+import React, { ChangeEvent, useRef } from 'react';
 import styled from 'styled-components';
-import { FaTimes, FaPlus } from 'react-icons/fa';
+import { FaTimes, FaPlus, FaUpload } from 'react-icons/fa';
 
 interface ProductImageSectionProps {
   images?: (string | null)[];
@@ -11,6 +11,8 @@ interface ProductImageSectionProps {
   ) => void;
   handleImageDelete: (index: number) => void;
   handleImageReorder: (dragIndex: number, hoverIndex: number) => void;
+  handleMultipleImageUpload: (e: ChangeEvent<HTMLInputElement>) => void;
+  handleImageDrop: (index: number, file: File) => void;
   productUrl: string;
 }
 
@@ -19,31 +21,44 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
   handleImageUpload,
   handleImageDelete,
   handleImageReorder,
+  handleMultipleImageUpload,
+  handleImageDrop,
   productUrl,
 }) => {
+  const batchInputRef = useRef<HTMLInputElement>(null);
+
   const imageLabels = new Array(10)
     .fill('')
     .map((_, index) => (index === 0 ? '썸네일 이미지' : `이미지 ${index}`));
 
+  // 드래그 시작 (reorder 용)
   const onDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
     e.dataTransfer.setData('text/plain', index.toString());
     e.dataTransfer.effectAllowed = 'move';
   };
 
+  // 슬롯 위 드래그 중엔 항상 허용
   const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   };
 
+  // 드롭: 파일이면 업로드, 아니면 reorder
   const onDrop = (e: React.DragEvent<HTMLDivElement>, hoverIndex: number) => {
     e.preventDefault();
-    const data = e.dataTransfer.getData('text/plain');
-    const dragIndex = parseInt(data, 10);
-    if (!isNaN(dragIndex) && dragIndex !== hoverIndex) {
-      handleImageReorder(dragIndex, hoverIndex);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      handleImageDrop(hoverIndex, file);
+    } else {
+      const data = e.dataTransfer.getData('text/plain');
+      const dragIndex = parseInt(data, 10);
+      if (!isNaN(dragIndex) && dragIndex !== hoverIndex) {
+        handleImageReorder(dragIndex, hoverIndex);
+      }
     }
   };
 
+  // 슬롯 내부 버튼 클릭 시 파일 선택창 열기
   const onSlotAddClick = (index: number) => {
     const fileInput = document.getElementById(
       `image-upload-${index}`
@@ -56,6 +71,20 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
       <SectionHeader>
         <Bullet />
         <SectionTitle>제품 이미지</SectionTitle>
+        <BatchButton
+          onClick={() => batchInputRef.current?.click()}
+          title='일괄 이미지 업로드'
+        >
+          <FaUpload size={18} />
+          <span>일괄 업로드</span>
+        </BatchButton>
+        <BatchFileInput
+          ref={batchInputRef}
+          type='file'
+          accept='image/*'
+          multiple
+          onChange={handleMultipleImageUpload}
+        />
       </SectionHeader>
       <VerticalLine />
       <ImageGrid>
@@ -72,10 +101,7 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
                 <>
                   {index === 0 ? (
                     <ThumbnailImageBox>
-                      <UploadedImage
-                        src={images[index] as string}
-                        alt='Uploaded'
-                      />
+                      <UploadedImage src={images[index]!} alt='Uploaded' />
                       <DeleteButton
                         onClick={(e) => {
                           e.stopPropagation();
@@ -83,15 +109,12 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
                         }}
                         title='이미지 삭제'
                       >
-                        <FaTimes size={16} color='#d32f2f' />
+                        <FaTimes size={16} />
                       </DeleteButton>
                     </ThumbnailImageBox>
                   ) : (
                     <ImageBox>
-                      <UploadedImage
-                        src={images[index] as string}
-                        alt='Uploaded'
-                      />
+                      <UploadedImage src={images[index]!} alt='Uploaded' />
                       <DeleteButton
                         onClick={(e) => {
                           e.stopPropagation();
@@ -99,7 +122,7 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
                         }}
                         title='이미지 삭제'
                       >
-                        <FaTimes size={16} color='#d32f2f' />
+                        <FaTimes size={16} />
                       </DeleteButton>
                     </ImageBox>
                   )}
@@ -113,7 +136,7 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
                         onClick={() => onSlotAddClick(index)}
                         title='이미지 추가'
                       >
-                        <FaPlus size={14} color='#0026fc' />
+                        <FaPlus size={14} />
                       </SlotAddButton>
                     </ThumbnailImageBox>
                   ) : (
@@ -123,7 +146,7 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
                         onClick={() => onSlotAddClick(index)}
                         title='이미지 추가'
                       >
-                        <FaPlus size={14} color='#0026fc' />
+                        <FaPlus size={14} />
                       </SlotAddButton>
                     </ImageBox>
                   )}
@@ -161,20 +184,36 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
 
 export default ProductImageSection;
 
-/* Styled Components */
+// --- Styled Components (생략 없이 동일) ---
+
 const SectionBox = styled.div`
   position: relative;
   margin-bottom: 20px;
   padding-left: 20px;
 `;
-
 const SectionHeader = styled.div`
   display: flex;
   align-items: center;
   position: relative;
   margin-bottom: 10px;
 `;
-
+const BatchButton = styled.button`
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  gap: 4px;
+  color: #1e88e5;
+  &:hover {
+    color: #1565c0;
+  }
+`;
+const BatchFileInput = styled.input`
+  display: none;
+`;
 const Bullet = styled.div`
   position: absolute;
   left: -27px;
@@ -195,7 +234,6 @@ const Bullet = styled.div`
     border-radius: 50%;
   }
 `;
-
 const SectionTitle = styled.div`
   font-family: 'NanumSquare Neo OTF';
   font-weight: 800;
@@ -203,7 +241,6 @@ const SectionTitle = styled.div`
   line-height: 15px;
   margin-left: 10px;
 `;
-
 const VerticalLine = styled.div`
   position: absolute;
   left: 0;
@@ -221,24 +258,20 @@ const VerticalLine = styled.div`
     background: #ddd;
   }
 `;
-
 const ImageGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 20px;
 `;
-
 const ImageColumn = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
 `;
-
 const DraggableWrapper = styled.div`
   position: relative;
   cursor: move;
 `;
-
 const IndexLabel = styled.div`
   position: absolute;
   top: 4px;
@@ -250,7 +283,6 @@ const IndexLabel = styled.div`
   z-index: 3;
   border-radius: 2px;
 `;
-
 const ImageBox = styled.div`
   width: 140px;
   height: 200px;
@@ -261,24 +293,20 @@ const ImageBox = styled.div`
   justify-content: center;
   position: relative;
 `;
-
 const ThumbnailImageBox = styled(ImageBox)`
   background-color: #e0f7fa;
   border: 2px solid #00acc1;
 `;
-
 const EmptyBox = styled.div`
   width: 100%;
   height: 100%;
   background-color: #f9f9f9;
 `;
-
 const UploadedImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
 `;
-
 const DeleteButton = styled.button`
   position: absolute;
   top: 4px;
@@ -300,7 +328,6 @@ const DeleteButton = styled.button`
     background-color: #fce4ec;
   }
 `;
-
 const SlotAddButton = styled.button`
   position: absolute;
   bottom: 4px;
@@ -324,45 +351,38 @@ const SlotAddButton = styled.button`
     background-color: #e3f2fd;
   }
 `;
-
 const HiddenFileInput = styled.input`
   display: none;
 `;
-
 const ImageLabel = styled.div`
   font-size: 12px;
   font-weight: 700;
   margin-top: 20px;
   text-align: center;
 `;
-
 const ProductUrlContainer = styled.div`
   margin-top: 20px;
   display: flex;
   flex-direction: column;
 `;
-
 const ProductUrlLabel = styled.label`
   font-size: 12px;
   font-weight: 700;
   margin-bottom: 8px;
   color: #000;
 `;
-
 const ProductUrlText = styled.div`
   font-size: 14px;
   color: #000;
   word-break: break-all;
   margin-top: 4px;
 `;
-
 const ProductUrlLink = styled.a`
   font-size: 14px;
   color: #1e88e5;
   text-decoration: underline;
   word-break: break-all;
   margin-top: 4px;
-
   &:hover {
     color: #1565c0;
   }
