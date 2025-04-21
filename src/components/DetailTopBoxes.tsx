@@ -7,22 +7,23 @@ import DetailBoxSvg3 from '../assets/DetailTopBoxesSvg3.svg';
 import { ProductDetailResponse, SizeRow } from '../api/adminProduct';
 
 const colorOptions = [
-  '화이트',
-  '블랙',
-  '그레이',
-  '네이비',
-  '아이보리',
-  '베이지',
-  '브라운',
-  '카키',
-  '그린',
-  '블루',
-  '퍼플',
-  '버건디',
-  '레드',
-  '핑크',
-  '옐로우',
-  '오렌지',
+  { label: '화이트', value: 'WHITE' },
+  { label: '블랙', value: 'BLACK' },
+  { label: '그레이', value: 'GRAY' },
+  { label: '네이비', value: 'NAVY' },
+  { label: '아이보리', value: 'IVORY' },
+  { label: '베이지', value: 'BEIGE' },
+  { label: '브라운', value: 'BROWN' },
+  { label: '카키', value: 'KHAKI' },
+  { label: '그린', value: 'GREEN' },
+  { label: '블루', value: 'BLUE' },
+  { label: '퍼플', value: 'PURPLE' },
+  { label: '버건디', value: 'BURGUNDY' },
+  { label: '레드', value: 'RED' },
+  { label: '핑크', value: 'PINK' },
+  { label: '옐로우', value: 'YELLOW' },
+  { label: '오렌지', value: 'ORANGE' },
+  { label: '마젠타', value: 'MAGENTA' },
 ];
 
 const categoryOptions = [
@@ -70,7 +71,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   editable = false,
   onChange,
 }) => {
-  // API에서 내려온 숫자형 가격 내림 처리
+  // 가격 내림
   const retailValue = Math.floor(product.price);
   const saleValue =
     product.sale_price != null ? Math.floor(product.sale_price) : retailValue;
@@ -189,11 +190,14 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                 </Select>
               ) : (
                 <Value>
-                  {categoryOptions.find((o) => o.value === product.category)
-                    ?.label || product.category}
+                  {
+                    categoryOptions.find((o) => o.value === product.category)
+                      ?.label
+                  }
                 </Value>
               )}
             </Row>
+
             <Row>
               <Label>사이즈</Label>
               <SizeRowWrapper>
@@ -223,6 +227,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                 )}
               </SizeRowWrapper>
             </Row>
+
             <Row>
               <Label>색상</Label>
               {editable ? (
@@ -233,14 +238,16 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                   <option value='' disabled hidden>
                     옵션을 선택하세요
                   </option>
-                  {colorOptions.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
+                  {colorOptions.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
                     </option>
                   ))}
                 </Select>
               ) : (
-                <Value>{product.color}</Value>
+                <Value>
+                  {colorOptions.find((o) => o.value === product.color)?.label}
+                </Value>
               )}
             </Row>
           </InfoCol>
@@ -248,7 +255,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
 
         <Divider />
 
-        {/* 박스3: 리테일 / 판매 / 대여 (항상 disabled & 회색 처리) */}
+        {/* 박스3: 리테일 / 판매 / 대여 */}
         <Box>
           <IconWrapper>
             <Icon src={DetailBoxSvg3} />
@@ -334,6 +341,7 @@ const Input = styled.input`
   border: 1px solid #ccc;
   border-radius: 4px;
   line-height: 28px;
+
   &:disabled {
     background: #f5f5f5;
     color: #777;
@@ -354,6 +362,7 @@ const Select = styled.select`
   background-repeat: no-repeat;
   background-position: right 8px center;
   background-size: 10px 6px;
+
   &:focus {
     outline: none;
     border-color: #888;
