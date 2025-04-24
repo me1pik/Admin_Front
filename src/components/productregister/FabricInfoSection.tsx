@@ -8,7 +8,7 @@ interface FabricInfoSectionProps {
   onChange?: (data: Partial<ProductDetailResponse>) => void;
 }
 
-// --- 상수 정의
+// 상수 정의
 const FABRIC_KEYS = ['겉감', '안감', '배색', '부속'] as const;
 const COLUMN_COUNT = 5;
 const MATERIAL_OPTIONS = [
@@ -34,6 +34,7 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
   product,
   onChange,
 }) => {
+  // 빈 슬롯 배열 생성
   const createEmptySlots = (): Record<string, SlotItem[]> =>
     FABRIC_KEYS.reduce(
       (acc, key) => {
@@ -49,6 +50,7 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
   const [slots, setSlots] =
     useState<Record<string, SlotItem[]>>(createEmptySlots);
 
+  // product.fabricComposition → slots 동기화
   useEffect(() => {
     const compMap = (product.fabricComposition || {}) as Record<string, string>;
     const newSlots = createEmptySlots();
@@ -68,17 +70,19 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
     setSlots(newSlots);
   }, [product.fabricComposition]);
 
+  // 변경 사항을 부모에 통보
   const notifyChange = (updated: Record<string, SlotItem[]>) => {
     const comp: Record<string, string> = {};
     FABRIC_KEYS.forEach((key) => {
-      const arr = updated[key]
+      const entries = updated[key]
         .filter((s) => s.material && s.percent)
         .map((s) => `${s.material} ${s.percent}`);
-      if (arr.length) comp[key] = arr.join(', ');
+      if (entries.length) comp[key] = entries.join(', ');
     });
     onChange?.({ fabricComposition: comp } as any);
   };
 
+  // 소재 선택: 그대로 해당 인덱스만 업데이트
   const handleMaterial = (key: string, idx: number, material: string) => {
     setSlots((prev) => {
       const updated = { ...prev };
@@ -89,6 +93,7 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
     });
   };
 
+  // 퍼센트 입력: 그대로 해당 인덱스만 업데이트 + 통보
   const handlePercent = (key: string, idx: number, raw: string) => {
     const num = parseInt(raw.replace(/\D/g, ''), 10);
     const percent = isNaN(num) ? '' : `${num}%`;
@@ -123,35 +128,41 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
           {FABRIC_KEYS.map((key) => (
             <tr key={key}>
               <td>{key}</td>
-              {slots[key].map((slot, idx) => (
-                <td key={idx}>
-                  <CellRow>
-                    <Select
-                      value={slot.material}
-                      onChange={(e) => handleMaterial(key, idx, e.target.value)}
-                    >
-                      <option value=''>선택</option>
-                      {MATERIAL_OPTIONS.map((m) => (
-                        <option key={m} value={m}>
-                          {m}
-                        </option>
-                      ))}
-                    </Select>
-
-                    <PercentWrapper>
-                      <NumberInput
-                        type='number'
-                        value={slot.percent.replace('%', '')}
-                        disabled={!slot.material}
+              {slots[key].map((slot, idx) => {
+                const empty = !slot.material && !slot.percent;
+                return (
+                  <CellTd key={idx} empty={empty}>
+                    <CellRow>
+                      <Select
+                        empty={empty}
+                        value={slot.material}
                         onChange={(e) =>
-                          handlePercent(key, idx, e.target.value)
+                          handleMaterial(key, idx, e.target.value)
                         }
-                      />
-                      <Suffix>%</Suffix>
-                    </PercentWrapper>
-                  </CellRow>
-                </td>
-              ))}
+                      >
+                        <option value=''>선택</option>
+                        {MATERIAL_OPTIONS.map((m) => (
+                          <option key={m} value={m}>
+                            {m}
+                          </option>
+                        ))}
+                      </Select>
+                      <PercentWrapper>
+                        <NumberInput
+                          empty={empty}
+                          type='number'
+                          value={slot.percent.replace('%', '')}
+                          disabled={!slot.material}
+                          onChange={(e) =>
+                            handlePercent(key, idx, e.target.value)
+                          }
+                        />
+                        <Suffix>%</Suffix>
+                      </PercentWrapper>
+                    </CellRow>
+                  </CellTd>
+                );
+              })}
             </tr>
           ))}
         </tbody>
@@ -162,7 +173,7 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
 
 export default FabricInfoSection;
 
-/* ========== Styled Components ========== */
+/* 스타일드 컴포넌트 */
 const Container = styled.div`
   position: relative;
   margin-bottom: 20px;
@@ -210,6 +221,7 @@ const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
+
   th,
   td {
     border: 1px solid #ddd;
@@ -237,29 +249,33 @@ const Table = styled.table`
     }
   }
 `;
+const CellTd = styled.td<{ empty: boolean }>`
+  background: ${({ empty }) => (empty ? '#f5f5f5' : '#fff')};
+`;
 const CellRow = styled.div`
   display: flex;
   gap: 4px;
   justify-content: center;
   align-items: center;
 `;
-const Select = styled.select`
+const Select = styled.select<{ empty: boolean }>`
   flex: 1;
   height: 30px;
   font-size: 12px;
   padding: 0 6px;
+  background: ${({ empty }) => (empty ? '#f5f5f5' : '#fff')};
 `;
 const PercentWrapper = styled.div`
   display: flex;
   align-items: center;
 `;
-const NumberInput = styled.input`
+const NumberInput = styled.input<{ empty: boolean }>`
   width: 50px;
   height: 30px;
   font-size: 12px;
   text-align: center;
   border: 1px solid #ddd;
-  background: #fff;
+  background: ${({ empty }) => (empty ? '#f5f5f5' : '#fff')};
 `;
 const Suffix = styled.span`
   margin-left: 2px;
