@@ -26,6 +26,8 @@ const MATERIAL_OPTIONS = [
   '천연모피(양)',
   '천연가죽(양)',
   '천연가죽(돼지)',
+  '메탈',
+  '금속성섬유',
 ] as const;
 
 type SlotItem = { material: string; percent: string };
