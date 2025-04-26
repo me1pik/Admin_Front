@@ -29,9 +29,10 @@ const MATERIAL_OPTIONS = [
   '천연모피(여우)',
   '메탈',
   '금속성섬유',
-  ' 거위솜털',
+  '거위솜털',
   '거위깃털',
-  ' 아세테이트',
+  '아세테이트',
+  '견',
 ] as const;
 
 type SlotItem = { material: string; percent: string };

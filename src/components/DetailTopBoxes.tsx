@@ -24,6 +24,7 @@ const colorOptions = [
   { label: '옐로우', value: 'YELLOW' },
   { label: '오렌지', value: 'ORANGE' },
   { label: '마젠타', value: 'MAGENTA' },
+  { label: '민트', value: 'MINT' },
 ];
 
 const categoryOptions = [
