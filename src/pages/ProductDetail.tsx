@@ -9,8 +9,8 @@ import MaterialInfoSection from '../components/productregister/MaterialInfoSecti
 import FabricInfoSection from '../components/productregister/FabricInfoSection';
 import ProductImageSection from '../components/productregister/ProductImageSection';
 import DetailTopBoxes from '../components/DetailTopBoxes';
-import ReusableModal from '../components/ReusableModal';
-import ReusableModal2 from '../components/ReusableModal2';
+import ReusableModal from '../components/TwoButtonModal';
+import ReusableModal2 from '../components/OneButtonModal';
 
 import {
   getProductDetail,

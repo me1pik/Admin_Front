@@ -4,7 +4,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import styled, { keyframes } from 'styled-components';
 import InputField from '../components/InputField';
-import ReusableModal from '../components/ReusableModal';
+import ReusableModal from '../components/TwoButtonModal';
 import { schemaLogin } from '../hooks/ValidationYup';
 import { adminLogin } from '../api/adminAuth';
 import Cookies from 'js-cookie';

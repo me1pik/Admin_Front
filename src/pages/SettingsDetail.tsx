@@ -10,7 +10,7 @@ import ShippingTabBar from '../components/TabBar';
 import SettingsDetailTable, {
   SettingsDetailRow,
 } from '../components/Table/Setting/SettingsDetailTable';
-import ReusableModal2 from '../components/ReusableModal2';
+import ReusableModal2 from '../components/OneButtonModal';
 import { TabItem } from '../components/Header/SearchSubHeader';
 
 const SettingsDetail: React.FC = () => {
