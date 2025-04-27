@@ -1,11 +1,5 @@
 // src/pages/ProductDetail.tsx
-import React, {
-  useEffect,
-  useState,
-  useCallback,
-  ChangeEvent,
-  FormEvent,
-} from 'react';
+import React, { useEffect, useState, useCallback, FormEvent } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
 import TripleButtonDetailSubHeader from '../components/Header/TripleButtonDetailSubHeader';
@@ -84,37 +78,26 @@ const ProductDetail: React.FC = () => {
     [handleProductChange]
   );
 
-  const updateImage = (idx: number, dataUrl: string | null) => {
+  // 이미지 업데이트 헬퍼
+  const updateImage = (idx: number, url: string | null) => {
     setImages((prev) => {
       const next = [...prev];
-      if (dataUrl) next[idx] = dataUrl;
+      if (url) next[idx] = url;
       else next.splice(idx, 1);
       handleProductChange({ product_img: next });
       return next;
     });
   };
 
-  const handleImageDrop = (file: File) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const dataUrl = reader.result as string;
-      setImages((prev) => {
-        const next = [...prev, dataUrl];
-        handleProductChange({ product_img: next });
-        return next;
-      });
-    };
-    reader.readAsDataURL(file);
+  // URL 삽입
+  const handleImageLinkUpload = (idx: number, url: string) => {
+    updateImage(idx, url);
   };
 
-  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleImageDrop(file);
-    e.target.value = '';
-  };
-
+  // 삭제
   const handleImageDelete = (idx: number) => updateImage(idx, null);
 
+  // 순서 변경
   const handleImageReorder = (from: number, to: number) => {
     setImages((prev) => {
       const next = [...prev];
@@ -123,16 +106,6 @@ const ProductDetail: React.FC = () => {
       handleProductChange({ product_img: next });
       return next;
     });
-  };
-
-  const handleMultipleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    Array.from(e.target.files || []).forEach((f) => handleImageDrop(f));
-    e.target.value = '';
-  };
-
-  // URL 삽입용
-  const handleImageLinkUpload = (idx: number, url: string) => {
-    updateImage(idx, url);
   };
 
   const fetchDetail = async (id: number) => {
@@ -162,10 +135,7 @@ const ProductDetail: React.FC = () => {
     if (!product) return;
     openConfirm('변경 내용을 저장하시겠습니까?', async () => {
       try {
-        const payload: any = {
-          ...changed,
-          product_img: images,
-        };
+        const payload: any = { ...changed, product_img: images };
         if (product.sizes) {
           payload.sizes = product.sizes.map((row) => ({
             size: row.size,
@@ -242,11 +212,9 @@ const ProductDetail: React.FC = () => {
             <MiddleDivider />
             <ProductImageSection
               images={images}
-              handleImageUpload={handleImageUpload}
+              handleImageLinkUpload={handleImageLinkUpload}
               handleImageDelete={handleImageDelete}
               handleImageReorder={handleImageReorder}
-              handleMultipleImageUpload={handleMultipleImageUpload}
-              handleImageLinkUpload={handleImageLinkUpload}
               productUrl={product.product_url}
             />
             <BottomDivider />
@@ -282,7 +250,7 @@ const ProductDetail: React.FC = () => {
 
 export default ProductDetail;
 
-// --- Styled Components (생략 없이 그대로 유지) ---
+/* Styled Components 생략 없이 유지 */
 
 const Container = styled.div`
   width: 100%;
