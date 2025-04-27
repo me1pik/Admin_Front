@@ -41,7 +41,6 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
   product,
   onChange,
 }) => {
-  // 빈 슬롯 배열 생성
   const createEmptySlots = (): Record<string, SlotItem[]> =>
     FABRIC_KEYS.reduce(
       (acc, key) => {
@@ -57,7 +56,6 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
   const [slots, setSlots] =
     useState<Record<string, SlotItem[]>>(createEmptySlots);
 
-  // product.fabricComposition → slots 동기화
   useEffect(() => {
     const compMap = (product.fabricComposition || {}) as Record<string, string>;
     const newSlots = createEmptySlots();
@@ -77,7 +75,6 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
     setSlots(newSlots);
   }, [product.fabricComposition]);
 
-  // 변경 사항을 부모에 통보
   const notifyChange = (updated: Record<string, SlotItem[]>) => {
     const comp: Record<string, string> = {};
     FABRIC_KEYS.forEach((key) => {
@@ -89,7 +86,6 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
     onChange?.({ fabricComposition: comp } as any);
   };
 
-  // 소재 선택: 그대로 해당 인덱스만 업데이트
   const handleMaterial = (key: string, idx: number, material: string) => {
     setSlots((prev) => {
       const updated = { ...prev };
@@ -100,7 +96,6 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
     });
   };
 
-  // 퍼센트 입력: 그대로 해당 인덱스만 업데이트 + 통보
   const handlePercent = (key: string, idx: number, raw: string) => {
     const num = parseInt(raw.replace(/\D/g, ''), 10);
     const percent = isNaN(num) ? '' : `${num}%`;
@@ -134,26 +129,26 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
         <tbody>
           {FABRIC_KEYS.map((key) => (
             <tr key={key}>
-              <td>{key}</td>
+              <td className='label'>{key}</td>
               {slots[key].map((slot, idx) => {
                 const empty = !slot.material && !slot.percent;
+                const listId = `options-${key}-${idx}`;
                 return (
                   <CellTd key={idx} empty={empty}>
                     <CellRow>
-                      <Select
+                      <MaterialInput
                         empty={empty}
+                        list={listId}
                         value={slot.material}
                         onChange={(e) =>
                           handleMaterial(key, idx, e.target.value)
                         }
-                      >
-                        <option value=''>선택</option>
+                      />
+                      <datalist id={listId}>
                         {MATERIAL_OPTIONS.map((m) => (
-                          <option key={m} value={m}>
-                            {m}
-                          </option>
+                          <option key={m} value={m} />
                         ))}
-                      </Select>
+                      </datalist>
                       <PercentWrapper>
                         <NumberInput
                           empty={empty}
@@ -184,16 +179,16 @@ export default FabricInfoSection;
 const Container = styled.div`
   position: relative;
   margin-bottom: 20px;
-  padding-left: 20px;
+  padding-left: 24px;
 `;
 const Header = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 `;
 const Bullet = styled.div`
   position: absolute;
-  left: -27px;
+  left: -28px;
   width: 14px;
   height: 14px;
   border: 1px solid #ddd;
@@ -211,80 +206,81 @@ const Bullet = styled.div`
   }
 `;
 const Title = styled.div`
-  font-family: 'NanumSquare Neo OTF';
-  font-weight: 800;
-  font-size: 14px;
-  margin-left: 10px;
+  font-weight: 700;
+  font-size: 15px;
+  margin-left: 12px;
 `;
 const Divider = styled.div`
   position: absolute;
   left: 0;
   top: 14px;
   bottom: 20px;
-  width: 1px;
+  width: 2px;
   background: #ddd;
 `;
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
+  margin-top: 12px;
 
   th,
   td {
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
     text-align: center;
-    font-family: 'NanumSquare Neo OTF';
-    font-weight: 900;
-    font-size: 12px;
-    padding: 4px;
-    min-width: 60px;
+    font-size: 13px;
+    padding: 8px;
+    min-width: 70px;
   }
   th {
-    background: #f9f9f9;
+    background: #f2f2f2;
+    font-weight: 600;
   }
-  td:first-child {
-    position: relative;
-    &:before {
-      content: '';
-      position: absolute;
-      left: -20px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 20px;
-      height: 1px;
-      background: #ddd;
-    }
+  td.label {
+    background: #fafafa;
+    font-weight: 600;
+    color: #333;
   }
 `;
 const CellTd = styled.td<{ empty: boolean }>`
-  background: ${({ empty }) => (empty ? '#f5f5f5' : '#fff')};
+  background: ${({ empty }) => (empty ? '#f9f9f9' : '#fff')};
 `;
 const CellRow = styled.div`
   display: flex;
-  gap: 4px;
+  gap: 6px;
   justify-content: center;
   align-items: center;
 `;
-const Select = styled.select<{ empty: boolean }>`
+const MaterialInput = styled.input<{ empty: boolean }>`
   flex: 1;
-  height: 30px;
-  font-size: 12px;
-  padding: 0 6px;
-  background: ${({ empty }) => (empty ? '#f5f5f5' : '#fff')};
+  height: 32px;
+  font-size: 13px;
+  padding: 0 8px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  background: #fff;
+  outline: ${({ empty }) => (empty ? 'none' : '2px solid #f6ae24')};
+  &:focus {
+    outline: 2px solid #f6ae24;
+  }
 `;
 const PercentWrapper = styled.div`
   display: flex;
   align-items: center;
 `;
 const NumberInput = styled.input<{ empty: boolean }>`
-  width: 50px;
-  height: 30px;
-  font-size: 12px;
+  width: 60px;
+  height: 32px;
+  font-size: 13px;
   text-align: center;
-  border: 1px solid #ddd;
-  background: ${({ empty }) => (empty ? '#f5f5f5' : '#fff')};
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  background: ${({ empty }) => (empty ? '#f9f9f9' : '#fff')};
+  &:focus {
+    outline: 2px solid #f6ae24;
+  }
 `;
 const Suffix = styled.span`
-  margin-left: 2px;
-  font-size: 12px;
+  margin-left: 4px;
+  font-size: 13px;
+  color: #666;
 `;

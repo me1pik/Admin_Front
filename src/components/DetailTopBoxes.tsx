@@ -73,7 +73,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   onChange,
 }) => {
   // 가격 내림
-  const retailValue = Math.floor(product.price);
+  const retailValue = Math.floor(product.retailPrice);
   const saleValue =
     product.sale_price != null ? Math.floor(product.sale_price) : retailValue;
   const rentalValue =

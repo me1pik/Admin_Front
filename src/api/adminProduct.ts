@@ -19,7 +19,7 @@ export interface ProductItem {
   category: string;
   color: string;
   size: string;
-  price: number; // 리테일가
+  retailPrice: number; // 리테일가
   registerDate: string;
   status: string;
 }
@@ -38,7 +38,7 @@ export interface ProductDetailResponse {
   brand: string;
   category: string;
   color: string;
-  price: number; // 리테일가
+  retailPrice: number; // 리테일가
   sale_price?: number; // 판매가
   rental_price?: number; // 대여가
   registration: number;
@@ -71,7 +71,7 @@ export interface ProductDetailResponse {
 export type UpdateProductRequest = Partial<
   Omit<ProductDetailResponse, 'price' | 'sale_price' | 'rental_price'>
 > & {
-  price?: number;
+  retailPrice?: number;
   sale_price?: number;
   rental_price?: number;
   sizeTableJson?: Record<string, Record<string, number>>;
@@ -113,7 +113,7 @@ export const createProduct = async (
   productData: Partial<
     Pick<
       ProductDetailResponse,
-      'fabricComposition' | 'price' | 'sale_price' | 'rental_price'
+      'fabricComposition' | 'retailPrice' | 'sale_price' | 'rental_price'
     >
   >
 ): Promise<ProductDetailResponse> => {
