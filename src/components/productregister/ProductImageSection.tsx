@@ -1,223 +1,197 @@
 // src/components/productregister/ProductImageSection.tsx
-import React, { ChangeEvent, useRef } from 'react';
+import React, { ChangeEvent } from 'react';
 import styled from 'styled-components';
-import { FaTimes, FaPlus, FaUpload } from 'react-icons/fa';
+import { FaTimes, FaPlus, FaUpload, FaLink } from 'react-icons/fa';
 
 interface ProductImageSectionProps {
-  images?: (string | null)[];
+  images: (string | null)[];
   handleImageUpload: (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
   ) => void;
   handleImageDelete: (index: number) => void;
-  handleImageReorder: (dragIndex: number, hoverIndex: number) => void;
+  handleImageReorder: (from: number, to: number) => void;
   handleMultipleImageUpload: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleImageDrop: (index: number, file: File) => void;
+  handleImageLinkUpload: (index: number, url: string) => void;
   productUrl: string;
 }
 
 const ProductImageSection: React.FC<ProductImageSectionProps> = ({
-  images = new Array(10).fill(null),
+  images,
   handleImageUpload,
   handleImageDelete,
   handleImageReorder,
   handleMultipleImageUpload,
-  handleImageDrop,
+  handleImageLinkUpload,
   productUrl,
 }) => {
-  const batchInputRef = useRef<HTMLInputElement>(null);
-
-  const imageLabels = new Array(10)
-    .fill('')
-    .map((_, index) => (index === 0 ? '썸네일 이미지' : `이미지 ${index}`));
-
-  // 드래그 시작 (reorder 용)
-  const onDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
-    e.dataTransfer.setData('text/plain', index.toString());
+  // 드래그 시작
+  const onDragStart = (e: React.DragEvent, idx: number) => {
+    e.dataTransfer.setData('text/plain', String(idx));
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  // 슬롯 위 드래그 중엔 항상 허용
-  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  // 드래그 오버
+  const onDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   };
 
-  // 드롭: 파일이면 업로드, 아니면 reorder
-  const onDrop = (e: React.DragEvent<HTMLDivElement>, hoverIndex: number) => {
+  // 드롭: 파일 업로드 or 순서 변경
+  const onDrop = (e: React.DragEvent, idx: number) => {
     e.preventDefault();
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      handleImageDrop(hoverIndex, file);
+    if (e.dataTransfer.files.length) {
+      // 파일 드롭 -> handleImageUpload 호출
+      handleImageUpload(idx, {
+        ...({} as ChangeEvent<HTMLInputElement>),
+        target: { files: e.dataTransfer.files },
+      } as any);
     } else {
-      const data = e.dataTransfer.getData('text/plain');
-      const dragIndex = parseInt(data, 10);
-      if (!isNaN(dragIndex) && dragIndex !== hoverIndex) {
-        handleImageReorder(dragIndex, hoverIndex);
+      const from = Number(e.dataTransfer.getData('text/plain'));
+      if (!isNaN(from) && from !== idx) {
+        handleImageReorder(from, idx);
       }
     }
   };
 
-  // 슬롯 내부 버튼 클릭 시 파일 선택창 열기
-  const onSlotAddClick = (index: number) => {
-    const fileInput = document.getElementById(
-      `image-upload-${index}`
-    ) as HTMLInputElement;
-    fileInput?.click();
+  // 개별 URL 삽입
+  const onLinkAdd = (idx: number) => {
+    const url = window.prompt(
+      '이미지 URL을 입력해주세요\n예: https://…jpg#addimg'
+    );
+    if (!url) return;
+    handleImageLinkUpload(idx, url.trim());
+  };
+
+  // 일괄 URL 삽입
+  const onBatchLinkAdd = () => {
+    const input = window.prompt(
+      '여러 이미지 URL을 붙여넣으세요.\n줄바꿈·쉼표·공백 구분'
+    );
+    if (!input) return;
+    const urls = Array.from(
+      input.matchAll(/(https?:\/\/\S+\.(?:jpe?g|png|gif)(?:\?\S*)?(?:#\S*)?)/gi)
+    ).map((m) => m[0].trim());
+    if (urls.length === 0) {
+      alert('유효한 이미지 URL이 없습니다.');
+      return;
+    }
+    urls.forEach((url) => {
+      // 빈 슬롯 찾기
+      const emptyIdx = images.findIndex((x) => !x);
+      handleImageLinkUpload(emptyIdx >= 0 ? emptyIdx : images.length, url);
+    });
   };
 
   return (
     <SectionBox>
-      <SectionHeader>
+      <Header>
         <Bullet />
-        <SectionTitle>제품 이미지</SectionTitle>
-        <BatchButton
-          onClick={() => batchInputRef.current?.click()}
-          title='일괄 이미지 업로드'
-        >
+        <Title>제품 이미지</Title>
+        <BatchButton onClick={onBatchLinkAdd} title='URL 이미지 삽입'>
           <FaUpload size={18} />
-          <span>일괄 업로드</span>
+          <span>URL 일괄 삽입</span>
         </BatchButton>
         <BatchFileInput
-          ref={batchInputRef}
           type='file'
           accept='image/*'
           multiple
           onChange={handleMultipleImageUpload}
         />
-      </SectionHeader>
-      <VerticalLine />
-      <ImageGrid>
-        {imageLabels.map((label, index) => (
-          <ImageColumn key={index}>
-            <DraggableWrapper
+      </Header>
+
+      <Divider />
+
+      <Grid>
+        {images.map((src, idx) => (
+          <Column key={idx}>
+            <DragWrapper
               draggable
-              onDragStart={(e) => onDragStart(e, index)}
+              onDragStart={(e) => onDragStart(e, idx)}
               onDragOver={onDragOver}
-              onDrop={(e) => onDrop(e, index)}
+              onDrop={(e) => onDrop(e, idx)}
             >
-              <IndexLabel>{index + 1}</IndexLabel>
-              {images[index] ? (
-                <>
-                  {index === 0 ? (
-                    <ThumbnailImageBox>
-                      <UploadedImage src={images[index]!} alt='Uploaded' />
-                      <DeleteButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleImageDelete(index);
-                        }}
-                        title='이미지 삭제'
-                      >
-                        <FaTimes size={16} />
-                      </DeleteButton>
-                    </ThumbnailImageBox>
-                  ) : (
-                    <ImageBox>
-                      <UploadedImage src={images[index]!} alt='Uploaded' />
-                      <DeleteButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleImageDelete(index);
-                        }}
-                        title='이미지 삭제'
-                      >
-                        <FaTimes size={16} />
-                      </DeleteButton>
-                    </ImageBox>
-                  )}
-                </>
+              <IdxLabel>{idx + 1}</IdxLabel>
+
+              {src ? (
+                <ImgBox>
+                  <Img src={src} alt={`이미지 ${idx + 1}`} />
+                  <DeleteBtn
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleImageDelete(idx);
+                    }}
+                    title='삭제'
+                  >
+                    <FaTimes size={16} />
+                  </DeleteBtn>
+                </ImgBox>
               ) : (
-                <>
-                  {index === 0 ? (
-                    <ThumbnailImageBox>
-                      <EmptyBox />
-                      <SlotAddButton
-                        onClick={() => onSlotAddClick(index)}
-                        title='이미지 추가'
-                      >
-                        <FaPlus size={14} />
-                      </SlotAddButton>
-                    </ThumbnailImageBox>
-                  ) : (
-                    <ImageBox>
-                      <EmptyBox />
-                      <SlotAddButton
-                        onClick={() => onSlotAddClick(index)}
-                        title='이미지 추가'
-                      >
-                        <FaPlus size={14} />
-                      </SlotAddButton>
-                    </ImageBox>
-                  )}
-                </>
+                <EmptyBox>
+                  <Controls>
+                    <AddBtn
+                      onClick={() =>
+                        document.getElementById(`file-${idx}`)!.click()
+                      }
+                      title='파일 업로드'
+                    >
+                      <FaPlus size={14} />
+                    </AddBtn>
+                    <LinkBtn onClick={() => onLinkAdd(idx)} title='URL 삽입'>
+                      <FaLink size={14} />
+                    </LinkBtn>
+                  </Controls>
+                </EmptyBox>
               )}
-              <HiddenFileInput
-                id={`image-upload-${index}`}
+
+              <HiddenInput
+                id={`file-${idx}`}
                 type='file'
                 accept='image/*'
-                onChange={(e) => handleImageUpload(index, e)}
+                onChange={(e) => handleImageUpload(idx, e)}
               />
-            </DraggableWrapper>
-            <ImageLabel>{label}</ImageLabel>
-          </ImageColumn>
+            </DragWrapper>
+            <Label>{idx === 0 ? 'mainImage' : `image${idx}`}</Label>
+          </Column>
         ))}
-      </ImageGrid>
+      </Grid>
 
-      <ProductUrlContainer>
-        <ProductUrlLabel>제품 URL</ProductUrlLabel>
+      <UrlContainer>
+        <UrlLabel>제품 URL</UrlLabel>
         {productUrl ? (
-          <ProductUrlLink
-            href={productUrl}
-            target='_blank'
-            rel='noopener noreferrer'
-          >
+          <UrlLink href={productUrl} target='_blank' rel='noopener noreferrer'>
             {productUrl}
-          </ProductUrlLink>
+          </UrlLink>
         ) : (
-          <ProductUrlText>등록된 URL이 없습니다.</ProductUrlText>
+          <UrlText>등록된 URL이 없습니다.</UrlText>
         )}
-      </ProductUrlContainer>
+      </UrlContainer>
     </SectionBox>
   );
 };
 
 export default ProductImageSection;
 
-// --- Styled Components (생략 없이 동일) ---
+/* styled-components (생략 없이) */
 
 const SectionBox = styled.div`
   position: relative;
   margin-bottom: 20px;
   padding-left: 20px;
 `;
-const SectionHeader = styled.div`
+const Header = styled.div`
   display: flex;
   align-items: center;
-  position: relative;
   margin-bottom: 10px;
 `;
-const BatchButton = styled.button`
-  display: flex;
-  align-items: center;
-  margin-left: auto;
-  background: none;
-  border: none;
-  cursor: pointer;
+const Title = styled.div`
+  font-weight: 800;
   font-size: 14px;
-  gap: 4px;
-  color: #1e88e5;
-  &:hover {
-    color: #1565c0;
-  }
-`;
-const BatchFileInput = styled.input`
-  display: none;
+  margin-left: 10px;
 `;
 const Bullet = styled.div`
   position: absolute;
   left: -27px;
-  top: 0;
   width: 14px;
   height: 14px;
   border: 1px solid #ddd;
@@ -234,89 +208,79 @@ const Bullet = styled.div`
     border-radius: 50%;
   }
 `;
-const SectionTitle = styled.div`
-  font-family: 'NanumSquare Neo OTF';
-  font-weight: 800;
+const BatchButton = styled.button`
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 14px;
-  line-height: 15px;
-  margin-left: 10px;
-`;
-const VerticalLine = styled.div`
-  position: absolute;
-  left: 0;
-  top: 14px;
-  bottom: 200px;
-  width: 1px;
-  background: #ddd;
-  &::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 20px;
-    height: 1px;
-    background: #ddd;
+  color: #1e88e5;
+  &:hover {
+    color: #1565c0;
   }
 `;
-const ImageGrid = styled.div`
+const BatchFileInput = styled.input`
+  display: none;
+`;
+const Divider = styled.div`
+  position: absolute;
+  left: 0;
+  top: 24px;
+  bottom: 0;
+  width: 1px;
+  background: #ddd;
+`;
+const Grid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 20px;
 `;
-const ImageColumn = styled.div`
+const Column = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
 `;
-const DraggableWrapper = styled.div`
+const DragWrapper = styled.div`
   position: relative;
   cursor: move;
 `;
-const IndexLabel = styled.div`
+const IdxLabel = styled.div`
   position: absolute;
   top: 4px;
   left: 4px;
-  background-color: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.6);
   color: #fff;
   padding: 2px 4px;
   font-size: 10px;
-  z-index: 3;
   border-radius: 2px;
 `;
-const ImageBox = styled.div`
+const ImgBox = styled.div`
   width: 140px;
   height: 200px;
   border: 1px solid #ddd;
-  background-color: #fff;
+  background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
 `;
-const ThumbnailImageBox = styled(ImageBox)`
-  background-color: #e0f7fa;
-  border: 2px solid #00acc1;
-`;
-const EmptyBox = styled.div`
-  width: 100%;
-  height: 100%;
-  background-color: #f9f9f9;
-`;
-const UploadedImage = styled.img`
+const Img = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
 `;
-const DeleteButton = styled.button`
+const DeleteBtn = styled.button`
   position: absolute;
   top: 4px;
   right: 4px;
   background: #fff;
   border: none;
   padding: 4px;
-  cursor: pointer;
   border-radius: 4px;
-  z-index: 4;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -328,18 +292,26 @@ const DeleteButton = styled.button`
     background-color: #fce4ec;
   }
 `;
-const SlotAddButton = styled.button`
+const EmptyBox = styled.div`
+  width: 140px;
+  height: 200px;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  position: relative;
+`;
+const Controls = styled.div`
   position: absolute;
   bottom: 4px;
   right: 4px;
+  display: flex;
+  gap: 4px;
+`;
+const AddBtn = styled.button`
   background: #fff;
   border: none;
   padding: 4px;
-  width: 28px;
-  height: 28px;
   border-radius: 50%;
   cursor: pointer;
-  z-index: 4;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -351,38 +323,36 @@ const SlotAddButton = styled.button`
     background-color: #e3f2fd;
   }
 `;
-const HiddenFileInput = styled.input`
+const LinkBtn = styled(AddBtn)``;
+const HiddenInput = styled.input`
   display: none;
 `;
-const ImageLabel = styled.div`
+const Label = styled.div`
+  margin-top: 20px;
   font-size: 12px;
   font-weight: 700;
-  margin-top: 20px;
   text-align: center;
 `;
-const ProductUrlContainer = styled.div`
+const UrlContainer = styled.div`
   margin-top: 20px;
   display: flex;
   flex-direction: column;
 `;
-const ProductUrlLabel = styled.label`
+const UrlLabel = styled.label`
   font-size: 12px;
   font-weight: 700;
   margin-bottom: 8px;
-  color: #000;
 `;
-const ProductUrlText = styled.div`
+const UrlText = styled.div`
   font-size: 14px;
-  color: #000;
   word-break: break-all;
-  margin-top: 4px;
+  color: #000;
 `;
-const ProductUrlLink = styled.a`
+const UrlLink = styled.a`
   font-size: 14px;
   color: #1e88e5;
   text-decoration: underline;
   word-break: break-all;
-  margin-top: 4px;
   &:hover {
     color: #1565c0;
   }

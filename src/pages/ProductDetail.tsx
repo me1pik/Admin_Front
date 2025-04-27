@@ -25,7 +25,6 @@ import {
   SizeRow,
 } from '../api/adminProduct';
 
-// 빈 필드 제거 헬퍼: product_img 키는 항상 유지
 const cleanPayload = <T extends object>(obj: T): Partial<T> => {
   const result = { ...(obj as any) } as Partial<T>;
   Object.entries(result).forEach(([key, value]) => {
@@ -48,8 +47,7 @@ const ProductDetail: React.FC = () => {
   const productId = no ? Number(no) : null;
   const navigate = useNavigate();
 
-  // 항상 길이 10 배열로 초기화
-  const [images, setImages] = useState<string[]>(() => Array(10).fill(''));
+  const [images, setImages] = useState<string[]>([]);
   const [product, setProduct] = useState<ProductDetailResponse | null>(null);
   const [changed, setChanged] = useState<
     Partial<ProductDetailResponse & { sizes: SizeRow[] }>
@@ -74,7 +72,6 @@ const ProductDetail: React.FC = () => {
     setResultConfig({ open: true, message });
   };
 
-  // product + changed state 동기화
   const handleProductChange = useCallback(
     (data: Partial<ProductDetailResponse & { sizes: SizeRow[] }>) => {
       setProduct((prev) => (prev ? { ...prev, ...data } : prev));
@@ -87,71 +84,63 @@ const ProductDetail: React.FC = () => {
     [handleProductChange]
   );
 
-  // 단일 이미지 업데이트(공통)
   const updateImage = (idx: number, dataUrl: string | null) => {
     setImages((prev) => {
       const next = [...prev];
-      next[idx] = dataUrl || '';
-      handleProductChange({ product_img: next.filter((x) => x) });
+      if (dataUrl) next[idx] = dataUrl;
+      else next.splice(idx, 1);
+      handleProductChange({ product_img: next });
       return next;
     });
   };
 
-  // 드래그 앤 드롭 파일 업로드
-  const handleImageDrop = (idx: number, file: File) => {
+  const handleImageDrop = (file: File) => {
     const reader = new FileReader();
-    reader.onloadend = () => updateImage(idx, reader.result as string);
+    reader.onloadend = () => {
+      const dataUrl = reader.result as string;
+      setImages((prev) => {
+        const next = [...prev, dataUrl];
+        handleProductChange({ product_img: next });
+        return next;
+      });
+    };
     reader.readAsDataURL(file);
   };
 
-  // 인풋 변경 시 단일 업로드
-  const handleImageUpload = (idx: number, e: ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    handleImageDrop(idx, file);
+    if (file) handleImageDrop(file);
+    e.target.value = '';
   };
 
-  // 슬롯 삭제
   const handleImageDelete = (idx: number) => updateImage(idx, null);
 
-  // 순서 변경
   const handleImageReorder = (from: number, to: number) => {
     setImages((prev) => {
       const next = [...prev];
       const [moved] = next.splice(from, 1);
       next.splice(to, 0, moved);
-      handleProductChange({ product_img: next.filter((x) => x) });
+      handleProductChange({ product_img: next });
       return next;
     });
   };
 
-  // **수정된** 다중 이미지 일괄 업로드
   const handleMultipleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    // 현재 빈 슬롯 인덱스 모으기
-    const emptySlots = images
-      .map((img, idx) => (!img ? idx : null))
-      .filter((i) => i !== null) as number[];
-
-    files.forEach((file, i) => {
-      if (i >= emptySlots.length) return;
-      const slot = emptySlots[i];
-      handleImageDrop(slot, file);
-    });
+    Array.from(e.target.files || []).forEach((f) => handleImageDrop(f));
     e.target.value = '';
   };
 
-  // 제품 상세 가져오기 + images 패딩
+  // URL 삽입용
+  const handleImageLinkUpload = (idx: number, url: string) => {
+    updateImage(idx, url);
+  };
+
   const fetchDetail = async (id: number) => {
     setLoading(true);
     try {
       const data = await getProductDetail(id);
       setProduct(data);
-
-      const initial = data.product_img || [];
-      const padded = [...initial, ...Array(10 - initial.length).fill('')];
-      setImages(padded);
-
+      setImages(data.product_img || []);
       setError(null);
     } catch {
       setError('제품 상세 정보를 불러오는데 실패했습니다.');
@@ -169,14 +158,13 @@ const ProductDetail: React.FC = () => {
     }
   }, [productId]);
 
-  // 저장/삭제
   const handleSave = () => {
     if (!product) return;
     openConfirm('변경 내용을 저장하시겠습니까?', async () => {
       try {
         const payload: any = {
           ...changed,
-          product_img: images.filter((x) => x),
+          product_img: images,
         };
         if (product.sizes) {
           payload.sizes = product.sizes.map((row) => ({
@@ -220,6 +208,7 @@ const ProductDetail: React.FC = () => {
         <ProductNumberLabel>번호</ProductNumberLabel>
         <ProductNumberValue>{product?.id}</ProductNumberValue>
       </ProductNumberWrapper>
+
       {product && (
         <>
           <DetailTopBoxes
@@ -257,13 +246,14 @@ const ProductDetail: React.FC = () => {
               handleImageDelete={handleImageDelete}
               handleImageReorder={handleImageReorder}
               handleMultipleImageUpload={handleMultipleImageUpload}
-              handleImageDrop={handleImageDrop}
+              handleImageLinkUpload={handleImageLinkUpload}
               productUrl={product.product_url}
             />
             <BottomDivider />
           </Form>
         </>
       )}
+
       <ReusableModal
         isOpen={confirmConfig.open}
         title='알림'
@@ -292,7 +282,8 @@ const ProductDetail: React.FC = () => {
 
 export default ProductDetail;
 
-// --- Styled Components 생략 없이 그대로 유지 ---
+// --- Styled Components (생략 없이 그대로 유지) ---
+
 const Container = styled.div`
   width: 100%;
   padding: 20px;
