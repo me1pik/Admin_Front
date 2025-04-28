@@ -19,7 +19,7 @@ interface RawProductItem extends ProductItem {
 }
 
 const tabs: TabItem[] = [
-  { label: '전체보기', path: '' },
+  { label: '전체보기', path: '전체보기' },
   { label: '등록완료', path: '등록완료' },
   { label: '등록대기', path: '등록대기' },
   { label: '판매종료', path: '판매종료' },
@@ -28,22 +28,26 @@ const tabs: TabItem[] = [
 const ProductList: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // URL에서 꺼내올 기본 값들
   const searchTerm = searchParams.get('search') ?? '';
   const page = parseInt(searchParams.get('page') ?? '1', 10);
+  const statusParam = searchParams.get('status') ?? tabs[0].path;
 
-  const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
+  // URL에 맞춰 탭을 초기화 및 동기화
+  const matchedTab = tabs.find((t) => t.path === statusParam) || tabs[0];
+  const [selectedTab, setSelectedTab] = useState<TabItem>(matchedTab);
+
+  // URL(status)가 바뀌면 selectedTab도 업데이트
+  useEffect(() => {
+    const updated = tabs.find((t) => t.path === statusParam);
+    if (updated) setSelectedTab(updated);
+  }, [statusParam]);
+
   const [productData, setProductData] = useState<ProductItem[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
   const limit = 10;
-
-  // 탭 변경 시 페이지를 1로 리셋
-  const handleTabChange = (tab: TabItem) => {
-    setSelectedTab(tab);
-    const params = Object.fromEntries(searchParams.entries());
-    params.page = '1';
-    setSearchParams(params);
-  };
 
   // 검색어, 탭, 페이지가 바뀔 때마다 API 호출
   useEffect(() => {
@@ -57,15 +61,12 @@ const ProductList: React.FC = () => {
       };
       try {
         const res: ProductListResponse = await getProducts(params);
-
-        // res.items는 RawProductItem이므로 retailPrice를 price로 매핑
         const uiItems: ProductItem[] = (res.items as RawProductItem[]).map(
           ({ retailPrice, ...rest }) => ({
             ...rest,
             price: retailPrice,
           })
         );
-
         setProductData(uiItems);
         setTotalCount(res.totalCount);
         setTotalPages(res.totalPages);
@@ -76,8 +77,25 @@ const ProductList: React.FC = () => {
     fetchProducts();
   }, [selectedTab, searchTerm, page]);
 
+  // 탭 클릭 시: page=1, status 변경
+  const handleTabChange = (tab: TabItem) => {
+    setSelectedTab(tab);
+    const params = Object.fromEntries(searchParams.entries());
+    params.status = tab.path;
+    params.page = '1';
+    setSearchParams(params);
+  };
+
+  // 페이지 변경 시: status, search 유지
+  const handlePageChange = (newPage: number) => {
+    const params = Object.fromEntries(searchParams.entries());
+    params.page = newPage.toString();
+    setSearchParams(params);
+  };
+
+  // 수정 페이지로 이동할 때도 쿼리 유지
   const handleEdit = (_styleCode: string, no: number) => {
-    navigate(`/productdetail/${no}`);
+    navigate(`/productdetail/${no}${window.location.search}`);
   };
 
   const handleRegister = () => {
@@ -104,7 +122,11 @@ const ProductList: React.FC = () => {
 
       <FooterRow>
         <RegisterButton text='제품등록' onClick={handleRegister} />
-        <Pagination totalPages={totalPages} />
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </FooterRow>
     </Content>
   );

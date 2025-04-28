@@ -7,7 +7,7 @@ import NewIcon from '../../assets/New.svg';
 
 export interface TabItem {
   label: string;
-  path: string;
+  path: string; // status에 들어갈 값
 }
 
 interface SubHeaderProps {
@@ -16,11 +16,18 @@ interface SubHeaderProps {
 }
 
 const SubHeader: React.FC<SubHeaderProps> = ({ tabs, onTabChange }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<string>(tabs[0].label);
   const [inputValue, setInputValue] = useState<string>('');
-  const [searchParams, setSearchParams] = useSearchParams();
 
-  // URL 쿼리(search)가 바뀔 때마다 inputValue 동기화
+  // 1) URL(status)에 따라 activeTab 초기 동기화
+  useEffect(() => {
+    const status = searchParams.get('status');
+    const matched = tabs.find((t) => t.path === status);
+    setActiveTab(matched ? matched.label : tabs[0].label);
+  }, [searchParams, tabs]);
+
+  // 2) URL(search)에 따라 inputValue 동기화
   useEffect(() => {
     setInputValue(searchParams.get('search') ?? '');
   }, [searchParams]);
@@ -28,23 +35,36 @@ const SubHeader: React.FC<SubHeaderProps> = ({ tabs, onTabChange }) => {
   const handleTabClick = (tab: TabItem) => {
     setActiveTab(tab.label);
     onTabChange?.(tab);
+
+    // 기존 검색어(search)는 유지하고, status만 갱신
+    const newParams: Record<string, string> = { status: tab.path };
+    const currentSearch = searchParams.get('search');
+    if (currentSearch) {
+      newParams.search = currentSearch;
+    }
+    setSearchParams(newParams);
   };
 
-  // 공통 검색 실행 함수
   const handleSearch = () => {
     const trimmed = inputValue.trim();
     if (trimmed) {
-      setSearchParams({ search: trimmed });
+      // status 유지, search만 갱신
+      const newParams: Record<string, string> = {};
+      const currentStatus = searchParams.get('status');
+      if (currentStatus) newParams.status = currentStatus;
+      newParams.search = trimmed;
+      setSearchParams(newParams);
     } else {
-      setSearchParams({});
+      // 빈 검색어면 search 제거하고 status만 남김
+      const newParams = searchParams.get('status')
+        ? { status: searchParams.get('status')! }
+        : {};
+      setSearchParams(newParams);
     }
   };
 
-  // Enter 키로만 URL 갱신
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
+    if (e.key === 'Enter') handleSearch();
   };
 
   return (
@@ -71,7 +91,7 @@ const SubHeader: React.FC<SubHeaderProps> = ({ tabs, onTabChange }) => {
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
         />
-        <SearchIcon onClick={handleSearch} /> {/* 아이콘 클릭 시 검색 */}
+        <SearchIcon onClick={handleSearch} />
       </SearchContainer>
     </HeaderContainer>
   );
@@ -162,5 +182,5 @@ const SearchIcon = styled(FiSearch)`
   right: 10px;
   font-size: 16px;
   color: #6c757d;
-  cursor: pointer; /* 클릭 가능한 커서 */
+  cursor: pointer;
 `;
