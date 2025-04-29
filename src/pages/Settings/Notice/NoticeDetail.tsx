@@ -48,13 +48,13 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
   const [content, setContent] = useState('');
   const [author, setAuthor] = useState('관리자');
 
-  // 모달 제어
+  // modal state
   const [activeTab, setActiveTab] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
   const [modalMessage, setModalMessage] = useState('');
 
-  // 상세조회: 수정 모드일 때만 호출
+  // load existing notice on edit
   useEffect(() => {
     if (!isCreate && numericNo) {
       getNotice(numericNo).then((data: ApiNotice) => {
@@ -66,7 +66,6 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
     }
   }, [isCreate, numericNo]);
 
-  // 뒤로가기 & 모달 열기
   const handleBack = () => navigate(-1);
   const handleSave = () => {
     setModalTitle(isCreate ? '등록 완료' : '변경 완료');
@@ -83,16 +82,12 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
     setIsModalOpen(true);
   };
 
-  // 모달 확인 버튼
   const handleConfirm = async () => {
     setIsModalOpen(false);
-
     try {
       if (modalTitle === '등록 완료') {
-        // 생성
         await createNotice({ title, type: category, content, author });
       } else if (modalTitle === '변경 완료' && numericNo) {
-        // 수정
         await updateNotice(numericNo, {
           title,
           type: category,
@@ -100,7 +95,6 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
           author,
         });
       } else if (modalTitle === '삭제 완료' && numericNo) {
-        // 삭제
         await deleteNotice(numericNo);
       }
     } catch (err) {
@@ -119,11 +113,7 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
     onEndClick: isCreate ? handleBack : handleDelete,
   };
 
-  const initialRow: SettingsDetailRow = {
-    title,
-    category,
-    content,
-  };
+  const initialRow: SettingsDetailRow = { title, category, content };
 
   return (
     <Container>
@@ -148,11 +138,12 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
         activeIndex={activeTab}
         onTabClick={setActiveTab}
       />
+
       {activeTab === 0 && (
         <SettingsDetailTable
           data={[initialRow]}
           selectOptions={options}
-          onChangeRow={(row) => {
+          onChange={(row: SettingsDetailRow) => {
             setTitle(row.title);
             setCategory(row.category);
             setContent(row.content);
@@ -174,7 +165,6 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
 
 export default NoticeDetail;
 
-/* Styled Components */
 const Container = styled.div`
   width: 100%;
   padding: 20px;

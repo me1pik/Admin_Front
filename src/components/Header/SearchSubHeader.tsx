@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FiSearch } from 'react-icons/fi';
 import { useSearchParams } from 'react-router-dom';
-import NewIcon from '../../assets/New.svg';
+// import NewIcon from '../../assets/New.svg';
 
 export interface TabItem {
   label: string;
@@ -75,7 +75,7 @@ const SubHeader: React.FC<SubHeaderProps> = ({ tabs, onTabChange }) => {
             onClick={() => handleTabClick(tab)}
           >
             {tab.label}
-            {activeTab === tab.label && <NewBadge src={NewIcon} alt='New' />}
+            {/* {activeTab === tab.label && <NewBadge src={NewIcon} alt='New' />} */}
           </TabButton>
         ))}
       </TabContainer>
@@ -148,14 +148,14 @@ const TabButton = styled.button<TabButtonProps>`
   }
 `;
 
-const NewBadge = styled.img`
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  width: 24px;
-  height: 24px;
-  z-index: 1;
-`;
+// const NewBadge = styled.img`
+//   position: absolute;
+//   top: -10px;
+//   right: -10px;
+//   width: 24px;
+//   height: 24px;
+//   z-index: 1;
+// `;
 
 const SearchContainer = styled.div`
   display: flex;
