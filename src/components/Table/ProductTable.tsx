@@ -1,7 +1,13 @@
-// src/components/Table/ProductTable.tsx
-
 import React from 'react';
 import styled, { css } from 'styled-components';
+
+/** 숫자 사이즈 라벨 매핑 */
+const SIZE_LABELS: Record<string, string> = {
+  '44': 'S',
+  '55': 'M',
+  '66': 'L',
+  '77': 'XL',
+};
 
 /** 제품 아이템 인터페이스 */
 export interface ProductItem {
@@ -51,6 +57,19 @@ const ProductTable: React.FC<ProductTableProps> = ({
     }
   };
 
+  // 사이즈 문자열을 배열로 분리해 매핑 후 다시 합치기
+  const formatSize = (raw: string) => {
+    // Free 처리
+    if (/free/i.test(raw)) return 'Free';
+    // 숫자 추출
+    const parts = raw.match(/\d+/g) || [];
+    const formatted = parts.map((num) => {
+      const label = SIZE_LABELS[num];
+      return label ? `${num}(${label})` : num;
+    });
+    return formatted.join(' / ');
+  };
+
   return (
     <Table>
       <colgroup>
@@ -80,7 +99,6 @@ const ProductTable: React.FC<ProductTableProps> = ({
       <tbody>
         {filteredData.map((item, idx) => (
           <TableRow key={idx}>
-            {/* 전체 순번 = startNo + 현재 인덱스 + 1 */}
             <Td>{startNo + idx + 1}</Td>
             <Td onClick={() => handleEdit(item.styleCode, item.no)}>
               <StyleCodeText title={item.styleCode}>
@@ -90,7 +108,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
             <Td title={item.brand}>{item.brand}</Td>
             <Td title={item.category}>{item.category}</Td>
             <Td title={item.color}>{item.color}</Td>
-            <Td title={item.size}>{item.size}</Td>
+            <Td title={item.size}>{formatSize(item.size)}</Td>
             <Td title={`${item.price.toLocaleString()}원`}>
               {item.price.toLocaleString()}원
             </Td>
@@ -127,7 +145,6 @@ const ProductTable: React.FC<ProductTableProps> = ({
 export default ProductTable;
 
 /* ====================== Styled Components ====================== */
-
 const Table = styled.table`
   width: 100%;
   table-layout: fixed;
