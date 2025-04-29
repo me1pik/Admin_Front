@@ -164,12 +164,12 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
               <SizeCheckbox
                 type='checkbox'
                 name='lining'
-                value='정체안감'
-                checked={selectedOptions.lining === '정체안감'}
+                value='전체안감'
+                checked={selectedOptions.lining === '전체안감'}
                 onChange={handleCheckboxChange}
                 disabled={!editable}
               />
-              정체안감
+              전체안감
             </SizeCheckboxLabel>
             <SizeCheckboxLabel style={{ minWidth: '100px' }}>
               <SizeCheckbox
