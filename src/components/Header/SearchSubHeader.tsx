@@ -1,3 +1,4 @@
+// src/components/Header/SearchSubHeader.tsx
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FiSearch } from 'react-icons/fi';
@@ -12,26 +13,12 @@ export interface TabItem {
 interface SubHeaderProps {
   tabs: TabItem[];
   onTabChange?: (tab: TabItem) => void;
-  /** 새 데이터가 있는 탭 라벨 리스트 */
-  newTabs?: string[];
 }
 
-const SubHeader: React.FC<SubHeaderProps> = ({
-  tabs,
-  onTabChange,
-  newTabs = [],
-}) => {
+const SubHeader: React.FC<SubHeaderProps> = ({ tabs, onTabChange }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<string>(tabs[0].label);
   const [inputValue, setInputValue] = useState<string>('');
-
-  // 새 데이터 표시 상태 (클릭 시 제거)
-  const [unreadTabs, setUnreadTabs] = useState<Set<string>>(new Set(newTabs));
-
-  // props.newTabs 변경 시 동기화
-  useEffect(() => {
-    setUnreadTabs(new Set(newTabs));
-  }, [newTabs]);
 
   // URL(status)에 따라 activeTab 초기 동기화
   useEffect(() => {
@@ -45,32 +32,30 @@ const SubHeader: React.FC<SubHeaderProps> = ({
     setInputValue(searchParams.get('search') ?? '');
   }, [searchParams]);
 
-  // 탭 클릭 시
+  // 탭 클릭 시 status만 갱신 (search는 유지)
   const handleTabClick = (tab: TabItem) => {
     setActiveTab(tab.label);
     onTabChange?.(tab);
 
-    // 클릭된 탭의 새 데이터 표시 제거
-    setUnreadTabs((prev) => {
-      const next = new Set(prev);
-      next.delete(tab.label);
-      return next;
-    });
-
-    // status만 변경
     const newParams: Record<string, string> = { status: tab.path };
     const currentSearch = searchParams.get('search');
-    if (currentSearch) newParams.search = currentSearch;
+    if (currentSearch) {
+      newParams.search = currentSearch;
+    }
     setSearchParams(newParams);
   };
 
-  // 검색 실행: status 유지, search 업데이트
+  // 검색 실행: status 유지, search는 trimmed 값으로
   const handleSearch = () => {
     const trimmed = inputValue.trim();
     const newParams: Record<string, string> = {};
     const currentStatus = searchParams.get('status');
-    if (currentStatus) newParams.status = currentStatus;
-    if (trimmed) newParams.search = trimmed;
+    if (currentStatus) {
+      newParams.status = currentStatus;
+    }
+    if (trimmed) {
+      newParams.search = trimmed;
+    }
     setSearchParams(newParams);
   };
 
@@ -90,7 +75,7 @@ const SubHeader: React.FC<SubHeaderProps> = ({
             onClick={() => handleTabClick(tab)}
           >
             {tab.label}
-            {unreadTabs.has(tab.label) && <NewBadge src={NewIcon} alt='New' />}
+            {activeTab === tab.label && <NewBadge src={NewIcon} alt='New' />}
           </TabButton>
         ))}
       </TabContainer>
@@ -110,6 +95,7 @@ const SubHeader: React.FC<SubHeaderProps> = ({
 
 export default SubHeader;
 
+/* ====================== Styled Components ====================== */
 const HeaderContainer = styled.div`
   display: flex;
   align-items: center;
@@ -149,12 +135,14 @@ const TabButton = styled.button<TabButtonProps>`
   line-height: 13px;
   text-align: center;
   cursor: pointer;
+
   ${({ isFirst, isLast }) =>
     isFirst
       ? 'border-top-left-radius: 8px; border-bottom-left-radius: 8px;'
       : isLast
         ? 'border-top-right-radius: 8px; border-bottom-right-radius: 8px;'
         : ''}
+
   &:last-child {
     border-right: none;
   }
