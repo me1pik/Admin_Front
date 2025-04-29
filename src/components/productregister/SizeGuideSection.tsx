@@ -1,4 +1,3 @@
-// src/components/productregister/SizeGuideSection.tsx
 import React, { useState, useEffect, ChangeEvent, useCallback } from 'react';
 import styled from 'styled-components';
 import { FaTimes, FaPlus } from 'react-icons/fa';
@@ -12,6 +11,14 @@ export interface SizeGuideSectionProps {
   onSizesChange?: (sizes: SizeRow[]) => void;
 }
 
+// 44->S, 55->M, 66->L, 77->XL 매핑
+const SIZE_LABELS: Record<string, string> = {
+  '44': 'S',
+  '55': 'M',
+  '66': 'L',
+  '77': 'XL',
+};
+
 const defaultSizes = ['44', '55', '66', '77', 'Free'];
 
 const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
@@ -23,15 +30,21 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   ]);
   const [rows, setRows] = useState<RowData[]>([]);
 
+  // 사이즈 문자열에 라벨을 붙여 포맷
+  const formatSizeValue = (raw: string) => {
+    if (/free/i.test(raw)) return 'Free';
+    const num = raw.replace(/[^0-9]/g, '');
+    const label = SIZE_LABELS[num];
+    return label ? `${num}(${label})` : num;
+  };
+
   // 1) sizes 전체에서 모든 measurement 키를 모아 헤더 구성 (라벨 알파벳 순 정렬)
   useEffect(() => {
     if (sizes && sizes.length > 0) {
       const allKeys = Array.from(
         new Set(sizes.flatMap((item) => Object.keys(item.measurements)))
       );
-      // 측정값 컬럼 생성
       const measureCols: Column[] = allKeys.map((k) => ({ key: k, label: k }));
-      // 라벨 기준 정렬
       measureCols.sort((a, b) => a.label.localeCompare(b.label));
       setColumns([{ key: 'size', label: '사이즈' }, ...measureCols]);
     } else {
@@ -47,9 +60,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
           const row: RowData = {};
           columns.forEach((col) => {
             if (col.key === 'size') {
-              row.size = /free/i.test(item.size)
-                ? 'Free'
-                : item.size.replace(/[^0-9]/g, '');
+              row.size = formatSizeValue(item.size);
             } else {
               const v = item.measurements[col.key] ?? 0;
               row[col.key] = v === 0 ? '' : String(v);
@@ -58,15 +69,18 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
           return row;
         })
         .sort((a, b) => {
-          const na = a.size === 'Free' ? Infinity : Number(a.size);
-          const nb = b.size === 'Free' ? Infinity : Number(b.size);
+          const na =
+            a.size === 'Free' ? Infinity : Number(a.size.replace(/\D/g, ''));
+          const nb =
+            b.size === 'Free' ? Infinity : Number(b.size.replace(/\D/g, ''));
           return na - nb;
         });
     } else {
       return defaultSizes.map((sz) => {
         const row: RowData = {};
         columns.forEach((col) => {
-          row[col.key] = col.key === 'size' ? sz : '';
+          if (col.key === 'size') row.size = formatSizeValue(sz);
+          else row[col.key] = '';
         });
         return row;
       });
@@ -86,7 +100,12 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
           measurements[col.key] = r[col.key] !== '' ? Number(r[col.key]) : 0;
         }
       });
-      return { size: r.size, measurements };
+      // size column에서 숫자만 추출하여 SizeRow 타입에 맞춤
+      const rawSize = r.size;
+      const sizeOnly = /free/i.test(rawSize)
+        ? 'Free'
+        : rawSize.replace(/\D/g, '');
+      return { size: sizeOnly, measurements };
     });
     onSizesChange?.(out);
   };
@@ -97,8 +116,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     key: string,
     e: ChangeEvent<HTMLInputElement>
   ) => {
-    const val =
-      key === 'size' ? e.target.value.replace(/[^0-9]/g, '') : e.target.value;
+    const val = key === 'size' ? e.target.value : e.target.value;
     const next = rows.map((r, i) =>
       i === rowIndex ? { ...r, [key]: val } : r
     );
@@ -106,7 +124,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     emitChange(next);
   };
 
-  // (옵션) 컬럼 추가/삭제/레이블 변경 (사용자 커스텀 컬럼도 정렬 대상에 포함하려면, 여기에 정렬 로직 추가)
+  // (옵션) 컬럼 추가/삭제/레이블 변경
   const handleAddColumn = () => {
     const newKey = `col_${Date.now()}`;
     setColumns((c) => [...c, { key: newKey, label: '열 이름' }]);
