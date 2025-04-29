@@ -1,5 +1,4 @@
-// src/pages/Settings/Notice/NoticeDetail.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import SettingsDetailSubHeader, {
@@ -12,6 +11,13 @@ import SettingsDetailTable, {
 } from '../../../components/Table/Setting/SettingsDetailTable';
 import ReusableModal2 from '../../../components/OneButtonModal';
 import { TabItem } from '../../../components/Header/SearchSubHeader';
+import {
+  getNotice,
+  createNotice,
+  updateNotice,
+  deleteNotice,
+  ApiNotice,
+} from '../../../api/Notice/NoticeApi';
 
 interface NoticeDetailProps {
   isCreate?: boolean;
@@ -30,25 +36,37 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
   const navigate = useNavigate();
   const location = useLocation() as { state?: { selectOptions: TabItem[] } };
   const { no } = useParams<{ no: string }>();
+  const numericNo = isCreate ? undefined : Number(no);
 
   const options = isCreate
     ? (propOptions ?? defaultNoticeOptions)
     : (location.state?.selectOptions ?? defaultNoticeOptions);
-  const numericNo = isCreate ? undefined : Number(no);
 
-  const initialRow: SettingsDetailRow = isCreate
-    ? { title: '', category: options[0].label, content: '' }
-    : {
-        title: '회사에서 제공하는 판매 서비스 사항',
-        category: '공지사항',
-        content: `본 약관은 주식회사 스타일윅스(이하 “회사”라 합니다.)가 제공하는 의류 및 잡화(이하 “제품”이라 합니다.) 대여 및 전자상거래에 관한 온/오프라인상의 제반 서비스(이하 “서비스”라 합니다.)를 이용함에 있어 회사와 회원의 권리와 의무에 대한 책임사항을 규정함을 목적으로 합니다.`,
-      };
+  // form state
+  const [title, setTitle] = useState('');
+  const [category, setCategory] = useState(options[0].label);
+  const [content, setContent] = useState('');
+  const [author, setAuthor] = useState('관리자');
 
+  // 모달 제어
   const [activeTab, setActiveTab] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
   const [modalMessage, setModalMessage] = useState('');
 
+  // 상세조회: 수정 모드일 때만 호출
+  useEffect(() => {
+    if (!isCreate && numericNo) {
+      getNotice(numericNo).then((data: ApiNotice) => {
+        setTitle(data.title);
+        setCategory(data.type);
+        setContent(data.content);
+        setAuthor(data.author);
+      });
+    }
+  }, [isCreate, numericNo]);
+
+  // 뒤로가기 & 모달 열기
   const handleBack = () => navigate(-1);
   const handleSave = () => {
     setModalTitle(isCreate ? '등록 완료' : '변경 완료');
@@ -64,9 +82,32 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
     setModalMessage('공지사항을 삭제하시겠습니까?');
     setIsModalOpen(true);
   };
-  const handleConfirm = () => {
+
+  // 모달 확인 버튼
+  const handleConfirm = async () => {
     setIsModalOpen(false);
-    navigate(-1);
+
+    try {
+      if (modalTitle === '등록 완료') {
+        // 생성
+        await createNotice({ title, type: category, content, author });
+      } else if (modalTitle === '변경 완료' && numericNo) {
+        // 수정
+        await updateNotice(numericNo, {
+          title,
+          type: category,
+          content,
+          author,
+        });
+      } else if (modalTitle === '삭제 완료' && numericNo) {
+        // 삭제
+        await deleteNotice(numericNo);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      navigate(-1);
+    }
   };
 
   const detailProps: DetailSubHeaderProps = {
@@ -76,6 +117,12 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
     onEditClick: handleSave,
     endLabel: isCreate ? '취소' : '삭제',
     onEndClick: isCreate ? handleBack : handleDelete,
+  };
+
+  const initialRow: SettingsDetailRow = {
+    title,
+    category,
+    content,
   };
 
   return (
@@ -102,7 +149,15 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
         onTabClick={setActiveTab}
       />
       {activeTab === 0 && (
-        <SettingsDetailTable data={[initialRow]} selectOptions={options} />
+        <SettingsDetailTable
+          data={[initialRow]}
+          selectOptions={options}
+          onChangeRow={(row) => {
+            setTitle(row.title);
+            setCategory(row.category);
+            setContent(row.content);
+          }}
+        />
       )}
 
       <ReusableModal2

@@ -1,5 +1,4 @@
-// src/pages/Settings/Notice/NoticeList.tsx
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -9,38 +8,7 @@ import NoticeTable, {
 import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
 import Pagination from '../../../components/Pagination';
 import RegisterButton from '../../../components/RegisterButton';
-
-// 더미 데이터
-const dummyNotice: NoticeItem[] = [
-  {
-    no: 13485,
-    type: '공지',
-    content: '[공지] 새로운 시즌 신상품 할인안내 (2025 봄)',
-    author: '홍길동 매니저',
-    createdAt: '2025.04.01',
-  },
-  {
-    no: 13485,
-    type: '공지',
-    content: '[공지] 새로운 시즌 신상품 할인안내 (2025 봄)',
-    author: '홍길동 매니저',
-    createdAt: '2025.04.01',
-  },
-  {
-    no: 13485,
-    type: '공지',
-    content: '[공지] 새로운 시즌 신상품 할인안내 (2025 봄)',
-    author: '홍길동 매니저',
-    createdAt: '2025.04.01',
-  },
-  {
-    no: 13485,
-    type: '공지',
-    content: '[공지] 새로운 시즌 신상품 할인안내 (2025 봄)',
-    author: '홍길동 매니저',
-    createdAt: '2025.04.01',
-  },
-];
+import { getNotices, ApiNotice } from '../../../api/Notice/NoticeApi';
 
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
@@ -57,14 +25,28 @@ const NoticeList: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
-
   const page = parseInt(searchParams.get('page') ?? '1', 10);
   const limit = 10;
 
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-  const [noticeData] = useState<NoticeItem[]>(dummyNotice);
+  const [noticeData, setNoticeData] = useState<NoticeItem[]>([]);
 
-  // 1) 탭·검색어 필터링, 2) 페이징: useMemo 로 캐싱
+  // 1) API 호출
+  useEffect(() => {
+    getNotices().then((data: ApiNotice[]) => {
+      // API 결과를 NoticeTable에서 사용하는 NoticeItem 타입으로 매핑
+      const items: NoticeItem[] = data.map((n) => ({
+        no: n.id,
+        type: n.type,
+        content: n.content,
+        author: n.author,
+        createdAt: n.createdAt,
+      }));
+      setNoticeData(items);
+    });
+  }, []);
+
+  // 2) 필터링 & 페이징
   const filteredData = useMemo(() => {
     return noticeData
       .filter(
@@ -88,7 +70,7 @@ const NoticeList: React.FC = () => {
     [filteredData, page]
   );
 
-  // 핸들러에 useCallback 적용
+  // 3) 핸들러
   const handleTabChange = useCallback(
     (tab: TabItem) => {
       setSelectedTab(tab);
@@ -144,7 +126,7 @@ const NoticeList: React.FC = () => {
 
 export default NoticeList;
 
-/* ================= Styled Components ================= */
+/* Styled Components */
 const Content = styled.div`
   display: flex;
   flex-direction: column;
