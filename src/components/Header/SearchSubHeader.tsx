@@ -1,13 +1,11 @@
-// src/components/Header/SearchSubHeader.tsx
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FiSearch } from 'react-icons/fi';
 import { useSearchParams } from 'react-router-dom';
-// import NewIcon from '../../assets/New.svg';
 
 export interface TabItem {
   label: string;
-  path: string; // status에 들어갈 값
+  path: string;
 }
 
 interface SubHeaderProps {
@@ -32,30 +30,25 @@ const SubHeader: React.FC<SubHeaderProps> = ({ tabs, onTabChange }) => {
     setInputValue(searchParams.get('search') ?? '');
   }, [searchParams]);
 
-  // 탭 클릭 시 status만 갱신 (search는 유지)
+  // 탭 클릭 시: status 변경 + search 초기화
   const handleTabClick = (tab: TabItem) => {
     setActiveTab(tab.label);
     onTabChange?.(tab);
 
-    const newParams: Record<string, string> = { status: tab.path };
-    const currentSearch = searchParams.get('search');
-    if (currentSearch) {
-      newParams.search = currentSearch;
-    }
-    setSearchParams(newParams);
+    // 검색어 초기화
+    setInputValue('');
+
+    // status만 갱신, 검색어 파라미터 제거
+    setSearchParams({ status: tab.path });
   };
 
-  // 검색 실행: status 유지, search는 trimmed 값으로
+  // 검색 실행: status 유지, search 업데이트
   const handleSearch = () => {
     const trimmed = inputValue.trim();
     const newParams: Record<string, string> = {};
     const currentStatus = searchParams.get('status');
-    if (currentStatus) {
-      newParams.status = currentStatus;
-    }
-    if (trimmed) {
-      newParams.search = trimmed;
-    }
+    if (currentStatus) newParams.status = currentStatus;
+    if (trimmed) newParams.search = trimmed;
     setSearchParams(newParams);
   };
 
@@ -75,7 +68,6 @@ const SubHeader: React.FC<SubHeaderProps> = ({ tabs, onTabChange }) => {
             onClick={() => handleTabClick(tab)}
           >
             {tab.label}
-            {/* {activeTab === tab.label && <NewBadge src={NewIcon} alt='New' />} */}
           </TabButton>
         ))}
       </TabContainer>
@@ -95,7 +87,6 @@ const SubHeader: React.FC<SubHeaderProps> = ({ tabs, onTabChange }) => {
 
 export default SubHeader;
 
-/* ====================== Styled Components ====================== */
 const HeaderContainer = styled.div`
   display: flex;
   align-items: center;
@@ -147,15 +138,6 @@ const TabButton = styled.button<TabButtonProps>`
     border-right: none;
   }
 `;
-
-// const NewBadge = styled.img`
-//   position: absolute;
-//   top: -10px;
-//   right: -10px;
-//   width: 24px;
-//   height: 24px;
-//   z-index: 1;
-// `;
 
 const SearchContainer = styled.div`
   display: flex;
