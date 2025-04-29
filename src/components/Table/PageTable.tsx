@@ -116,25 +116,6 @@ const PageTable: React.FC<PageTableProps> = ({
             ))}
         </tbody>
       </Table>
-
-      {/* 페이지 링크 */}
-      <PaginationContainer>
-        {Array.from({ length: totalPages }, (_, i) => {
-          const page = i + 1;
-          return (
-            <PageLink
-              key={page}
-              to={{
-                pathname: location.pathname,
-                search: `?page=${page}`,
-              }}
-              isActive={page === currentPage}
-            >
-              {page}
-            </PageLink>
-          );
-        })}
-      </PaginationContainer>
     </>
   );
 };
@@ -197,26 +178,5 @@ const InstaText = styled.span`
   color: #007bff;
   &:hover {
     color: #0056b3;
-  }
-`;
-
-const PaginationContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  margin: 16px 0;
-  gap: 4px;
-`;
-
-const PageLink = styled(Link)<{ isActive: boolean }>`
-  padding: 4px 8px;
-  text-decoration: none;
-  border: 1px solid #007bff;
-  border-radius: 4px;
-  font-size: 12px;
-  color: ${({ isActive }) => (isActive ? '#fff' : '#007bff')};
-  background: ${({ isActive }) => (isActive ? '#007bff' : '#fff')};
-  &:hover {
-    background: #007bff;
-    color: #fff;
   }
 `;
