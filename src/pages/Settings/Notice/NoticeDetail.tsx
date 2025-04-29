@@ -1,7 +1,7 @@
 // src/pages/Settings/Notice/NoticeDetail.tsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../../../components/Header/SettingsDetailSubHeader';
@@ -13,12 +13,12 @@ import SettingsDetailTable, {
 import ReusableModal2 from '../../../components/OneButtonModal';
 import { TabItem } from '../../../components/Header/SearchSubHeader';
 
-type NoticeDetailProps = {
+interface NoticeDetailProps {
   isCreate?: boolean;
   selectOptions?: TabItem[];
-};
+}
 
-const defaultOptions: TabItem[] = [
+const defaultNoticeOptions: TabItem[] = [
   { label: '공지', path: '' },
   { label: '안내', path: '' },
 ];
@@ -29,12 +29,12 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation() as { state?: { selectOptions: TabItem[] } };
+  const { no } = useParams<{ no: string }>();
 
   const options = isCreate
-    ? (propOptions ?? defaultOptions)
-    : (location.state?.selectOptions ?? defaultOptions);
-
-  const dummyNo = isCreate ? undefined : 5;
+    ? (propOptions ?? defaultNoticeOptions)
+    : (location.state?.selectOptions ?? defaultNoticeOptions);
+  const numericNo = isCreate ? undefined : Number(no);
 
   const initialRow: SettingsDetailRow = isCreate
     ? { title: '', category: options[0].label, content: '' }
@@ -49,10 +49,6 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
   const [modalTitle, setModalTitle] = useState('');
   const [modalMessage, setModalMessage] = useState('');
 
-  const handleModalConfirm = () => {
-    setIsModalOpen(false);
-    navigate(-1);
-  };
   const handleBack = () => navigate(-1);
   const handleSave = () => {
     setModalTitle(isCreate ? '등록 완료' : '변경 완료');
@@ -68,6 +64,10 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
     setModalMessage('공지사항을 삭제하시겠습니까?');
     setIsModalOpen(true);
   };
+  const handleConfirm = () => {
+    setIsModalOpen(false);
+    navigate(-1);
+  };
 
   const detailProps: DetailSubHeaderProps = {
     backLabel: '목록이동',
@@ -81,18 +81,19 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
   return (
     <Container>
       <HeaderRow>
-        <Title>{isCreate ? '공지사항 등록' : '공지사항 상세'}</Title>
+        <Title>
+          {isCreate ? '공지사항 등록' : `공지사항 상세 (${numericNo})`}
+        </Title>
       </HeaderRow>
 
       <SettingsDetailSubHeader {...detailProps} />
 
       <ProductNumberWrapper>
         <ProductNumberLabel>번호</ProductNumberLabel>
-        <ProductNumberValue>{dummyNo ?? '-'}</ProductNumberValue>
+        <ProductNumberValue>{numericNo ?? '-'}</ProductNumberValue>
       </ProductNumberWrapper>
 
       <SettingsDetailTopBoxes />
-
       <MiddleDivider />
 
       <ShippingTabBar
@@ -100,7 +101,6 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
         activeIndex={activeTab}
         onTabClick={setActiveTab}
       />
-
       {activeTab === 0 && (
         <SettingsDetailTable data={[initialRow]} selectOptions={options} />
       )}
@@ -108,7 +108,7 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
       <ReusableModal2
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onConfirm={handleModalConfirm}
+        onConfirm={handleConfirm}
         title={modalTitle}
       >
         {modalMessage}
@@ -119,6 +119,7 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
 
 export default NoticeDetail;
 
+/* Styled Components */
 const Container = styled.div`
   width: 100%;
   padding: 20px;
@@ -127,6 +128,7 @@ const Container = styled.div`
 const HeaderRow = styled.div`
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 10px;
 `;
 const Title = styled.h1`

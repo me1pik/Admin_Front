@@ -1,11 +1,12 @@
-// src/pages/FAQList.tsx
-
-import React, { useState } from 'react';
+// src/pages/Settings/FAQ/FAQList.tsx
+import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
+
 import FAQTable, { FAQItem } from '../../../components/Table/Setting/FAQTable';
 import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
 import Pagination from '../../../components/Pagination';
+import RegisterButton from '../../../components/RegisterButton';
 
 /** FAQ 더미 데이터 */
 const dummyFAQ: FAQItem[] = [
@@ -75,7 +76,6 @@ const tabs: TabItem[] = [
   { label: '이용권', path: '이용권' },
 ];
 
-// 상세페이지로 전달할 selectOptions
 const faqSelectOptions: TabItem[] = [
   { label: '서비스', path: '서비스' },
   { label: '주문/결제', path: '주문/결제' },
@@ -88,68 +88,80 @@ const FAQList: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
 
-  // URL 쿼리에서 현재 페이지 읽기
   const page = parseInt(searchParams.get('page') ?? '1', 10);
   const limit = 10;
 
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-  const [FAQData] = useState<FAQItem[]>(dummyFAQ);
+  const [data] = useState<FAQItem[]>(dummyFAQ);
 
-  // 1차 탭 필터링
-  const dataByTab = FAQData.filter((item) =>
-    selectedTab.label === '전체보기' ? true : item.type === selectedTab.label
+  // 필터링 & 페이징
+  const filtered = useMemo(() => {
+    return data
+      .filter(
+        (item) =>
+          selectedTab.label === '전체보기' || item.type === selectedTab.label
+      )
+      .filter((item) =>
+        [
+          String(item.no),
+          item.type,
+          item.content,
+          item.author,
+          item.createdAt,
+        ].some((f) => f.toLowerCase().includes(searchTerm))
+      );
+  }, [data, selectedTab, searchTerm]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / limit));
+  const pageData = useMemo(
+    () => filtered.slice((page - 1) * limit, (page - 1) * limit + limit),
+    [filtered, page]
   );
 
-  // 2차 검색어 필터링
-  const filteredData = dataByTab.filter((item) =>
-    [
-      String(item.no),
-      item.type,
-      item.content,
-      item.author,
-      item.createdAt,
-    ].some((field) => field.toLowerCase().includes(searchTerm))
+  const onTabChange = useCallback(
+    (tab: TabItem) => {
+      setSelectedTab(tab);
+      setSearchParams((prev) => ({
+        ...Object.fromEntries(prev.entries()),
+        page: '1',
+      }));
+    },
+    [setSearchParams]
   );
 
-  // 페이지네이션 계산
-  const totalCount = filteredData.length;
-  const totalPages = Math.max(1, Math.ceil(totalCount / limit));
-  const offset = (page - 1) * limit;
-  const currentPageData = filteredData.slice(offset, offset + limit);
-
-  // 탭 변경 시 page=1으로 URL 리셋
-  const handleTabChange = (tab: TabItem) => {
-    setSelectedTab(tab);
-    const params = Object.fromEntries(searchParams.entries());
-    params.page = '1';
-    setSearchParams(params);
-  };
-
-  const handleAuthorClick = (_: string, no: number) => {
-    navigate(`/faqDetail/${no}`, {
-      state: { selectOptions: faqSelectOptions },
-    });
-  };
+  const onRowClick = useCallback(
+    (_a: string, no: number) => {
+      navigate(`/faqDetail/${no}`, {
+        state: { selectOptions: faqSelectOptions },
+      });
+    },
+    [navigate]
+  );
 
   return (
     <Content>
       <HeaderTitle>자주 묻는 질문 (FAQ)</HeaderTitle>
 
-      <SubHeader tabs={tabs} onTabChange={handleTabChange} />
+      <SubHeader tabs={tabs} onTabChange={onTabChange} />
 
       <InfoBar>
-        <TotalCountText>Total: {totalCount}</TotalCountText>
+        <TotalCountText>Total: {filtered.length}</TotalCountText>
       </InfoBar>
 
       <TableContainer>
-        <FAQTable
-          filteredData={currentPageData}
-          handleEdit={handleAuthorClick}
-        />
+        <FAQTable filteredData={pageData} handleEdit={onRowClick} />
       </TableContainer>
 
       <FooterRow>
-        <Pagination totalPages={totalPages} />
+        <Pagination
+          totalPages={totalPages}
+          leftComponent={
+            <RegisterButton
+              text='등록하기'
+              onClick={() => navigate('/createFAQ')}
+            />
+          }
+        />
       </FooterRow>
     </Content>
   );
@@ -157,43 +169,35 @@ const FAQList: React.FC = () => {
 
 export default FAQList;
 
-/* ====================== Styled Components ====================== */
+/* Styled Components */
 
 const Content = styled.div`
   display: flex;
   flex-direction: column;
-  background-color: #ffffff;
+  background-color: #fff;
   flex-grow: 1;
-  font-size: 14px;
   padding: 10px;
 `;
-
 const HeaderTitle = styled.h1`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
+  font-family: 'NanumSquare Neo OTF';
   font-weight: 700;
   font-size: 16px;
   margin-bottom: 18px;
 `;
-
 const InfoBar = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 15px;
 `;
-
 const TotalCountText = styled.div`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
+  font-family: 'NanumSquare Neo OTF';
   font-weight: 900;
   font-size: 12px;
 `;
-
 const TableContainer = styled.div`
   box-sizing: border-box;
 `;
-
 const FooterRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  width: 100%;
   margin-top: 40px;
 `;

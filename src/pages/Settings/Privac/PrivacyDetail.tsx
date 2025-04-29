@@ -1,7 +1,7 @@
-// src/pages/PrivacyDetail.tsx
+// src/pages/Settings/Privacy/PrivacyDetail.tsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../../../components/Header/SettingsDetailSubHeader';
@@ -13,84 +13,110 @@ import SettingsDetailTable, {
 import ReusableModal2 from '../../../components/OneButtonModal';
 import { TabItem } from '../../../components/Header/SearchSubHeader';
 
-const PrivacyDetail: React.FC = () => {
-  const location = useLocation() as { state?: { selectOptions: TabItem[] } };
-  const selectOptions: TabItem[] = location.state?.selectOptions || [];
+// Props 정의
+interface PrivacyDetailProps {
+  isCreate?: boolean;
+  selectOptions?: TabItem[];
+}
+
+const defaultOptions: TabItem[] = [
+  { label: '개인정보방침', path: '' },
+  { label: '파기절차', path: '' },
+  { label: '기타', path: '' },
+];
+
+const PrivacyDetail: React.FC<PrivacyDetailProps> = ({
+  isCreate = false,
+  selectOptions: propOptions,
+}) => {
   const navigate = useNavigate();
+  const location = useLocation() as { state?: { selectOptions: TabItem[] } };
+  const { no } = useParams<{ no: string }>();
 
-  const shippingTabs = ['상세내용'];
-  const dummyProducts = [{ no: 3 }];
-  const dummySettingsDetail: SettingsDetailRow = {
-    title: '개인정보 처리방침',
-    category: '개인정보처리방침',
-    content: `회사는 이용자의 개인정보를 중요시하며, 「개인정보 보호법」 등 관련 법령을 준수합니다. 본 방침은 회사의 개인정보 처리방침에 대해 설명합니다.`,
-  };
+  // create 모드면 propOptions, 아니면 location.state
+  const options: TabItem[] = isCreate
+    ? (propOptions ?? defaultOptions)
+    : (location.state?.selectOptions ?? defaultOptions);
 
-  const [activeTab, setActiveTab] = useState<number>(0);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [modalTitle, setModalTitle] = useState<string>('');
-  const [modalMessage, setModalMessage] = useState<string>('');
+  // 번호: create면 undefined, 상세면 URL param
+  const numericNo = isCreate ? undefined : Number(no);
 
-  const handleModalConfirm = () => {
-    setIsModalOpen(false);
-    navigate(-1);
-  };
+  // 초기 row 데이터
+  const initialRow: SettingsDetailRow = isCreate
+    ? { title: '', category: options[0].label, content: '' }
+    : {
+        title: '개인정보 처리방침',
+        category: '개인정보처리방침',
+        content: `회사는 이용자의 개인정보를 중요시하며, 「개인정보 보호법」 등 관련 법령을 준수합니다. 본 방침은 회사의 개인정보 처리방침에 대해 설명합니다.`,
+      };
 
-  const handleBackClick = () => window.history.back();
-  const handleSaveClick = () => {
-    setModalTitle('변경 완료');
-    setModalMessage('변경 내용을 저장하시겠습니까?');
+  const [activeTab, setActiveTab] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalMessage, setModalMessage] = useState('');
+
+  const handleBack = () => navigate(-1);
+  const handleSave = () => {
+    setModalTitle(isCreate ? '등록 완료' : '변경 완료');
+    setModalMessage(
+      isCreate
+        ? '새 개인정보처리방침을 등록하시겠습니까?'
+        : '변경 내용을 저장하시겠습니까?'
+    );
     setIsModalOpen(true);
   };
-  const handleDeleteClick = () => {
+  const handleDelete = () => {
     setModalTitle('삭제 완료');
     setModalMessage('개인정보처리방침을 삭제하시겠습니까?');
     setIsModalOpen(true);
   };
+  const handleConfirm = () => {
+    setIsModalOpen(false);
+    navigate(-1);
+  };
 
-  const detailSubHeaderProps: DetailSubHeaderProps = {
+  const detailProps: DetailSubHeaderProps = {
     backLabel: '목록이동',
-    onBackClick: handleBackClick,
-    editLabel: '변경저장',
-    onEditClick: handleSaveClick,
-    endLabel: '삭제',
-    onEndClick: handleDeleteClick,
+    onBackClick: handleBack,
+    editLabel: isCreate ? '등록하기' : '변경저장',
+    onEditClick: handleSave,
+    endLabel: isCreate ? '취소' : '삭제',
+    onEndClick: isCreate ? handleBack : handleDelete,
   };
 
   return (
     <Container>
       <HeaderRow>
-        <Title>개인정보처리방침 상세</Title>
+        <Title>
+          {isCreate
+            ? '개인정보처리방침 등록'
+            : `개인정보처리방침 상세 (${numericNo})`}
+        </Title>
       </HeaderRow>
 
-      <SettingsDetailSubHeader {...detailSubHeaderProps} />
+      <SettingsDetailSubHeader {...detailProps} />
 
       <ProductNumberWrapper>
         <ProductNumberLabel>번호</ProductNumberLabel>
-        <ProductNumberValue>{dummyProducts[0].no}</ProductNumberValue>
+        <ProductNumberValue>{numericNo ?? '-'}</ProductNumberValue>
       </ProductNumberWrapper>
 
       <SettingsDetailTopBoxes />
-
       <MiddleDivider />
 
       <ShippingTabBar
-        tabs={shippingTabs}
+        tabs={['상세내용']}
         activeIndex={activeTab}
         onTabClick={setActiveTab}
       />
-
       {activeTab === 0 && (
-        <SettingsDetailTable
-          data={[dummySettingsDetail]}
-          selectOptions={selectOptions}
-        />
+        <SettingsDetailTable data={[initialRow]} selectOptions={options} />
       )}
 
       <ReusableModal2
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onConfirm={handleModalConfirm}
+        onConfirm={handleConfirm}
         title={modalTitle}
       >
         {modalMessage}
@@ -101,53 +127,37 @@ const PrivacyDetail: React.FC = () => {
 
 export default PrivacyDetail;
 
+/* Styled Components */
 const Container = styled.div`
   width: 100%;
-  margin: 0 auto;
   padding: 20px;
-  box-sizing: border-box;
   font-family: 'NanumSquare Neo OTF', sans-serif;
 `;
-
 const HeaderRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
 `;
-
 const Title = styled.h1`
-  font-family: 'NanumSquare Neo OTF';
   font-weight: 700;
   font-size: 16px;
-  line-height: 18px;
-  color: #000000;
 `;
-
 const ProductNumberWrapper = styled.div`
   display: flex;
   align-items: baseline;
   gap: 5px;
-  margin: 10px 0;
-  margin-top: 34px;
+  margin: 10px 0 34px;
 `;
-
 const ProductNumberLabel = styled.div`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 12px;
-  color: #000000;
 `;
-
 const ProductNumberValue = styled.div`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
-  color: #000000;
 `;
-
 const MiddleDivider = styled.hr`
-  border: 0;
   border-top: 1px dashed #dddddd;
   margin: 30px 0;
 `;

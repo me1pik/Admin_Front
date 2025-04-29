@@ -1,13 +1,14 @@
-// src/pages/Settings/Notice/Notice.tsx
-import React, { useState } from 'react';
+// src/pages/Settings/Notice/NoticeList.tsx
+import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
 
 import NoticeTable, {
   NoticeItem,
 } from '../../../components/Table/Setting/NoticeTable';
 import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
 import Pagination from '../../../components/Pagination';
+import RegisterButton from '../../../components/RegisterButton';
 
 // 더미 데이터
 const dummyNotice: NoticeItem[] = [
@@ -19,53 +20,25 @@ const dummyNotice: NoticeItem[] = [
     createdAt: '2025.04.01',
   },
   {
-    no: 13486,
+    no: 13485,
     type: '공지',
-    content: '[공지] 시스템 정기 점검 안내 (4/15 ~ 4/16)',
-    author: '이영희 담당',
-    createdAt: '2025.04.02',
+    content: '[공지] 새로운 시즌 신상품 할인안내 (2025 봄)',
+    author: '홍길동 매니저',
+    createdAt: '2025.04.01',
   },
   {
-    no: 13487,
-    type: '안내',
-    content: '[안내] 회원가입 이벤트 당첨자 발표',
-    author: '김민수 운영',
-    createdAt: '2025.04.03',
-  },
-  {
-    no: 13488,
+    no: 13485,
     type: '공지',
-    content: '[공지] 휴무일 배송 지연 공지',
-    author: '박민정 팀장',
-    createdAt: '2025.04.04',
+    content: '[공지] 새로운 시즌 신상품 할인안내 (2025 봄)',
+    author: '홍길동 매니저',
+    createdAt: '2025.04.01',
   },
   {
-    no: 13489,
-    type: '안내',
-    content: '[안내] 적립금 사용정책 변경 안내',
-    author: '허준 대리',
-    createdAt: '2025.04.05',
-  },
-  {
-    no: 13490,
+    no: 13485,
     type: '공지',
-    content: '[공지] 신규 브랜드 입점 예정 안내 (4월말)',
-    author: '최수영 매니저',
-    createdAt: '2025.04.06',
-  },
-  {
-    no: 13491,
-    type: '안내',
-    content: '[안내] 리뷰 프로모션 (포토리뷰 작성 시 포인트 지급)',
-    author: '정아름 운영',
-    createdAt: '2025.04.07',
-  },
-  {
-    no: 13492,
-    type: '안내',
-    content: '[안내] 배송비 인상 안내 (물류비 상승)',
-    author: '김진호 담당',
-    createdAt: '2025.04.08',
+    content: '[공지] 새로운 시즌 신상품 할인안내 (2025 봄)',
+    author: '홍길동 매니저',
+    createdAt: '2025.04.01',
   },
 ];
 
@@ -80,7 +53,7 @@ const noticeSelectOptions: TabItem[] = [
   { label: '안내', path: '' },
 ];
 
-const Notice: React.FC = () => {
+const NoticeList: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
@@ -91,62 +64,51 @@ const Notice: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
   const [noticeData] = useState<NoticeItem[]>(dummyNotice);
 
-  // 탭 필터링
-  const dataByTab = noticeData.filter((item) =>
-    selectedTab.label === '전체보기' ? true : item.type === selectedTab.label
+  // 1) 탭·검색어 필터링, 2) 페이징: useMemo 로 캐싱
+  const filteredData = useMemo(() => {
+    return noticeData
+      .filter(
+        (item) =>
+          selectedTab.label === '전체보기' || item.type === selectedTab.label
+      )
+      .filter((item) =>
+        [
+          String(item.no),
+          item.type,
+          item.content,
+          item.author,
+          item.createdAt,
+        ].some((field) => field.toLowerCase().includes(searchTerm))
+      );
+  }, [noticeData, selectedTab, searchTerm]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / limit));
+  const currentPageData = useMemo(
+    () => filteredData.slice((page - 1) * limit, (page - 1) * limit + limit),
+    [filteredData, page]
   );
 
-  // 검색어 필터링
-  const filteredData = dataByTab.filter((item) =>
-    [
-      String(item.no),
-      item.type,
-      item.content,
-      item.author,
-      item.createdAt,
-    ].some((field) => field.toLowerCase().includes(searchTerm))
+  // 핸들러에 useCallback 적용
+  const handleTabChange = useCallback(
+    (tab: TabItem) => {
+      setSelectedTab(tab);
+      setSearchParams((prev) => {
+        const params = Object.fromEntries(prev.entries());
+        params.page = '1';
+        return params;
+      });
+    },
+    [setSearchParams]
   );
 
-  const totalCount = filteredData.length;
-  const totalPages = Math.max(1, Math.ceil(totalCount / limit));
-  const offset = (page - 1) * limit;
-  const currentPageData = filteredData.slice(offset, offset + limit);
-
-  const handleTabChange = (tab: TabItem) => {
-    setSelectedTab(tab);
-    const params = Object.fromEntries(searchParams.entries());
-    params.page = '1';
-    setSearchParams(params);
-  };
-
-  const handleRowClick = (_: string, no: number) => {
-    navigate(`/noticeDetail/${no}`, {
-      state: { selectOptions: noticeSelectOptions },
-    });
-  };
-  const hoverAnim = keyframes`
-  0% { transform: translateY(0); box-shadow: none; }
-  100% { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-`;
-  const AddButton = styled.button`
-    padding: 10px 20px;
-    background-color: #000;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-
-    &:hover {
-      background-color: #222;
-      animation: ${hoverAnim} 0.2s forwards;
-    }
-    &:active {
-      transform: translateY(0);
-      box-shadow: none;
-    }
-  `;
+  const handleRowClick = useCallback(
+    (_author: string, no: number) => {
+      navigate(`/noticeDetail/${no}`, {
+        state: { selectOptions: noticeSelectOptions },
+      });
+    },
+    [navigate]
+  );
 
   return (
     <Content>
@@ -155,7 +117,7 @@ const Notice: React.FC = () => {
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
 
       <InfoBar>
-        <TotalCountText>Total: {totalCount}</TotalCountText>
+        <TotalCountText>Total: {filteredData.length}</TotalCountText>
       </InfoBar>
 
       <TableContainer>
@@ -169,9 +131,10 @@ const Notice: React.FC = () => {
         <Pagination
           totalPages={totalPages}
           leftComponent={
-            <AddButton onClick={() => navigate('/createNotice')}>
-              등록하기
-            </AddButton>
+            <RegisterButton
+              text='등록하기'
+              onClick={() => navigate('/createNotice')}
+            />
           }
         />
       </FooterRow>
@@ -179,8 +142,9 @@ const Notice: React.FC = () => {
   );
 };
 
-export default Notice;
+export default NoticeList;
 
+/* ================= Styled Components ================= */
 const Content = styled.div`
   display: flex;
   flex-direction: column;
@@ -189,7 +153,7 @@ const Content = styled.div`
   padding: 10px;
 `;
 const HeaderTitle = styled.h1`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
+  font-family: 'NanumSquare Neo OTF';
   font-weight: 700;
   font-size: 16px;
   margin-bottom: 18px;
@@ -200,7 +164,7 @@ const InfoBar = styled.div`
   margin-bottom: 15px;
 `;
 const TotalCountText = styled.div`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
+  font-family: 'NanumSquare Neo OTF';
   font-weight: 900;
   font-size: 12px;
 `;

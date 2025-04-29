@@ -1,45 +1,41 @@
 // src/components/RegisterButton.tsx
 import React from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
-type RegisterButtonProps = {
+interface RegisterButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  /** 버튼에 표시할 텍스트 */
   text: string;
-  onClick: () => void;
-};
+}
 
-const RegisterButton: React.FC<RegisterButtonProps> = ({ text, onClick }) => {
-  return (
-    <ButtonContainer onClick={onClick}>
-      <ButtonBox>
-        <ButtonText>{text}</ButtonText>
-      </ButtonBox>
-    </ButtonContainer>
-  );
-};
+// 마우스 오버 시 떠오르는 애니메이션
+const hoverAnim = keyframes`
+  0% { transform: translateY(0); box-shadow: none; }
+  100% { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+`;
+
+const Button = styled.button`
+  padding: 10px 20px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #ffae00;
+    animation: ${hoverAnim} 0.2s forwards;
+  }
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+`;
+
+const RegisterButton: React.FC<RegisterButtonProps> = ({ text, ...props }) => (
+  <Button {...props}>{text}</Button>
+);
 
 export default RegisterButton;
-
-const ButtonContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const ButtonBox = styled.div`
-  width: 100px;
-  height: 40px;
-  background: #000000;
-  border-radius: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const ButtonText = styled.span`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
-  font-weight: 700;
-  font-size: 12px;
-  line-height: 13px;
-  text-align: center;
-  color: #ffffff;
-`;
