@@ -1,4 +1,4 @@
-// === src/components/Pagination.tsx ===
+// src/components/Pagination.tsx
 import React from 'react';
 import styled from 'styled-components';
 import { useSearchParams } from 'react-router-dom';
@@ -16,21 +16,32 @@ import NextPageIconDisabled from '../assets/PageNationIcon3none.svg';
 import LastPageIconDisabled from '../assets/PageNationIcon4none.svg';
 
 interface PaginationProps {
+  /** 전체 페이지 수 */
   totalPages: number;
+  /** 현재 페이지 (URL 쿼리가 기본, prop 주입 우선) */
+  currentPage?: number;
+  /** 페이지 변경 시 호출 (없으면 URL 쿼리 자동 변경) */
+  onPageChange?: (newPage: number) => void;
 }
 
-const Pagination: React.FC<PaginationProps> = ({ totalPages }) => {
+const Pagination: React.FC<PaginationProps> = ({
+  totalPages,
+  currentPage,
+  onPageChange,
+}) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  // URL 쿼리로부터 현재 페이지를 파싱
-  const current = parseInt(searchParams.get('page') ?? '1', 10);
+  const parsed = parseInt(searchParams.get('page') ?? '1', 10);
   const correctedTotal = totalPages < 1 ? 1 : totalPages;
-  const page = Math.min(Math.max(current, 1), correctedTotal);
+  const page = Math.min(Math.max(currentPage ?? parsed, 1), correctedTotal);
 
-  // 쿼리 유지하며 페이지만 변경
   const changePage = (newPage: number) => {
-    const params = Object.fromEntries(searchParams.entries());
-    params['page'] = String(newPage);
-    setSearchParams(params);
+    if (onPageChange) {
+      onPageChange(newPage);
+    } else {
+      const params = Object.fromEntries(searchParams.entries());
+      params['page'] = String(newPage);
+      setSearchParams(params);
+    }
   };
 
   const formatted = (n: number) => String(n).padStart(2, '0');

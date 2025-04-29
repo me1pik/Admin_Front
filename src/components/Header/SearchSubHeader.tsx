@@ -1,4 +1,4 @@
-// src/components/Header/SubHeader.tsx
+// src/components/Header/SearchSubHeader.tsx
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FiSearch } from 'react-icons/fi';
@@ -20,23 +20,23 @@ const SubHeader: React.FC<SubHeaderProps> = ({ tabs, onTabChange }) => {
   const [activeTab, setActiveTab] = useState<string>(tabs[0].label);
   const [inputValue, setInputValue] = useState<string>('');
 
-  // 1) URL(status)에 따라 activeTab 초기 동기화
+  // URL(status)에 따라 activeTab 초기 동기화
   useEffect(() => {
     const status = searchParams.get('status');
     const matched = tabs.find((t) => t.path === status);
     setActiveTab(matched ? matched.label : tabs[0].label);
   }, [searchParams, tabs]);
 
-  // 2) URL(search)에 따라 inputValue 동기화
+  // URL(search)에 따라 inputValue 동기화
   useEffect(() => {
     setInputValue(searchParams.get('search') ?? '');
   }, [searchParams]);
 
+  // 탭 클릭 시 status만 갱신 (search는 유지)
   const handleTabClick = (tab: TabItem) => {
     setActiveTab(tab.label);
     onTabChange?.(tab);
 
-    // 기존 검색어(search)는 유지하고, status만 갱신
     const newParams: Record<string, string> = { status: tab.path };
     const currentSearch = searchParams.get('search');
     if (currentSearch) {
@@ -45,22 +45,18 @@ const SubHeader: React.FC<SubHeaderProps> = ({ tabs, onTabChange }) => {
     setSearchParams(newParams);
   };
 
+  // 검색 실행: status 유지, search는 trimmed 값으로
   const handleSearch = () => {
     const trimmed = inputValue.trim();
-    if (trimmed) {
-      // status 유지, search만 갱신
-      const newParams: Record<string, string> = {};
-      const currentStatus = searchParams.get('status');
-      if (currentStatus) newParams.status = currentStatus;
-      newParams.search = trimmed;
-      setSearchParams(newParams);
-    } else {
-      // 빈 검색어면 search 제거하고 status만 남김
-      const newParams = searchParams.get('status')
-        ? { status: searchParams.get('status')! }
-        : {};
-      setSearchParams(newParams);
+    const newParams: Record<string, string> = {};
+    const currentStatus = searchParams.get('status');
+    if (currentStatus) {
+      newParams.status = currentStatus;
     }
+    if (trimmed) {
+      newParams.search = trimmed;
+    }
+    setSearchParams(newParams);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -100,7 +96,6 @@ const SubHeader: React.FC<SubHeaderProps> = ({ tabs, onTabChange }) => {
 export default SubHeader;
 
 /* ====================== Styled Components ====================== */
-
 const HeaderContainer = styled.div`
   display: flex;
   align-items: center;

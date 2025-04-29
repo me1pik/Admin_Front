@@ -1,62 +1,51 @@
-// src/pages/SettingsDetail.tsx
+// src/pages/FAQDetail.tsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
-} from '../components/Header/SettingsDetailSubHeader';
-import SettingsDetailTopBoxes from '../components/SettingsDetailTopBoxes';
-import ShippingTabBar from '../components/TabBar';
+} from '../../../components/Header/SettingsDetailSubHeader';
+import SettingsDetailTopBoxes from '../../../components/SettingsDetailTopBoxes';
+import ShippingTabBar from '../../../components/TabBar';
 import SettingsDetailTable, {
   SettingsDetailRow,
-} from '../components/Table/Setting/SettingsDetailTable';
-import ReusableModal2 from '../components/OneButtonModal';
-import { TabItem } from '../components/Header/SearchSubHeader';
+} from '../../../components/Table/Setting/SettingsDetailTable';
+import ReusableModal2 from '../../../components/OneButtonModal';
+import { TabItem } from '../../../components/Header/SearchSubHeader';
 
-const SettingsDetail: React.FC = () => {
-  // useLocation 훅은 컴포넌트 내부에서 호출합니다.
+const FAQDetail: React.FC = () => {
   const location = useLocation() as { state?: { selectOptions: TabItem[] } };
   const selectOptions: TabItem[] = location.state?.selectOptions || [];
-
-  // useNavigate 훅을 사용하여 이전 경로로 돌아갈 수 있도록 합니다.
   const navigate = useNavigate();
 
-  // ShippingTabBar는 string[] 타입의 탭 목록을 요구하므로, label 값 배열을 사용합니다.
-  const shippingTabs: string[] = ['상세내용'];
-
-  const dummyProducts = [{ no: 5 }];
+  const shippingTabs = ['상세내용'];
+  const dummyProducts = [{ no: 12 }];
   const dummySettingsDetail: SettingsDetailRow = {
-    title: '회사에서 제공하는 판매 서비스 사항',
-    category: '개인정보처리방침',
-    content: `본 약관은 주식회사 스타일윅스(이하 “회사”라 합니다.)가 제공하는 의류 및 잡화(이하 “제품”이라 합니다.) 대여 및 전자상거래에 관한 온/오프라인상의 제반 서비스(이하 “서비스”라 합니다.)를 이용함에 있어 회사와 회원의 권리와 의무에 대한 책임사항을 규정함을 목적으로 합니다.`,
+    title: '자주 묻는 질문 (FAQ)',
+    category: 'FAQ',
+    content: `회원가입은 어떻게 하나요?  
+    A: 우측 상단의 회원가입 버튼을 눌러 이메일과 비밀번호를 입력하시면 가입이 완료됩니다.`,
   };
 
   const [activeTab, setActiveTab] = useState<number>(0);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState('');
-  const [modalMessage, setModalMessage] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [modalTitle, setModalTitle] = useState<string>('');
+  const [modalMessage, setModalMessage] = useState<string>('');
 
-  // "네" 버튼 클릭 시 이전 경로로 이동하도록 수정 (navigate(-1))
   const handleModalConfirm = () => {
+    setIsModalOpen(false);
     navigate(-1);
   };
 
-  /** 각 버튼 핸들러 */
-  const handleBackClick = () => {
-    window.history.back();
-  };
-
+  const handleBackClick = () => window.history.back();
   const handleSaveClick = () => {
-    // 변경내용 저장 로직 (예: API 호출) 후 모달 띄우기
     setModalTitle('변경 완료');
     setModalMessage('변경 내용을 저장하시겠습니까?');
     setIsModalOpen(true);
   };
-
   const handleDeleteClick = () => {
-    // 삭제 로직 (예: API 호출) 후 모달 띄우기
     setModalTitle('삭제 완료');
-    setModalMessage('공지사항을 삭제하시겠습니까?');
+    setModalMessage('FAQ를 삭제하시겠습니까?');
     setIsModalOpen(true);
   };
 
@@ -69,33 +58,10 @@ const SettingsDetail: React.FC = () => {
     onEndClick: handleDeleteClick,
   };
 
-  // 탭 클릭 시 activeTab 업데이트
-  const handleTabClick = (index: number) => {
-    setActiveTab(index);
-  };
-
-  // 실제 데이터 배열 (현재 dummy 데이터 한 개)
-  const SettingsDetailData = [dummySettingsDetail];
-
-  // activeTab에 따라 다른 테이블을 렌더링 (현재는 단일 테이블만)
-  const renderTable = () => {
-    switch (activeTab) {
-      case 0:
-        return (
-          <SettingsDetailTable
-            data={SettingsDetailData}
-            selectOptions={selectOptions}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <Container>
       <HeaderRow>
-        <Title>공지사항</Title>
+        <Title>FAQ 상세</Title>
       </HeaderRow>
 
       <SettingsDetailSubHeader {...detailSubHeaderProps} />
@@ -110,14 +76,18 @@ const SettingsDetail: React.FC = () => {
       <MiddleDivider />
 
       <ShippingTabBar
-        tabs={shippingTabs} // string[] 타입 전달
+        tabs={shippingTabs}
         activeIndex={activeTab}
-        onTabClick={handleTabClick}
+        onTabClick={setActiveTab}
       />
 
-      {renderTable()}
+      {activeTab === 0 && (
+        <SettingsDetailTable
+          data={[dummySettingsDetail]}
+          selectOptions={selectOptions}
+        />
+      )}
 
-      {/* 모달 컴포넌트 */}
       <ReusableModal2
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -130,9 +100,8 @@ const SettingsDetail: React.FC = () => {
   );
 };
 
-export default SettingsDetail;
+export default FAQDetail;
 
-/* ====================== Styled Components ====================== */
 const Container = styled.div`
   width: 100%;
   margin: 0 auto;

@@ -1,102 +1,104 @@
-// src/pages/TermsList.tsx
+// src/pages/NoticeList.tsx
+
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
-import TermsTable, { TermsItem } from '../components/Table/Setting/TermsTable';
-import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
-import Pagination from '../components/Pagination';
+import NoticeTable, {
+  NoticeItem,
+} from '../../../components/Table/Setting/NoticeTable';
+import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
+import Pagination from '../../../components/Pagination';
 
-/** 이용약관 더미 데이터 */
-const dummyTerms: TermsItem[] = [
+/** 공지사항 더미 데이터 */
+const dummyNotice: NoticeItem[] = [
+  {
+    no: 13485,
+    type: '공지',
+    content: '[공지] 새로운 시즌 신상품 할인안내 (2025 봄)',
+    author: '홍길동 매니저',
+    createdAt: '2025.04.01',
+  },
   {
     no: 13486,
-    type: '서비스 정책',
-    content: '제1장 - 총칙',
-    author: '홍길동 (등급1)',
-    createdAt: '2025.04.01',
+    type: '공지',
+    content: '[공지] 시스템 정기 점검 안내 (4/15 ~ 4/16)',
+    author: '이영희 담당',
+    createdAt: '2025.04.02',
   },
   {
     no: 13487,
-    type: '서비스 정책',
-    content: '제2장 - 책임제한 사항',
-    author: '홍길동 (등급1)',
-    createdAt: '2025.04.01',
+    type: '안내',
+    content: '[안내] 회원가입 이벤트 당첨자 발표',
+    author: '김민수 운영',
+    createdAt: '2025.04.03',
   },
   {
     no: 13488,
-    type: '서비스 정책',
-    content: '제3장 - 서비스 제공 사항 (무엇무엇)',
-    author: '홍길동 (등급1)',
-    createdAt: '2025.04.01',
+    type: '공지',
+    content: '[공지] 휴무일 배송 지연 공지',
+    author: '박민정 팀장',
+    createdAt: '2025.04.04',
   },
   {
     no: 13489,
-    type: '서비스 정책',
-    content: '회사에서 제공하는 법적 서비스 사항',
-    author: '홍길동 (등급1)',
-    createdAt: '2025.04.01',
+    type: '안내',
+    content: '[안내] 적립금 사용정책 변경 안내',
+    author: '허준 대리',
+    createdAt: '2025.04.05',
   },
   {
     no: 13490,
-    type: '서비스 정책',
-    content: '회사에서 제공하는 법적 서비스 사항',
-    author: '홍길동 (등급1)',
-    createdAt: '2025.04.01',
+    type: '공지',
+    content: '[공지] 신규 브랜드 입점 예정 안내 (4월말)',
+    author: '최수영 매니저',
+    createdAt: '2025.04.06',
   },
   {
     no: 13491,
-    type: '서비스 정책',
-    content: '회사에서 제공하는 법적 서비스 사항',
-    author: '홍길동 (등급1)',
-    createdAt: '2025.04.01',
+    type: '안내',
+    content: '[안내] 리뷰 프로모션 (포토리뷰 작성 시 포인트 지급)',
+    author: '정아름 운영',
+    createdAt: '2025.04.07',
   },
   {
     no: 13492,
-    type: '서비스 정책',
-    content: '회사에서 제공하는 법적 서비스 사항',
-    author: '홍길동 (등급1)',
-    createdAt: '2025.04.01',
-  },
-  {
-    no: 13493,
-    type: '서비스 정책',
-    content: '회사에서 제공하는 법적 서비스 사항',
-    author: '김민수 (등급2)',
-    createdAt: '2025.04.01',
+    type: '안내',
+    content: '[안내] 배송비 인상 안내 (물류비 상승)',
+    author: '김진호 담당',
+    createdAt: '2025.04.08',
   },
 ];
 
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
-  { label: '서비스 정책', path: '서비스 정책' },
-  { label: '판매정책', path: '판매정책' },
-  { label: '훼손정책', path: '훼손정책' },
+  { label: '공지', path: '공지' },
+  { label: '안내', path: '안내' },
 ];
 
-// Terms용 selectOptions (상세페이지로 전달)
-const termsSelectOptions: TabItem[] = [
-  { label: '서비스 정책', path: '' },
-  { label: '판매정책', path: '' },
-  { label: '훼손정책', path: '' },
+// 상세페이지로 전달할 selectOptions
+const noticeSelectOptions: TabItem[] = [
+  { label: '공지', path: '' },
+  { label: '안내', path: '' },
 ];
 
-const TermsList: React.FC = () => {
+const NoticeList: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
 
-  // URL 쿼리에서 페이지 읽기
+  // URL 쿼리에서 현재 페이지 읽기
   const page = parseInt(searchParams.get('page') ?? '1', 10);
-
-  const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
   const limit = 10;
 
-  // 1차 탭 필터링
-  const dataByTab = dummyTerms.filter((item) =>
+  const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
+  const [noticeData] = useState<NoticeItem[]>(dummyNotice);
+
+  // 탭별 1차 필터링
+  const dataByTab = noticeData.filter((item) =>
     selectedTab.label === '전체보기' ? true : item.type === selectedTab.label
   );
 
-  // 2차 검색어 필터링
+  // URL 검색어로 2차 필터링
   const filteredData = dataByTab.filter((item) =>
     [
       String(item.no),
@@ -107,13 +109,13 @@ const TermsList: React.FC = () => {
     ].some((field) => field.toLowerCase().includes(searchTerm))
   );
 
-  // 페이지네이션 로직
+  // 페이지네이션 계산
   const totalCount = filteredData.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  // 탭 변경 시 page=1로 리셋
+  // 탭 변경 시 page=1으로 URL 리셋
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
     const params = Object.fromEntries(searchParams.entries());
@@ -121,15 +123,15 @@ const TermsList: React.FC = () => {
     setSearchParams(params);
   };
 
-  const handleEdit = (_: string, no: number) => {
-    navigate(`/settingsDetail/${no}`, {
-      state: { selectOptions: termsSelectOptions },
+  const handleAuthorClick = (_: string, no: number) => {
+    navigate(`/noticeDetail/${no}`, {
+      state: { selectOptions: noticeSelectOptions },
     });
   };
 
   return (
     <Content>
-      <HeaderTitle>이용약관</HeaderTitle>
+      <HeaderTitle>공지사항</HeaderTitle>
 
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
 
@@ -138,8 +140,10 @@ const TermsList: React.FC = () => {
       </InfoBar>
 
       <TableContainer>
-        {/* TermsTable이 요구하는 prop 이름은 filteredData 입니다 */}
-        <TermsTable filteredData={currentPageData} handleEdit={handleEdit} />
+        <NoticeTable
+          filteredData={currentPageData}
+          handleEdit={handleAuthorClick}
+        />
       </TableContainer>
 
       <FooterRow>
@@ -149,9 +153,10 @@ const TermsList: React.FC = () => {
   );
 };
 
-export default TermsList;
+export default NoticeList;
 
 /* ====================== Styled Components ====================== */
+
 const Content = styled.div`
   display: flex;
   flex-direction: column;
@@ -162,6 +167,7 @@ const Content = styled.div`
 `;
 
 const HeaderTitle = styled.h1`
+  text-align: left;
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 16px;

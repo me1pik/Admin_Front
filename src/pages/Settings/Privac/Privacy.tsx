@@ -1,87 +1,40 @@
-// src/pages/NoticeList.tsx
+// src/pages/PrivacyList.tsx
 
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
-import NoticeTable, {
-  NoticeItem,
-} from '../components/Table/Setting/NoticeTable';
-import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
-import Pagination from '../components/Pagination';
+import PrivacyTable, {
+  PrivacyItem,
+} from '../../../components/Table/Setting/PrivacyTable';
+import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
+import Pagination from '../../../components/Pagination';
 
-/** 공지사항 더미 데이터 */
-const dummyNotice: NoticeItem[] = [
-  {
-    no: 13485,
-    type: '공지',
-    content: '[공지] 새로운 시즌 신상품 할인안내 (2025 봄)',
-    author: '홍길동 매니저',
-    createdAt: '2025.04.01',
-  },
+/** 개인정보 더미 데이터 */
+const dummyPrivacy: PrivacyItem[] = [
   {
     no: 13486,
-    type: '공지',
-    content: '[공지] 시스템 정기 점검 안내 (4/15 ~ 4/16)',
-    author: '이영희 담당',
-    createdAt: '2025.04.02',
-  },
-  {
-    no: 13487,
-    type: '안내',
-    content: '[안내] 회원가입 이벤트 당첨자 발표',
-    author: '김민수 운영',
-    createdAt: '2025.04.03',
-  },
-  {
-    no: 13488,
-    type: '공지',
-    content: '[공지] 휴무일 배송 지연 공지',
-    author: '박민정 팀장',
-    createdAt: '2025.04.04',
-  },
-  {
-    no: 13489,
-    type: '안내',
-    content: '[안내] 적립금 사용정책 변경 안내',
-    author: '허준 대리',
-    createdAt: '2025.04.05',
-  },
-  {
-    no: 13490,
-    type: '공지',
-    content: '[공지] 신규 브랜드 입점 예정 안내 (4월말)',
-    author: '최수영 매니저',
-    createdAt: '2025.04.06',
-  },
-  {
-    no: 13491,
-    type: '안내',
-    content: '[안내] 리뷰 프로모션 (포토리뷰 작성 시 포인트 지급)',
-    author: '정아름 운영',
-    createdAt: '2025.04.07',
-  },
-  {
-    no: 13492,
-    type: '안내',
-    content: '[안내] 배송비 인상 안내 (물류비 상승)',
-    author: '김진호 담당',
-    createdAt: '2025.04.08',
+    type: '개인정보방침',
+    content: '개인정보의 획득 및 수집방법',
+    author: '홍길동 (등급1)',
+    createdAt: '2025.04.01',
   },
 ];
 
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
-  { label: '공지', path: '공지' },
-  { label: '안내', path: '안내' },
+  { label: '개인정보방침', path: '개인정보방침' },
+  { label: '파기절차', path: '파기절차' },
+  { label: '기타', path: '기타' },
 ];
 
-// 상세페이지로 전달할 selectOptions
-const noticeSelectOptions: TabItem[] = [
-  { label: '공지', path: '' },
-  { label: '안내', path: '' },
+// Privacy용 selectOptions
+const privacySelectOptions: TabItem[] = [
+  { label: '개인정보방침', path: '' },
+  { label: '파기절차', path: '' },
+  { label: '기타', path: '' },
 ];
 
-const NoticeList: React.FC = () => {
+const PrivacyList: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
@@ -91,10 +44,10 @@ const NoticeList: React.FC = () => {
   const limit = 10;
 
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-  const [noticeData] = useState<NoticeItem[]>(dummyNotice);
+  const [privacyData] = useState<PrivacyItem[]>(dummyPrivacy);
 
   // 탭별 1차 필터링
-  const dataByTab = noticeData.filter((item) =>
+  const dataByTab = privacyData.filter((item) =>
     selectedTab.label === '전체보기' ? true : item.type === selectedTab.label
   );
 
@@ -124,14 +77,14 @@ const NoticeList: React.FC = () => {
   };
 
   const handleAuthorClick = (_: string, no: number) => {
-    navigate(`/settingsDetail/${no}`, {
-      state: { selectOptions: noticeSelectOptions },
+    navigate(`/privacyDetail/${no}`, {
+      state: { selectOptions: privacySelectOptions },
     });
   };
 
   return (
     <Content>
-      <HeaderTitle>공지사항</HeaderTitle>
+      <HeaderTitle>개인정보보호</HeaderTitle>
 
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
 
@@ -140,7 +93,7 @@ const NoticeList: React.FC = () => {
       </InfoBar>
 
       <TableContainer>
-        <NoticeTable
+        <PrivacyTable
           filteredData={currentPageData}
           handleEdit={handleAuthorClick}
         />
@@ -153,7 +106,7 @@ const NoticeList: React.FC = () => {
   );
 };
 
-export default NoticeList;
+export default PrivacyList;
 
 /* ====================== Styled Components ====================== */
 
@@ -167,7 +120,6 @@ const Content = styled.div`
 `;
 
 const HeaderTitle = styled.h1`
-  text-align: left;
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 16px;
