@@ -18,13 +18,14 @@ import CalculateList from './pages/CalculateList';
 import BrandList from './pages/BrandList';
 import GeneralOrderDetail from './pages/GeneralOrderDetail';
 
-import Notice from './pages/Settings/Notice/Notice';
+import NoticeList from './pages/Settings/Notice/NoticeList';
 import NoticeDetail from './pages/Settings/Notice/NoticeDetail';
-import Terms from './pages/Settings/Terms/Terms';
+import CreateNotice from './pages/Settings/Notice/CreateNotice';
+import TermsList from './pages/Settings/Terms/TermsList';
 import TermsDetail from './pages/Settings/Terms/TermsDetail';
-import Privacy from './pages/Settings/Privac/Privacy';
+import PrivacyList from './pages/Settings/Privac/PrivacyList';
 import PrivacyDetail from './pages/Settings/Privac/PrivacyDetail';
-import FAQ from './pages/Settings/FAQ/FAQ';
+import FAQList from './pages/Settings/FAQ/FAQList';
 import FAQDetail from './pages/Settings/FAQ/FAQDetail';
 
 // import Dashboard from "./pages/Dashboard";
@@ -57,13 +58,14 @@ const App: React.FC = () => {
           <Route path='/productdetail/:no' element={<ProductDetail />} />
           <Route path='/brandlist' element={<BrandList />} />
           <Route path='/generalorderdetail' element={<GeneralOrderDetail />} />
-          <Route path='/notice' element={<Notice />} />{' '}
+          <Route path='/notice' element={<NoticeList />} />
           <Route path='/noticeDetail/:no' element={<NoticeDetail />} />
-          <Route path='/terms' element={<Terms />} />
+          <Route path='/createNotice' element={<CreateNotice />} />
+          <Route path='/terms' element={<TermsList />} />
           <Route path='/termsDetail/:no' element={<TermsDetail />} />
-          <Route path='/privacy' element={<Privacy />} />
+          <Route path='/privacy' element={<PrivacyList />} />
           <Route path='/privacyDetail/:no' element={<PrivacyDetail />} />
-          <Route path='/faq' element={<FAQ />} />
+          <Route path='/faq' element={<FAQList />} />
           <Route path='/faqDetail/:no' element={<FAQDetail />} />
           {/* <Route path="/analysisinfo" element={<AnalysisInfo />} />
           <Route path="/inventorylist" element={<InventoryList />} />

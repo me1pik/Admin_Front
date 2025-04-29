@@ -1,15 +1,15 @@
-// src/pages/NoticeList.tsx
-
+// src/pages/Settings/Notice/Notice.tsx
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
+
 import NoticeTable, {
   NoticeItem,
 } from '../../../components/Table/Setting/NoticeTable';
 import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
 import Pagination from '../../../components/Pagination';
 
-/** 공지사항 더미 데이터 */
+// 더미 데이터
 const dummyNotice: NoticeItem[] = [
   {
     no: 13485,
@@ -75,30 +75,28 @@ const tabs: TabItem[] = [
   { label: '안내', path: '안내' },
 ];
 
-// 상세페이지로 전달할 selectOptions
 const noticeSelectOptions: TabItem[] = [
   { label: '공지', path: '' },
   { label: '안내', path: '' },
 ];
 
-const NoticeList: React.FC = () => {
+const Notice: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
 
-  // URL 쿼리에서 현재 페이지 읽기
   const page = parseInt(searchParams.get('page') ?? '1', 10);
   const limit = 10;
 
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
   const [noticeData] = useState<NoticeItem[]>(dummyNotice);
 
-  // 탭별 1차 필터링
+  // 탭 필터링
   const dataByTab = noticeData.filter((item) =>
     selectedTab.label === '전체보기' ? true : item.type === selectedTab.label
   );
 
-  // URL 검색어로 2차 필터링
+  // 검색어 필터링
   const filteredData = dataByTab.filter((item) =>
     [
       String(item.no),
@@ -109,13 +107,11 @@ const NoticeList: React.FC = () => {
     ].some((field) => field.toLowerCase().includes(searchTerm))
   );
 
-  // 페이지네이션 계산
   const totalCount = filteredData.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  // 탭 변경 시 page=1으로 URL 리셋
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
     const params = Object.fromEntries(searchParams.entries());
@@ -123,11 +119,34 @@ const NoticeList: React.FC = () => {
     setSearchParams(params);
   };
 
-  const handleAuthorClick = (_: string, no: number) => {
+  const handleRowClick = (_: string, no: number) => {
     navigate(`/noticeDetail/${no}`, {
       state: { selectOptions: noticeSelectOptions },
     });
   };
+  const hoverAnim = keyframes`
+  0% { transform: translateY(0); box-shadow: none; }
+  100% { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+`;
+  const AddButton = styled.button`
+    padding: 10px 20px;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #222;
+      animation: ${hoverAnim} 0.2s forwards;
+    }
+    &:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+  `;
 
   return (
     <Content>
@@ -142,57 +161,53 @@ const NoticeList: React.FC = () => {
       <TableContainer>
         <NoticeTable
           filteredData={currentPageData}
-          handleEdit={handleAuthorClick}
+          handleEdit={handleRowClick}
         />
       </TableContainer>
 
       <FooterRow>
-        <Pagination totalPages={totalPages} />
+        <Pagination
+          totalPages={totalPages}
+          leftComponent={
+            <AddButton onClick={() => navigate('/createNotice')}>
+              등록하기
+            </AddButton>
+          }
+        />
       </FooterRow>
     </Content>
   );
 };
 
-export default NoticeList;
-
-/* ====================== Styled Components ====================== */
+export default Notice;
 
 const Content = styled.div`
   display: flex;
   flex-direction: column;
-  background-color: #ffffff;
+  background-color: #fff;
   flex-grow: 1;
-  font-size: 14px;
   padding: 10px;
 `;
-
 const HeaderTitle = styled.h1`
-  text-align: left;
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 16px;
   margin-bottom: 18px;
 `;
-
 const InfoBar = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 15px;
 `;
-
 const TotalCountText = styled.div`
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
 `;
-
 const TableContainer = styled.div`
   box-sizing: border-box;
 `;
-
 const FooterRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  width: 100%;
   margin-top: 40px;
 `;
