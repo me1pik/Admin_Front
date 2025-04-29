@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 /** User 인터페이스 (이미지에 맞춰 필드 변경) */
 export interface User {
@@ -31,14 +31,10 @@ const PageTable: React.FC<PageTableProps> = ({
   handleEdit,
   pageSize = 10,
 }) => {
-  const location = useLocation();
   const [searchParams] = useSearchParams();
 
   // URL ?page= 에서 현재 페이지를 읽되, 없으면 1
   const currentPage = Number(searchParams.get('page') ?? '1');
-
-  // 전체 페이지 수 계산
-  const totalPages = Math.max(1, Math.ceil(data.length / pageSize));
 
   // 현재 페이지에 해당하는 데이터 슬라이스
   const slicedData = data.slice(
