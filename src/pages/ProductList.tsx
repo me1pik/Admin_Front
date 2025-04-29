@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import ProductTable, { ProductItem } from '../components/Table/ProductTable';
 import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
 import Pagination from '../components/Pagination';
-import RegisterButton from '../components/RegisterButton';
+// import RegisterButton from '../components/RegisterButton';
 import {
   getProducts,
   ProductListParams,
@@ -98,9 +98,9 @@ const ProductList: React.FC = () => {
     navigate(`/productdetail/${no}${window.location.search}`);
   };
 
-  const handleRegister = () => {
-    navigate('/productregister');
-  };
+  // const handleRegister = () => {
+  //   navigate('/productregister');
+  // };
 
   return (
     <Content>
@@ -121,7 +121,7 @@ const ProductList: React.FC = () => {
       </TableContainer>
 
       <FooterRow>
-        <RegisterButton text='제품등록' onClick={handleRegister} />
+        {/* <RegisterButton text='제품등록' onClick={handleRegister} /> */}
         <Pagination
           currentPage={page}
           totalPages={totalPages}
