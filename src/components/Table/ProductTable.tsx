@@ -16,8 +16,8 @@ export interface ProductItem {
   brand: string;
   category: string;
   color: string;
-  size: string; // 사이즈
-  price: number; // retailPrice → price 로 변경
+  size: string; // 사이즈 (예: "SIZE 55 / SIZE 66" 또는 "Free")
+  price: number;
   registerDate: string;
   status: string;
 }
@@ -25,13 +25,11 @@ export interface ProductItem {
 /** ProductTable Props */
 interface ProductTableProps {
   filteredData: ProductItem[];
-  // handleEdit 함수가 styleCode와 no 두 개의 인자를 받도록 수정
   handleEdit: (styleCode: string, no: number) => void;
-  /** 페이지 시작 순번 (0-based) */
   startNo?: number;
 }
 
-// 모든 셀에 공통으로 적용할 ellipsis 스타일
+// ellipsis 스타일
 const ellipsis = css`
   overflow: hidden;
   text-overflow: ellipsis;
@@ -43,7 +41,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
   handleEdit,
   startNo = 0,
 }) => {
-  // 상태별 배경색 반환 함수
+  // 상태별 배경색
   const getStatusColor = (status: string) => {
     switch (status) {
       case '등록완료':
@@ -57,31 +55,32 @@ const ProductTable: React.FC<ProductTableProps> = ({
     }
   };
 
-  // 사이즈 문자열을 배열로 분리해 매핑 후 다시 합치기
+  // 사이즈 매핑 함수
   const formatSize = (raw: string) => {
     // Free 처리
     if (/free/i.test(raw)) return 'Free';
-    // 숫자 추출
-    const parts = raw.match(/\d+/g) || [];
-    const formatted = parts.map((num) => {
+    // 숫자만 추출
+    const parts = raw.match(/\d+/g);
+    if (!parts) return raw;
+    const mapped = parts.map((num) => {
       const label = SIZE_LABELS[num];
       return label ? `${num}(${label})` : num;
     });
-    return formatted.join(' / ');
+    return mapped.join(' / ');
   };
 
   return (
     <Table>
       <colgroup>
-        <col style={{ width: '50px' }} /> {/* 순번 */}
-        <col style={{ width: '150px' }} /> {/* 스타일(품번) */}
-        <col style={{ width: '100px' }} /> {/* 브랜드 */}
-        <col style={{ width: '80px' }} /> {/* 분류 */}
-        <col style={{ width: '80px' }} /> {/* 색상 */}
-        <col style={{ width: '100px' }} /> {/* 사이즈 */}
-        <col style={{ width: '100px' }} /> {/* 가격 */}
-        <col style={{ width: '100px' }} /> {/* 등록일 */}
-        <col style={{ width: '80px' }} /> {/* 상태 */}
+        <col style={{ width: '50px' }} />
+        <col style={{ width: '150px' }} />
+        <col style={{ width: '100px' }} />
+        <col style={{ width: '80px' }} />
+        <col style={{ width: '80px' }} />
+        <col style={{ width: '100px' }} />
+        <col style={{ width: '100px' }} />
+        <col style={{ width: '100px' }} />
+        <col style={{ width: '80px' }} />
       </colgroup>
       <thead>
         <TableRow>
@@ -144,52 +143,45 @@ const ProductTable: React.FC<ProductTableProps> = ({
 
 export default ProductTable;
 
-/* ====================== Styled Components ====================== */
 const Table = styled.table`
   width: 100%;
   table-layout: fixed;
   border-collapse: collapse;
-  background-color: #ffffff;
-  border: 1px solid #dddddd;
+  background-color: #fff;
+  border: 1px solid #ddd;
 `;
-
 const TableRow = styled.tr`
   height: 44px;
 `;
-
 const Th = styled.th`
   text-align: center;
   vertical-align: middle;
-  background-color: #eeeeee;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
+  background-color: #eee;
+  font-family: 'NanumSquare Neo OTF';
   font-weight: 800;
   font-size: 12px;
-  color: #000000;
-  border: 1px solid #dddddd;
+  color: #000;
+  border: 1px solid #ddd;
   ${ellipsis}
 `;
-
 const Td = styled.td`
   text-align: center;
   vertical-align: middle;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
+  font-family: 'NanumSquare Neo OTF';
   font-weight: 400;
   font-size: 12px;
-  color: #000000;
-  border: 1px solid #dddddd;
+  color: #000;
+  border: 1px solid #ddd;
   ${ellipsis}
 `;
-
 const StyleCodeText = styled.span`
   font-size: 12px;
   cursor: pointer;
   color: #007bff;
-
   &:hover {
     color: #0056b3;
   }
 `;
-
 const StatusBadge = styled.div`
   display: inline-block;
   border-radius: 4px;
@@ -198,7 +190,7 @@ const StatusBadge = styled.div`
   line-height: 24px;
   font-size: 10px;
   font-weight: 800;
-  color: #ffffff;
+  color: #fff;
   text-align: center;
   vertical-align: middle;
   ${ellipsis}
