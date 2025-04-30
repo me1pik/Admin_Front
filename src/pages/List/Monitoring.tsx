@@ -5,9 +5,9 @@ import { useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import MonitoringTable, {
   MonitoringItem,
-} from '../components/Table/MonitoringTable';
-import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
-import Pagination from '../components/Pagination';
+} from '../../components/Table/MonitoringTable';
+import SubHeader, { TabItem } from '../../components/Header/SearchSubHeader';
+import Pagination from '../../components/Pagination';
 
 /** 모니터링 더미 데이터 (배송일정 제거) */
 const dummyMonitoring: MonitoringItem[] = [

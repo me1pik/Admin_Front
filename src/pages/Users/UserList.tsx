@@ -3,10 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
-import UserTable, { User } from '../components/Table/UserTable';
-import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
-import Pagination from '../components/Pagination';
-import { getAllUsers, getBlockedUsers } from '../api/adminUser';
+import UserTable, { User } from '../../components/Table/UserTable';
+import SubHeader, { TabItem } from '../../components/Header/SearchSubHeader';
+import Pagination from '../../components/Pagination';
+import { getAllUsers, getBlockedUsers } from '../../api/adminUser';
 
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },

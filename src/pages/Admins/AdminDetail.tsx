@@ -5,16 +5,16 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import ListButtonDetailSubHeader, {
   DetailSubHeaderProps,
-} from '../components/Header/ListButtonDetailSubHeader';
-import AdminDetailTopBoxes from '../components/AdminDetailTopBoxes';
-import ShippingTabBar from '../components/TabBar';
+} from '../../components/Header/ListButtonDetailSubHeader';
+import AdminDetailTopBoxes from '../../components/AdminDetailTopBoxes';
+import ShippingTabBar from '../../components/TabBar';
 import TaskHistoryTable, {
   TaskHistoryRow,
-} from '../components/Table/admin/TaskHistoryTable';
+} from '../../components/Table/admin/TaskHistoryTable';
 import PermissionSettingsTable, {
   PermissionGroup,
-} from '../components/Table/admin/PermissionSettingsTable';
-import Pagination from '../components/Pagination';
+} from '../../components/Table/admin/PermissionSettingsTable';
+import Pagination from '../../components/Pagination';
 
 // 예시 제품 번호
 const dummyProducts = [{ no: 5 }];

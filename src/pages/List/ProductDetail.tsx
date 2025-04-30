@@ -2,22 +2,22 @@
 import React, { useEffect, useState, useCallback, FormEvent } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
-import TripleButtonDetailSubHeader from '../components/Header/TripleButtonDetailSubHeader';
-import SizeGuideSection from '../components/productregister/SizeGuideSection';
-import SizeDisplaySection from '../components/productregister/SizeDisplaySection';
-import MaterialInfoSection from '../components/productregister/MaterialInfoSection';
-import FabricInfoSection from '../components/productregister/FabricInfoSection';
-import ProductImageSection from '../components/productregister/ProductImageSection';
-import DetailTopBoxes from '../components/DetailTopBoxes';
-import ReusableModal from '../components/TwoButtonModal';
-import ReusableModal2 from '../components/OneButtonModal';
+import TripleButtonDetailSubHeader from '../../components/Header/TripleButtonDetailSubHeader';
+import SizeGuideSection from '../../components/productregister/SizeGuideSection';
+import SizeDisplaySection from '../../components/productregister/SizeDisplaySection';
+import MaterialInfoSection from '../../components/productregister/MaterialInfoSection';
+import FabricInfoSection from '../../components/productregister/FabricInfoSection';
+import ProductImageSection from '../../components/productregister/ProductImageSection';
+import DetailTopBoxes from '../../components/DetailTopBoxes';
+import ReusableModal from '../../components/TwoButtonModal';
+import ReusableModal2 from '../../components/OneButtonModal';
 
 import {
   getProductDetail,
   updateProduct,
   ProductDetailResponse,
   SizeRow,
-} from '../api/adminProduct';
+} from '../../api/adminProduct';
 
 const cleanPayload = <T extends object>(obj: T): Partial<T> => {
   const result = { ...(obj as any) } as Partial<T>;

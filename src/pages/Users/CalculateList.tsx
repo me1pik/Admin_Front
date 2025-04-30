@@ -1,11 +1,13 @@
-// src/pages/DetailsSales.tsx
+// src/pages/CalculateList.tsx
 
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
-import DetailsSalesTable, { User } from '../components/Table/DetailsSalesTable';
-import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
-import Pagination from '../components/Pagination';
+import CalculateListTable, {
+  User,
+} from '../../components/Table/CalculateListTable';
+import SubHeader, { TabItem } from '../../components/Header/SearchSubHeader';
+import Pagination from '../../components/Pagination';
 
 /** 탭 목록 */
 const tabs: TabItem[] = [
@@ -14,19 +16,19 @@ const tabs: TabItem[] = [
   { label: '블럭회원', path: '블럭' },
 ];
 
-/** 더미 데이터 */
+/** 더미 데이터 (구매 횟수 제거) */
 const dummyData: User[] = [
   {
     no: 13486,
     grade: '일반',
     name: '홍길동',
     nickname: '홍길동',
-    instagram: 'mivin',
+    instagram: 'styleweex',
     season: '2025 / 1분기',
-    contentsCount: '8개',
-    submitCount: '30',
-    average: 12,
+    sellCount: '8개',
     totalSum: 1840000,
+    profit: 184000,
+    expectedProfit: 92000,
   },
   {
     no: 13485,
@@ -35,34 +37,34 @@ const dummyData: User[] = [
     nickname: '홍길동',
     instagram: 'Cobrasin',
     season: '2025 / 1분기',
-    contentsCount: '8개',
-    submitCount: '30',
-    average: 12,
+    sellCount: '8개',
     totalSum: 1840000,
+    profit: 184000,
+    expectedProfit: 92000,
   },
   {
     no: 13484,
     grade: '일반',
     name: '홍길동',
     nickname: '홍길동',
-    instagram: 'mert_eunroae',
+    instagram: 'mert__eunroae',
     season: '2025 / 1분기',
-    contentsCount: '8개',
-    submitCount: '30',
-    average: 12,
+    sellCount: '8개',
     totalSum: 1840000,
+    profit: 184000,
+    expectedProfit: 92000,
   },
   {
     no: 13483,
     grade: '일반',
     name: '홍길동',
     nickname: '홍길동',
-    instagram: 'jimmy.stayagam',
+    instagram: 'jimmy.stayagram',
     season: '2025 / 1분기',
-    contentsCount: '8개',
-    submitCount: '30',
-    average: 12,
+    sellCount: '8개',
     totalSum: 1840000,
+    profit: 184000,
+    expectedProfit: 92000,
   },
   {
     no: 13482,
@@ -71,38 +73,62 @@ const dummyData: User[] = [
     nickname: '홍길동',
     instagram: 'mikyong___k',
     season: '2025 / 1분기',
-    contentsCount: '8개',
-    submitCount: '30',
-    average: 12,
+    sellCount: '8개',
     totalSum: 1840000,
+    profit: 184000,
+    expectedProfit: 92000,
   },
   {
     no: 13481,
+    grade: '일반',
+    name: '홍길동',
+    nickname: '홍길동',
+    instagram: 'diva0629',
+    season: '2025 / 1분기',
+    sellCount: '8개',
+    totalSum: 1840000,
+    profit: 184000,
+    expectedProfit: 92000,
+  },
+  {
+    no: 13480,
     grade: '블럭',
     name: '홍길동',
     nickname: '홍길동',
     instagram: 'blossom520',
     season: '2025 / 1분기',
-    contentsCount: '8개',
-    submitCount: '30',
-    average: 12,
+    sellCount: '8개',
     totalSum: 1840000,
+    profit: 184000,
+    expectedProfit: 92000,
+  },
+  {
+    no: 13479,
+    grade: '블럭',
+    name: '홍길동',
+    nickname: '홍길동',
+    instagram: 'blossom520',
+    season: '2025 / 1분기',
+    sellCount: '8개',
+    totalSum: 1840000,
+    profit: 184000,
+    expectedProfit: 92000,
   },
 ];
 
-const DetailsSales: React.FC = () => {
+const CalculateList: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
 
-  // URL 쿼리에서 현재 페이지 읽기
+  // URL 쿼리에서 현재 페이지 가져오기
   const page = parseInt(searchParams.get('page') ?? '1', 10);
   const limit = 10;
 
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
   const [data] = useState<User[]>(dummyData);
 
-  // 탭 변경: selectedTab 업데이트 + page=1으로 URL 리셋
+  /** 탭 변경 시 URL의 page=1로 리셋 */
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
     const params = Object.fromEntries(searchParams.entries());
@@ -110,12 +136,12 @@ const DetailsSales: React.FC = () => {
     setSearchParams(params);
   };
 
-  // 탭별 1차 필터링
+  /** 1차: 탭별 필터링 */
   const dataByTab = data.filter((item) =>
     selectedTab.label === '전체보기' ? true : item.grade === selectedTab.path
   );
 
-  // URL 검색어로 2차 필터링
+  /** 2차: URL 검색어 필터링 */
   const filteredData = dataByTab.filter((item) => {
     const t = searchTerm;
     return (
@@ -125,14 +151,14 @@ const DetailsSales: React.FC = () => {
       item.nickname.toLowerCase().includes(t) ||
       item.instagram.toLowerCase().includes(t) ||
       item.season.toLowerCase().includes(t) ||
-      item.contentsCount.toLowerCase().includes(t) ||
-      item.submitCount.toLowerCase().includes(t) ||
-      String(item.average).includes(t) ||
-      String(item.totalSum).includes(t)
+      item.sellCount.toLowerCase().includes(t) ||
+      String(item.totalSum).includes(t) ||
+      String(item.profit).includes(t) ||
+      String(item.expectedProfit).includes(t)
     );
   });
 
-  // 페이지네이션 계산
+  /** 페이지네이션 계산 및 슬라이스 */
   const totalCount = filteredData.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
   const offset = (page - 1) * limit;
@@ -144,7 +170,7 @@ const DetailsSales: React.FC = () => {
 
   return (
     <Content>
-      <HeaderTitle>판매내역</HeaderTitle>
+      <HeaderTitle>정산내역</HeaderTitle>
 
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
 
@@ -153,7 +179,7 @@ const DetailsSales: React.FC = () => {
       </InfoBar>
 
       <TableContainer>
-        <DetailsSalesTable
+        <CalculateListTable
           filteredData={currentPageData}
           handleEdit={handleEdit}
         />
@@ -166,7 +192,7 @@ const DetailsSales: React.FC = () => {
   );
 };
 
-export default DetailsSales;
+export default CalculateList;
 
 /* ====================== Styled Components ====================== */
 
@@ -180,6 +206,7 @@ const Content = styled.div`
 `;
 
 const HeaderTitle = styled.h1`
+  text-align: left;
   font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 16px;

@@ -3,9 +3,9 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
-import PageTable, { User } from '../components/Table/PageTable';
-import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
-import Pagination from '../components/Pagination';
+import PageTable, { User } from '../../components/Table/PageTable';
+import SubHeader, { TabItem } from '../../components/Header/SearchSubHeader';
+import Pagination from '../../components/Pagination';
 
 /** 탭 목록 */
 const tabs: TabItem[] = [

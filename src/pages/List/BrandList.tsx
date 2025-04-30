@@ -3,10 +3,10 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
-import BrandTable, { BrandItem } from '../components/Table/BrandTable';
-import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
-import Pagination from '../components/Pagination';
-import RegisterButton from '../components/RegisterButton'; // 새 버튼 컴포넌트 임포트
+import BrandTable, { BrandItem } from '../../components/Table/BrandTable';
+import SubHeader, { TabItem } from '../../components/Header/SearchSubHeader';
+import Pagination from '../../components/Pagination';
+import RegisterButton from '../../components/RegisterButton'; // 새 버튼 컴포넌트 임포트
 
 /** 더미 브랜드 데이터 */
 const dummyBrands: BrandItem[] = [

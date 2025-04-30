@@ -3,9 +3,9 @@
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
-import OrderTable, { Order } from '../components/Table/OrderTable';
-import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
-import Pagination from '../components/Pagination';
+import OrderTable, { Order } from '../../components/Table/OrderTable';
+import SubHeader, { TabItem } from '../../components/Header/SearchSubHeader';
+import Pagination from '../../components/Pagination';
 
 /** 주문 더미 데이터 (paymentDate 제거) */
 const dummyOrders: Order[] = [
