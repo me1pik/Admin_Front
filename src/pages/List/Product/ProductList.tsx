@@ -3,15 +3,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
-import ProductTable, { ProductItem } from '../../components/Table/ProductTable';
-import SubHeader, { TabItem } from '../../components/Header/SearchSubHeader';
-import Pagination from '../../components/Pagination';
+import ProductTable, {
+  ProductItem,
+} from '../../../components/Table/ProductTable';
+import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
+import Pagination from '../../../components/Pagination';
 // import RegisterButton from '../components/RegisterButton';
 import {
   getProducts,
   ProductListParams,
   ProductListResponse,
-} from '../../api/adminProduct';
+} from '../../../api/adminProduct';
 
 // API에서 내려주는 원시 아이템 타입 (retailPrice 포함)
 interface RawProductItem extends ProductItem {
