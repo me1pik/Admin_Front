@@ -15,7 +15,8 @@ import PageList from './pages/Users/PageList';
 import ProductEvaluation from './pages/Users/ProductEvaluation';
 import DetailsSales from './pages/Users/DetailsSales';
 import CalculateList from './pages/Users/CalculateList';
-import BrandList from './pages/List/BrandList';
+import BrandList from './pages/List/Brand/BrandList';
+import BrandDetail from './pages/List/Brand/BrandDetail';
 import GeneralOrderDetail from './pages/GeneralOrderDetail';
 
 import NoticeList from './pages/Settings/Notice/NoticeList';
@@ -63,6 +64,8 @@ const App: React.FC = () => {
           {/* <Route path='/productregister' element={<ProductRegister />} /> */}
           <Route path='/productdetail/:no' element={<ProductDetail />} />
           <Route path='/brandlist' element={<BrandList />} />
+          <Route path='/branddetail/:no' element={<BrandDetail />} />
+
           <Route path='/generalorderdetail' element={<GeneralOrderDetail />} />
 
           <Route path='/notice' element={<NoticeList />} />
