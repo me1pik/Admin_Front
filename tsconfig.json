@@ -1,5 +1,13 @@
 {
   "compilerOptions": {
+    "baseUrl": ".", // 경로 별칭 기준
+    "paths": {
+      "@/*": ["src/*"],
+      "@components/*": ["src/components/*"],
+      "@pages/*": ["src/pages/*"],
+      "@api/*": ["src/api/*"],
+      "@assets/*": ["src/assets/*"]
+    },
     "types": ["node", "vite/client", "styled-components"],
     "target": "ES2020",
     "useDefineForClassFields": true,
@@ -17,7 +25,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
-    "typeRoots": ["./node_modules/@types"]
+    "typeRoots": ["./node_modules/@types"],
+    "esModuleInterop": true
   },
   "include": [
     "src/**/*",
@@ -26,8 +35,5 @@
     "vite.config.ts",
     "src/svg.d.ts"
   ],
-  "exclude": [
-    "node_modules", // 빌드 제외
-    "dist" // 빌드 제외
-  ]
+  "exclude": ["node_modules", "dist"]
 }

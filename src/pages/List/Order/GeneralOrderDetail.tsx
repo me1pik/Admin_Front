@@ -1,40 +1,27 @@
-// src/pages/GeneralOrder/GeneralOrderDetail.tsx
+// src/pages/List/Order/GeneralOrderDetail.tsx
 
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import DatePicker from 'react-datepicker';
+import { useNavigate, useParams } from 'react-router-dom';
+import DatePicker, { ReactDatePickerProps } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { FaCalendarAlt } from 'react-icons/fa';
 import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../../../components/Header/SettingsDetailSubHeader';
+import SettingsDetailTopBoxes from '../../../components/SettingsDetailTopBoxes';
 import ShippingTabBar from '../../../components/TabBar';
 import ReusableModal2 from '../../../components/OneButtonModal';
-import { TabItem } from '../../../components/Header/SearchSubHeader';
 
 interface GeneralOrderDetailProps {
   isCreate?: boolean;
-  selectOptions?: TabItem[];
 }
-
-const defaultOptions: TabItem[] = [
-  { label: '서비스', path: '서비스' },
-  { label: '주문/결제', path: '주문/결제' },
-  { label: '배송/반품', path: '배송/반품' },
-  { label: '이용권', path: '이용권' },
-];
 
 const GeneralOrderDetail: React.FC<GeneralOrderDetailProps> = ({
   isCreate = false,
-  selectOptions: propOptions,
 }) => {
   const navigate = useNavigate();
-  const location = useLocation() as { state?: { selectOptions: TabItem[] } };
   const { no } = useParams<{ no: string }>();
-  const options = isCreate
-    ? (propOptions ?? defaultOptions)
-    : (location.state?.selectOptions ?? defaultOptions);
   const numericNo = isCreate ? undefined : Number(no);
 
   // ─── 주문상세 state ───
@@ -81,6 +68,14 @@ const GeneralOrderDetail: React.FC<GeneralOrderDetailProps> = ({
     navigate(-1);
   };
 
+  // onChange 오류 해결: ReactDatePickerProps['onChange'] 사용
+  const handleDateChange: ReactDatePickerProps['onChange'] = (date, _e) => {
+    if (date instanceof Date) {
+      setExpectedDate(date);
+    }
+    // range 선택 시 array 처리도 가능
+  };
+
   const detailProps: DetailSubHeaderProps = {
     backLabel: '목록이동',
     onBackClick: handleBack,
@@ -103,15 +98,18 @@ const GeneralOrderDetail: React.FC<GeneralOrderDetailProps> = ({
         <span>{numericNo ?? '-'}</span>
       </ProductNumber>
 
+      <SettingsDetailTopBoxes />
+      <DividerDashed />
+
       <ShippingTabBar
         tabs={['주문상세', '배송정보']}
         activeIndex={activeTab}
         onTabClick={setActiveTab}
       />
 
-      {/* ── 주문상세 탭 ── */}
       {activeTab === 0 && (
         <FormBox>
+          {/* 주문상세 폼 내용 */}
           <Row>
             <Field>
               <label>제품명</label>
@@ -153,7 +151,7 @@ const GeneralOrderDetail: React.FC<GeneralOrderDetailProps> = ({
                 <FaCalendarAlt />
                 <StyledDatePicker
                   selected={expectedDate}
-                  onChange={(date) => date && setExpectedDate(date)}
+                  onChange={handleDateChange}
                   dateFormat='yyyy.MM.dd'
                 />
               </DatePickerContainer>
@@ -174,9 +172,9 @@ const GeneralOrderDetail: React.FC<GeneralOrderDetailProps> = ({
         </FormBox>
       )}
 
-      {/* ── 배송정보 탭 ── */}
       {activeTab === 1 && (
         <FormBox>
+          {/* 배송정보 폼 내용 */}
           <Row>
             <Field>
               <label>수령인</label>
@@ -268,6 +266,11 @@ const ProductNumber = styled.div`
   }
 `;
 
+const DividerDashed = styled.hr`
+  border-top: 1px dashed #ddd;
+  margin: 24px 0;
+`;
+
 const FormBox = styled.div`
   background: #fff;
   border: 1px solid #ddd;
@@ -350,27 +353,36 @@ const TrackingPart = styled.div`
 const DatePickerContainer = styled.div`
   display: flex;
   align-items: center;
-
+  border: 1px solid #ddd;
   border-radius: 4px;
-  padding: 0 8px;
+  padding: 0 12px;
   height: 36px;
+  min-width: 140px;
 
   svg {
     margin-right: 8px;
     color: #666;
   }
+
+  input {
+    border: none;
+    outline: none;
+    font-size: 12px;
+    height: 100%;
+    min-width: 80px;
+  }
 `;
 
+// 제네릭 완전히 제거했습니다
 const StyledDatePicker = styled(DatePicker)`
   border: none;
   outline: none;
   font-size: 12px;
-  max-width: 300px;
-  height: 36px;
+  height: 100%;
 `;
 
 const Hint = styled.div`
-  margin-top: 4px;
+  margin-left: 8px;
   font-size: 10px;
   color: #999;
 `;
