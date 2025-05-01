@@ -38,11 +38,18 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   const [paymentStatus, setPaymentStatus] = useState('결제완료');
 
   // ─── 배송정보 state ───
-  const [receiver] = useState('홍길동');
-  const [phone] = useState('010-1234-5678');
-  const [message, setMessage] = useState('문 앞에 전달해주세요.');
-  const [address] = useState('(18139) 경기 오산시 대원로 47, 101동 903호');
-  const [deliveryStatus, setDeliveryStatus] = useState('배송 준비중');
+  const [sender] = useState('홍길순'); // 발송인
+  const [senderPhone] = useState('010-1111-2222'); // 발송인 연락처
+  const [receiver] = useState('홍길동'); // 수령인
+  const [receiverPhone] = useState('010-1234-5678'); // 수령인 연락처
+  const [message, setMessage] = useState('문 앞에 전달해주세요.'); // 메시지
+  const [deliveryAddress] = useState(
+    '(06205) 서울 강남구 대치동 922-4 디엠빌딩 401호'
+  ); // 배송지
+  const [deliveryStatus, setDeliveryStatus] = useState('배송 준비중'); // 배송상태
+  const [returnAddress] = useState(
+    '(06205) 서울 강남구 대치동 922-4 디엠빌딩 401호'
+  ); // 회수지
 
   // ─── 공통 state ───
   const [activeTab, setActiveTab] = useState(0);
@@ -68,12 +75,8 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
     navigate(-1);
   };
 
-  // onChange 오류 해결: ReactDatePickerProps['onChange'] 사용
-  const handleDateChange: ReactDatePickerProps['onChange'] = (date, _e) => {
-    if (date instanceof Date) {
-      setExpectedDate(date);
-    }
-    // range 선택 시 array 처리도 가능
+  const handleDateChange: ReactDatePickerProps['onChange'] = (date) => {
+    if (date instanceof Date) setExpectedDate(date);
   };
 
   const detailProps: DetailSubHeaderProps = {
@@ -109,7 +112,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 
       {activeTab === 0 && (
         <FormBox>
-          {/* 주문상세 폼 내용 */}
+          {/* 주문상세 */}
           <Row>
             <Field>
               <label>제품명</label>
@@ -155,7 +158,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
                   dateFormat='yyyy.MM.dd'
                 />
               </DatePickerContainer>
-              <Hint>(제품 신청일로부터 3일 이내)</Hint>
             </Field>
             <Field>
               <label>결제상태</label>
@@ -174,16 +176,27 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 
       {activeTab === 1 && (
         <FormBox>
-          {/* 배송정보 폼 내용 */}
+          {/* 배송정보 */}
           <Row>
+            <Field>
+              <label>발송인</label>
+              <input value={sender} readOnly />
+            </Field>
+            <Field>
+              <label>연락처</label>
+              <input value={senderPhone} readOnly />
+            </Field>
             <Field>
               <label>수령인</label>
               <input value={receiver} readOnly />
             </Field>
             <Field>
               <label>연락처</label>
-              <input value={phone} readOnly />
+              <input value={receiverPhone} readOnly />
             </Field>
+          </Row>
+
+          <Row>
             <Field>
               <label>메시지</label>
               <input
@@ -194,13 +207,14 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
           </Row>
 
           <Row>
-            <Field style={{ minWidth: '100%' }}>
+            <Field style={{ flex: 1, minWidth: 0 }}>
               <label>배송지</label>
-              <input value={address} readOnly style={{ width: '100%' }} />
+              <input
+                value={deliveryAddress}
+                readOnly
+                style={{ width: '100%' }}
+              />
             </Field>
-          </Row>
-
-          <Row>
             <Field>
               <label>배송상태</label>
               <select
@@ -211,6 +225,13 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
                 <option>배송 중</option>
                 <option>배송 완료</option>
               </select>
+            </Field>
+          </Row>
+
+          <Row>
+            <Field style={{ flex: 1, minWidth: 0 }}>
+              <label>회수지</label>
+              <input value={returnAddress} readOnly style={{ width: '100%' }} />
             </Field>
           </Row>
         </FormBox>
@@ -285,8 +306,9 @@ const Row = styled.div`
 `;
 
 const Field = styled.div`
-  width: 100%;
-  min-width: 300px;
+  flex: 1;
+  min-width: 200px;
+
   display: flex;
   align-items: center;
   padding: 12px 16px;
@@ -310,10 +332,9 @@ const Field = styled.div`
     height: 36px;
     padding: 0 8px;
     font-size: 12px;
-    max-width: 300px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    box-sizing: border-box;
+    max-width: 200px;
   }
 `;
 
@@ -321,10 +342,9 @@ const InputGroup = styled.div`
   display: flex;
   align-items: center;
   height: 36px;
+  min-width: 200px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  overflow: hidden;
-  width: 100%;
 `;
 
 const MethodPart = styled.div`
@@ -343,10 +363,10 @@ const Divider = styled.div`
 const TrackingPart = styled.div`
   flex: 1;
   padding: 0 8px;
-  font-size: 12px;
-  font-weight: 400;
   white-space: nowrap;
   overflow: hidden;
+  font-size: 12px;
+  font-weight: 400;
   text-overflow: ellipsis;
 `;
 
@@ -357,7 +377,6 @@ const DatePickerContainer = styled.div`
   border-radius: 4px;
   padding: 0 12px;
   height: 36px;
-  min-width: 140px;
 
   svg {
     margin-right: 8px;
@@ -368,21 +387,12 @@ const DatePickerContainer = styled.div`
     border: none;
     outline: none;
     font-size: 12px;
-    height: 100%;
-    min-width: 80px;
   }
 `;
 
-// 제네릭 완전히 제거했습니다
 const StyledDatePicker = styled(DatePicker)`
   border: none;
   outline: none;
   font-size: 12px;
-  height: 100%;
-`;
-
-const Hint = styled.div`
-  margin-left: 8px;
-  font-size: 10px;
-  color: #999;
+  width: 100px;
 `;
