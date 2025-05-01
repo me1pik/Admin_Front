@@ -1,33 +1,68 @@
+// src/components/OrderDetailTopBoxes.tsx
 import React from 'react';
 import styled from 'styled-components';
-
 import userDetailImg2 from '../assets/userDetailImg2.svg';
-// import userDetailImg3 from '../assets/userDetailImg3.svg';
+import storeDetailImg from '../assets/storeDetailImg.svg';
 
-const SettingsDetailTopBoxes: React.FC = () => {
+const OrderDetailTopBoxes: React.FC = () => {
   return (
     <Container>
       <BoxWrapper>
-        {/* 첫 번째 박스 */}
+        {/* 1. 회원정보 */}
         <Box>
           <IconPlaceholder>
-            <IconImage src={userDetailImg2} alt='User Detail 2' />
+            <IconImage src={userDetailImg2} alt='User' />
+          </IconPlaceholder>
+          <Content>
+            <UserName>
+              <Label>홍길동</Label> <Nick>(mivin)</Nick>
+            </UserName>
+            <Email>goodxx21@naver.com</Email>
+            <Type>
+              <Label>형태</Label> / 제품구매
+            </Type>
+          </Content>
+        </Box>
+
+        <Divider />
+
+        {/* 2. 주문정보 */}
+        <Box>
+          <IconPlaceholder>
+            <IconImage src={storeDetailImg} alt='Store Detail' />
           </IconPlaceholder>
           <Content>
             <Row>
-              <Value>
-                <BoldValue>홍길동</BoldValue> (webmanager)
-              </Value>
+              <Label>주문일</Label>
+              <Value>2025-04-07 (10:03:25)</Value>
             </Row>
             <Row>
-              <Value>
-                <BoldValue>등록일</BoldValue> 2025.04.01
-              </Value>
+              <Label>주문번호</Label>
+              <Value>2906646342SYTIKI</Value>
             </Row>
             <Row>
-              <Value>
-                <BoldValue>관리등급 1</BoldValue> (등급)
-              </Value>
+              <Label>결제방식</Label>
+              <Value>카드결제</Value>
+            </Row>
+          </Content>
+        </Box>
+
+        <Divider />
+
+        {/* 3. 추가정보 */}
+        <Box>
+          <Content>
+            <Row>
+              <Label>포인트 사용</Label>
+              <Value>미사용</Value>
+            </Row>
+            <Row>
+              <Label>할인코드</Label>
+              <Value>미사용</Value>
+            </Row>
+            <Row>
+              <Label>추가비용</Label>
+              <Value>없음</Value>
             </Row>
           </Content>
         </Box>
@@ -36,37 +71,39 @@ const SettingsDetailTopBoxes: React.FC = () => {
   );
 };
 
-export default SettingsDetailTopBoxes;
+export default OrderDetailTopBoxes;
 
 /* ======================= Styled Components ======================= */
 
-/** 전체 컨테이너 */
 const Container = styled.div`
+  width: 100%;
   min-width: 1000px;
 `;
 
-/** 박스와 Divider를 포함하는 그룹 */
 const BoxWrapper = styled.div`
   display: flex;
-  align-items: stretch;
   border: 1px solid #dddddd;
   border-radius: 4px;
+  overflow: hidden;
 `;
 
-/** 각 박스 */
 const Box = styled.div`
   flex: 1;
   display: flex;
   align-items: center;
-  padding: 10px;
+  padding: 12px 20px;
 `;
 
-/** 아이콘 영역 */
+const Divider = styled.div`
+  width: 1px;
+  background-color: #dddddd;
+`;
+
 const IconPlaceholder = styled.div`
   width: 72px;
   height: 72px;
-  border: 1px solid #dddddd;
   border-radius: 50%;
+  background-color: #fafafa;
   margin-right: 15px;
   display: flex;
   align-items: center;
@@ -76,39 +113,57 @@ const IconPlaceholder = styled.div`
 const IconImage = styled.img`
   width: 72px;
   height: 72px;
-  object-fit: contain;
+  object-fit: cover;
   border-radius: 50%;
 `;
 
-/** 텍스트 영역 */
 const Content = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 `;
 
-/** 한 줄 */
+const UserName = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+`;
+
+const Nick = styled.span`
+  font-size: 12px;
+  color: #666;
+`;
+
+const Email = styled.div`
+  font-size: 12px;
+  color: #333;
+`;
+
+const Type = styled.div`
+  font-size: 12px;
+  color: #333;
+`;
+
 const Row = styled.div`
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+  margin-bottom: 4px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 `;
 
-/** 기본 텍스트 값 */
-const Value = styled.div`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
-  font-weight: 400;
+const Label = styled.span`
+  font-weight: 800;
   font-size: 12px;
   color: #000;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 `;
 
-/** Bold 텍스트 값 */
-const BoldValue = styled.span`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
-  font-weight: 800;
+const Value = styled.span`
+  font-weight: 400;
   font-size: 12px;
   color: #000;
 `;

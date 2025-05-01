@@ -9,7 +9,7 @@ import { FaCalendarAlt } from 'react-icons/fa';
 import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../../../components/Header/SettingsDetailSubHeader';
-import SettingsDetailTopBoxes from '../../../components/SettingsDetailTopBoxes';
+import OrderDetailTopBoxes from '../../../components/OrderDetailTopBoxes';
 import ShippingTabBar from '../../../components/TabBar';
 import ReusableModal2 from '../../../components/OneButtonModal';
 
@@ -98,7 +98,7 @@ const GeneralOrderDetail: React.FC<GeneralOrderDetailProps> = ({
         <span>{numericNo ?? '-'}</span>
       </ProductNumber>
 
-      <SettingsDetailTopBoxes />
+      <OrderDetailTopBoxes />
       <DividerDashed />
 
       <ShippingTabBar
