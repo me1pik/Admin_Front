@@ -52,6 +52,7 @@ interface TabButtonProps {
 
 const TabButton = styled.button<TabButtonProps>`
   padding: 10px 20px;
+  min-width: 110px;
   height: 40px;
   border: 1px solid #dddddd;
   border-bottom: none;
