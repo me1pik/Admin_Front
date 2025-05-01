@@ -1,10 +1,9 @@
-// src/components/productregister/ProductImageSection.tsx
 import React from 'react';
 import styled from 'styled-components';
 import { FaTimes, FaLink } from 'react-icons/fa';
 
 interface ProductImageSectionProps {
-  images: string[]; // dynamic
+  images: string[];
   handleImageLinkUpload: (index: number, url: string) => void;
   handleImageDelete: (index: number) => void;
   handleImageReorder: (from: number, to: number) => void;
@@ -18,43 +17,32 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
   handleImageReorder,
   productUrl,
 }) => {
-  // 단일 URL 삽입
   const onAddUrl = (idx: number) => {
     const url = window.prompt(
       '이미지 URL을 입력해주세요\n예: https://…jpg#addimg'
     );
-    if (url && url.trim()) {
-      handleImageLinkUpload(idx, url.trim());
-    }
+    if (url?.trim()) handleImageLinkUpload(idx, url.trim());
   };
 
-  // 일괄 URL 삽입
   const onBatchUrl = () => {
     const input = window.prompt(
       '여러 이미지 URL을 붙여넣으세요.\n쉼표(,) 또는 공백·줄바꿈으로 구분'
     );
     if (!input) return;
-
-    const candidates = input
+    const urls = input
       .split(/[\s,]+/)
       .map((u) => u.trim())
-      .filter((u) => u);
-    const urlRegex = /^https?:\/\/\S+\.(?:jpe?g|png|gif)(?:\?\S*)?(?:#\S*)?$/i;
-    const urls = candidates.filter((u) => urlRegex.test(u));
-
+      .filter((u) =>
+        /^https?:\/\/\S+\.(?:jpe?g|png|gif)(?:\?\S*)?(?:#\S*)?$/i.test(u)
+      );
     if (!urls.length) {
       alert('유효한 이미지 URL이 없습니다.');
       return;
     }
-
-    // 기존 길이를 기준으로 append
     const startIdx = images.length;
-    urls.forEach((url, i) => {
-      handleImageLinkUpload(startIdx + i, url);
-    });
+    urls.forEach((url, i) => handleImageLinkUpload(startIdx + i, url));
   };
 
-  // Drag & Drop 핸들러
   const onDragStart = (e: React.DragEvent, idx: number) => {
     e.dataTransfer.setData('text/plain', String(idx));
     e.dataTransfer.effectAllowed = 'move';
@@ -66,9 +54,7 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
   const onDrop = (e: React.DragEvent, idx: number) => {
     e.preventDefault();
     const from = Number(e.dataTransfer.getData('text/plain'));
-    if (!isNaN(from) && from !== idx) {
-      handleImageReorder(from, idx);
-    }
+    if (!isNaN(from) && from !== idx) handleImageReorder(from, idx);
   };
 
   return (
@@ -81,9 +67,7 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
           <span>URL 일괄 삽입</span>
         </BatchButton>
       </Header>
-
       <Divider />
-
       <Grid>
         {images.map((src, idx) => (
           <Column key={idx}>
@@ -94,7 +78,7 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
               onDrop={(e) => onDrop(e, idx)}
             >
               <IdxLabel>{idx + 1}</IdxLabel>
-              <ImgBox>
+              <ImgBox isMain={idx === 0}>
                 <Img src={src} alt={`이미지 ${idx + 1}`} />
                 <DeleteBtn
                   onClick={(e) => {
@@ -110,8 +94,6 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
             <Label>{idx === 0 ? 'Main Image' : `Image ${idx}`}</Label>
           </Column>
         ))}
-
-        {/* 항상 하나 남아 있는 ‘새 URL 삽입’ 버튼 */}
         <Column>
           <EmptyBox onClick={() => onAddUrl(images.length)}>
             <AddBtn title='새 URL 삽입'>
@@ -121,7 +103,6 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
           <Label>Add URL</Label>
         </Column>
       </Grid>
-
       <UrlContainer>
         <UrlLabel>제품 URL</UrlLabel>
         {productUrl ? (
@@ -139,7 +120,6 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
 export default ProductImageSection;
 
 /* styled-components */
-
 const SectionBox = styled.div`
   position: relative;
   margin-bottom: 20px;
@@ -220,10 +200,10 @@ const IdxLabel = styled.div`
   font-size: 10px;
   border-radius: 2px;
 `;
-const ImgBox = styled.div`
+const ImgBox = styled.div<{ isMain?: boolean }>`
   width: 140px;
   height: 200px;
-  border: 1px solid #ddd;
+  border: 2px solid ${({ isMain }) => (isMain ? '#f6ae24' : '#ddd')};
   background: #fff;
   display: flex;
   align-items: center;
