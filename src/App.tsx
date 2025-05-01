@@ -3,12 +3,14 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import AdminList from './pages/Admins/AdminList';
 import UserList from './pages/Users/UserList';
-import Monitoring from './pages/List/Monitoring';
+import MonitoringList from './pages/List/Monitoring/MonitoringList';
+import MonitoringDetail from './pages/List/Monitoring/MonitoringDetail';
+
 // import OrderList from './pages/List/OrderList';
 import Layout from './Layout';
-import ProductList from './pages/List/ProductList';
+import ProductList from './pages/List/Product/ProductList';
 // import ProductRegister from './pages/ProductRegister';
-import ProductDetail from './pages/List/ProductDetail';
+import ProductDetail from './pages/List/Product/ProductDetail';
 import UserDetail from './pages/Users/UserDetail';
 import AdminDetail from './pages/Admins/AdminDetail';
 import PageList from './pages/Users/PageList';
@@ -62,7 +64,8 @@ const App: React.FC = () => {
           <Route path='/calculatelist' element={<CalculateList />} />
           <Route path='/userdetail/:no' element={<UserDetail />} />
           {/* <Route path='/orderlist' element={<OrderList />} /> */}
-          <Route path='/monitoring' element={<Monitoring />} />
+          <Route path='/monitoringlist' element={<MonitoringList />} />
+          <Route path='/monitoringdetail/:no' element={<MonitoringDetail />} />
           <Route path='/productlist' element={<ProductList />} />
           {/* <Route path='/productregister' element={<ProductRegister />} /> */}
           <Route path='/productdetail/:no' element={<ProductDetail />} />
