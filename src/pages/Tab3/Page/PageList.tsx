@@ -3,9 +3,9 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
-import PageTable, { User } from '../../components/Table/PageTable';
-import SubHeader, { TabItem } from '../../components/Header/SearchSubHeader';
-import Pagination from '../../components/Pagination';
+import PageTable, { User } from '../../../components/Table/PageTable';
+import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
+import Pagination from '../../../components/Pagination';
 
 /** 탭 목록 */
 const tabs: TabItem[] = [
@@ -135,7 +135,7 @@ const Pagelist: React.FC = () => {
 
   // 인스타 계정 클릭 시 상세 페이지 이동
   const handleEdit = (no: number) => {
-    navigate(`/userdetail/${no}`);
+    navigate(`/pagedetail/${no}`);
   };
 
   return (
