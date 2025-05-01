@@ -19,6 +19,8 @@ import BrandList from './pages/List/Brand/BrandList';
 import BrandDetail from './pages/List/Brand/BrandDetail';
 import GeneralOrderList from './pages/List/Order/GeneralOrderList';
 import GeneralOrderDetail from './pages/List/Order/GeneralOrderDetail';
+import MarketOrderList from './pages/List/Market/MarketOrderList';
+import MarketOrderDetail from './pages/List/Market/MarketOrderDetail';
 
 import NoticeList from './pages/Settings/Notice/NoticeList';
 import NoticeDetail from './pages/Settings/Notice/NoticeDetail';
@@ -71,6 +73,11 @@ const App: React.FC = () => {
           <Route
             path='/generalorderdetail/:no'
             element={<GeneralOrderDetail />}
+          />
+          <Route path='/marketorderList' element={<MarketOrderList />} />
+          <Route
+            path='/marketorderdetail/:no'
+            element={<MarketOrderDetail />}
           />
 
           <Route path='/notice' element={<NoticeList />} />
