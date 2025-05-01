@@ -3,16 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
-import AdminTable, { Admin } from '../../components/Table/AdminTable';
-import SubHeader, { TabItem } from '../../components/Header/SearchSubHeader';
-import Pagination from '../../components/Pagination';
-import RegisterButton from '../../components/RegisterButton';
+import AdminTable, { Admin } from '../../../components/Table/AdminTable';
+import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
+import Pagination from '../../../components/Pagination';
+import RegisterButton from '../../../components/RegisterButton';
 import {
   getAllAdmins,
   getActiveAdmins,
   getBlockedAdmins,
-} from '../../api/admin';
-import { GetAdminsResponse } from '../../api/admin';
+} from '../../../api/admin';
+import { GetAdminsResponse } from '../../../api/admin';
 
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },

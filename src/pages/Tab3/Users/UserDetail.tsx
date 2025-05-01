@@ -5,25 +5,25 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import ListButtonDetailSubHeader, {
   DetailSubHeaderProps,
-} from '../../components/Header/ListButtonDetailSubHeader';
-import UserDetailTopBoxes from '../../components/UserDetailTopBoxes';
-import ShippingTabBar from '../../components/TabBar';
+} from '../../../components/Header/ListButtonDetailSubHeader';
+import UserDetailTopBoxes from '../../../components/UserDetailTopBoxes';
+import ShippingTabBar from '../../../components/TabBar';
 import ShippingAddressTable, {
   ShippingRow,
-} from '../../components/Table/user/ShippingAddressTable';
+} from '../../../components/Table/user/ShippingAddressTable';
 import UsageHistoryTable, {
   UsageHistoryRow,
-} from '../../components/Table/user/UsageHistoryTable';
+} from '../../../components/Table/user/UsageHistoryTable';
 import PointHistoryTable, {
   PointHistoryRow,
-} from '../../components/Table/user/PointHistoryTable';
+} from '../../../components/Table/user/PointHistoryTable';
 import AdditionalListTable, {
   AdditionalListRow,
-} from '../../components/Table/user/AdditionalListTable';
+} from '../../../components/Table/user/AdditionalListTable';
 import PersonalEvaluationTable, {
   PersonalEvaluationRow,
-} from '../../components/Table/user/PersonalEvaluationTable';
-import Pagination from '../../components/Pagination';
+} from '../../../components/Table/user/PersonalEvaluationTable';
+import Pagination from '../../../components/Pagination';
 
 // 예시 제품 번호
 const dummyProducts = [{ no: 5 }];

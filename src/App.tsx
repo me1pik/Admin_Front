@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
-import AdminList from './pages/Tab2/AdminList';
-import UserList from './pages/Tab3/UserList';
+import AdminList from './pages/Tab2/Admins/AdminList';
+import UserList from './pages/Tab3/Users/UserList';
 import MonitoringList from './pages/Tab4/Monitoring/MonitoringList';
 import MonitoringDetail from './pages/Tab4/Monitoring/MonitoringDetail';
 
@@ -11,8 +11,8 @@ import Layout from './Layout';
 import ProductList from './pages/Tab4/Product/ProductList';
 // import ProductRegister from './pages/ProductRegister';
 import ProductDetail from './pages/Tab4/Product/ProductDetail';
-import UserDetail from './pages/Tab3/UserDetail';
-import AdminDetail from './pages/Tab2/AdminDetail';
+import UserDetail from './pages/Tab3/Users/UserDetail';
+import AdminDetail from './pages/Tab2/Admins/AdminDetail';
 import PageList from './pages/Tab3/PageList';
 import ProductEvaluation from './pages/Tab3/ProductEvaluation';
 import DetailsSales from './pages/Tab3/DetailsSales';
