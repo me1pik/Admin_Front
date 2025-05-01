@@ -1,44 +1,44 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
-import AdminList from './pages/Admins/AdminList';
-import UserList from './pages/Users/UserList';
-import MonitoringList from './pages/List/Monitoring/MonitoringList';
-import MonitoringDetail from './pages/List/Monitoring/MonitoringDetail';
+import AdminList from './pages/Tab2/AdminList';
+import UserList from './pages/Tab3/UserList';
+import MonitoringList from './pages/Tab4/Monitoring/MonitoringList';
+import MonitoringDetail from './pages/Tab4/Monitoring/MonitoringDetail';
 
 // import OrderList from './pages/List/OrderList';
 import Layout from './Layout';
-import ProductList from './pages/List/Product/ProductList';
+import ProductList from './pages/Tab4/Product/ProductList';
 // import ProductRegister from './pages/ProductRegister';
-import ProductDetail from './pages/List/Product/ProductDetail';
-import UserDetail from './pages/Users/UserDetail';
-import AdminDetail from './pages/Admins/AdminDetail';
-import PageList from './pages/Users/PageList';
-import ProductEvaluation from './pages/Users/ProductEvaluation';
-import DetailsSales from './pages/Users/DetailsSales';
-import CalculateList from './pages/Users/CalculateList';
-import BrandList from './pages/List/Brand/BrandList';
-import BrandDetail from './pages/List/Brand/BrandDetail';
-import GeneralOrderList from './pages/List/Order/GeneralOrderList';
-import GeneralOrderDetail from './pages/List/Order/GeneralOrderDetail';
-import MarketOrderList from './pages/List/Market/MarketOrderList';
-import MarketOrderDetail from './pages/List/Market/MarketOrderDetail';
+import ProductDetail from './pages/Tab4/Product/ProductDetail';
+import UserDetail from './pages/Tab3/UserDetail';
+import AdminDetail from './pages/Tab2/AdminDetail';
+import PageList from './pages/Tab3/PageList';
+import ProductEvaluation from './pages/Tab3/ProductEvaluation';
+import DetailsSales from './pages/Tab3/DetailsSales';
+import CalculateList from './pages/Tab3/CalculateList';
+import BrandList from './pages/Tab4/Brand/BrandList';
+import BrandDetail from './pages/Tab4/Brand/BrandDetail';
+import GeneralOrderList from './pages/Tab4/Order/GeneralOrderList';
+import GeneralOrderDetail from './pages/Tab4/Order/GeneralOrderDetail';
+import MarketOrderList from './pages/Tab4/Market/MarketOrderList';
+import MarketOrderDetail from './pages/Tab4/Market/MarketOrderDetail';
 
-import NoticeList from './pages/Settings/Notice/NoticeList';
-import NoticeDetail from './pages/Settings/Notice/NoticeDetail';
-import CreateNotice from './pages/Settings/Notice/CreateNotice';
+import NoticeList from './pages/Tab5/Notice/NoticeList';
+import NoticeDetail from './pages/Tab5/Notice/NoticeDetail';
+import CreateNotice from './pages/Tab5/Notice/CreateNotice';
 
-import TermsList from './pages/Settings/Terms/TermsList';
-import TermsDetail from './pages/Settings/Terms/TermsDetail';
-import CreateTerms from './pages/Settings/Terms/CreateTerms';
+import TermsList from './pages/Tab5/Terms/TermsList';
+import TermsDetail from './pages/Tab5/Terms/TermsDetail';
+import CreateTerms from './pages/Tab5/Terms/CreateTerms';
 
-import PrivacyList from './pages/Settings/Privac/PrivacyList';
-import PrivacyDetail from './pages/Settings/Privac/PrivacyDetail';
-import CreatePrivacy from './pages/Settings/Privac/CreatePrivacy';
+import PrivacyList from './pages/Tab5/Privac/PrivacyList';
+import PrivacyDetail from './pages/Tab5/Privac/PrivacyDetail';
+import CreatePrivacy from './pages/Tab5/Privac/CreatePrivacy';
 
-import FAQList from './pages/Settings/FAQ/FAQList';
-import FAQDetail from './pages/Settings/FAQ/FAQDetail';
-import CreateFAQ from './pages/Settings/FAQ/CreateFAQ';
+import FAQList from './pages/Tab5/FAQ/FAQList';
+import FAQDetail from './pages/Tab5/FAQ/FAQDetail';
+import CreateFAQ from './pages/Tab5/FAQ/CreateFAQ';
 
 // import Dashboard from "./pages/Dashboard";
 // import AnalysisInfo from "./pages/AnalysisInfo";
