@@ -1,16 +1,16 @@
-// src/pages/GeneralOrderDetail.tsx
+// src/pages/GeneralOrderList.tsx
 
 import React, { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import GeneralOrderDetailTable, {
-  GeneralOrderDetailItem,
-} from '../components/Table/GeneralOrderTable';
-import SubHeader, { TabItem } from '../components/Header/SearchSubHeader';
-import Pagination from '../components/Pagination';
+import GeneralOrderListTable, {
+  GeneralOrderListItem,
+} from '../../../components/Table/GeneralOrderTable';
+import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
+import Pagination from '../../../components/Pagination';
 
-/** 일반주문내역 더미 데이터 (배송 관련 필드 제거, 결제 필드 추가) */
-const dummyGeneralOrderDetail: GeneralOrderDetailItem[] = [
+/** 더미 데이터 (배송 관련 필드 제거, 결제 필드 추가) */
+const dummyGeneralOrderList: GeneralOrderListItem[] = [
   {
     no: 13486,
     orderDate: '2024-12-12',
@@ -101,25 +101,26 @@ const dummyGeneralOrderDetail: GeneralOrderDetailItem[] = [
   },
 ];
 
-/** 서브헤더 탭: 전체보기 / 진행내역 / 취소내역 */
+/** 서브헤더 탭 */
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
   { label: '진행내역', path: '진행내역' },
   { label: '취소내역', path: '취소' },
 ];
 
-const GeneralOrderDetail: React.FC = () => {
+const GeneralOrderList: React.FC = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
 
-  // URL 쿼리에서 현재 페이지 읽기
+  // 페이지 & 페이징 설정
   const page = parseInt(searchParams.get('page') ?? '1', 10);
   const limit = 10;
 
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-  const [data] = useState<GeneralOrderDetailItem[]>(dummyGeneralOrderDetail);
+  const [data] = useState<GeneralOrderListItem[]>(dummyGeneralOrderList);
 
-  // 탭 변경 시 page=1으로 URL 리셋
+  // 탭 변경 핸들러 (페이지 리셋)
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
     const params = Object.fromEntries(searchParams.entries());
@@ -135,7 +136,6 @@ const GeneralOrderDetail: React.FC = () => {
         item.paymentStatus
       );
     }
-    // '취소내역'
     return ['취소요청', '환불 진행중', '결제실패'].includes(item.paymentStatus);
   });
 
@@ -155,14 +155,17 @@ const GeneralOrderDetail: React.FC = () => {
     );
   });
 
-  // 페이지네이션 계산
+  // 페이징 로직
   const totalCount = filteredData.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  const handleEdit = (account: string) => {
-    alert(`주문자 계정(${account}) 클릭됨`);
+  // 상세 페이지로 이동
+  const handleEdit = (no: number) => {
+    navigate(`/generalorderdetail/${no}`, {
+      state: { selectOptions: tabs },
+    });
   };
 
   return (
@@ -176,7 +179,7 @@ const GeneralOrderDetail: React.FC = () => {
       </InfoBar>
 
       <TableContainer>
-        <GeneralOrderDetailTable
+        <GeneralOrderListTable
           filteredData={currentPageData}
           handleEdit={handleEdit}
         />
@@ -189,9 +192,9 @@ const GeneralOrderDetail: React.FC = () => {
   );
 };
 
-export default GeneralOrderDetail;
+export default GeneralOrderList;
 
-/* ====================== Styled Components ====================== */
+/* Styled Components */
 
 const Content = styled.div`
   display: flex;

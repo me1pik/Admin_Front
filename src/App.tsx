@@ -4,7 +4,7 @@ import Login from './pages/Login';
 import AdminList from './pages/Admins/AdminList';
 import UserList from './pages/Users/UserList';
 import Monitoring from './pages/List/Monitoring';
-import OrderList from './pages/List/OrderList';
+// import OrderList from './pages/List/OrderList';
 import Layout from './Layout';
 import ProductList from './pages/List/ProductList';
 // import ProductRegister from './pages/ProductRegister';
@@ -17,7 +17,8 @@ import DetailsSales from './pages/Users/DetailsSales';
 import CalculateList from './pages/Users/CalculateList';
 import BrandList from './pages/List/Brand/BrandList';
 import BrandDetail from './pages/List/Brand/BrandDetail';
-import GeneralOrderDetail from './pages/GeneralOrderDetail';
+import GeneralOrderList from './pages/List/Order/GeneralOrderList';
+import GeneralOrderDetail from './pages/List/Order/GeneralOrderDetail';
 
 import NoticeList from './pages/Settings/Notice/NoticeList';
 import NoticeDetail from './pages/Settings/Notice/NoticeDetail';
@@ -58,7 +59,7 @@ const App: React.FC = () => {
           <Route path='/details-sales' element={<DetailsSales />} />
           <Route path='/calculatelist' element={<CalculateList />} />
           <Route path='/userdetail/:no' element={<UserDetail />} />
-          <Route path='/orderlist' element={<OrderList />} />
+          {/* <Route path='/orderlist' element={<OrderList />} /> */}
           <Route path='/monitoring' element={<Monitoring />} />
           <Route path='/productlist' element={<ProductList />} />
           {/* <Route path='/productregister' element={<ProductRegister />} /> */}
@@ -66,7 +67,11 @@ const App: React.FC = () => {
           <Route path='/brandlist' element={<BrandList />} />
           <Route path='/branddetail/:no' element={<BrandDetail />} />
 
-          <Route path='/generalorderdetail' element={<GeneralOrderDetail />} />
+          <Route path='/generalorderList' element={<GeneralOrderList />} />
+          <Route
+            path='/generalorderdetail/:no'
+            element={<GeneralOrderDetail />}
+          />
 
           <Route path='/notice' element={<NoticeList />} />
           <Route path='/noticeDetail/:no' element={<NoticeDetail />} />
