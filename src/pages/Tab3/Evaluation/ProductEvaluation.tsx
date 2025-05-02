@@ -5,9 +5,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import ProductEvaluationTable, {
   User,
-} from '../../components/Table/ProductEvaluationTable';
-import SubHeader, { TabItem } from '../../components/Header/SearchSubHeader';
-import Pagination from '../../components/Pagination';
+} from '../../../components/Table/ProductEvaluationTable';
+import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
+import Pagination from '../../../components/Pagination';
 
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
@@ -100,7 +100,7 @@ const ProductEvaluation: React.FC = () => {
   };
 
   const handleEdit = (no: number) => {
-    navigate(`/userdetail/${no}`);
+    navigate(`/evaluationdetail/${no}`);
   };
 
   return (

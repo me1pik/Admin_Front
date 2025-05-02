@@ -35,11 +35,6 @@ const CalculateDetail: React.FC<CalculateDetailProps> = ({
   const [activeTab, setActiveTab] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 상단 요약 박스
-  const summaryBoxes = [
-    /* 필요에 따라 CalculateDetailTopBoxes 내부 데이터를 여기에 전달할 수도 있습니다 */
-  ];
-
   // 정산 내역 더미 데이터
   const [summary] = useState<SummaryItem[]>([
     {
