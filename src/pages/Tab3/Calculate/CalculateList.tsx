@@ -5,9 +5,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import CalculateListTable, {
   User,
-} from '../../components/Table/CalculateListTable';
-import SubHeader, { TabItem } from '../../components/Header/SearchSubHeader';
-import Pagination from '../../components/Pagination';
+} from '../../../components/Table/CalculateListTable';
+import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
+import Pagination from '../../../components/Pagination';
 
 /** 탭 목록 */
 const tabs: TabItem[] = [
@@ -165,7 +165,7 @@ const CalculateList: React.FC = () => {
   const currentPageData = filteredData.slice(offset, offset + limit);
 
   const handleEdit = (no: number) => {
-    navigate(`/userdetail/${no}`);
+    navigate(`/calculatedetail/${no}`);
   };
 
   return (
