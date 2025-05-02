@@ -5,9 +5,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import DetailsSalesTable, {
   User,
-} from '../../components/Table/DetailsSalesTable';
-import SubHeader, { TabItem } from '../../components/Header/SearchSubHeader';
-import Pagination from '../../components/Pagination';
+} from '../../../components/Table/DetailsSalesTable';
+import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
+import Pagination from '../../../components/Pagination';
 
 /** 탭 목록 */
 const tabs: TabItem[] = [
@@ -141,7 +141,7 @@ const DetailsSales: React.FC = () => {
   const currentPageData = filteredData.slice(offset, offset + limit);
 
   const handleEdit = (no: number) => {
-    navigate(`/userdetail/${no}`);
+    navigate(`/salesdetail/${no}`);
   };
 
   return (

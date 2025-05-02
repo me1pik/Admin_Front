@@ -16,7 +16,9 @@ import AdminDetail from './pages/Tab2/Admins/AdminDetail';
 import PageList from './pages/Tab3/Page/PageList';
 import PageDetail from './pages/Tab3/Page/PageDetail';
 import ProductEvaluation from './pages/Tab3/ProductEvaluation';
-import DetailsSales from './pages/Tab3/DetailsSales';
+import SalesList from './pages/Tab3/Sales/SalesList';
+import SalesDetail from './pages/Tab3/Sales/SalesDetail';
+
 import CalculateList from './pages/Tab3/CalculateList';
 import BrandList from './pages/Tab4/Brand/BrandList';
 import BrandDetail from './pages/Tab4/Brand/BrandDetail';
@@ -63,7 +65,8 @@ const App: React.FC = () => {
           <Route path='/pagedetail/:no' element={<PageDetail />} />
 
           <Route path='/product-evaluation' element={<ProductEvaluation />} />
-          <Route path='/details-sales' element={<DetailsSales />} />
+          <Route path='/saleslist' element={<SalesList />} />
+          <Route path='/salesdetail/:no' element={<SalesDetail />} />
           <Route path='/calculatelist' element={<CalculateList />} />
           <Route path='/userdetail/:no' element={<UserDetail />} />
           {/* <Route path='/orderlist' element={<OrderList />} /> */}
