@@ -1,4 +1,3 @@
-// src/pages/List/Order/PageDetail.tsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -7,6 +6,7 @@ import SettingsDetailSubHeader, {
 } from '../../../components/Header/SettingsDetailSubHeader';
 import ShippingTabBar from '../../../components/TabBar';
 import ReusableModal2 from '../../../components/OneButtonModal';
+import PageDetailTopBoxes from '../../../components/PageDetailTopBoxes';
 
 interface PageDetailProps {
   isCreate?: boolean;
@@ -26,6 +26,9 @@ const PageDetail: React.FC<PageDetailProps> = ({ isCreate = false }) => {
   const navigate = useNavigate();
   const { no } = useParams<{ no: string }>();
   const numericNo = isCreate ? undefined : Number(no);
+
+  // 예시 제품 번호
+  const dummyProducts = [{ no: numericNo || 0 }];
 
   const [season] = useState('2025 / 1분기');
   const [links] = useState<LinkItem[]>([
@@ -72,14 +75,28 @@ const PageDetail: React.FC<PageDetailProps> = ({ isCreate = false }) => {
 
       <SettingsDetailSubHeader {...detailProps} />
 
+      {/* 제품 번호 */}
+      <ProductNumberWrapper>
+        <ProductNumberLabel>번호</ProductNumberLabel>
+        <ProductNumberValue>{dummyProducts[0].no}</ProductNumberValue>
+      </ProductNumberWrapper>
+
+      {/* 사용자 상세 상단 박스 */}
+      <PageDetailTopBoxes />
+
+      {/* 구분선 */}
+      <DividerDashed />
+
+      {/* 페이지 상세 탭 */}
       <ShippingTabBar
         tabs={['페이지 상세']}
         activeIndex={activeTab}
         onTabClick={setActiveTab}
       />
 
-      {activeTab === 0 && (
-        <>
+      {/* 상세 내용 컨테이너 */}
+      <DetailSection>
+        {activeTab === 0 && (
           <InfoBox>
             {/* 시즌 진행 & 링크 개수 */}
             <DataRow>
@@ -93,7 +110,6 @@ const PageDetail: React.FC<PageDetailProps> = ({ isCreate = false }) => {
 
             {/* 링크 버튼 */}
             <LinkRow>
-              {' '}
               <DataItem>
                 <DataLabel>링크 등록</DataLabel>
                 <DataValue>{links.length}개</DataValue>
@@ -105,29 +121,27 @@ const PageDetail: React.FC<PageDetailProps> = ({ isCreate = false }) => {
 
             <Divider />
 
-            {/* 등록 제품수 */}
+            {/* 등록 제품수 + 상품 카드들을 한 행에 */}
             <DataRow>
               <DataItem>
                 <DataLabel>등록 제품수</DataLabel>
                 <DataValue>{products.length}개</DataValue>
               </DataItem>
+              <ProductRow>
+                {products.map((p) => (
+                  <Card key={p.id}>
+                    <ImageBox />
+                    <CardInfo>
+                      <Brand>{p.brand}</Brand>
+                      <Name>{p.name}</Name>
+                    </CardInfo>
+                  </Card>
+                ))}
+              </ProductRow>
             </DataRow>
-
-            {/* 상품 카드들 row 정렬 */}
-            <ProductRow>
-              {products.map((p) => (
-                <Card key={p.id}>
-                  <ImageBox />
-                  <CardInfo>
-                    <Brand>{p.brand}</Brand>
-                    <Name>{p.name}</Name>
-                  </CardInfo>
-                </Card>
-              ))}
-            </ProductRow>
           </InfoBox>
-        </>
-      )}
+        )}
+      </DetailSection>
 
       <ReusableModal2
         isOpen={isModalOpen}
@@ -163,20 +177,47 @@ const Title = styled.h1`
   font-weight: 700;
 `;
 
-/* 시즌·링크·제품수 박스 */
+const ProductNumberWrapper = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin: 16px 0;
+`;
+
+const ProductNumberLabel = styled.div`
+  font-weight: 700;
+  font-size: 12px;
+`;
+
+const ProductNumberValue = styled.div`
+  font-weight: 900;
+  font-size: 12px;
+`;
+
+const DividerDashed = styled.hr`
+  border: none;
+  border-top: 1px dashed #dddddd;
+  margin: 30px 0;
+`;
+
+const DetailSection = styled.div`
+  margin-top: 0;
+`;
+
 const InfoBox = styled.div`
-  width: 1200px; /* 디자인 기준 너비 */
   background: #ffffff;
   border: 1px solid #dddddd;
-  border-radius: 0 4px 4px 4px; /* 좌상단만 직각 */
-  padding: 16px;
+  border-radius: 0 4px 4px 4px;
+  padding: 1rem;
   box-sizing: border-box;
 `;
 
 /* 데이터를 row로 나열 */
 const DataRow = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
 `;
 
 const DataItem = styled.div`
@@ -189,6 +230,7 @@ const DataLabel = styled.span`
   font-size: 12px;
   font-weight: 700;
   margin-right: 8px;
+  padding: 10px;
 `;
 
 const DataValue = styled.span`
@@ -196,14 +238,12 @@ const DataValue = styled.span`
   color: #333333;
 `;
 
-/* 실선 구분선 */
 const Divider = styled.hr`
   border: none;
   border-top: 1px solid #dddddd;
   margin: 12px 0;
 `;
 
-/* 링크 버튼 영역 */
 const LinkRow = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -218,16 +258,14 @@ const LinkButton = styled.button`
   border-radius: 8px;
   color: #ffffff;
   border: none;
-
   cursor: pointer;
 `;
 
-/* 상품 카드 row */
 const ProductRow = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  margin-top: 12px;
+  margin-top: 0;
 `;
 
 const Card = styled.div`
