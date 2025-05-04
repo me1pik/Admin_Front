@@ -364,11 +364,11 @@ const Box = styled.div`
   padding: 10px;
 `;
 const IconWrapper = styled.div`
-  width: 80px; /* 기존 72px → 80px */
-  height: 80px; /* 기존 72px → 80px */
+  width: 72px;
+  height: 72px;
   padding: 8px; /* 내부 여백 추가 */
-  background: #fafafa; /* 연한 배경색 부여 */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 부드러운 그림자 */
+  border: 1px solid #ddd;
+
   border-radius: 50%;
   display: flex;
   align-items: center;
