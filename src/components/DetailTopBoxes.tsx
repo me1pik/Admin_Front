@@ -1,11 +1,31 @@
 // src/components/DetailTopBoxes.tsx
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import DetailBoxSvg1 from '../assets/DetailTopBoxesSvg1.svg';
 import DetailBoxSvg2 from '../assets/DetailTopBoxesSvg2.svg';
 import DetailBoxSvg3 from '../assets/DetailTopBoxesSvg3.svg';
 import { ProductDetailResponse, SizeRow } from '../api/adminProduct';
 import { sizeGuideConfig } from '../config/sizeGuideConfig';
+
+import IconMiniDress from '../assets/category/MiniDress.svg';
+import IconMidiDress from '../assets/category/MidiDress.svg';
+import IconLongDress from '../assets/category/LongDress.svg';
+import IconTowDress from '../assets/category/TowDress.svg';
+import IconJumpSuit from '../assets/category/JumpSuit.svg';
+import IconBlouse from '../assets/category/Blouse.svg';
+import IconKnitTop from '../assets/category/KnitTop.svg';
+import IconShirtTop from '../assets/category/ShirtTop.svg';
+import IconMiniSkirt from '../assets/category/MiniSkirt.svg';
+import IconMidiSkirt from '../assets/category/MidiSkirt.svg';
+import IconLongSkirt from '../assets/category/LongSkirt.svg';
+import IconPants from '../assets/category/Pants.svg';
+import IconJacket from '../assets/category/Jacket.svg';
+import IconCoat from '../assets/category/Coat.svg';
+import IconTop from '../assets/category/Top.svg';
+import IconTshirt from '../assets/category/Tshirt.svg';
+import IconCardigan from '../assets/category/Cardigan.svg';
+import IconBest from '../assets/category/Best.svg';
+import IconPadding from '../assets/category/Padding.svg';
 
 const colorOptions = [
   { label: '화이트', value: 'WHITE' },
@@ -29,32 +49,26 @@ const colorOptions = [
 ];
 
 const categoryOptions = [
-  { label: '전체', value: 'Entire' },
-  { label: '미니원피스', value: 'MiniDress' },
-  { label: '미디원피스', value: 'MidiDress' },
-  { label: '롱 원피스', value: 'LongDress' },
-  { label: '투피스', value: 'TowDress' },
-  { label: '점프수트', value: 'JumpSuit' },
-  { label: '블라우스', value: 'Blouse' },
-  { label: '니트 상의', value: 'KnitTop' },
-  { label: '셔츠 상의', value: 'ShirtTop' },
-  { label: '미니 스커트', value: 'MiniSkirt' },
-  { label: '미디 스커트', value: 'MidiSkirt' },
-  { label: '롱 스커트', value: 'LongSkirt' },
-  { label: '팬츠', value: 'Pants' },
-  { label: '자켓', value: 'Jacket' },
-  { label: '코트', value: 'Coat' },
-  { label: '탑', value: 'Top' },
-  { label: '티셔츠', value: 'Tshirt' },
-  { label: '가디건', value: 'Cardigan' },
-  { label: '베스트', value: 'Best' },
-  { label: '패딩', value: 'Padding' },
-];
-
-const statusOptions = [
-  { label: '등록대기', value: 0 },
-  { label: '등록완료', value: 1 },
-  { label: '판매종료', value: 2 },
+  { label: '전체', value: 'Entire', icon: null },
+  { label: '미니원피스', value: 'MiniDress', icon: IconMiniDress },
+  { label: '미디원피스', value: 'MidiDress', icon: IconMidiDress },
+  { label: '롱 원피스', value: 'LongDress', icon: IconLongDress },
+  { label: '투피스', value: 'TowDress', icon: IconTowDress },
+  { label: '점프수트', value: 'JumpSuit', icon: IconJumpSuit },
+  { label: '블라우스', value: 'Blouse', icon: IconBlouse },
+  { label: '니트 상의', value: 'KnitTop', icon: IconKnitTop },
+  { label: '셔츠 상의', value: 'ShirtTop', icon: IconShirtTop },
+  { label: '미니 스커트', value: 'MiniSkirt', icon: IconMiniSkirt },
+  { label: '미디 스커트', value: 'MidiSkirt', icon: IconMidiSkirt },
+  { label: '롱 스커트', value: 'LongSkirt', icon: IconLongSkirt },
+  { label: '팬츠', value: 'Pants', icon: IconPants },
+  { label: '자켓', value: 'Jacket', icon: IconJacket },
+  { label: '코트', value: 'Coat', icon: IconCoat },
+  { label: '탑', value: 'Top', icon: IconTop },
+  { label: '티셔츠', value: 'Tshirt', icon: IconTshirt },
+  { label: '가디건', value: 'Cardigan', icon: IconCardigan },
+  { label: '베스트', value: 'Best', icon: IconBest },
+  { label: '패딩', value: 'Padding', icon: IconPadding },
 ];
 
 const defaultSizes = ['44', '55', '66', '77', 'Free'];
@@ -67,29 +81,75 @@ interface DetailTopBoxesProps {
   ) => void;
 }
 
+// ——— 커스텀 드롭다운 컴포넌트 ———
+interface CategoryDropdownProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
+  value,
+  onChange,
+}) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selected = categoryOptions.find((o) => o.value === value);
+
+  return (
+    <DropdownWrapper ref={ref}>
+      <SelectStyled onClick={() => setOpen((v) => !v)}>
+        {selected?.icon && <IconSmall src={selected.icon} />}
+        <span>{selected?.label || '옵션을 선택하세요'}</span>
+        <Arrow>{open ? '▲' : '▼'}</Arrow>
+      </SelectStyled>
+      {open && (
+        <Menu>
+          {categoryOptions.map((o) => (
+            <MenuItem
+              key={o.value}
+              onClick={() => {
+                onChange(o.value);
+                setOpen(false);
+              }}
+            >
+              {o.icon && <IconSmall src={o.icon} />}
+              <span>{o.label}</span>
+            </MenuItem>
+          ))}
+        </Menu>
+      )}
+    </DropdownWrapper>
+  );
+};
+// ————————————————————————————
+
 const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   product,
   editable = false,
   onChange,
 }) => {
-  // 가격 내림
   const retailValue = Math.floor(product.retailPrice);
   const saleValue =
     product.sale_price != null ? Math.floor(product.sale_price) : retailValue;
   const rentalValue =
     product.rental_price != null ? Math.floor(product.rental_price) : 0;
 
-  // 카테고리 변경 시 size_picture도 매핑
-  const handleCategoryChange = (value: string) => {
+  const handleCategoryChange = (val: string) => {
     if (!onChange) return;
-    const cfg = sizeGuideConfig[value];
-    onChange({
-      category: value,
-      size_picture: cfg.image,
-    });
+    const cfg = sizeGuideConfig[val];
+    onChange({ category: val, size_picture: cfg.image });
   };
 
-  // 사이즈 토글
   const handleToggleSize = (sz: string) => {
     if (!onChange) return;
     const exists = product.sizes?.some((item) =>
@@ -105,7 +165,6 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
           : item.size.replace(/[^0-9]/g, '') !== sz
       );
     } else {
-      // 기존 measurements 키 그대로 가져옴
       const measurements = product.sizes?.[0]?.measurements ?? {};
       newSizes.push({ size: sz, measurements });
     }
@@ -115,7 +174,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   return (
     <Container>
       <BoxWrapper>
-        {/* 박스1: 브랜드 / 품번 / 상태 */}
+        {/* 박스1 */}
         <Box>
           <IconWrapper>
             <Icon src={DetailBoxSvg1} />
@@ -149,6 +208,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               <Label>상태</Label>
               {editable ? (
                 <Select
+                  native
                   value={String(product.registration)}
                   onChange={(e) =>
                     onChange?.({ registration: Number(e.target.value) })
@@ -157,17 +217,16 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                   <option disabled hidden>
                     옵션을 선택하세요
                   </option>
-                  {statusOptions.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
+                  <option value={0}>등록대기</option>
+                  <option value={1}>등록완료</option>
+                  <option value={2}>판매종료</option>
                 </Select>
               ) : (
                 <Value>
                   {
-                    statusOptions.find((o) => o.value === product.registration)
-                      ?.label
+                    { 0: '등록대기', 1: '등록완료', 2: '판매종료' }[
+                      product.registration
+                    ]
                   }
                 </Value>
               )}
@@ -177,7 +236,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
 
         <Divider />
 
-        {/* 박스2: 종류 / 사이즈 / 색상 */}
+        {/* 박스2 */}
         <Box>
           <IconWrapper>
             <Icon src={DetailBoxSvg2} />
@@ -186,19 +245,10 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
             <Row>
               <Label>종류</Label>
               {editable ? (
-                <Select
+                <CategoryDropdown
                   value={product.category}
-                  onChange={(e) => handleCategoryChange(e.target.value)}
-                >
-                  <option disabled hidden>
-                    옵션을 선택하세요
-                  </option>
-                  {categoryOptions.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </Select>
+                  onChange={handleCategoryChange}
+                />
               ) : (
                 <Value>
                   {
@@ -243,6 +293,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               <Label>색상</Label>
               {editable ? (
                 <Select
+                  native
                   value={product.color}
                   onChange={(e) => onChange?.({ color: e.target.value })}
                 >
@@ -266,7 +317,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
 
         <Divider />
 
-        {/* 박스3: 리테일 / 판매 / 대여 */}
+        {/* 박스3 */}
         <Box>
           <IconWrapper>
             <Icon src={DetailBoxSvg3} />
@@ -274,16 +325,15 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
           <InfoCol>
             <Row>
               <Label>리테일</Label>
-              <Input type='number' disabled value={retailValue.toString()} />
+              <Input disabled value={retailValue.toString()} />
             </Row>
             <Row>
               <Label>판매</Label>
-              <Input type='number' disabled value={saleValue.toString()} />
+              <Input disabled value={saleValue.toString()} />
             </Row>
             <Row>
               <Label>대여</Label>
               <Input
-                type='number'
                 disabled
                 value={rentalValue > 0 ? rentalValue.toString() : ''}
                 placeholder='-'
@@ -352,7 +402,6 @@ const Input = styled.input`
   border: 1px solid #ccc;
   border-radius: 4px;
   line-height: 28px;
-
   &:disabled {
     background: #f5f5f5;
     color: #777;
@@ -373,12 +422,62 @@ const Select = styled.select`
   background-repeat: no-repeat;
   background-position: right 8px center;
   background-size: 10px 6px;
-
   &:focus {
     outline: none;
     border-color: #888;
     box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
   }
+`;
+const SelectStyled = styled.div`
+  font-size: 12px;
+  height: 27px;
+  width: 125px;
+  padding: 0 8px;
+  line-height: 28px;
+  border: 1px solid #000;
+  border-radius: 4px;
+  background: #fff;
+  border-radius: 4px;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+`;
+const Arrow = styled.span`
+  margin-left: 8px;
+  font-size: 10px;
+`;
+const DropdownWrapper = styled.div`
+  position: relative;
+`;
+const Menu = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 4px;
+  margin-top: 4px;
+  z-index: 10;
+`;
+const MenuItem = styled.div`
+  padding: 6px 8px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  &:hover {
+    background: #f0f0f0;
+  }
+`;
+const IconSmall = styled.img`
+  width: 16px;
+  height: 16px;
 `;
 const Divider = styled.div`
   width: 1px;
