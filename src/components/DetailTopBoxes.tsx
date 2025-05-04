@@ -5,6 +5,7 @@ import DetailBoxSvg1 from '../assets/DetailTopBoxesSvg1.svg';
 import DetailBoxSvg2 from '../assets/DetailTopBoxesSvg2.svg';
 import DetailBoxSvg3 from '../assets/DetailTopBoxesSvg3.svg';
 import { ProductDetailResponse, SizeRow } from '../api/adminProduct';
+import { sizeGuideConfig } from '../config/sizeGuideConfig';
 
 const colorOptions = [
   { label: '화이트', value: 'WHITE' },
@@ -33,19 +34,16 @@ const categoryOptions = [
   { label: '미디원피스', value: 'MidiDress' },
   { label: '롱 원피스', value: 'LongDress' },
   { label: '투피스', value: 'TowDress' },
-
   { label: '점프수트', value: 'JumpSuit' },
   { label: '블라우스', value: 'Blouse' },
   { label: '니트 상의', value: 'KnitTop' },
   { label: '셔츠 상의', value: 'ShirtTop' },
   { label: '미니 스커트', value: 'MiniSkirt' },
-
   { label: '미디 스커트', value: 'MidiSkirt' },
   { label: '롱 스커트', value: 'LongSkirt' },
   { label: '팬츠', value: 'Pants' },
   { label: '자켓', value: 'Jacket' },
   { label: '코트', value: 'Coat' },
-
   { label: '탑', value: 'Top' },
   { label: '티셔츠', value: 'Tshirt' },
   { label: '가디건', value: 'Cardigan' },
@@ -59,6 +57,8 @@ const statusOptions = [
   { label: '판매종료', value: 2 },
 ];
 
+const defaultSizes = ['44', '55', '66', '77', 'Free'];
+
 interface DetailTopBoxesProps {
   product: ProductDetailResponse;
   editable?: boolean;
@@ -66,15 +66,6 @@ interface DetailTopBoxesProps {
     data: Partial<ProductDetailResponse & { sizes: SizeRow[] }>
   ) => void;
 }
-
-const defaultSizes = ['44', '55', '66', '77', 'Free'];
-const defaultMeasurementsTemplate = {
-  어깨: 0,
-  가슴: 0,
-  허리: 0,
-  팔길이: 0,
-  총길이: 0,
-};
 
 const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   product,
@@ -88,6 +79,17 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   const rentalValue =
     product.rental_price != null ? Math.floor(product.rental_price) : 0;
 
+  // 카테고리 변경 시 size_picture도 매핑
+  const handleCategoryChange = (value: string) => {
+    if (!onChange) return;
+    const cfg = sizeGuideConfig[value];
+    onChange({
+      category: value,
+      size_picture: cfg.image,
+    });
+  };
+
+  // 사이즈 토글
   const handleToggleSize = (sz: string) => {
     if (!onChange) return;
     const exists = product.sizes?.some((item) =>
@@ -103,10 +105,9 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
           : item.size.replace(/[^0-9]/g, '') !== sz
       );
     } else {
-      newSizes.push({
-        size: sz,
-        measurements: { ...defaultMeasurementsTemplate },
-      });
+      // 기존 measurements 키 그대로 가져옴
+      const measurements = product.sizes?.[0]?.measurements ?? {};
+      newSizes.push({ size: sz, measurements });
     }
     onChange({ sizes: newSizes });
   };
@@ -153,7 +154,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                     onChange?.({ registration: Number(e.target.value) })
                   }
                 >
-                  <option value='' disabled hidden>
+                  <option disabled hidden>
                     옵션을 선택하세요
                   </option>
                   {statusOptions.map((o) => (
@@ -187,9 +188,9 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               {editable ? (
                 <Select
                   value={product.category}
-                  onChange={(e) => onChange?.({ category: e.target.value })}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
                 >
-                  <option value='' disabled hidden>
+                  <option disabled hidden>
                     옵션을 선택하세요
                   </option>
                   {categoryOptions.map((o) => (
@@ -245,7 +246,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                   value={product.color}
                   onChange={(e) => onChange?.({ color: e.target.value })}
                 >
-                  <option value='' disabled hidden>
+                  <option disabled hidden>
                     옵션을 선택하세요
                   </option>
                   {colorOptions.map((o) => (
