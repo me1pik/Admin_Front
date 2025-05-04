@@ -2,7 +2,7 @@
 import React, { ChangeEvent, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { SizeRow } from '../../api/adminProduct';
-import { sizeGuideConfig } from '../../config/sizeGuideConfig'; // <-- 분리된 매핑 import
+import { sizeGuideConfig } from '../../config/sizeGuideConfig';
 
 interface Column {
   key: string;

@@ -1,5 +1,5 @@
 // src/components/productregister/SizeDisplaySection.tsx
-import React, { useState, useEffect, ChangeEvent, useMemo } from 'react';
+import React, { useState, ChangeEvent, useMemo } from 'react';
 import styled from 'styled-components';
 import { ProductDetailResponse } from '../../api/adminProduct';
 

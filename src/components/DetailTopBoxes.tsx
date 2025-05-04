@@ -5,7 +5,6 @@ import DetailBoxSvg1 from '../assets/DetailTopBoxesSvg1.svg';
 import DetailBoxSvg2 from '../assets/DetailTopBoxesSvg2.svg';
 import DetailBoxSvg3 from '../assets/DetailTopBoxesSvg3.svg';
 import { ProductDetailResponse, SizeRow } from '../api/adminProduct';
-import { sizeGuideConfig } from '../config/sizeGuideConfig'; // 분리된 매핑 import
 
 const colorOptions = [
   { label: '화이트', value: 'WHITE' },
@@ -34,16 +33,19 @@ const categoryOptions = [
   { label: '미디원피스', value: 'MidiDress' },
   { label: '롱 원피스', value: 'LongDress' },
   { label: '투피스', value: 'TowDress' },
+
   { label: '점프수트', value: 'JumpSuit' },
   { label: '블라우스', value: 'Blouse' },
   { label: '니트 상의', value: 'KnitTop' },
   { label: '셔츠 상의', value: 'ShirtTop' },
   { label: '미니 스커트', value: 'MiniSkirt' },
+
   { label: '미디 스커트', value: 'MidiSkirt' },
   { label: '롱 스커트', value: 'LongSkirt' },
   { label: '팬츠', value: 'Pants' },
   { label: '자켓', value: 'Jacket' },
   { label: '코트', value: 'Coat' },
+
   { label: '탑', value: 'Top' },
   { label: '티셔츠', value: 'Tshirt' },
   { label: '가디건', value: 'Cardigan' },
@@ -57,17 +59,22 @@ const statusOptions = [
   { label: '판매종료', value: 2 },
 ];
 
-const defaultSizes = ['44', '55', '66', '77', 'Free'];
-
 interface DetailTopBoxesProps {
   product: ProductDetailResponse;
   editable?: boolean;
   onChange?: (
-    data: Partial<
-      ProductDetailResponse & { sizes: SizeRow[]; size_picture: string }
-    >
+    data: Partial<ProductDetailResponse & { sizes: SizeRow[] }>
   ) => void;
 }
+
+const defaultSizes = ['44', '55', '66', '77', 'Free'];
+const defaultMeasurementsTemplate = {
+  어깨: 0,
+  가슴: 0,
+  허리: 0,
+  팔길이: 0,
+  총길이: 0,
+};
 
 const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   product,
@@ -81,22 +88,6 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   const rentalValue =
     product.rental_price != null ? Math.floor(product.rental_price) : 0;
 
-  // 카테고리 변경 시 sizes & size_picture 초기화
-  const handleCategoryChange = (value: string) => {
-    if (!onChange) return;
-    const config = sizeGuideConfig[value];
-    const keys = Object.keys(config.labels);
-    const newSizes: SizeRow[] = defaultSizes.map((sz) => ({
-      size: sz,
-      measurements: keys.reduce(
-        (acc, k) => ({ ...acc, [k]: 0 }),
-        {} as Record<string, number>
-      ),
-    }));
-    onChange({ category: value, sizes: newSizes, size_picture: config.image });
-  };
-
-  // 사이즈 토글
   const handleToggleSize = (sz: string) => {
     if (!onChange) return;
     const exists = product.sizes?.some((item) =>
@@ -112,12 +103,10 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
           : item.size.replace(/[^0-9]/g, '') !== sz
       );
     } else {
-      const labels = sizeGuideConfig[product.category]?.labels ?? {};
-      const measurements = Object.keys(labels).reduce(
-        (acc, k) => ({ ...acc, [k]: 0 }),
-        {} as Record<string, number>
-      );
-      newSizes.push({ size: sz, measurements });
+      newSizes.push({
+        size: sz,
+        measurements: { ...defaultMeasurementsTemplate },
+      });
     }
     onChange({ sizes: newSizes });
   };
@@ -198,7 +187,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               {editable ? (
                 <Select
                   value={product.category}
-                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  onChange={(e) => onChange?.({ category: e.target.value })}
                 >
                   <option value='' disabled hidden>
                     옵션을 선택하세요
@@ -218,6 +207,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                 </Value>
               )}
             </Row>
+
             <Row>
               <Label>사이즈</Label>
               <SizeRowWrapper>
@@ -247,6 +237,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                 )}
               </SizeRowWrapper>
             </Row>
+
             <Row>
               <Label>색상</Label>
               {editable ? (
@@ -360,6 +351,7 @@ const Input = styled.input`
   border: 1px solid #ccc;
   border-radius: 4px;
   line-height: 28px;
+
   &:disabled {
     background: #f5f5f5;
     color: #777;
@@ -380,6 +372,7 @@ const Select = styled.select`
   background-repeat: no-repeat;
   background-position: right 8px center;
   background-size: 10px 6px;
+
   &:focus {
     outline: none;
     border-color: #888;
