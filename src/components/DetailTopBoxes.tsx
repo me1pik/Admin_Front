@@ -34,14 +34,23 @@ const categoryOptions = [
   { label: '롱 원피스', value: 'LongDress' },
   { label: '투피스', value: 'TowDress' },
   { label: '점프수트', value: 'JumpSuit' },
+
   { label: '블라우스', value: 'Blouse' },
   { label: '니트 상의', value: 'KnitTop' },
   { label: '셔츠 상의', value: 'ShirtTop' },
   { label: '미니 스커트', value: 'MiniSkirt' },
   { label: '미디 스커트', value: 'MidiSkirt' },
+
+  { label: '롱 스커트', value: 'LongSkirt' },
   { label: '팬츠', value: 'Pants' },
   { label: '자켓', value: 'Jacket' },
   { label: '코트', value: 'Coat' },
+  { label: '탑', value: 'Top' },
+
+  { label: '티셔츠', value: 'Tshirt' },
+  { label: '가디건', value: 'Cardigan' },
+  { label: '베스트', value: 'Best' },
+  { label: '패딩', value: 'Padding' },
 ];
 
 const statusOptions = [
