@@ -71,6 +71,12 @@ const categoryOptions = [
   { label: '패딩', value: 'Padding', icon: IconPadding },
 ];
 
+const statusOptions = [
+  { label: '등록대기', value: 0 },
+  { label: '등록완료', value: 1 },
+  { label: '판매종료', value: 2 },
+];
+
 const defaultSizes = ['44', '55', '66', '77', 'Free'];
 
 interface DetailTopBoxesProps {
@@ -82,12 +88,21 @@ interface DetailTopBoxesProps {
 }
 
 // ——— 커스텀 드롭다운 컴포넌트 ———
-interface CategoryDropdownProps {
-  value: string;
-  onChange: (value: string) => void;
+interface DropdownOption {
+  label: string;
+  value: string | number;
+  icon?: string | null;
 }
-const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
+interface DropdownProps {
+  value: string | number;
+  options: DropdownOption[];
+  placeholder?: string;
+  onChange: (value: string | number) => void;
+}
+const Dropdown: React.FC<DropdownProps> = ({
   value,
+  options,
+  placeholder = '선택하세요',
   onChange,
 }) => {
   const [open, setOpen] = useState(false);
@@ -103,18 +118,18 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const selected = categoryOptions.find((o) => o.value === value);
+  const selected = options.find((o) => o.value === value);
 
   return (
     <DropdownWrapper ref={ref}>
       <SelectStyled onClick={() => setOpen((v) => !v)}>
         {selected?.icon && <IconSmall src={selected.icon} />}
-        <span>{selected?.label || '옵션을 선택하세요'}</span>
+        <span>{selected?.label ?? placeholder}</span>
         <Arrow>{open ? '▲' : '▼'}</Arrow>
       </SelectStyled>
       {open && (
         <Menu>
-          {categoryOptions.map((o) => (
+          {options.map((o) => (
             <MenuItem
               key={o.value}
               onClick={() => {
@@ -207,26 +222,16 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
             <Row>
               <Label>상태</Label>
               {editable ? (
-                <Select
-                  native
-                  value={String(product.registration)}
-                  onChange={(e) =>
-                    onChange?.({ registration: Number(e.target.value) })
-                  }
-                >
-                  <option disabled hidden>
-                    옵션을 선택하세요
-                  </option>
-                  <option value={0}>등록대기</option>
-                  <option value={1}>등록완료</option>
-                  <option value={2}>판매종료</option>
-                </Select>
+                <Dropdown
+                  value={product.registration}
+                  options={statusOptions}
+                  onChange={(v) => onChange?.({ registration: Number(v) })}
+                />
               ) : (
                 <Value>
                   {
-                    { 0: '등록대기', 1: '등록완료', 2: '판매종료' }[
-                      product.registration
-                    ]
+                    statusOptions.find((o) => o.value === product.registration)
+                      ?.label
                   }
                 </Value>
               )}
@@ -245,9 +250,10 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
             <Row>
               <Label>종류</Label>
               {editable ? (
-                <CategoryDropdown
+                <Dropdown
                   value={product.category}
-                  onChange={handleCategoryChange}
+                  options={categoryOptions}
+                  onChange={(v) => handleCategoryChange(String(v))}
                 />
               ) : (
                 <Value>
@@ -258,7 +264,6 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                 </Value>
               )}
             </Row>
-
             <Row>
               <Label>사이즈</Label>
               <SizeRowWrapper>
@@ -288,24 +293,14 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                 )}
               </SizeRowWrapper>
             </Row>
-
             <Row>
               <Label>색상</Label>
               {editable ? (
-                <Select
-                  native
+                <Dropdown
                   value={product.color}
-                  onChange={(e) => onChange?.({ color: e.target.value })}
-                >
-                  <option disabled hidden>
-                    옵션을 선택하세요
-                  </option>
-                  {colorOptions.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </Select>
+                  options={colorOptions}
+                  onChange={(v) => onChange?.({ color: String(v) })}
+                />
               ) : (
                 <Value>
                   {colorOptions.find((o) => o.value === product.color)?.label}
@@ -350,7 +345,7 @@ export default DetailTopBoxes;
 
 /* Styled Components */
 const Container = styled.div`
-  min-width: 1000px;
+  min-width: 1100px;
 `;
 const BoxWrapper = styled.div`
   display: flex;
@@ -366,39 +361,19 @@ const Box = styled.div`
 const IconWrapper = styled.div`
   width: 72px;
   height: 72px;
-  padding: 8px; /* 내부 여백 추가 */
-  border: 1px solid #ddd;
+  padding: 8px;
 
+  border: 1px solid #ddd;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 15px;
 `;
-
 const Icon = styled.img`
   max-width: 100%;
   max-height: 100%;
 `;
-
-const IconSmall = styled.img`
-  width: 20px; /* 기존 16px → 20px */
-  height: 20px; /* 기존 16px → 20px */
-  flex-shrink: 0;
-`;
-
-const MenuItem = styled.div`
-  padding: 8px 12px; /* 기존 6px 8px → 8px 12px */
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px; /* 아이콘과 텍스트 간격 확대 */
-  cursor: pointer;
-  &:hover {
-    background: #f5f5f5; /* 호버 시 배경 강조 */
-  }
-`;
-
 const InfoCol = styled.div`
   display: flex;
   flex-direction: column;
@@ -430,35 +405,16 @@ const Input = styled.input`
     cursor: not-allowed;
   }
 `;
-const Select = styled.select`
-  font-size: 12px;
-  height: 30px;
-  width: 145px;
-  padding: 0 8px;
-  line-height: 28px;
-  border: 1px solid #000;
-  border-radius: 4px;
-  background: #fff;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l5 6 5-6H0z' fill='%23666'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-  background-size: 10px 6px;
-  &:focus {
-    outline: none;
-    border-color: #888;
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
-  }
+const DropdownWrapper = styled.div`
+  position: relative;
 `;
 const SelectStyled = styled.div`
-  font-size: 10px;
-  height: 27px;
-  width: 125px;
+  font-size: 12px;
+  height: 30px;
+  min-width: 125px;
   padding: 0 8px;
   line-height: 28px;
   border: 1px solid #000;
-  border-radius: 4px;
-  background: #fff;
   border-radius: 4px;
   background: #fff;
   display: inline-flex;
@@ -469,9 +425,6 @@ const SelectStyled = styled.div`
 const Arrow = styled.span`
   margin-left: 8px;
   font-size: 10px;
-`;
-const DropdownWrapper = styled.div`
-  position: relative;
 `;
 const Menu = styled.div`
   position: absolute;
@@ -486,7 +439,23 @@ const Menu = styled.div`
   margin-top: 4px;
   z-index: 10;
 `;
+const MenuItem = styled.div`
+  padding: 8px 12px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  &:hover {
+    background: #f5f5f5;
+  }
+`;
 
+const IconSmall = styled.img`
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+`;
 const Divider = styled.div`
   width: 1px;
   background: #ddd;
@@ -498,7 +467,7 @@ const SizeRowWrapper = styled.div`
   align-items: center;
 `;
 const SizeBox = styled.div`
-  padding: 2px 6px;
+  padding: 10px 10px;
   font-size: 10px;
   border-radius: 4px;
   background: #f6f6f6;
