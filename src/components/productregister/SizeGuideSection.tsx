@@ -1,9 +1,21 @@
 // src/components/productregister/SizeGuideSection.tsx
-import React, { useState, useEffect, ChangeEvent, useCallback } from 'react';
+import React, { ChangeEvent, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { SizeRow } from '../../api/adminProduct';
 
-// ① 카테고리별 매핑(이미지·라벨) — 기본값 그대로 유지
+interface Column {
+  key: string;
+  label: string;
+}
+type RowData = Record<string, string>;
+
+export interface SizeGuideSectionProps {
+  category: string;
+  sizes: SizeRow[];
+  onSizesChange?: (sizes: SizeRow[]) => void;
+}
+
+// 카테고리별 이미지·라벨 매핑
 const sizeGuideConfig: Record<
   string,
   { image: string; labels: Record<string, string> }
@@ -241,74 +253,56 @@ const sizeGuideConfig: Record<
   },
 };
 
-type Column = { key: string; label: string };
-type RowData = Record<string, string>;
-
-export interface SizeGuideSectionProps {
-  category: string;
-  sizes: SizeRow[];
-  onSizesChange?: (sizes: SizeRow[]) => void;
-}
-
 const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   category,
   sizes,
   onSizesChange,
 }) => {
-  const [columns, setColumns] = useState<Column[]>([]);
-  const [rows, setRows] = useState<RowData[]>([]);
-
-  // ① 헤더 생성
-  useEffect(() => {
-    const config = sizeGuideConfig[category] || { labels: {} };
-    const cols: Column[] = [{ key: 'size', label: '사이즈' }];
-    Object.entries(config.labels).forEach(([code, label]) => {
-      cols.push({ key: code, label });
-    });
-    setColumns(cols);
+  const columns: Column[] = useMemo(() => {
+    const labels = sizeGuideConfig[category]?.labels ?? {};
+    return [
+      { key: 'size', label: '사이즈' },
+      ...Object.entries(labels).map(([k, v]) => ({ key: k, label: v })),
+    ];
   }, [category]);
 
-  // ② rows 생성 (sizes prop 그대로 사용)
-  const makeRows = useCallback((): RowData[] => {
-    return sizes.map((item) => {
+  const [rows, setRows] = useState<RowData[]>([]);
+
+  useEffect(() => {
+    const newRows = sizes.map((item) => {
       const row: RowData = { size: item.size };
       columns.forEach((col) => {
         if (col.key === 'size') return;
-        const value = item.measurements[col.key];
-        row[col.key] = value != null && value !== 0 ? String(value) : '';
+        const mKey = Object.keys(item.measurements).find((k) =>
+          k.startsWith(col.key + ' ')
+        );
+        // measurementKey가 존재하면 그것, 아니면 코드 키 자체로도 시도
+        const rawKey = mKey ?? col.key;
+        const val = item.measurements[rawKey];
+        row[col.key] = val != null && val !== 0 ? String(val) : '';
       });
       return row;
     });
+    setRows(newRows);
   }, [sizes, columns]);
 
-  useEffect(() => {
-    setRows(makeRows());
-  }, [makeRows]);
-
-  // ③ 변경 시 상위 전달
-  const emitChange = (newRows: RowData[]) => {
-    const out: SizeRow[] = newRows.map((r) => {
-      const measurements: Record<string, number> = {};
-      columns.forEach((col) => {
-        if (col.key !== 'size') {
-          measurements[col.key] = r[col.key] ? Number(r[col.key]) : 0;
-        }
-      });
-      return { size: r.size, measurements };
-    });
-    onSizesChange?.(out);
-  };
-
-  const handleCellChange = (
-    ri: number,
-    key: string,
-    e: ChangeEvent<HTMLInputElement>
-  ) => {
-    const next = rows.map((r, i) =>
-      i === ri ? { ...r, [key]: e.target.value } : r
+  const handleCellChange = (ri: number, key: string, value: string) => {
+    const updatedRows = rows.map((r, i) =>
+      i === ri ? { ...r, [key]: value } : r
     );
-    setRows(next);
-    emitChange(next);
+    setRows(updatedRows);
+    onSizesChange?.(
+      updatedRows.map((r) => ({
+        size: r.size,
+        measurements: Object.entries(r).reduce<Record<string, number>>(
+          (acc, [k, v]) => {
+            if (k !== 'size') acc[k] = v ? Number(v) : 0;
+            return acc;
+          },
+          {}
+        ),
+      }))
+    );
   };
 
   return (
@@ -335,7 +329,9 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
                 <Td key={`${ri}-${col.key}`}>
                   <CellInput
                     value={row[col.key] || ''}
-                    onChange={(e) => handleCellChange(ri, col.key, e)}
+                    onChange={(e) =>
+                      handleCellChange(ri, col.key, e.target.value)
+                    }
                   />
                 </Td>
               ))}
@@ -349,7 +345,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
 
 export default SizeGuideSection;
 
-/* styled-components */
+/* ---- styled-components ---- */
 const SectionBox = styled.div`
   position: relative;
   padding-left: 20px;
