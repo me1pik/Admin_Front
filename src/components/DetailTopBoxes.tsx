@@ -364,19 +364,41 @@ const Box = styled.div`
   padding: 10px;
 `;
 const IconWrapper = styled.div`
-  width: 72px;
-  height: 72px;
-  border: 1px solid #ddd;
+  width: 80px; /* 기존 72px → 80px */
+  height: 80px; /* 기존 72px → 80px */
+  padding: 8px; /* 내부 여백 추가 */
+  background: #fafafa; /* 연한 배경색 부여 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 부드러운 그림자 */
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 15px;
 `;
+
 const Icon = styled.img`
   max-width: 100%;
   max-height: 100%;
 `;
+
+const IconSmall = styled.img`
+  width: 20px; /* 기존 16px → 20px */
+  height: 20px; /* 기존 16px → 20px */
+  flex-shrink: 0;
+`;
+
+const MenuItem = styled.div`
+  padding: 8px 12px; /* 기존 6px 8px → 8px 12px */
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px; /* 아이콘과 텍스트 간격 확대 */
+  cursor: pointer;
+  &:hover {
+    background: #f5f5f5; /* 호버 시 배경 강조 */
+  }
+`;
+
 const InfoCol = styled.div`
   display: flex;
   flex-direction: column;
@@ -429,7 +451,7 @@ const Select = styled.select`
   }
 `;
 const SelectStyled = styled.div`
-  font-size: 12px;
+  font-size: 10px;
   height: 27px;
   width: 125px;
   padding: 0 8px;
@@ -464,21 +486,7 @@ const Menu = styled.div`
   margin-top: 4px;
   z-index: 10;
 `;
-const MenuItem = styled.div`
-  padding: 6px 8px;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  &:hover {
-    background: #f0f0f0;
-  }
-`;
-const IconSmall = styled.img`
-  width: 16px;
-  height: 16px;
-`;
+
 const Divider = styled.div`
   width: 1px;
   background: #ddd;
