@@ -1,7 +1,29 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
 
-/** 숫자 사이즈 라벨 매핑 */
+/** 인라인 색상 옵션 — 분리 컴포넌트 없이 */
+const colorOptions = [
+  { label: '전체색상', value: '' },
+  { label: '화이트', value: 'WHITE' },
+  { label: '블랙', value: 'BLACK' },
+  { label: '그레이', value: 'GRAY' },
+  { label: '네이비', value: 'NAVY' },
+  { label: '아이보리', value: 'IVORY' },
+  { label: '베이지', value: 'BEIGE' },
+  { label: '브라운', value: 'BROWN' },
+  { label: '카키', value: 'KHAKI' },
+  { label: '그린', value: 'GREEN' },
+  { label: '블루', value: 'BLUE' },
+  { label: '퍼플', value: 'PURPLE' },
+  { label: '버건디', value: 'BURGUNDY' },
+  { label: '레드', value: 'RED' },
+  { label: '핑크', value: 'PINK' },
+  { label: '옐로우', value: 'YELLOW' },
+  { label: '오렌지', value: 'ORANGE' },
+  { label: '마젠타', value: 'MAGENTA' },
+  { label: '민트', value: 'MINT' },
+] as const;
+
 const SIZE_LABELS: Record<string, string> = {
   '44': 'S',
   '55': 'M',
@@ -9,27 +31,24 @@ const SIZE_LABELS: Record<string, string> = {
   '77': 'XL',
 };
 
-/** 제품 아이템 인터페이스 */
 export interface ProductItem {
   no: number;
   styleCode: string;
   brand: string;
   category: string;
   color: string;
-  size: string; // 사이즈 (예: "SIZE 55 / SIZE 66" 또는 "Free")
+  size: string;
   price: number;
   registerDate: string;
   status: string;
 }
 
-/** ProductTable Props */
 interface ProductTableProps {
   filteredData: ProductItem[];
   handleEdit: (styleCode: string, no: number) => void;
   startNo?: number;
 }
 
-// ellipsis 스타일
 const ellipsis = css`
   overflow: hidden;
   text-overflow: ellipsis;
@@ -41,7 +60,6 @@ const ProductTable: React.FC<ProductTableProps> = ({
   handleEdit,
   startNo = 0,
 }) => {
-  // 상태별 배경색
   const getStatusColor = (status: string) => {
     switch (status) {
       case '등록완료':
@@ -55,19 +73,20 @@ const ProductTable: React.FC<ProductTableProps> = ({
     }
   };
 
-  // 사이즈 매핑 함수
   const formatSize = (raw: string) => {
-    // Free 처리
     if (/free/i.test(raw)) return 'Free';
-    // 숫자만 추출
     const parts = raw.match(/\d+/g);
     if (!parts) return raw;
-    const mapped = parts.map((num) => {
-      const label = SIZE_LABELS[num];
-      return label ? `${num}(${label})` : num;
-    });
-    return mapped.join(' / ');
+    return parts
+      .map((num) => {
+        const label = SIZE_LABELS[num];
+        return label ? `${num}(${label})` : num;
+      })
+      .join(' / ');
   };
+
+  const getColorLabel = (value: string) =>
+    colorOptions.find((o) => o.value === value)?.label || value;
 
   return (
     <Table>
@@ -106,7 +125,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
             </Td>
             <Td title={item.brand}>{item.brand}</Td>
             <Td title={item.category}>{item.category}</Td>
-            <Td title={item.color}>{item.color}</Td>
+            <Td title={item.color}>{getColorLabel(item.color)}</Td>
             <Td title={item.size}>{formatSize(item.size)}</Td>
             <Td title={`${item.price.toLocaleString()}원`}>
               {item.price.toLocaleString()}원
@@ -125,15 +144,9 @@ const ProductTable: React.FC<ProductTableProps> = ({
         {filteredData.length < 10 &&
           Array.from({ length: 10 - filteredData.length }).map((_, i) => (
             <TableRow key={`empty-${i}`}>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
+              {Array.from({ length: 9 }).map((_, j) => (
+                <Td key={j}>&nbsp;</Td>
+              ))}
             </TableRow>
           ))}
       </tbody>
@@ -143,6 +156,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
 
 export default ProductTable;
 
+/* Styled Components */
 const Table = styled.table`
   width: 100%;
   table-layout: fixed;
