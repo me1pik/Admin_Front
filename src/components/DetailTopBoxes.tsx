@@ -33,19 +33,16 @@ const categoryOptions = [
   { label: '미디원피스', value: 'MidiDress' },
   { label: '롱 원피스', value: 'LongDress' },
   { label: '투피스', value: 'TowDress' },
-
   { label: '점프수트', value: 'JumpSuit' },
   { label: '블라우스', value: 'Blouse' },
   { label: '니트 상의', value: 'KnitTop' },
   { label: '셔츠 상의', value: 'ShirtTop' },
   { label: '미니 스커트', value: 'MiniSkirt' },
-
   { label: '미디 스커트', value: 'MidiSkirt' },
   { label: '롱 스커트', value: 'LongSkirt' },
   { label: '팬츠', value: 'Pants' },
   { label: '자켓', value: 'Jacket' },
   { label: '코트', value: 'Coat' },
-
   { label: '탑', value: 'Top' },
   { label: '티셔츠', value: 'Tshirt' },
   { label: '가디건', value: 'Cardigan' },
@@ -59,22 +56,255 @@ const statusOptions = [
   { label: '판매종료', value: 2 },
 ];
 
+// 각 카테고리별 실측 이미지 URL과 Measurement 라벨 매핑
+const sizeGuideConfig: Record<
+  string,
+  { image: string; labels: Record<string, string> }
+> = {
+  Entire: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/6aa5cfc1fcf058242047931081e6bd5c.png',
+    labels: {
+      A: 'A.어깨넓이',
+      B: 'B.가슴둘레',
+      C: 'C.소매길이',
+      D: 'D.암홀',
+      E: 'E.총길이',
+    },
+  },
+  Top: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/6aa5cfc1fcf058242047931081e6bd5c.png',
+    labels: {
+      A: 'A.어깨넓이',
+      B: 'B.가슴둘레',
+      C: 'C.소매길이',
+      D: 'D.암홀',
+      E: 'E.총길이',
+    },
+  },
+  Tshirt: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/25db6b65a4c2eccbe1ea546026389427.png',
+    labels: {
+      A: 'A.어깨넓이',
+      B: 'B.가슴둘레',
+      C: 'C.소매길이',
+      D: 'D.암홀',
+      E: 'E.총길이',
+      F: 'F.밑단둘레',
+    },
+  },
+  Blouse: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/6aa5cfc1fcf058242047931081e6bd5c.png',
+    labels: {
+      A: 'A.어깨넓이',
+      B: 'B.가슴둘레',
+      C: 'C.소매길이',
+      D: 'D.암홀',
+      E: 'E.총길이',
+    },
+  },
+  KnitTop: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/25db6b65a4c2eccbe1ea546026389427.png',
+    labels: {
+      A: 'A.어깨넓이',
+      B: 'B.가슴둘레',
+      C: 'C.소매길이',
+      D: 'D.암홀',
+      E: 'E.총길이',
+      F: 'F.밑단둘레',
+    },
+  },
+  ShirtTop: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/6aa5cfc1fcf058242047931081e6bd5c.png',
+    labels: {
+      A: 'A.어깨넓이',
+      B: 'B.가슴둘레',
+      C: 'C.소매길이',
+      D: 'D.암홀',
+      E: 'E.총길이',
+    },
+  },
+  MiniSkirt: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/4a3564bd7e1095a189083bb62916349a.png',
+    labels: {
+      A: 'A.허리둘레',
+      B: 'B.엉덩이둘레',
+      C: 'C.밑단둘레',
+      D: 'D.총길이',
+    },
+  },
+  MidiSkirt: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/4a3564bd7e1095a189083bb62916349a.png',
+    labels: {
+      A: 'A.허리둘레',
+      B: 'B.엉덩이둘레',
+      C: 'C.밑단둘레',
+      D: 'D.총길이',
+    },
+  },
+  LongSkirt: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/4a3564bd7e1095a189083bb62916349a.png',
+    labels: {
+      A: 'A.허리둘레',
+      B: 'B.엉덩이둘레',
+      C: 'C.밑단둘레',
+      D: 'D.총길이',
+    },
+  },
+  Pants: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/59c6a4e2fb13d263e2799ab338f8674a.png',
+    labels: {
+      A: 'A.허리둘레',
+      B: 'B.엉덩이둘레',
+      C: 'C.허벅지둘레',
+      D: 'D.밑위길이',
+      E: 'E.총길이',
+      F: 'F.밑단둘레',
+    },
+  },
+  MiniDress: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/358a254fc60602c20991d47964a23311.png',
+    labels: {
+      A: 'A.어깨넓이',
+      B: 'B.가슴둘레',
+      C: 'C.허리둘레',
+      D: 'D.소매길이',
+      E: 'E.엉덩이둘레',
+      F: 'F.총길이',
+    },
+  },
+  MidiDress: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/358a254fc60602c20991d47964a23311.png',
+    labels: {
+      A: 'A.어깨넓이',
+      B: 'B.가슴둘레',
+      C: 'C.허리둘레',
+      D: 'D.소매길이',
+      E: 'E.엉덩이둘레',
+      F: 'F.총길이',
+    },
+  },
+  LongDress: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/358a254fc60602c20991d47964a23311.png',
+    labels: {
+      A: 'A.어깨넓이',
+      B: 'B.가슴둘레',
+      C: 'C.허리둘레',
+      D: 'D.소매길이',
+      E: 'E.엉덩이둘레',
+      F: 'F.총길이',
+    },
+  },
+  TowDress: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/358a254fc60602c20991d47964a23311.png',
+    labels: {
+      A: 'A.어깨넓이',
+      B: 'B.가슴둘레',
+      C: 'C.허리둘레',
+      D: 'D.소매길이',
+      E: 'E.엉덩이둘레',
+      F: 'F.총길이',
+    },
+  },
+  JumpSuit: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/5ded97cf03063ebe34316355b36a419c.png',
+    labels: {
+      A: 'A.어깨넓이',
+      B: 'B.가슴둘레',
+      C: 'C.허리둘레',
+      D: 'D.소매길이',
+      E: 'E.총길이',
+    },
+  },
+  Best: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/356a561aa2641c9a99a5fa22196a60fb.png',
+    labels: {
+      A: 'A.어깨넓이',
+      B: 'B.가슴둘레',
+      C: 'C.허리둘레',
+      D: 'D.암홀',
+      E: 'E.총길이',
+      F: 'F.밑단둘레',
+    },
+  },
+  Cardigan: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/88bf095e82d97c3fa1fbc85dea6fb58b.png',
+    labels: {
+      A: 'A.어깨넓이',
+      B: 'B.가슴둘레',
+      C: 'C.소매길이',
+      D: 'D.암홀',
+      E: 'E.총길이',
+      F: 'F.밑단둘레',
+    },
+  },
+  Jacket: {
+    image:
+      'https://www.daehyuninside.com/_skin/daehyun_250205/img/etc/OUTER3.jpg',
+    labels: {
+      A: 'A.어깨넓이',
+      B: 'B.가슴둘레',
+      C: 'C.허리둘레',
+      D: 'D.소매길이',
+      E: 'E.암홀',
+      F: 'F.총길이',
+      G: 'G.밑단둘레',
+    },
+  },
+  Padding: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/88bf095e82d97c3fa1fbc85dea6fb58b.png',
+    labels: {
+      A: 'A.어깨넓이',
+      B: 'B.가슴둘레',
+      C: 'C.소매길이',
+      D: 'D.암홀',
+      E: 'E.총길이',
+      F: 'F.밑단둘레',
+    },
+  },
+  Coat: {
+    image:
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/c514aa235c2c74a8f6c9a4d6ee59e58e.png',
+    labels: {
+      A: 'A.어깨넓이',
+      B: 'B.가슴둘레',
+      C: 'C.허리둘레',
+      D: 'D.소매길이',
+      E: 'E.암홀',
+      F: 'F.총길이',
+      G: 'G.밑단둘레',
+    },
+  },
+};
+
+const defaultSizes = ['44', '55', '66', '77', 'Free'];
+
 interface DetailTopBoxesProps {
   product: ProductDetailResponse;
   editable?: boolean;
   onChange?: (
-    data: Partial<ProductDetailResponse & { sizes: SizeRow[] }>
+    data: Partial<
+      ProductDetailResponse & { sizes: SizeRow[]; size_picture: string }
+    >
   ) => void;
 }
-
-const defaultSizes = ['44', '55', '66', '77', 'Free'];
-const defaultMeasurementsTemplate = {
-  어깨: 0,
-  가슴: 0,
-  허리: 0,
-  팔길이: 0,
-  총길이: 0,
-};
 
 const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   product,
@@ -88,6 +318,28 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
   const rentalValue =
     product.rental_price != null ? Math.floor(product.rental_price) : 0;
 
+  // ❶ 카테고리 변경 시 sizes, size_picture 초기화
+  const handleCategoryChange = (value: string) => {
+    if (!onChange) return;
+    const config = sizeGuideConfig[value];
+    // measurement 키(A,B,C...) 목록
+    const keys = Object.keys(config.labels);
+    // defaultSizes 기반으로 SizeRow 배열 생성
+    const newSizes: SizeRow[] = defaultSizes.map((sz) => {
+      const measurements: Record<string, number> = {};
+      keys.forEach((k) => {
+        measurements[k] = 0;
+      });
+      return { size: sz, measurements };
+    });
+    onChange({
+      category: value,
+      sizes: newSizes,
+      size_picture: config.image,
+    });
+  };
+
+  // ❷ 기존 토글 로직: measurement 키를 현재 product.size_picture에 맞춘 키로 초기화
   const handleToggleSize = (sz: string) => {
     if (!onChange) return;
     const exists = product.sizes?.some((item) =>
@@ -103,10 +355,11 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
           : item.size.replace(/[^0-9]/g, '') !== sz
       );
     } else {
-      newSizes.push({
-        size: sz,
-        measurements: { ...defaultMeasurementsTemplate },
-      });
+      // 현재 설정된 category의 measurement 키
+      const labels = sizeGuideConfig[product.category]?.labels ?? {};
+      const measurements: Record<string, number> = {};
+      Object.keys(labels).forEach((k) => (measurements[k] = 0));
+      newSizes.push({ size: sz, measurements });
     }
     onChange({ sizes: newSizes });
   };
@@ -187,7 +440,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               {editable ? (
                 <Select
                   value={product.category}
-                  onChange={(e) => onChange?.({ category: e.target.value })}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
                 >
                   <option value='' disabled hidden>
                     옵션을 선택하세요

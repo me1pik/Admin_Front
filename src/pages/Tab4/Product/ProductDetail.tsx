@@ -1,4 +1,3 @@
-// src/pages/ProductDetail.tsx
 import React, { useEffect, useState, useCallback, FormEvent } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -43,6 +42,7 @@ const ProductDetail: React.FC = () => {
 
   const [images, setImages] = useState<string[]>([]);
   const [product, setProduct] = useState<ProductDetailResponse | null>(null);
+  const [sizeGuides, setSizeGuides] = useState<Record<string, SizeRow[]>>({});
   const [changed, setChanged] = useState<
     Partial<ProductDetailResponse & { sizes: SizeRow[] }>
   >({});
@@ -78,7 +78,6 @@ const ProductDetail: React.FC = () => {
     [handleProductChange]
   );
 
-  // 이미지 업데이트 헬퍼
   const updateImage = (idx: number, url: string | null) => {
     setImages((prev) => {
       const next = [...prev];
@@ -88,16 +87,10 @@ const ProductDetail: React.FC = () => {
       return next;
     });
   };
-
-  // URL 삽입
   const handleImageLinkUpload = (idx: number, url: string) => {
     updateImage(idx, url);
   };
-
-  // 삭제
   const handleImageDelete = (idx: number) => updateImage(idx, null);
-
-  // 순서 변경
   const handleImageReorder = (from: number, to: number) => {
     setImages((prev) => {
       const next = [...prev];
@@ -111,10 +104,14 @@ const ProductDetail: React.FC = () => {
   const fetchDetail = async (id: number) => {
     setLoading(true);
     try {
-      const data = await getProductDetail(id);
+      const data = (await getProductDetail(id)) as ProductDetailResponse & {
+        sizesByCategory: Record<string, SizeRow[]>;
+      };
       setProduct(data);
       setImages(data.product_img || []);
-      setError(null);
+      setSizeGuides(data.sizesByCategory || {});
+      // 초기에는 changed 비워두고 product.sizes 그대로 보여주기
+      setChanged({});
     } catch {
       setError('제품 상세 정보를 불러오는데 실패했습니다.');
     } finally {
@@ -130,6 +127,16 @@ const ProductDetail: React.FC = () => {
       fetchDetail(productId);
     }
   }, [productId]);
+
+  // 카테고리 변경 시에만 sizeGuides 적용
+  useEffect(() => {
+    if (!product) return;
+    const guide = sizeGuides[product.category];
+    if (guide) {
+      setProduct((prev) => (prev ? { ...prev, sizes: guide } : prev));
+      setChanged((prev) => ({ ...prev, sizes: guide }));
+    }
+  }, [product?.category, sizeGuides]);
 
   const handleSave = () => {
     if (!product) return;
@@ -190,7 +197,8 @@ const ProductDetail: React.FC = () => {
           <Form onSubmit={(e: FormEvent) => e.preventDefault()}>
             <TwoColumn>
               <SizeGuideSection
-                sizes={product.sizes}
+                category={product.category}
+                sizes={changed.sizes ?? product.sizes ?? []}
                 onSizesChange={handleSizesChange}
               />
               <SizeDisplaySection
@@ -250,8 +258,7 @@ const ProductDetail: React.FC = () => {
 
 export default ProductDetail;
 
-/* Styled Components 생략 없이 유지 */
-
+/* Styled Components */
 const Container = styled.div`
   width: 100%;
   padding: 20px;
