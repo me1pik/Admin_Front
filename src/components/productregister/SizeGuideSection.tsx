@@ -1,6 +1,5 @@
 import React, { useState, useEffect, ChangeEvent, useCallback } from 'react';
 import styled from 'styled-components';
-import { FaTimes, FaPlus } from 'react-icons/fa';
 import { SizeRow } from '../../api/adminProduct';
 
 type Column = { key: string; label: string };
@@ -116,7 +115,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     key: string,
     e: ChangeEvent<HTMLInputElement>
   ) => {
-    const val = key === 'size' ? e.target.value : e.target.value;
+    const val = e.target.value;
     const next = rows.map((r, i) =>
       i === rowIndex ? { ...r, [key]: val } : r
     );
@@ -124,55 +123,21 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     emitChange(next);
   };
 
-  // (옵션) 컬럼 추가/삭제/레이블 변경
-  const handleAddColumn = () => {
-    const newKey = `col_${Date.now()}`;
-    setColumns((c) => [...c, { key: newKey, label: '열 이름' }]);
-    setRows((rs) => rs.map((r) => ({ ...r, [newKey]: '' })));
-  };
-  const handleDeleteColumn = (idx: number) => {
-    const delKey = columns[idx].key;
-    setColumns((c) => c.filter((_, i) => i !== idx));
-    setRows((rs) =>
-      rs.map((r) => {
-        const { [delKey]: _, ...rest } = r;
-        return rest;
-      })
-    );
-  };
-  const handleLabelChange = (idx: number, e: ChangeEvent<HTMLInputElement>) => {
-    const label = e.target.value;
-    setColumns((c) => {
-      const copy = [...c];
-      copy[idx] = { ...copy[idx], label };
-      return copy;
-    });
-  };
+  // (열 추가/삭제 기능 제거)
 
   return (
     <SectionBox>
       <Header>
         <Bullet />
         <Title>사이즈 가이드</Title>
-        <AddColButton type='button' onClick={handleAddColumn}>
-          <FaPlus /> 열 추가
-        </AddColButton>
       </Header>
       <Line />
       <Table>
         <thead>
           <tr>
-            {columns.map((col, i) => (
+            {columns.map((col) => (
               <Th key={col.key}>
-                <LabelInput
-                  value={col.label}
-                  onChange={(e) => handleLabelChange(i, e)}
-                />
-                {col.key !== 'size' && (
-                  <DelColButton onClick={() => handleDeleteColumn(i)}>
-                    <FaTimes />
-                  </DelColButton>
-                )}
+                <LabelInput value={col.label} readOnly />
               </Th>
             ))}
           </tr>
@@ -234,18 +199,6 @@ const Title = styled.div`
   font-size: 14px;
   margin-left: 10px;
 `;
-const AddColButton = styled.button`
-  margin-left: auto;
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  & svg {
-    margin-right: 4px;
-  }
-`;
 const Line = styled.div`
   position: absolute;
   left: 0;
@@ -271,7 +224,7 @@ const Th = styled.th`
   position: relative;
 `;
 const LabelInput = styled.input`
-  width: calc(100% - 24px);
+  width: 100%;
   border: none;
   text-align: center;
   font-weight: 900;
@@ -280,14 +233,6 @@ const LabelInput = styled.input`
   &:focus {
     outline: none;
   }
-`;
-const DelColButton = styled.button`
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  background: none;
-  border: none;
-  cursor: pointer;
 `;
 const Td = styled.td``;
 const CellInput = styled.input`
