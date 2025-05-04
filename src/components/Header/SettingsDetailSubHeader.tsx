@@ -70,7 +70,7 @@ const LeftButton = styled.button`
   justify-content: center;
   width: 110px;
   height: 40px;
-  font-family: 'NanumSquare Neo OTF';
+
   font-weight: 700;
   font-size: 12px;
   line-height: 13px;
@@ -103,7 +103,7 @@ const RightButtons = styled.div`
 const EditButton = styled.button`
   width: 100px;
   height: 40px;
-  font-family: 'NanumSquare Neo OTF';
+
   font-weight: 700;
   font-size: 12px;
   line-height: 13px;
@@ -121,7 +121,7 @@ const EditButton = styled.button`
 const EndButton = styled.button`
   width: 100px;
   height: 40px;
-  font-family: 'NanumSquare Neo OTF';
+
   font-weight: 700;
   font-size: 12px;
   line-height: 13px;

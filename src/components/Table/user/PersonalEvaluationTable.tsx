@@ -89,7 +89,6 @@ const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   background-color: #ffffff;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
 `;
 
 const Th = styled.th`

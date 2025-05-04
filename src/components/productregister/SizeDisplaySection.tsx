@@ -351,7 +351,6 @@ const Bullet = styled.div`
 `;
 
 const SectionTitleInput = styled.input`
-  font-family: 'NanumSquare Neo OTF';
   font-weight: 800;
   font-size: 14px;
   line-height: 15px;

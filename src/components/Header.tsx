@@ -70,7 +70,6 @@ const GreetingContainer = styled.div`
 `;
 
 const UnderlinedName = styled.span`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 800;
   font-size: 14px;
   color: #000000;
@@ -79,7 +78,6 @@ const UnderlinedName = styled.span`
 `;
 
 const GreetingText = styled.span`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 400;
   font-size: 14px;
   color: #aaaaaa;
@@ -90,7 +88,7 @@ const LogoutButton = styled.button`
   height: 34px;
   background: #ffffff;
   border: 1px solid #dddddd;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
+
   font-weight: 800;
   font-size: 14px;
   color: #000000;

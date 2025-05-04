@@ -86,7 +86,7 @@ const Th = styled.th`
   text-align: center;
   vertical-align: middle;
   background-color: #eeeeee;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
+
   font-weight: 800;
   font-size: 12px;
   color: #000000;
@@ -96,7 +96,7 @@ const Th = styled.th`
 
 const Td = styled.td`
   vertical-align: middle;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
+
   font-weight: 400;
   font-size: 12px;
   color: #000000;

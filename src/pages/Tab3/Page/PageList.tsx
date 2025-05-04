@@ -175,7 +175,7 @@ const Content = styled.div`
 
 const HeaderTitle = styled.h1`
   text-align: left;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
+
   font-weight: 700;
   font-size: 16px;
   line-height: 18px;
@@ -189,7 +189,6 @@ const InfoBar = styled.div`
 `;
 
 const TotalCountText = styled.div`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
 `;

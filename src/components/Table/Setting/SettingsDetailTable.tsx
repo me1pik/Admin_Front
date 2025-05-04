@@ -108,7 +108,7 @@ const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   background-color: #ffffff;
-  font-family: 'NanumSquare Neo OTF';
+
   font-size: 12px;
   line-height: 23px;
   color: #000000;

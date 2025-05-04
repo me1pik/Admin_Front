@@ -319,8 +319,6 @@ const SubMenu = styled.div`
 `;
 
 const SubMenuItem = styled.div`
-  font-family: 'NanumSquare Neo OTF';
-  font-style: normal;
   font-weight: 700;
   font-size: 12px;
   line-height: 13px;

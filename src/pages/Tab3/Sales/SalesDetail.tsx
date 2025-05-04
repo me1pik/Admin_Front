@@ -233,7 +233,6 @@ const Container = styled.div`
   width: 100%;
   min-width: 1000px;
   padding: 20px;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
 `;
 
 const HeaderRow = styled.div`
@@ -299,7 +298,7 @@ const TableRow = styled.tr`
 const Th = styled.th`
   text-align: center;
   vertical-align: middle;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
+
   font-weight: 800;
   font-size: 12px;
   color: #000000;
@@ -310,7 +309,7 @@ const Th = styled.th`
 const TdCenter = styled.td`
   text-align: center;
   vertical-align: middle;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
+
   font-weight: 400;
   font-size: 12px;
   color: #000000;
@@ -338,7 +337,6 @@ const Avatar = styled.div`
 `;
 
 const AccountText = styled.span`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 400;
   font-size: 12px;
   color: #007bff;

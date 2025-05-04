@@ -74,7 +74,7 @@ const TableContainer = styled.div`
 const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
+
   background-color: #ffffff;
 `;
 

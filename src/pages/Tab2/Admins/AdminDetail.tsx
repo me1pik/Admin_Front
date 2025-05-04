@@ -164,7 +164,6 @@ const Container = styled.div`
   margin: 0 auto;
   padding: 20px;
   box-sizing: border-box;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
 `;
 
 const HeaderRow = styled.div`
@@ -175,7 +174,6 @@ const HeaderRow = styled.div`
 `;
 
 const Title = styled.h1`
-  font-family: 'NanumSquare Neo OTF';
   font-weight: 700;
   font-size: 16px;
   line-height: 18px;
@@ -191,14 +189,12 @@ const ProductNumberWrapper = styled.div`
 `;
 
 const ProductNumberLabel = styled.div`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 700;
   font-size: 12px;
   color: #000000;
 `;
 
 const ProductNumberValue = styled.div`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 900;
   font-size: 12px;
   color: #000000;

@@ -351,7 +351,6 @@ const Bullet = styled.div`
 `;
 
 const SectionTitle = styled.div`
-  font-family: 'NanumSquare Neo OTF';
   font-weight: 800;
   font-size: 14px;
   line-height: 15px;
@@ -382,7 +381,7 @@ const CheckGroupRow = styled.div`
 const Label = styled.label`
   position: relative;
   min-width: 40px;
-  font-family: 'NanumSquare Neo OTF';
+
   font-weight: 900;
   font-size: 12px;
   line-height: 13px;
@@ -410,7 +409,7 @@ const SizeCheckboxLabel = styled.label`
   display: flex;
   align-items: center;
   cursor: pointer;
-  font-family: 'NanumSquare Neo OTF';
+
   font-weight: 700;
   font-size: 12px;
   line-height: 13px;

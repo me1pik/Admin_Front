@@ -198,7 +198,6 @@ const Container = styled.div`
   width: 100%;
   min-width: 1000px;
   padding: 20px;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
 `;
 
 const HeaderRow = styled.div`

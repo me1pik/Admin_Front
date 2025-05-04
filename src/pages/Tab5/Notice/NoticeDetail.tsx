@@ -168,7 +168,6 @@ export default NoticeDetail;
 const Container = styled.div`
   width: 100%;
   padding: 20px;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
 `;
 const HeaderRow = styled.div`
   display: flex;

@@ -480,7 +480,6 @@ const Container = styled.div`
   margin: 0 auto;
   padding: 20px;
   box-sizing: border-box;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
 `;
 
 const HeaderRow = styled.div`

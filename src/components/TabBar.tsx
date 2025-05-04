@@ -56,7 +56,7 @@ const TabButton = styled.button<TabButtonProps>`
   height: 40px;
   border: 1px solid #dddddd;
   border-bottom: none;
-  font-family: 'NanumSquare Neo OTF';
+
   font-weight: 700;
   font-size: 12px;
   color: #000;

@@ -78,8 +78,7 @@ interface ActionButtonProps {
 
 const ActionButton = styled.button<ActionButtonProps>`
   padding: 10px 20px;
-  font-family: 'NanumSquare Neo OTF';
-  font-style: normal;
+
   font-weight: 700;
   font-size: 12px;
   line-height: 13px;

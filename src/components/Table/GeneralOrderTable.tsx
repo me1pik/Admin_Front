@@ -139,7 +139,7 @@ const Th = styled.th`
   text-align: center;
   vertical-align: middle;
   background-color: #eeeeee;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
+
   font-weight: 800;
   font-size: 12px;
   border: 1px solid #dddddd;
@@ -149,7 +149,7 @@ const Th = styled.th`
 const Td = styled.td`
   text-align: center;
   vertical-align: middle;
-  font-family: 'NanumSquare Neo OTF', sans-serif;
+
   font-weight: 400;
   font-size: 12px;
   border: 1px solid #dddddd;

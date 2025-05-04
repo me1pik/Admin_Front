@@ -94,7 +94,6 @@ const Bullet = styled.div`
 `;
 
 const SectionTitle = styled.div`
-  font-family: 'NanumSquare Neo OTF';
   font-weight: 800;
   font-size: 14px;
   line-height: 15px;
@@ -119,7 +118,7 @@ const InputRow = styled.div`
 const Label = styled.label`
   position: relative;
   min-width: 40px;
-  font-family: 'NanumSquare Neo OTF';
+
   font-weight: 900;
   font-size: 12px;
   line-height: 13px;
@@ -143,7 +142,7 @@ const Select = styled.select`
   border: 1px solid #000;
   padding: 0 8px;
   font-size: 12px;
-  font-family: 'NanumSquare Neo OTF';
+
   font-weight: 800;
   max-width: 180px;
 `;
@@ -158,7 +157,7 @@ const SizeCheckboxLabel = styled.label`
   display: flex;
   align-items: center;
   cursor: pointer;
-  font-family: 'NanumSquare Neo OTF';
+
   font-weight: 700;
   font-size: 12px;
   line-height: 13px;

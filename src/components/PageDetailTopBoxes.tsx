@@ -91,7 +91,6 @@ const Row = styled.div`
 `;
 
 const BoldText = styled.div`
-  font-family: 'NanumSquare Neo OTF';
   font-weight: 800;
   font-size: 12px;
   line-height: 13px;
@@ -99,7 +98,6 @@ const BoldText = styled.div`
 `;
 
 const NormalText = styled.div`
-  font-family: 'NanumSquare Neo OTF';
   font-weight: 400;
   font-size: 12px;
   line-height: 13px;

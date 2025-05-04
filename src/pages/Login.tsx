@@ -153,8 +153,7 @@ const Header = styled.div`
 
 const Title = styled.h2`
   margin: 0;
-  font-family: 'NanumSquare Neo OTF';
-  font-style: normal;
+
   font-weight: 700;
   font-size: 30px;
   line-height: 40px;

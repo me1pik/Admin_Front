@@ -128,7 +128,6 @@ const Row = styled.div`
 
 /** 기본 텍스트 값 */
 const Value = styled.div`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 400;
   font-size: 12px;
   color: #000;
@@ -139,7 +138,6 @@ const Value = styled.div`
 
 /** Bold 텍스트 값 */
 const BoldValue = styled.span`
-  font-family: 'NanumSquare Neo OTF', sans-serif;
   font-weight: 800;
   font-size: 12px;
   color: #000;
