@@ -36,6 +36,8 @@ import CreatePrivacy from './pages/Tab5/Privac/CreatePrivacy';
 import FAQList from './pages/Tab5/FAQ/FAQList';
 import FAQDetail from './pages/Tab5/FAQ/FAQDetail';
 import CreateFAQ from './pages/Tab5/FAQ/CreateFAQ';
+import Dashboard from './pages/Tab1/Dashboard';
+import AnalysisInfo from './pages/Tab2/Analysis/AnalysisInfo';
 
 const App: React.FC = () => {
   return (
@@ -90,6 +92,8 @@ const App: React.FC = () => {
           <Route path='/faq' element={<FAQList />} />
           <Route path='/faqDetail/:no' element={<FAQDetail />} />
           <Route path='/createFaq' element={<CreateFAQ />} />
+          <Route path='/dashboard' element={<Dashboard />} />
+          <Route path='/analysisInfo' element={<AnalysisInfo />} />
         </Route>
       </Routes>
     </BrowserRouter>
