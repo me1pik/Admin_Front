@@ -1,7 +1,5 @@
-// src/pages/UserDetail.tsx
-
-import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import ListButtonDetailSubHeader, {
   DetailSubHeaderProps,
@@ -24,6 +22,10 @@ import PersonalEvaluationTable, {
   PersonalEvaluationRow,
 } from '../../../components/Table/user/PersonalEvaluationTable';
 import Pagination from '../../../components/Pagination';
+import {
+  getUserByEmail,
+  UserDetail as UserDetailModel,
+} from '../../../api/adminUser';
 
 // 예시 제품 번호
 const dummyProducts = [{ no: 5 }];
@@ -358,24 +360,20 @@ const dummyEvaluations: PersonalEvaluationRow[] = [
 ];
 
 const UserDetail: React.FC = () => {
+  const { email } = useParams<{ email: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  // URL 쿼리에서 현재 페이지 읽기
   const page = parseInt(searchParams.get('page') ?? '1', 10);
   const pageSize = 10;
 
+  // ✅ 여기에 import한 UserDetailModel 타입을 사용
+  const [userDetail, setUserDetail] = useState<UserDetailModel | null>(null);
   const [activeTab, setActiveTab] = useState<number>(0);
 
-  /** 서브헤더 버튼 핸들러 */
-  const handleBackClick = () => {
-    navigate(-1);
-  };
-  const handleEditClick = () => {
-    alert('정보가 수정되었습니다!');
-  };
-  const handleEndClick = () => {
-    alert('종료 처리가 완료되었습니다!');
-  };
+  // 서브헤더 버튼 핸들러
+  const handleBackClick = () => navigate(-1);
+  const handleEditClick = () => alert('정보가 수정되었습니다!');
+  const handleEndClick = () => alert('종료 처리가 완료되었습니다!');
 
   const detailSubHeaderProps: DetailSubHeaderProps = {
     backLabel: '목록이동',
@@ -386,15 +384,29 @@ const UserDetail: React.FC = () => {
     onEndClick: handleEndClick,
   };
 
-  /** 탭 클릭 시 page=1으로 리셋 */
-  const handleTabClick = (index: number) => {
-    setActiveTab(index);
+  // URL 파라미터로 넘어온 email로 API 호출
+  useEffect(() => {
+    if (!email) return;
+    (async () => {
+      try {
+        const decoded = decodeURIComponent(email);
+        const data = await getUserByEmail(decoded);
+        setUserDetail(data);
+      } catch (err) {
+        console.error('사용자 상세정보 불러오기 실패:', err);
+      }
+    })();
+  }, [email]);
+
+  // 탭 클릭 시 page=1으로 리셋
+  const handleTabClick = (idx: number) => {
+    setActiveTab(idx);
     const params = Object.fromEntries(searchParams.entries());
     params.page = '1';
     setSearchParams(params);
   };
 
-  /** 현재 탭에 맞는 전체 데이터 선택 */
+  // 탭별 데이터 선택
   const activeData = (() => {
     switch (activeTab) {
       case 0:
@@ -412,12 +424,9 @@ const UserDetail: React.FC = () => {
     }
   })();
 
-  // 전체 페이지 수
   const totalPages = Math.max(1, Math.ceil(activeData.length / pageSize));
-  // 현재 페이지에 해당하는 데이터 슬라이스
   const slicedData = activeData.slice((page - 1) * pageSize, page * pageSize);
 
-  /** 테이블 렌더링 */
   const renderTable = () => {
     switch (activeTab) {
       case 0:
@@ -452,7 +461,11 @@ const UserDetail: React.FC = () => {
         <ProductNumberValue>{dummyProducts[0].no}</ProductNumberValue>
       </ProductNumberWrapper>
 
-      <UserDetailTopBoxes />
+      {userDetail ? (
+        <UserDetailTopBoxes email={userDetail.email} />
+      ) : (
+        <LoadingText>사용자 정보를 불러오는 중...</LoadingText>
+      )}
 
       <MiddleDivider />
 
@@ -473,7 +486,7 @@ const UserDetail: React.FC = () => {
 
 export default UserDetail;
 
-/* ====================== Styled Components ====================== */
+/* ======================= Styled Components ======================= */
 
 const Container = styled.div`
   width: 100%;
@@ -521,4 +534,9 @@ const FooterRow = styled.div`
   display: flex;
   justify-content: flex-end;
   margin-top: 40px;
+`;
+
+const LoadingText = styled.div`
+  text-align: center;
+  padding: 20px;
 `;

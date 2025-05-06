@@ -1,11 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import userDetailImg1 from '../assets/userDetailImg1.svg';
 import userDetailImg2 from '../assets/userDetailImg2.svg';
 import userDetailImg3 from '../assets/userDetailImg3.svg';
 import userDetailImg4 from '../assets/userDetailImg4.svg';
+import { getUserByEmail, UserDetail } from '../api/adminUser';
 
-const UserDetailTopBoxes: React.FC = () => {
+interface Props {
+  email: string;
+}
+
+const UserDetailTopBoxes: React.FC<Props> = ({ email }) => {
+  const [user, setUser] = useState<UserDetail | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await getUserByEmail(email);
+        setUser(data);
+      } catch (error) {
+        console.error('사용자 정보를 불러오는 데 실패했습니다.', error);
+      }
+    };
+
+    fetchUser();
+  }, [email]);
+
+  if (!user) return <Container>로딩 중...</Container>;
+
+  const getAge = (birthdate: string): number => {
+    const birthYear = parseInt(birthdate.split('-')[0], 10);
+    const thisYear = new Date().getFullYear();
+    return thisYear - birthYear + 1;
+  };
+
   return (
     <Container>
       <BoxWrapper>
@@ -17,15 +45,15 @@ const UserDetailTopBoxes: React.FC = () => {
           <Content>
             <Row>
               <Value>
-                <BoldValue>홍길동 (mivin)</BoldValue>
+                <BoldValue>{user.nickname}</BoldValue> ({user.email})
               </Value>
             </Row>
             <Row>
-              <Value>good2@krea.com</Value>
+              <Value>{user.email}</Value>
             </Row>
             <Row>
               <Value>
-                <BoldValue>일반</BoldValue> (등급) : 2021.11.15
+                <BoldValue>{user.membershipLevel}</BoldValue> (등급)
               </Value>
             </Row>
           </Content>
@@ -41,12 +69,13 @@ const UserDetailTopBoxes: React.FC = () => {
           <Content>
             <Row>
               <Value>
-                <BoldValue>1990년</BoldValue> (34세)
+                <BoldValue>{user.birthdate.split('-')[0]}년</BoldValue> (
+                {getAge(user.birthdate)}세)
               </Value>
             </Row>
             <Row>
               <Value>
-                <BoldValue>010-1234-5678</BoldValue>
+                <BoldValue>{user.phoneNumber}</BoldValue>
               </Value>
             </Row>
           </Content>
@@ -62,13 +91,15 @@ const UserDetailTopBoxes: React.FC = () => {
           <Content>
             <Row>
               <Value>
-                <BoldValue>styleweex_xx1</BoldValue> (브랜드)
+                <BoldValue>{user.instagramId}</BoldValue> (브랜드)
               </Value>
             </Row>
             <Row>
               <Value>
-                팔로워 <BoldValue>5,480</BoldValue> / 팔로잉{' '}
-                <BoldValue>397</BoldValue>
+                팔로워{' '}
+                <BoldValue>{user.followersCount.toLocaleString()}</BoldValue> /
+                팔로잉{' '}
+                <BoldValue>{user.followingCount.toLocaleString()}</BoldValue>
               </Value>
             </Row>
           </Content>
@@ -84,12 +115,12 @@ const UserDetailTopBoxes: React.FC = () => {
           <Content>
             <Row>
               <Value>
-                <BoldValue>서울 / 금천구 </BoldValue>(서비스 지역)
+                <BoldValue>{user.address}</BoldValue>
               </Value>
             </Row>
             <Row>
               <Value>
-                멜픽 - <BoldValue>me1pik.com/styleweex</BoldValue>
+                멜픽 - <BoldValue>{user.personalWebpage}</BoldValue>
               </Value>
             </Row>
           </Content>
@@ -103,12 +134,10 @@ export default UserDetailTopBoxes;
 
 /* ======================= Styled Components ======================= */
 
-/** 전체 컨테이너 */
 const Container = styled.div`
   min-width: 1100px;
 `;
 
-/** 박스와 Divider를 포함하는 그룹 */
 const BoxWrapper = styled.div`
   display: flex;
   align-items: stretch;
@@ -116,7 +145,6 @@ const BoxWrapper = styled.div`
   border-radius: 4px;
 `;
 
-/** 각 박스 */
 const Box = styled.div`
   flex: 1;
   display: flex;
@@ -124,7 +152,6 @@ const Box = styled.div`
   padding: 10px;
 `;
 
-/** Divider (수직 구분선) */
 const Divider = styled.div`
   width: 1px;
   background-color: #dddddd;
@@ -132,7 +159,6 @@ const Divider = styled.div`
   margin: 10px;
 `;
 
-/** 아이콘 영역: DetailTopBoxes와 동일한 구조 */
 const IconPlaceholder = styled.div`
   width: 72px;
   height: 72px;
@@ -148,25 +174,21 @@ const IconImage = styled.img`
   width: 72px;
   height: 72px;
   object-fit: contain;
-
   border-radius: 50%;
 `;
 
-/** 텍스트 영역 */
 const Content = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
 `;
 
-/** 한 줄 */
 const Row = styled.div`
   display: flex;
   align-items: center;
   gap: 5px;
 `;
 
-/** 기본 텍스트 값 - 내부에서 한 줄 처리 */
 const Value = styled.div`
   font-weight: 400;
   font-size: 12px;
@@ -176,7 +198,6 @@ const Value = styled.div`
   text-overflow: ellipsis;
 `;
 
-/** Bold 텍스트 값 (font-weight: 800 적용) */
 const BoldValue = styled.span`
   font-weight: 800;
   font-size: 12px;

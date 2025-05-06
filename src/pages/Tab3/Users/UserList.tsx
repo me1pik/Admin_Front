@@ -1,5 +1,3 @@
-// src/pages/UserList.tsx
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -42,6 +40,7 @@ const UserList: React.FC = () => {
 
       const users: User[] = res.users.map((u: any) => ({
         no: u.id,
+        email: u.email, // email 필드 매핑
         status: selectedTab.label === '블럭회원' ? '블럭' : '일반',
         grade: u.membershipLevel,
         name: u.name,
@@ -64,6 +63,7 @@ const UserList: React.FC = () => {
   // 페이지나 탭 변경 시 데이터 재요청
   useEffect(() => {
     fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, selectedTab]);
 
   // 탭 변경 핸들러: selectedTab 업데이트 + page=1으로 URL 리셋
@@ -78,6 +78,7 @@ const UserList: React.FC = () => {
   const filteredData = userData.filter((item) =>
     [
       String(item.no),
+      item.email, // email도 검색에 포함
       item.name,
       item.nickname,
       item.instagram,
@@ -89,8 +90,13 @@ const UserList: React.FC = () => {
     ].some((field) => field.toLowerCase().includes(searchTerm))
   );
 
+  // UserTable의 handleEdit(no: number) 시그니처를 유지하면서,
+  // no를 받아 해당 이메일로 navigate 하도록 처리
   const handleEdit = (no: number) => {
-    navigate(`/userdetail/${no}`);
+    const user = userData.find((u) => u.no === no);
+    if (user) {
+      navigate(`/userdetail/${encodeURIComponent(user.email)}`);
+    }
   };
 
   return (
@@ -133,7 +139,6 @@ const Content = styled.div`
 
 const HeaderTitle = styled.h1`
   text-align: left;
-
   font-weight: 700;
   font-size: 16px;
   line-height: 18px;

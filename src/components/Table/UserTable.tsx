@@ -5,6 +5,7 @@ import styled from 'styled-components';
 /** User 인터페이스 */
 export interface User {
   no: number;
+  email: string;
   status: string; // 상태 (예: 인증, 블럭 등)
   grade: string; // 등급 (예: 일반, 우수 등)
   name: string; // 이름
