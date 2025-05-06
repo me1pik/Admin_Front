@@ -136,13 +136,13 @@ const List: React.FC = () => {
                   브랜드목록
                 </SubMenuItem>
                 <SubMenuItem onClick={() => navigate('/marketorderlist')}>
-                  마켓 주문내역
+                  멜픽내역
                 </SubMenuItem>
                 <SubMenuItem onClick={() => navigate('/GeneralOrderList')}>
-                  일반 주문내역
+                  구매내역
                 </SubMenuItem>
                 <SubMenuItem onClick={() => navigate('/monitoringlist')}>
-                  모니터링
+                  대여내역
                 </SubMenuItem>
               </SubMenu>
             )}
