@@ -110,7 +110,6 @@ const ProductDetail: React.FC = () => {
       setProduct(data);
       setImages(data.product_img || []);
       setSizeGuides(data.sizesByCategory || {});
-      // 초기에는 changed 비워두고 product.sizes 그대로 보여주기
       setChanged({});
     } catch {
       setError('제품 상세 정보를 불러오는데 실패했습니다.');
@@ -128,7 +127,6 @@ const ProductDetail: React.FC = () => {
     }
   }, [productId]);
 
-  // 카테고리 변경 시에만 sizeGuides 적용
   useEffect(() => {
     if (!product) return;
     const guide = sizeGuides[product.category];
@@ -142,13 +140,40 @@ const ProductDetail: React.FC = () => {
     if (!product) return;
     openConfirm('변경 내용을 저장하시겠습니까?', async () => {
       try {
-        const payload: any = { ...changed, product_img: images };
+        // 1) fabricComposition 정리: 빈값 제거 + 퍼센트 내림차순 정렬
+        const rawComp = (changed.fabricComposition ||
+          product.fabricComposition) as Record<string, string>;
+        const sortedComp: Record<string, string> = {};
+        Object.entries(rawComp || {}).forEach(([key, value]) => {
+          const items = value
+            .split(/\s*,\s*/)
+            .map((str) => {
+              const [material, numStr] = str.split(/\s+/);
+              const percent = parseInt(numStr.replace('%', ''), 10) || 0;
+              return { material, percent };
+            })
+            .filter((item) => item.material && item.percent > 0)
+            .sort((a, b) => b.percent - a.percent);
+          if (items.length > 0) {
+            sortedComp[key] = items
+              .map((i) => `${i.material} ${i.percent}%`)
+              .join(', ');
+          }
+        });
+
+        // 2) payload 구성
+        const payload: any = {
+          ...changed,
+          product_img: images,
+          fabricComposition: sortedComp,
+        };
         if (product.sizes) {
           payload.sizes = product.sizes.map((row) => ({
             size: row.size,
             measurements: { ...row.measurements },
           }));
         }
+
         const cleaned = cleanPayload(payload);
         const updated = await updateProduct(product.id, cleaned);
         await fetchDetail(updated.id);
@@ -159,6 +184,7 @@ const ProductDetail: React.FC = () => {
       }
     });
   };
+
   const handleDelete = () => {
     openConfirm('정말 삭제하시겠습니까?', async () => {
       openResult('삭제에 실패했습니다.');
