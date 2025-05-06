@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import ReusableModal2 from './OneButtonModal';
+import ReusableModal2 from './TwoButtonModal';
 
 const Header: React.FC = () => {
   const [isModalOpen, setModalOpen] = useState(false);

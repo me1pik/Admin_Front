@@ -1,4 +1,3 @@
-// src/components/ReusableModal.tsx
 import React from 'react';
 import styled from 'styled-components';
 
@@ -12,115 +11,119 @@ type ModalProps = {
   height?: string;
 };
 
-const ReusableModal: React.FC<ModalProps> = ({
+const ReusableModal2: React.FC<ModalProps> = ({
   isOpen,
   onClose,
   onConfirm,
   title,
   children,
-  width = '400px',
-  height = '200px',
+  width = '100%',
+  height = '360px',
 }) => {
   if (!isOpen) return null;
 
-  const handleYes = () => {
+  const handleConfirmClick = () => {
     if (onConfirm) onConfirm();
     onClose();
   };
 
   return (
-    <Overlay>
-      <ModalBox style={{ width, height }}>
+    <StyledModal>
+      <ModalContent width={width} height={height}>
         {title && (
-          <Header>
-            <Title>{title}</Title>
-          </Header>
+          <ModalHeader>
+            <ModalTitle>{title}</ModalTitle>
+          </ModalHeader>
         )}
-        <Body>{children}</Body>
-        <Footer>
+        <ModalBody>{children}</ModalBody>
+        <CloseButtonWrapper>
           <NoButton onClick={onClose}>아니요</NoButton>
-          <YesButton onClick={handleYes}>네</YesButton>
-        </Footer>
-      </ModalBox>
-    </Overlay>
+          {onConfirm && <YesButton onClick={handleConfirmClick}>네</YesButton>}
+        </CloseButtonWrapper>
+      </ModalContent>
+    </StyledModal>
   );
 };
 
-export default ReusableModal;
+export default ReusableModal2;
 
-// --- Styled Components ---
-
-const Overlay = styled.div`
+const StyledModal = styled.div`
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 10000;
+  align-items: center;
+  padding: 27px;
+  z-index: 9999;
+  width: 100vw;
+  height: 100vh;
+  max-width: 1000px;
 `;
 
-const ModalBox = styled.div`
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
+const ModalContent = styled.div<{ width: string; height: string }>`
+  background-color: #ffffff;
+  padding: 20px;
+  width: ${({ width }) => width};
+  height: ${({ height }) => height};
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  max-width: 300px;
+  margin: 0 auto 20px;
+`;
+
+const ModalHeader = styled.div`
   display: flex;
   flex-direction: column;
 `;
 
-const Header = styled.div`
-  padding: 16px;
-  border-bottom: 1px solid #e0e0e0;
-`;
-
-const Title = styled.h2`
-  margin: 0;
+const ModalTitle = styled.h2`
   font-size: 16px;
   font-weight: bold;
 `;
 
-const Body = styled.div`
-  flex: 1;
-  padding: 20px;
+const ModalBody = styled.div`
   font-size: 14px;
+  font-weight: 400;
   text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  max-height: 70%;
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  border-top: 2px solid #e0e0e0;
+  border-bottom: 2px solid #e0e0e0;
 `;
 
-const Footer = styled.div`
+const CloseButtonWrapper = styled.div`
   display: flex;
-  border-top: 1px solid #e0e0e0;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
 `;
 
 const NoButton = styled.button`
   flex: 1;
-  padding: 12px 0;
+  height: 50px;
   background: #cccccc;
-  color: #fff;
+  color: #ffffff;
   border: none;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
-  &:hover {
-    background: #b3b3b3;
-  }
 `;
 
 const YesButton = styled.button`
   flex: 1;
-  padding: 12px 0;
-  background: #000;
-  color: #fff;
+  height: 50px;
+  background-color: #000000;
+  color: #ffffff;
   border: none;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
-  &:hover {
-    background: #333;
-  }
 `;
