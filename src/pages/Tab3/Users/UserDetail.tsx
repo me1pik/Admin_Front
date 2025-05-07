@@ -21,6 +21,9 @@ import AdditionalListTable, {
 import PersonalEvaluationTable, {
   PersonalEvaluationRow,
 } from '../../../components/Table/user/PersonalEvaluationTable';
+import PaymentMethodTable, {
+  PaymentMethodRow,
+} from '../../../components/Table/user/PaymentMethodTable';
 import Pagination from '../../../components/Pagination';
 import {
   getUserByEmail,
@@ -37,6 +40,7 @@ const shippingTabs = [
   '포인트 내역',
   '추가목록',
   '개인평가',
+  '결재수단',
 ];
 
 // ★ 배송지 설정 예시
@@ -358,6 +362,29 @@ const dummyEvaluations: PersonalEvaluationRow[] = [
     color: 'BLACK',
   },
 ];
+const dummyPaymentMethods: PaymentMethodRow[] = [
+  {
+    no: 3,
+    cardCompany: '신한',
+    cardNumber: '2025 - ○○○○ - ○○○○ - 1234',
+    status: '이용중',
+    registeredDate: '2025-05-01',
+  },
+  {
+    no: 2,
+    cardCompany: 'KB국민',
+    cardNumber: '2025 - ○○○○ - ○○○○ - 1234',
+    status: '사용불가',
+    registeredDate: '2025-05-01',
+  },
+  {
+    no: 1,
+    cardCompany: '삼성',
+    cardNumber: '2025 - ○○○○ - ○○○○ - 1234',
+    status: '사용불가',
+    registeredDate: '2025-05-01',
+  },
+];
 
 const UserDetail: React.FC = () => {
   const { email } = useParams<{ email: string }>();
@@ -419,6 +446,9 @@ const UserDetail: React.FC = () => {
         return dummyAdditionalList;
       case 4:
         return dummyEvaluations;
+      case 5:
+        return dummyPaymentMethods;
+
       default:
         return [];
     }
@@ -443,6 +473,8 @@ const UserDetail: React.FC = () => {
             data={slicedData as PersonalEvaluationRow[]}
           />
         );
+      case 5:
+        return <PaymentMethodTable data={slicedData as PaymentMethodRow[]} />;
       default:
         return null;
     }
