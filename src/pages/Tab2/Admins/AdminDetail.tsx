@@ -59,7 +59,7 @@ const dummyPermissionData: PermissionGroup[] = [
       { label: '브랜드 목록', checked: false },
       { label: '마켓 주문내역', checked: false },
       { label: '일반 주문내역', checked: false },
-      { label: '모니터링', checked: false },
+      { label: '대여', checked: false },
     ],
   },
   {

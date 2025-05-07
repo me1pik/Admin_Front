@@ -170,7 +170,7 @@ const GeneralOrderList: React.FC = () => {
 
   return (
     <Content>
-      <HeaderTitle>일반주문 내역</HeaderTitle>
+      <HeaderTitle>구매 내역</HeaderTitle>
 
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
 

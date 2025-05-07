@@ -170,7 +170,7 @@ const MarketOrderList: React.FC = () => {
 
   return (
     <Content>
-      <HeaderTitle>마켓주문 내역</HeaderTitle>
+      <HeaderTitle>멜픽 내역</HeaderTitle>
 
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
 

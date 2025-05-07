@@ -7,7 +7,7 @@ import MonitoringTable, {
 import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
 import Pagination from '../../../components/Pagination';
 
-/** 모니터링 더미 데이터 */
+/** 대여 더미 데이터 */
 const dummyMonitoring: MonitoringItem[] = [
   {
     no: 1,
@@ -94,7 +94,7 @@ const MonitoringList: React.FC = () => {
 
   return (
     <Content>
-      <HeaderTitle>모니터링 내역</HeaderTitle>
+      <HeaderTitle>대여 내역</HeaderTitle>
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
       <InfoBar>
         <TotalCountText>Total: {totalCount}</TotalCountText>

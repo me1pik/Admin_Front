@@ -3,7 +3,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-/** 일반주문 아이템 인터페이스 */
+/** 구매 아이템 인터페이스 */
 export interface MarketOrderListItem {
   no: number;
   orderDate: string;

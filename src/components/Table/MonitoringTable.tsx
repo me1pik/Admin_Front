@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-/** 모니터링 아이템 인터페이스 */
+/** 대여 아이템 인터페이스 */
 export interface MonitoringItem {
   no: number; // No.
   orderDate: string; // 주문일
