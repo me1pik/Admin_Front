@@ -45,7 +45,7 @@ const UserDetailTopBoxes: React.FC<Props> = ({ email }) => {
           <Content>
             <Row>
               <Value>
-                <BoldValue>{user.nickname}</BoldValue> ({user.email})
+                <BoldValue>{user.name}</BoldValue> ({user.nickname})
               </Value>
             </Row>
             <Row>

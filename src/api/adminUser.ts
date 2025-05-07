@@ -17,6 +17,7 @@ export interface UserDetail {
   personalWebpage: string; // 추가
   followersCount: number; // 추가
   followingCount: number; // 추가
+  name: string;
 }
 
 /**
