@@ -84,7 +84,7 @@ const UserTable: React.FC<UserTableProps> = ({ filteredData, handleEdit }) => {
           <Th>등급</Th>
           <Th>이름</Th>
           <Th>닉네임</Th>
-          <Th>계정(인스타)</Th>
+          <Th>계정(이메일)</Th>
           <Th>팔로잉/팔로우</Th>
           <Th>서비스 지역</Th>
           <Th>가입일자</Th>
@@ -111,7 +111,7 @@ const UserTable: React.FC<UserTableProps> = ({ filteredData, handleEdit }) => {
                 <Avatar />
                 {/* 클릭 시 handleEdit에 user.no 전달 */}
                 <InstaText onClick={() => handleEdit(user.no)}>
-                  {user.instagram}
+                  {user.email}
                 </InstaText>
               </InstaContainer>
             </TdLeft>
@@ -189,6 +189,11 @@ const InstaContainer = styled.div`
   align-items: center;
   gap: 8px;
   margin-left: 10px;
+
+  & > span {
+    flex: 1;
+    min-width: 0;
+  }
 `;
 
 const Avatar = styled.div`
@@ -202,6 +207,11 @@ const Avatar = styled.div`
 const InstaText = styled.span`
   cursor: pointer;
   color: #007bff;
+
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 
   &:hover {
     color: #0056b3;
