@@ -1,6 +1,12 @@
+// src/pages/UserDetail.tsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import { ko } from 'date-fns/locale';
+import { format } from 'date-fns';
+import Holidays from 'date-holidays';
+import 'react-datepicker/dist/react-datepicker.css';
 import ListButtonDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../../../components/Header/ListButtonDetailSubHeader';
@@ -24,16 +30,30 @@ import PersonalEvaluationTable, {
 import PaymentMethodTable, {
   PaymentMethodRow,
 } from '../../../components/Table/user/PaymentMethodTable';
+import LicenseHistoryTable, {
+  LicenseHistoryRow,
+} from '../../../components/Table/user/LicenseHistoryTable';
 import Pagination from '../../../components/Pagination';
 import {
   getUserByEmail,
   UserDetail as UserDetailModel,
 } from '../../../api/adminUser';
 
-// 예시 제품 번호
+// 한글 로케일 등록
+registerLocale('ko', ko);
+// date-holidays 초기화 (KR 공휴일)
+const hd = new Holidays('KR');
+
+// 요일·공휴일 색 지정
+const GlobalStyle = createGlobalStyle`
+  .day-holiday { color: red !important; }
+  .day-sunday  { color: red !important; }
+  .day-saturday{ color: blue !important; }
+`;
+
+// --- 더미 데이터 ---
 const dummyProducts = [{ no: 5 }];
 
-// 탭 목록
 const shippingTabs = [
   '배송지 설정',
   '이용내역',
@@ -41,6 +61,7 @@ const shippingTabs = [
   '추가목록',
   '개인평가',
   '결재수단',
+  '이용권 내역',
 ];
 
 // ★ 배송지 설정 예시
@@ -386,46 +407,83 @@ const dummyPaymentMethods: PaymentMethodRow[] = [
   },
 ];
 
+const dummyLicenseHistory: LicenseHistoryRow[] = [
+  {
+    no: 3,
+    type: '정기 구독권',
+    paymentDate: '2025-05-01',
+    nextPaymentDate: '2025-06-01',
+    code: 'GPX42NABZ2O6NFHY',
+    period: '2025-05-01 ~ 2025-05-31',
+    amount: '120,000',
+    status: '이용중',
+    cancelRequestDate: undefined,
+  },
+  {
+    no: 2,
+    type: '1회 이용권',
+    paymentDate: '2025-05-01',
+    nextPaymentDate: undefined,
+    code: '25HYX9YMFXBBFSOP',
+    period: undefined,
+    amount: '50,000',
+    status: '취소',
+    cancelRequestDate: '2025-05-01',
+  },
+  {
+    no: 1,
+    type: '1회 이용권',
+    paymentDate: '2025-04-21',
+    nextPaymentDate: undefined,
+    code: '00ZVNTTTB25HJT9Z',
+    period: '2025-04-21 ~ 2025-05-20',
+    amount: '50,000',
+    status: '이용완료',
+    cancelRequestDate: undefined,
+  },
+];
+
 const UserDetail: React.FC = () => {
   const { email } = useParams<{ email: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const page = parseInt(searchParams.get('page') ?? '1', 10);
+  const page = Number(searchParams.get('page') || '1');
   const pageSize = 10;
 
-  // ✅ 여기에 import한 UserDetailModel 타입을 사용
   const [userDetail, setUserDetail] = useState<UserDetailModel | null>(null);
   const [activeTab, setActiveTab] = useState<number>(0);
 
-  // 서브헤더 버튼 핸들러
-  const handleBackClick = () => navigate(-1);
-  const handleEditClick = () => alert('정보가 수정되었습니다!');
-  const handleEndClick = () => alert('종료 처리가 완료되었습니다!');
+  // 모달 관련 상태
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [licenseType, setLicenseType] = useState<string>('1회 이용권');
+  const [startDate, setStartDate] = useState<Date | undefined>(new Date());
+  const [endDate, setEndDate] = useState<Date | undefined>(
+    new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+  );
+  const [licenseCode, setLicenseCode] = useState<string>('');
+  const [isCalendarOpen, setIsCalendarOpen] = useState<boolean>(false);
 
   const detailSubHeaderProps: DetailSubHeaderProps = {
     backLabel: '목록이동',
-    onBackClick: handleBackClick,
+    onBackClick: () => navigate(-1),
     editLabel: '정보수정',
-    onEditClick: handleEditClick,
+    onEditClick: () => alert('정보수정!'),
     endLabel: '종료처리',
-    onEndClick: handleEndClick,
+    onEndClick: () => alert('종료처리!'),
   };
 
-  // URL 파라미터로 넘어온 email로 API 호출
   useEffect(() => {
     if (!email) return;
     (async () => {
       try {
-        const decoded = decodeURIComponent(email);
-        const data = await getUserByEmail(decoded);
+        const data = await getUserByEmail(decodeURIComponent(email));
         setUserDetail(data);
-      } catch (err) {
-        console.error('사용자 상세정보 불러오기 실패:', err);
+      } catch {
+        // 에러 처리
       }
     })();
   }, [email]);
 
-  // 탭 클릭 시 page=1으로 리셋
   const handleTabClick = (idx: number) => {
     setActiveTab(idx);
     const params = Object.fromEntries(searchParams.entries());
@@ -433,26 +491,16 @@ const UserDetail: React.FC = () => {
     setSearchParams(params);
   };
 
-  // 탭별 데이터 선택
-  const activeData = (() => {
-    switch (activeTab) {
-      case 0:
-        return dummyShippingData;
-      case 1:
-        return dummyUsageHistory;
-      case 2:
-        return dummyPointHistory;
-      case 3:
-        return dummyAdditionalList;
-      case 4:
-        return dummyEvaluations;
-      case 5:
-        return dummyPaymentMethods;
-
-      default:
-        return [];
-    }
-  })();
+  const activeData =
+    [
+      dummyShippingData,
+      dummyUsageHistory,
+      dummyPointHistory,
+      dummyAdditionalList,
+      dummyEvaluations,
+      dummyPaymentMethods,
+      dummyLicenseHistory,
+    ][activeTab] || [];
 
   const totalPages = Math.max(1, Math.ceil(activeData.length / pageSize));
   const slicedData = activeData.slice((page - 1) * pageSize, page * pageSize);
@@ -475,24 +523,46 @@ const UserDetail: React.FC = () => {
         );
       case 5:
         return <PaymentMethodTable data={slicedData as PaymentMethodRow[]} />;
+      case 6:
+        return <LicenseHistoryTable data={slicedData as LicenseHistoryRow[]} />;
       default:
         return null;
     }
   };
 
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setIsCalendarOpen(false);
+  };
+  const handleAddLicense = () => {
+    console.log({
+      licenseType,
+      period: `${format(startDate!, 'yyyy.MM.dd')} ~ ${format(
+        endDate!,
+        'yyyy.MM.dd'
+      )}`,
+      code: licenseCode,
+    });
+    closeModal();
+  };
+
   return (
     <Container>
+      <GlobalStyle />
+      {/* 헤더 */}
       <HeaderRow>
         <Title>제품관리</Title>
       </HeaderRow>
-
       <ListButtonDetailSubHeader {...detailSubHeaderProps} />
 
+      {/* 제품 번호 */}
       <ProductNumberWrapper>
         <ProductNumberLabel>번호</ProductNumberLabel>
         <ProductNumberValue>{dummyProducts[0].no}</ProductNumberValue>
       </ProductNumberWrapper>
 
+      {/* 사용자 정보 */}
       {userDetail ? (
         <UserDetailTopBoxes email={userDetail.email} />
       ) : (
@@ -501,74 +571,307 @@ const UserDetail: React.FC = () => {
 
       <MiddleDivider />
 
+      {/* 탭바 */}
       <ShippingTabBar
         tabs={shippingTabs}
         activeIndex={activeTab}
         onTabClick={handleTabClick}
       />
 
+      {/* 데이터 테이블 */}
       {renderTable()}
 
+      {/* 페이지네이션 & 버튼 */}
       <FooterRow>
+        {activeTab === 6 && (
+          <AddButton onClick={openModal}>이용권 추가</AddButton>
+        )}
         <Pagination totalPages={totalPages} />
       </FooterRow>
+
+      {/* 모달 */}
+      {isModalOpen && (
+        <ModalOverlay onClick={closeModal}>
+          <ModalBox onClick={(e) => e.stopPropagation()}>
+            {/* 모달 헤더 */}
+            <ModalHeader>
+              <ModalTitle>이용권 추가</ModalTitle>
+              <CloseButton onClick={closeModal}>×</CloseButton>
+            </ModalHeader>
+            <Divider />
+
+            {/* 이용권 종류 */}
+            <FieldGroup>
+              <FieldLabel>이용권 종류 설정</FieldLabel>
+              <StyledSelect
+                value={licenseType}
+                onChange={(e) => setLicenseType(e.target.value)}
+              >
+                <option>1회 이용권</option>
+                <option>정기 구독권</option>
+              </StyledSelect>
+            </FieldGroup>
+            <Divider />
+
+            {/* 이용기간 설정 */}
+            <FieldGroup>
+              <FieldLabel>이용기간 설정</FieldLabel>
+              <DatePreviewContainer>
+                <DatePreviewText>
+                  {startDate ? format(startDate, 'yyyy.MM.dd') : '시작일 선택'}{' '}
+                  ~ {endDate ? format(endDate, 'yyyy.MM.dd') : '종료일 선택'}
+                </DatePreviewText>
+                <ChangeButton
+                  onClick={() => setIsCalendarOpen((prev) => !prev)}
+                >
+                  설정변경
+                </ChangeButton>
+              </DatePreviewContainer>
+
+              {isCalendarOpen && (
+                <CalendarContainer>
+                  <DatePicker
+                    locale='ko'
+                    inline
+                    monthsShown={2}
+                    selectsRange
+                    startDate={startDate}
+                    endDate={endDate}
+                    selected={startDate}
+                    onChange={(d) => {
+                      if (Array.isArray(d)) {
+                        const [newStart, newEnd] = d;
+                        setStartDate(newStart ?? undefined);
+                        setEndDate(newEnd ?? undefined);
+                        // 종료일까지 선택되면 캘린더 자동 숨김
+                        if (newEnd) {
+                          setIsCalendarOpen(false);
+                        }
+                      }
+                    }}
+                    dayClassName={(date) => {
+                      if (hd.isHoliday(date)) return 'day-holiday';
+                      if (date.getDay() === 0) return 'day-sunday';
+                      if (date.getDay() === 6) return 'day-saturday';
+                      return '';
+                    }}
+                  />
+                </CalendarContainer>
+              )}
+
+              <FieldLabel>이용권 코드</FieldLabel>
+              <CodeInput
+                placeholder='Code | PASSI3Y8OTXFXTSG'
+                value={licenseCode}
+                onChange={(e) => setLicenseCode(e.target.value)}
+              />
+            </FieldGroup>
+
+            <SubmitButton onClick={handleAddLicense}>추가하기</SubmitButton>
+          </ModalBox>
+        </ModalOverlay>
+      )}
     </Container>
   );
 };
 
 export default UserDetail;
 
-/* ======================= Styled Components ======================= */
-
+/* Styled Components */
 const Container = styled.div`
   width: 100%;
   margin: 0 auto;
   padding: 20px;
   box-sizing: border-box;
 `;
-
 const HeaderRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
 `;
-
 const Title = styled.h1`
   font-weight: 700;
   font-size: 16px;
 `;
-
 const ProductNumberWrapper = styled.div`
   display: flex;
   align-items: baseline;
   gap: 5px;
   margin: 10px 0 34px;
 `;
-
 const ProductNumberLabel = styled.div`
   font-weight: 700;
   font-size: 12px;
 `;
-
 const ProductNumberValue = styled.div`
   font-weight: 900;
   font-size: 12px;
 `;
-
 const MiddleDivider = styled.hr`
   border: none;
-  border-top: 1px dashed #dddddd;
+  border-top: 1px dashed #ddd;
   margin: 30px 0;
 `;
-
 const FooterRow = styled.div`
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
   margin-top: 40px;
 `;
-
+const AddButton = styled.button`
+  width: 100px;
+  height: 40px;
+  font-size: 14px;
+  font-weight: 700;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  &:hover {
+    opacity: 0.9;
+  }
+`;
 const LoadingText = styled.div`
   text-align: center;
   padding: 20px;
+`;
+const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+const ModalBox = styled.div`
+  max-width: 600px;
+  width: 100%;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+`;
+const ModalHeader = styled.div`
+  position: relative;
+  padding: 16px 24px;
+`;
+const ModalTitle = styled.h3`
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #000;
+`;
+const CloseButton = styled.button`
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+`;
+const Divider = styled.hr`
+  margin: 0;
+  border: none;
+  border-top: 1px solid #ddd;
+`;
+const FieldGroup = styled.div`
+  padding: 16px 24px;
+`;
+const FieldLabel = styled.div`
+  font-size: 10px;
+  font-weight: 700;
+  margin-bottom: 8px;
+`;
+const StyledSelect = styled.select`
+  width: 100%;
+  height: 57px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 800;
+  border: 1px solid #000;
+  border-radius: 4px;
+  appearance: none;
+  background: url("data:image/svg+xml;utf8,<svg fill='black' height='10' viewBox='0 0 10 10'><path d='M0 0 L5 5 L10 0 Z'/></svg>")
+    no-repeat right 12px center #fff;
+`;
+const DatePreviewContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #000;
+  border-radius: 4px;
+  padding: 0 12px;
+  height: 57px;
+  margin-bottom: 12px;
+`;
+const DatePreviewText = styled.div`
+  font-size: 13px;
+  font-weight: 800;
+`;
+const ChangeButton = styled.button`
+  background: #000;
+  color: #fff;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+`;
+// 기존 CalendarContainer를 아래처럼 교체
+
+const CalendarContainer = styled.div`
+  display: flex;
+  flex-direction: column; /* 세로 스택 */
+  align-items: center;
+  background: #fff;
+  border-radius: 8px;
+  margin: 30px 0;
+
+  /* react-datepicker가 monthsShown={2}일 때 기본 float 스타일을 없애고, 블록으로 세로 배치 */
+  .react-datepicker__month-container {
+    float: none !important;
+    display: block !important;
+    margin: 0 auto 16px; /* 아래 월과의 간격 */
+  }
+
+  /* 마지막 달에는 아래 마진 제거 */
+  .react-datepicker__month-container:last-child {
+    margin-bottom: 0;
+  }
+
+  /* 필요시, 월별 헤더 가운데 정렬 추가 */
+  .react-datepicker__current-month {
+    text-align: center;
+    width: 100%;
+  }
+`;
+
+const CodeInput = styled.input`
+  width: 100%;
+  height: 57px;
+  padding: 0 12px;
+  font-size: 13px;
+  color: #999;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+`;
+const SubmitButton = styled.button`
+  display: block;
+  width: calc(100% - 48px); /* 좌우 24px 여백 제외 */
+  height: 56px;
+  background: #000;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  margin: 24px auto; /* 상하 24px, 자동 가운데 정렬 */
+  border-radius: 4px;
 `;
