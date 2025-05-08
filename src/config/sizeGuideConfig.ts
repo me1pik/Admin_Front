@@ -18,13 +18,12 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
   },
   Top: {
     image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/6aa5cfc1fcf058242047931081e6bd5c.png',
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/cba04f035c2ef680c59aac3c5535fd95.png',
     labels: {
       A: 'A.어깨넓이',
       B: 'B.가슴둘레',
-      C: 'C.소매길이',
-      D: 'D.암홀',
-      E: 'E.총길이',
+      C: 'C.암홀',
+      D: 'D.총길이',
     },
   },
   Tshirt: {
