@@ -166,6 +166,8 @@ const ProductDetail: React.FC = () => {
           ...changed,
           product_img: images,
           fabricComposition: sortedComp,
+          size_label_guide:
+            changed.size_label_guide ?? product.size_label_guide,
         };
         if (product.sizes) {
           payload.sizes = product.sizes.map((row) => ({
