@@ -230,6 +230,9 @@ const ProductDetail: React.FC = () => {
               <SizeDisplaySection
                 product={product}
                 sizeProductImg={product.size_picture}
+                onLabelChange={(labels) =>
+                  handleProductChange({ size_label_guide: labels })
+                }
               />
             </TwoColumn>
             <MiddleDivider />

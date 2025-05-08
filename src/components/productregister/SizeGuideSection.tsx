@@ -14,47 +14,69 @@ export interface SizeGuideSectionProps {
   category: string;
   sizes: SizeRow[];
   onSizesChange?: (sizes: SizeRow[]) => void;
+  /** 변경된 라벨을 부모로 전달 */
+  onLabelChange?: (labels: Record<string, string>) => void;
 }
 
 const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   category,
   sizes,
   onSizesChange,
+  onLabelChange,
 }) => {
+  // 1) config에서 초기 라벨 맵 가져오기
+  const initialLabels = useMemo(
+    () => sizeGuideConfig[category]?.labels ?? {},
+    [category]
+  );
+
+  // 2) 로컬 상태로 라벨 관리
+  const [labelMap, setLabelMap] =
+    useState<Record<string, string>>(initialLabels);
+
+  // category 변경 시 라벨 초기화
+  useEffect(() => {
+    setLabelMap(initialLabels);
+  }, [initialLabels]);
+
+  // 라벨 변경 시 상위로 전달
+  useEffect(() => {
+    onLabelChange?.(labelMap);
+  }, [labelMap, onLabelChange]);
+
+  // 3) 컬럼 정의 (size는 고정, 나머지는 labelMap 기반)
   const columns: Column[] = useMemo(() => {
-    const labels = sizeGuideConfig[category]?.labels ?? {};
     return [
       { key: 'size', label: '사이즈' },
-      ...Object.entries(labels).map(([k, v]) => ({ key: k, label: v })),
+      ...Object.entries(labelMap).map(([k, v]) => ({ key: k, label: v })),
     ];
-  }, [category]);
+  }, [labelMap]);
 
+  // 4) 로우 데이터 변환 (기존 로직)
   const [rows, setRows] = useState<RowData[]>([]);
-
   useEffect(() => {
     const newRows = sizes.map((item) => {
       const row: RowData = { size: item.size };
-      columns.forEach((col) => {
-        if (col.key === 'size') return;
-        const mKey = Object.keys(item.measurements).find((k) =>
-          k.startsWith(col.key + ' ')
+      Object.keys(labelMap).forEach((k) => {
+        // measurements 키 중 "A 어깨" 같은 경우 매칭
+        const mKey = Object.keys(item.measurements).find((mk) =>
+          mk.startsWith(k + ' ')
         );
-        const rawKey = mKey ?? col.key;
+        const rawKey = mKey ?? k;
         const val = item.measurements[rawKey];
-        row[col.key] = val != null && val !== 0 ? String(val) : '';
+        row[k] = val != null && val !== 0 ? String(val) : '';
       });
       return row;
     });
     setRows(newRows);
-  }, [sizes, columns]);
+  }, [sizes, labelMap]);
 
+  // 5) 셀 변경 핸들러 (기존 로직)
   const handleCellChange = (ri: number, key: string, value: string) => {
-    const updatedRows = rows.map((r, i) =>
-      i === ri ? { ...r, [key]: value } : r
-    );
-    setRows(updatedRows);
+    const updated = rows.map((r, i) => (i === ri ? { ...r, [key]: value } : r));
+    setRows(updated);
     onSizesChange?.(
-      updatedRows.map((r) => ({
+      updated.map((r) => ({
         size: r.size,
         measurements: Object.entries(r).reduce<Record<string, number>>(
           (acc, [k, v]) => {
@@ -65,6 +87,12 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
         ),
       }))
     );
+  };
+
+  // 6) 헤더 라벨 직접 수정 핸들러
+  const handleLabelInput = (key: string, e: ChangeEvent<HTMLInputElement>) => {
+    const next = { ...labelMap, [key]: e.target.value };
+    setLabelMap(next);
   };
 
   return (
@@ -79,7 +107,14 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
           <tr>
             {columns.map((col) => (
               <Th key={col.key}>
-                <LabelInput value={col.label} readOnly />
+                {col.key === 'size' ? (
+                  <LabelStatic>{col.label}</LabelStatic>
+                ) : (
+                  <LabelInput
+                    value={col.label}
+                    onChange={(e) => handleLabelInput(col.key, e)}
+                  />
+                )}
               </Th>
             ))}
           </tr>
@@ -89,12 +124,16 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
             <tr key={ri}>
               {columns.map((col) => (
                 <Td key={`${ri}-${col.key}`}>
-                  <CellInput
-                    value={row[col.key] || ''}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      handleCellChange(ri, col.key, e.target.value)
-                    }
-                  />
+                  {col.key === 'size' ? (
+                    <CellStatic>{row.size}</CellStatic>
+                  ) : (
+                    <CellInput
+                      value={row[col.key] || ''}
+                      onChange={(e) =>
+                        handleCellChange(ri, col.key, e.target.value)
+                      }
+                    />
+                  )}
                 </Td>
               ))}
             </tr>
@@ -167,6 +206,7 @@ const Th = styled.th`
   padding: 0;
   position: relative;
 `;
+/* 수정 가능 라벨 */
 const LabelInput = styled.input`
   width: 100%;
   border: none;
@@ -178,7 +218,20 @@ const LabelInput = styled.input`
     outline: none;
   }
 `;
+/* 고정 라벨(사이즈) */
+const LabelStatic = styled.div`
+  width: 100%;
+  text-align: center;
+  font-weight: 900;
+  font-size: 12px;
+`;
 const Td = styled.td``;
+/* 사이즈 셀 고정 텍스트 */
+const CellStatic = styled.div`
+  font-size: 12px;
+  line-height: 28px;
+`;
+/* 측정값 입력 */
 const CellInput = styled.input`
   width: 50px;
   height: 28px;

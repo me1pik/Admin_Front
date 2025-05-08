@@ -1,35 +1,55 @@
 // src/components/productregister/SizeDisplaySection.tsx
-import React, { useState, ChangeEvent, useMemo } from 'react';
+import React, { useState, ChangeEvent, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import { ProductDetailResponse } from '../../api/adminProduct';
-import { sizeGuideConfig } from '../../config/sizeGuideConfig'; // 경로 수정
+import { sizeGuideConfig } from '../../config/sizeGuideConfig';
 
 interface SizeDisplaySectionProps {
   product?: ProductDetailResponse;
   sizeProductImg: string;
+  /** 변경된 라벨을 부모로 전달 */
+  onLabelChange?: (labels: Record<string, string>) => void;
 }
 
 const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
   product,
   sizeProductImg,
+  onLabelChange,
 }) => {
   const category = product?.category || '';
 
-  // 1) 카테고리별 라벨(한글) 목록
-  const specLabels = useMemo(() => {
-    const map = sizeGuideConfig[category]?.labels || {};
-    return Object.entries(map)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([, label]) => label);
-  }, [category]);
+  // 1) 원본 키(key) 목록 및 초기 라벨 맵
+  const keys = useMemo(
+    () => Object.keys(sizeGuideConfig[category]?.labels || {}),
+    [category]
+  );
+  const initialLabels = useMemo(
+    () => sizeGuideConfig[category]?.labels || {},
+    [category]
+  );
 
-  // 2) 제목/소제목/노트
+  // 2) 라벨 상태를 key→label 맵으로 관리
+  const [labelMap, setLabelMap] =
+    useState<Record<string, string>>(initialLabels);
+
+  // 부모 콜백 호출
+  useEffect(() => {
+    onLabelChange?.(labelMap);
+  }, [labelMap, onLabelChange]);
+
+  const handleLabelChange = (key: string, e: ChangeEvent<HTMLInputElement>) => {
+    const next = { ...labelMap, [key]: e.target.value };
+    setLabelMap(next);
+  };
+
+  // 3) 제목/소제목/노트 (기존대로 유지)
   const [labelsState, setLabelsState] = useState({
     title: '사이즈 표기',
     specTitle: '[ 사이즈 표기 ]',
     note: '*측정 위치에 따라 약간의 오차 있음.',
   });
-  const handleLabelChange = (
+
+  const handleFieldChange = (
     field: keyof typeof labelsState,
     e: ChangeEvent<HTMLInputElement>
   ) => {
@@ -53,21 +73,24 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
           <SizeInfoContainer>
             <SpecTitleInput
               value={labelsState.specTitle}
-              onChange={(e) => handleLabelChange('specTitle', e)}
+              onChange={(e) => handleFieldChange('specTitle', e)}
             />
 
-            {/* 3) mapping된 라벨들을 그대로 출력 */}
+            {/* 4) 각 key 별로 editable한 input 렌더링 */}
             <SpaceColumn>
-              {specLabels.map((lbl) => (
-                <SpecItemRow key={lbl}>
-                  <SpecLabelInput value={lbl} readOnly />
+              {keys.map((key) => (
+                <SpecItemRow key={key}>
+                  <SpecLabelInput
+                    value={labelMap[key]}
+                    onChange={(e) => handleLabelChange(key, e)}
+                  />
                 </SpecItemRow>
               ))}
             </SpaceColumn>
 
             <NoteInput
               value={labelsState.note}
-              onChange={(e) => handleLabelChange('note', e)}
+              onChange={(e) => handleFieldChange('note', e)}
             />
           </SizeInfoContainer>
         </GuideWrapper>
