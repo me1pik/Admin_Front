@@ -41,8 +41,9 @@ const ProductDetail: React.FC = () => {
   const navigate = useNavigate();
 
   const [images, setImages] = useState<string[]>([]);
-  const [product, setProduct] = useState<ProductDetailResponse | null>(null);
-  const [sizeGuides, setSizeGuides] = useState<Record<string, SizeRow[]>>({});
+  const [product, setProduct] = useState<
+    (ProductDetailResponse & { sizes: SizeRow[] }) | null
+  >(null);
   const [changed, setChanged] = useState<
     Partial<ProductDetailResponse & { sizes: SizeRow[] }>
   >({});
@@ -78,6 +79,7 @@ const ProductDetail: React.FC = () => {
     [handleProductChange]
   );
 
+  // 이미지 관련 핸들러들...
   const updateImage = (idx: number, url: string | null) => {
     setImages((prev) => {
       const next = [...prev];
@@ -87,29 +89,33 @@ const ProductDetail: React.FC = () => {
       return next;
     });
   };
-  const handleImageLinkUpload = (idx: number, url: string) => {
+  const handleImageLinkUpload = (idx: number, url: string) =>
     updateImage(idx, url);
-  };
   const handleImageDelete = (idx: number) => updateImage(idx, null);
   const handleImageReorder = (from: number, to: number) => {
     setImages((prev) => {
       const next = [...prev];
-      const [moved] = next.splice(from, 1);
-      next.splice(to, 0, moved);
+      const [m] = next.splice(from, 1);
+      next.splice(to, 0, m);
       handleProductChange({ product_img: next });
       return next;
     });
   };
 
+  // ─── 데이터 불러오기 ─────────────────────────────────────────
   const fetchDetail = async (id: number) => {
     setLoading(true);
     try {
       const data = (await getProductDetail(id)) as ProductDetailResponse & {
         sizesByCategory: Record<string, SizeRow[]>;
+        sizes?: SizeRow[];
       };
-      setProduct(data);
+      // API가 보내준 sizes가 있으면 사용, 없으면 기본 가이드 사용
+      const initialSizes = data.sizes?.length
+        ? data.sizes
+        : data.sizesByCategory[data.category] || [];
+      setProduct({ ...data, sizes: initialSizes });
       setImages(data.product_img || []);
-      setSizeGuides(data.sizesByCategory || {});
       setChanged({});
     } catch {
       setError('제품 상세 정보를 불러오는데 실패했습니다.');
@@ -127,59 +133,54 @@ const ProductDetail: React.FC = () => {
     }
   }, [productId]);
 
-  useEffect(() => {
-    if (!product) return;
-    const guide = sizeGuides[product.category];
-    if (guide) {
-      setProduct((prev) => (prev ? { ...prev, sizes: guide } : prev));
-      setChanged((prev) => ({ ...prev, sizes: guide }));
-    }
-  }, [product?.category, sizeGuides]);
-
+  // ─── 저장 처리 ─────────────────────────────────────────────
   const handleSave = () => {
     if (!product) return;
     openConfirm('변경 내용을 저장하시겠습니까?', async () => {
       try {
-        // 1) fabricComposition 정리: 빈값 제거 + 퍼센트 내림차순 정렬
+        // 1) fabricComposition 정리
         const rawComp = (changed.fabricComposition ||
           product.fabricComposition) as Record<string, string>;
         const sortedComp: Record<string, string> = {};
-        Object.entries(rawComp || {}).forEach(([key, value]) => {
+        Object.entries(rawComp).forEach(([key, value]) => {
           const items = value
             .split(/\s*,\s*/)
             .map((str) => {
-              const [material, numStr] = str.split(/\s+/);
-              const percent = parseInt(numStr.replace('%', ''), 10) || 0;
-              return { material, percent };
+              const [mat, num] = str.split(/\s+/);
+              return { material: mat, percent: parseInt(num, 10) || 0 };
             })
-            .filter((item) => item.material && item.percent > 0)
+            .filter((i) => i.material && i.percent > 0)
             .sort((a, b) => b.percent - a.percent);
-          if (items.length > 0) {
+          if (items.length)
             sortedComp[key] = items
               .map((i) => `${i.material} ${i.percent}%`)
               .join(', ');
-          }
         });
 
-        // 2) payload 구성
+        // 2) size_label_guide 준비
+        const sizeLabelGuide: Record<string, string> =
+          (changed.size_label_guide as Record<string, string>) ||
+          product.size_label_guide ||
+          {};
+
+        // 3) payload 구성
         const payload: any = {
           ...changed,
           product_img: images,
           fabricComposition: sortedComp,
-          size_label_guide:
-            changed.size_label_guide ?? product.size_label_guide,
+          size_label_guide: sizeLabelGuide,
+          sizes: (changed.sizes ?? product.sizes)?.map((r) => ({
+            size: r.size,
+            measurements: { ...r.measurements },
+          })),
         };
-        if (product.sizes) {
-          payload.sizes = product.sizes.map((row) => ({
-            size: row.size,
-            measurements: { ...row.measurements },
-          }));
-        }
 
+        // 4) API 호출
         const cleaned = cleanPayload(payload);
         const updated = await updateProduct(product.id, cleaned);
+
+        // 5) 저장 후 다시 불러오기
         await fetchDetail(updated.id);
-        setChanged({});
         openResult('수정 완료되었습니다.');
       } catch {
         openResult('수정에 실패했습니다.');
@@ -226,7 +227,7 @@ const ProductDetail: React.FC = () => {
             <TwoColumn>
               <SizeGuideSection
                 category={product.category}
-                sizes={changed.sizes ?? product.sizes ?? []}
+                sizes={product.sizes}
                 onSizesChange={handleSizesChange}
               />
               <SizeDisplaySection

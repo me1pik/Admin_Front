@@ -1,4 +1,3 @@
-// src/components/productregister/SizeGuideSection.tsx
 import React, { ChangeEvent, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { SizeRow } from '../../api/adminProduct';
@@ -37,14 +36,10 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   // category 변경 시 라벨 초기화
   useEffect(() => {
     setLabelMap(initialLabels);
-  }, [initialLabels]);
+    onLabelChange?.(initialLabels);
+  }, [initialLabels, onLabelChange]);
 
-  // 라벨 변경 시 상위로 전달
-  useEffect(() => {
-    onLabelChange?.(labelMap);
-  }, [labelMap, onLabelChange]);
-
-  // 3) 컬럼 정의 (size는 고정, 나머지는 labelMap 기반)
+  // 3) 컬럼 정의
   const columns: Column[] = useMemo(() => {
     return [
       { key: 'size', label: '사이즈' },
@@ -52,26 +47,26 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     ];
   }, [labelMap]);
 
-  // 4) 로우 데이터 변환 (기존 로직)
+  // 4) 로우 데이터 변환
   const [rows, setRows] = useState<RowData[]>([]);
   useEffect(() => {
-    const newRows = sizes.map((item) => {
-      const row: RowData = { size: item.size };
-      Object.keys(labelMap).forEach((k) => {
-        // measurements 키 중 "A 어깨" 같은 경우 매칭
-        const mKey = Object.keys(item.measurements).find((mk) =>
-          mk.startsWith(k + ' ')
-        );
-        const rawKey = mKey ?? k;
-        const val = item.measurements[rawKey];
-        row[k] = val != null && val !== 0 ? String(val) : '';
-      });
-      return row;
-    });
-    setRows(newRows);
+    setRows(
+      sizes.map((item) => {
+        const row: RowData = { size: item.size };
+        Object.keys(labelMap).forEach((k) => {
+          const mKey = Object.keys(item.measurements).find((mk) =>
+            mk.startsWith(k + ' ')
+          );
+          const rawKey = mKey ?? k;
+          const val = item.measurements[rawKey];
+          row[k] = val != null && val !== 0 ? String(val) : '';
+        });
+        return row;
+      })
+    );
   }, [sizes, labelMap]);
 
-  // 5) 셀 변경 핸들러 (기존 로직)
+  // 5) 셀 변경 핸들러
   const handleCellChange = (ri: number, key: string, value: string) => {
     const updated = rows.map((r, i) => (i === ri ? { ...r, [key]: value } : r));
     setRows(updated);
@@ -89,7 +84,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     );
   };
 
-  // 6) 헤더 라벨 직접 수정 핸들러
+  // 6) 헤더 라벨 수정 핸들러
   const handleLabelInput = (key: string, e: ChangeEvent<HTMLInputElement>) => {
     const next = { ...labelMap, [key]: e.target.value };
     setLabelMap(next);
@@ -146,7 +141,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
 
 export default SizeGuideSection;
 
-/* ---- styled-components ---- */
+/* Styled Components */
 const SectionBox = styled.div`
   position: relative;
   padding-left: 20px;
@@ -206,7 +201,6 @@ const Th = styled.th`
   padding: 0;
   position: relative;
 `;
-/* 수정 가능 라벨 */
 const LabelInput = styled.input`
   width: 100%;
   border: none;
@@ -218,7 +212,6 @@ const LabelInput = styled.input`
     outline: none;
   }
 `;
-/* 고정 라벨(사이즈) */
 const LabelStatic = styled.div`
   width: 100%;
   text-align: center;
@@ -226,12 +219,10 @@ const LabelStatic = styled.div`
   font-size: 12px;
 `;
 const Td = styled.td``;
-/* 사이즈 셀 고정 텍스트 */
 const CellStatic = styled.div`
   font-size: 12px;
   line-height: 28px;
 `;
-/* 측정값 입력 */
 const CellInput = styled.input`
   width: 50px;
   height: 28px;

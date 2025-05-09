@@ -1,5 +1,4 @@
-// src/components/productregister/SizeDisplaySection.tsx
-import React, { useState, ChangeEvent, useMemo, useEffect } from 'react';
+import React, { useState, ChangeEvent, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { ProductDetailResponse } from '../../api/adminProduct';
 import { sizeGuideConfig } from '../../config/sizeGuideConfig';
@@ -18,7 +17,7 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
 }) => {
   const category = product?.category || '';
 
-  // 1) 원본 키(key) 목록 및 초기 라벨 맵
+  // 1) config에서 key 목록과 초기 라벨 맵 가져오기
   const keys = useMemo(
     () => Object.keys(sizeGuideConfig[category]?.labels || {}),
     [category]
@@ -28,93 +27,69 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
     [category]
   );
 
-  // 2) 라벨 상태를 key→label 맵으로 관리
+  // 2) 라벨 상태 관리
   const [labelMap, setLabelMap] =
     useState<Record<string, string>>(initialLabels);
 
-  // 부모 콜백 호출
+  // category 변경 시 라벨 초기화 & 부모에 초기값 전달
   useEffect(() => {
-    onLabelChange?.(labelMap);
-  }, [labelMap, onLabelChange]);
+    setLabelMap(initialLabels);
+    onLabelChange?.(initialLabels);
+    // category가 바뀔 때만 실행
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialLabels]);
 
+  // 3) 사용자가 입력할 때만 부모에 전달
   const handleLabelChange = (key: string, e: ChangeEvent<HTMLInputElement>) => {
     const next = { ...labelMap, [key]: e.target.value };
     setLabelMap(next);
-  };
-
-  // 3) 제목/소제목/노트 (기존대로 유지)
-  const [labelsState, setLabelsState] = useState({
-    title: '사이즈 표기',
-    specTitle: '[ 사이즈 표기 ]',
-    note: '*측정 위치에 따라 약간의 오차 있음.',
-  });
-
-  const handleFieldChange = (
-    field: keyof typeof labelsState,
-    e: ChangeEvent<HTMLInputElement>
-  ) => {
-    setLabelsState((prev) => ({ ...prev, [field]: e.target.value }));
+    onLabelChange?.(next);
   };
 
   return (
     <SectionBox>
       <SectionHeader>
         <Bullet />
-        <SectionTitleInput value={labelsState.title} readOnly />
+        <SectionTitle>사이즈 표기</SectionTitle>
       </SectionHeader>
       <VerticalLine />
-
-      <SizeGuideContainer>
-        <GuideWrapper>
-          <ImageContainer>
-            <SizeProductImage src={sizeProductImg} alt='사이즈 표기 이미지' />
-          </ImageContainer>
-
-          <SizeInfoContainer>
-            <SpecTitleInput
-              value={labelsState.specTitle}
-              onChange={(e) => handleFieldChange('specTitle', e)}
-            />
-
-            {/* 4) 각 key 별로 editable한 input 렌더링 */}
-            <SpaceColumn>
-              {keys.map((key) => (
-                <SpecItemRow key={key}>
-                  <SpecLabelInput
-                    value={labelMap[key]}
-                    onChange={(e) => handleLabelChange(key, e)}
-                  />
-                </SpecItemRow>
-              ))}
-            </SpaceColumn>
-
-            <NoteInput
-              value={labelsState.note}
-              onChange={(e) => handleFieldChange('note', e)}
-            />
-          </SizeInfoContainer>
-        </GuideWrapper>
-      </SizeGuideContainer>
+      <GuideWrapper>
+        <ImageContainer>
+          <SizeImage src={sizeProductImg} alt='사이즈 표기 이미지' />
+        </ImageContainer>
+        <InfoContainer>
+          <SpecTitle>[ 사이즈 표기 ]</SpecTitle>
+          <SpaceColumn>
+            {keys.map((key) => (
+              <SpecRow key={key}>
+                <SpecInput
+                  value={labelMap[key]}
+                  onChange={(e) => handleLabelChange(key, e)}
+                />
+              </SpecRow>
+            ))}
+          </SpaceColumn>
+          <Note>*측정 위치에 따라 약간의 오차 있음.</Note>
+        </InfoContainer>
+      </GuideWrapper>
     </SectionBox>
   );
 };
 
 export default SizeDisplaySection;
 
-/* Styled Components */
+/* ---- styled-components ---- */
 const SectionBox = styled.div`
   position: relative;
   margin-bottom: 20px;
   padding-left: 20px;
 `;
-
 const SectionHeader = styled.div`
   display: flex;
   align-items: center;
   position: relative;
   margin-bottom: 10px;
 `;
-
 const Bullet = styled.div`
   position: absolute;
   left: -27px;
@@ -135,102 +110,61 @@ const Bullet = styled.div`
     border-radius: 50%;
   }
 `;
-
-const SectionTitleInput = styled.input`
+const SectionTitle = styled.div`
   font-weight: 800;
   font-size: 14px;
-  line-height: 15px;
   margin-left: 10px;
-  border: none;
-  background: transparent;
-  &:read-only {
-    color: #000;
-  }
 `;
-
 const VerticalLine = styled.div`
   position: absolute;
   left: 0;
   top: 14px;
-  bottom: 200px;
+  bottom: 0;
   width: 1px;
   background: #dddddd;
-  &::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 20px;
-    height: 1px;
-    background: #dddddd;
-  }
 `;
-
-const SizeGuideContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
 const GuideWrapper = styled.div`
   display: flex;
-  flex-direction: row;
   border: 1px solid #dddddd;
 `;
-
 const ImageContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 10px;
 `;
-
-const SizeProductImage = styled.img`
+const SizeImage = styled.img`
   width: 146px;
   height: 232px;
   object-fit: contain;
-  margin: 10px;
 `;
-
-const SizeInfoContainer = styled.div`
+const InfoContainer = styled.div`
   display: flex;
   flex-direction: column;
-  background: #ffffff;
-  border-radius: 4px;
-  padding: 20px 0;
+  padding: 20px;
 `;
-
-const SpecTitleInput = styled.input`
+const SpecTitle = styled.div`
   font-size: 12px;
   font-weight: 800;
-  margin-bottom: 20px;
   text-align: center;
-  border: none;
-  background: transparent;
+  margin-bottom: 20px;
 `;
-
 const SpaceColumn = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
 `;
-
-const SpecItemRow = styled.div`
+const SpecRow = styled.div`
   display: flex;
-  align-items: baseline;
+  align-items: center;
 `;
-
-const SpecLabelInput = styled.input`
+const SpecInput = styled.input`
   font-size: 12px;
   font-weight: 700;
   text-align: left;
   border: none;
   background: transparent;
 `;
-
-const NoteInput = styled.input`
+const Note = styled.div`
   font-size: 12px;
   color: #aaa;
   margin-top: 29px;
   text-align: center;
-  border: none;
-  background: transparent;
 `;
