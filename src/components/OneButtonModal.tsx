@@ -57,7 +57,6 @@ const StyledModal = styled.div`
   z-index: 9999;
   width: 100vw;
   height: 100vh;
-  max-width: 1000px;
 `;
 
 const ModalContent = styled.div<{ width: string; height: string }>`
