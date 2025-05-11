@@ -36,7 +36,9 @@ import LicenseHistoryTable, {
 import Pagination from '../../../components/Pagination';
 import {
   getUserByEmail,
+  getUserClosetByEmail,
   UserDetail as UserDetailModel,
+  ClosetItem,
 } from '../../../api/adminUser';
 
 // 한글 로케일 등록
@@ -273,80 +275,6 @@ const dummyPointHistory: PointHistoryRow[] = [
   },
 ];
 
-// ★ 추가 목록 예시
-const dummyAdditionalList: AdditionalListRow[] = [
-  {
-    no: 42,
-    registeredDate: '2025-03-10',
-    style: 'C244MSE231',
-    brand: 'CC Collect',
-    category: '원피스',
-    color: 'BLACK',
-    purchaseSize: '55 (M) / 66 (L) / 77 (XL)',
-    retailPrice: '540,000',
-  },
-  {
-    no: 41,
-    registeredDate: '2025-03-10',
-    style: '24/MSE009',
-    brand: 'M.O.D.S/PHINE',
-    category: '원피스',
-    color: 'PINK',
-    purchaseSize: '55 (M) / 66 (L) / 77 (XL)',
-    retailPrice: '540,000',
-  },
-  {
-    no: 40,
-    registeredDate: '2025-03-10',
-    style: '24/MSE009',
-    brand: 'M.O.D.S/PHINE',
-    category: '원피스',
-    color: 'BLACK',
-    purchaseSize: '55 (M) / 66 (L) / 77 (XL)',
-    retailPrice: '540,000',
-  },
-  {
-    no: 39,
-    registeredDate: '2025-03-09',
-    style: 'C244T63',
-    brand: 'SATIN',
-    category: '원피스',
-    color: 'BLACK',
-    purchaseSize: '55 (M) / 66 (L) / 77 (XL)',
-    retailPrice: '600,000',
-  },
-  {
-    no: 38,
-    registeredDate: '2025-03-09',
-    style: 'Z244MSE015',
-    brand: 'ZOOC',
-    category: '원피스',
-    color: 'PINK',
-    purchaseSize: '55 (M) / 66 (L) / 77 (XL)',
-    retailPrice: '540,000',
-  },
-  {
-    no: 37,
-    registeredDate: '2025-03-09',
-    style: '24/MSE009',
-    brand: 'ZOOC',
-    category: '원피스',
-    color: 'BLACK',
-    purchaseSize: '55 (M) / 66 (L) / 77 (XL)',
-    retailPrice: '500,000',
-  },
-  {
-    no: 36,
-    registeredDate: '2025-03-08',
-    style: 'Z244MSE015',
-    brand: 'ZOOC',
-    category: '원피스',
-    color: 'LIGHT BEIGE',
-    purchaseSize: '55 (M) / 66 (L) / 77 (XL)',
-    retailPrice: '540,000',
-  },
-];
-
 // ★ 개인 평가 예시
 const dummyEvaluations: PersonalEvaluationRow[] = [
   {
@@ -450,7 +378,11 @@ const UserDetail: React.FC = () => {
   const page = Number(searchParams.get('page') || '1');
   const pageSize = 10;
 
+  // 사용자 상세 정보
   const [userDetail, setUserDetail] = useState<UserDetailModel | null>(null);
+  // 찜목록
+  const [closetItems, setClosetItems] = useState<AdditionalListRow[]>([]);
+  // 탭
   const [activeTab, setActiveTab] = useState<number>(0);
 
   // 모달 관련 상태
@@ -472,14 +404,38 @@ const UserDetail: React.FC = () => {
     onEndClick: () => alert('종료처리!'),
   };
 
+  // 사용자 정보 조회
   useEffect(() => {
     if (!email) return;
     (async () => {
       try {
         const data = await getUserByEmail(decodeURIComponent(email));
         setUserDetail(data);
-      } catch {
-        // 에러 처리
+      } catch (err) {
+        console.error('사용자 정보 조회 실패', err);
+      }
+    })();
+  }, [email]);
+
+  // 찜목록 조회
+  useEffect(() => {
+    if (!email) return;
+    (async () => {
+      try {
+        const res = await getUserClosetByEmail(decodeURIComponent(email));
+        const mapped = res.items.map((item: ClosetItem, idx: number) => ({
+          no: idx + 1,
+          registeredDate: item.registration_date,
+          style: item.name,
+          brand: item.brand,
+          category: item.category,
+          color: item.color,
+          purchaseSize: '',
+          retailPrice: item.price.toString(),
+        }));
+        setClosetItems(mapped);
+      } catch (err) {
+        console.error('찜목록 조회 실패', err);
       }
     })();
   }, [email]);
@@ -496,7 +452,7 @@ const UserDetail: React.FC = () => {
       dummyShippingData,
       dummyUsageHistory,
       dummyPointHistory,
-      dummyAdditionalList,
+      closetItems,
       dummyEvaluations,
       dummyPaymentMethods,
       dummyLicenseHistory,
@@ -538,10 +494,7 @@ const UserDetail: React.FC = () => {
   const handleAddLicense = () => {
     console.log({
       licenseType,
-      period: `${format(startDate!, 'yyyy.MM.dd')} ~ ${format(
-        endDate!,
-        'yyyy.MM.dd'
-      )}`,
+      period: `${format(startDate!, 'yyyy.MM.dd')} ~ ${format(endDate!, 'yyyy.MM.dd')}`,
       code: licenseCode,
     });
     closeModal();

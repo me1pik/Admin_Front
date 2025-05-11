@@ -1,5 +1,4 @@
 // src/api/adminUser.ts
-
 import { Axios } from './Axios';
 
 /**
@@ -13,10 +12,10 @@ export interface UserDetail {
   phoneNumber: string;
   gender: string;
   instagramId: string;
-  membershipLevel: string; // 추가
-  personalWebpage: string; // 추가
-  followersCount: number; // 추가
-  followingCount: number; // 추가
+  membershipLevel: string;
+  personalWebpage: string;
+  followersCount: number;
+  followingCount: number;
   name: string;
 }
 
@@ -32,7 +31,6 @@ export interface DeleteUserResponse {
  */
 export interface UserSummary {
   id: number;
-
   status: string;
   membershipLevel: string;
   name: string;
@@ -72,11 +70,31 @@ export interface GetBlockedUsersResponse {
 }
 
 /**
+ * 유저 찜 목록 아이템 인터페이스 (GET /admin/user/{email}/closet)
+ */
+export interface ClosetItem {
+  productId: number;
+  registration_date: string;
+  name: string;
+  brand: string;
+  category: string;
+  color: string;
+  price: number;
+}
+
+/**
+ * 유저 찜 목록 조회 응답 인터페이스
+ */
+export interface GetUserClosetResponse {
+  items: ClosetItem[];
+}
+
+/**
  * 이메일을 이용하여 사용자 정보를 조회합니다.
  * GET /admin/user/{email}
  */
 export const getUserByEmail = async (email: string): Promise<UserDetail> => {
-  const response = await Axios.get(`/admin/user/${email}`);
+  const response = await Axios.get(`/admin/user/${encodeURIComponent(email)}`);
   return response.data;
 };
 
@@ -87,7 +105,9 @@ export const getUserByEmail = async (email: string): Promise<UserDetail> => {
 export const deleteUserByEmail = async (
   email: string
 ): Promise<DeleteUserResponse> => {
-  const response = await Axios.delete(`/admin/user/${email}`);
+  const response = await Axios.delete(
+    `/admin/user/${encodeURIComponent(email)}`
+  );
   return response.data;
 };
 
@@ -116,5 +136,18 @@ export const getBlockedUsers = async (
   const response = await Axios.get(`/admin/user/blocked`, {
     params: { limit, page },
   });
+  return response.data;
+};
+
+/**
+ * 이메일을 이용하여 사용자의 찜 목록을 조회합니다. (관리자용)
+ * GET /admin/user/{email}/closet
+ */
+export const getUserClosetByEmail = async (
+  email: string
+): Promise<GetUserClosetResponse> => {
+  const response = await Axios.get(
+    `/admin/user/${encodeURIComponent(email)}/closet`
+  );
   return response.data;
 };
