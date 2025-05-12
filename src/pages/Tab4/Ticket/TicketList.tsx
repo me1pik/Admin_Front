@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import TicketTable, { TicketItem } from '../../../components/Table/TicketTable';
 import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
 import Pagination from '../../../components/Pagination';
-import { FaSearch } from 'react-icons/fa';
 
 /** 대여 더미 데이터 (이용권 내역) */
 const dummyTicket: TicketItem[] = [
@@ -159,13 +158,6 @@ const TicketList: React.FC = () => {
     setSearchParams(params);
   };
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const params = Object.fromEntries(searchParams.entries());
-    params.search = e.target.value;
-    params.page = '1';
-    setSearchParams(params);
-  };
-
   const handleEdit = (no: number) => {
     navigate(`/ticketDetail/${no}`);
   };
@@ -207,35 +199,6 @@ const HeaderTitle = styled.h1`
   font-size: 16px;
   font-weight: 700;
   margin-bottom: 12px;
-`;
-
-const SubHeaderContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-`;
-
-const SearchBox = styled.div`
-  display: flex;
-  align-items: center;
-  background-color: #f8f9fa;
-  border: 1px solid #dddddd;
-  border-radius: 4px;
-  padding: 4px 8px;
-  gap: 6px;
-
-  svg {
-    color: #888888;
-  }
-
-  input {
-    border: none;
-    outline: none;
-    background: transparent;
-    font-size: 14px;
-    width: 200px;
-  }
 `;
 
 const InfoBar = styled.div`
