@@ -52,13 +52,12 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     ];
   }, [labelMap]);
 
-  // 4) 로우 데이터 변환 (기존 로직)
+  // 4) 로우 데이터 변환
   const [rows, setRows] = useState<RowData[]>([]);
   useEffect(() => {
     const newRows = sizes.map((item) => {
       const row: RowData = { size: item.size };
       Object.keys(labelMap).forEach((k) => {
-        // measurements 키 중 "A 어깨" 같은 경우 매칭
         const mKey = Object.keys(item.measurements).find((mk) =>
           mk.startsWith(k + ' ')
         );
@@ -71,7 +70,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     setRows(newRows);
   }, [sizes, labelMap]);
 
-  // 5) 셀 변경 핸들러 (기존 로직)
+  // 5) 셀 변경 핸들러
   const handleCellChange = (ri: number, key: string, value: string) => {
     const updated = rows.map((r, i) => (i === ri ? { ...r, [key]: value } : r));
     setRows(updated);
@@ -102,44 +101,46 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
         <Title>사이즈 가이드</Title>
       </Header>
       <Line />
-      <Table>
-        <thead>
-          <tr>
-            {columns.map((col) => (
-              <Th key={col.key}>
-                {col.key === 'size' ? (
-                  <LabelStatic>{col.label}</LabelStatic>
-                ) : (
-                  <LabelInput
-                    value={col.label}
-                    onChange={(e) => handleLabelInput(col.key, e)}
-                  />
-                )}
-              </Th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, ri) => (
-            <tr key={ri}>
+      <TableWrapper>
+        <Table>
+          <thead>
+            <tr>
               {columns.map((col) => (
-                <Td key={`${ri}-${col.key}`}>
+                <Th key={col.key}>
                   {col.key === 'size' ? (
-                    <CellStatic>{row.size}</CellStatic>
+                    <LabelStatic>{col.label}</LabelStatic>
                   ) : (
-                    <CellInput
-                      value={row[col.key] || ''}
-                      onChange={(e) =>
-                        handleCellChange(ri, col.key, e.target.value)
-                      }
+                    <LabelInput
+                      value={col.label}
+                      onChange={(e) => handleLabelInput(col.key, e)}
                     />
                   )}
-                </Td>
+                </Th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {rows.map((row, ri) => (
+              <Tr key={ri} even={ri % 2 === 1}>
+                {columns.map((col) => (
+                  <Td key={`${ri}-${col.key}`}>
+                    {col.key === 'size' ? (
+                      <CellStatic>{row.size}</CellStatic>
+                    ) : (
+                      <CellInput
+                        value={row[col.key] || ''}
+                        onChange={(e) =>
+                          handleCellChange(ri, col.key, e.target.value)
+                        }
+                      />
+                    )}
+                  </Td>
+                ))}
+              </Tr>
+            ))}
+          </tbody>
+        </Table>
+      </TableWrapper>
     </SectionBox>
   );
 };
@@ -150,12 +151,13 @@ export default SizeGuideSection;
 const SectionBox = styled.div`
   position: relative;
   padding-left: 20px;
-  margin-bottom: 20px;
+  padding-bottom: 20px;
+  margin-bottom: 30px;
 `;
 const Header = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 `;
 const Bullet = styled.div`
   position: absolute;
@@ -185,57 +187,67 @@ const Title = styled.div`
 const Line = styled.div`
   position: absolute;
   left: 0;
-  top: 15px;
+  top: 14px;
   bottom: 0;
   width: 1px;
   background: #ddd;
 `;
+const TableWrapper = styled.div`
+  overflow-x: auto;
+`;
 const Table = styled.table`
-  width: 100%;
+  width: auto;
   border-collapse: collapse;
   margin-top: 10px;
+
   th,
   td {
     border: 1px solid #ddd;
     text-align: center;
-    padding: 4px;
+    padding: 4px 6px;
     font-size: 12px;
+    white-space: nowrap;
   }
 `;
 const Th = styled.th`
-  padding: 0;
-  position: relative;
+  background: #f5f5f5;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-weight: 700;
 `;
-/* 수정 가능 라벨 */
 const LabelInput = styled.input`
-  width: 100%;
+  width: 100px;
   border: none;
   text-align: center;
   font-weight: 900;
   font-size: 12px;
   background: transparent;
   &:focus {
-    outline: none;
+    outline: 2px solid #f6ae24;
   }
 `;
-/* 고정 라벨(사이즈) */
 const LabelStatic = styled.div`
-  width: 100%;
+  width: 100px;
   text-align: center;
   font-weight: 900;
   font-size: 12px;
 `;
+const Tr = styled.tr<{ even: boolean }>`
+  background: ${({ even }) => (even ? '#fafafa' : 'transparent')};
+`;
 const Td = styled.td``;
-/* 사이즈 셀 고정 텍스트 */
 const CellStatic = styled.div`
   font-size: 12px;
-  line-height: 28px;
+  line-height: 24px;
 `;
-/* 측정값 입력 */
 const CellInput = styled.input`
-  width: 50px;
-  height: 28px;
+  width: 40px;
+  height: 24px;
   border: 1px solid #ddd;
   font-size: 12px;
   text-align: center;
+  &:focus {
+    outline: 2px solid #f6ae24;
+  }
 `;

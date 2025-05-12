@@ -32,17 +32,19 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
   const [labelMap, setLabelMap] =
     useState<Record<string, string>>(initialLabels);
 
-  // 부모 콜백 호출
+  // --- (1) 초기 레이블 변경 감지 시에만 labelMap 리셋 ---
   useEffect(() => {
-    onLabelChange?.(labelMap);
-  }, [labelMap, onLabelChange]);
+    setLabelMap(initialLabels);
+  }, [initialLabels]);
 
+  // 3) 사용자 입력으로 변경된 경우에만 부모 콜백 호출
   const handleLabelChange = (key: string, e: ChangeEvent<HTMLInputElement>) => {
     const next = { ...labelMap, [key]: e.target.value };
     setLabelMap(next);
+    onLabelChange?.(next);
   };
 
-  // 3) 제목/소제목/노트 (기존대로 유지)
+  // 이하 타이틀/노트 렌더링 로직은 그대로 유지
   const [labelsState, setLabelsState] = useState({
     title: '사이즈 표기',
     specTitle: '[ 사이즈 표기 ]',
@@ -76,12 +78,11 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
               onChange={(e) => handleFieldChange('specTitle', e)}
             />
 
-            {/* 4) 각 key 별로 editable한 input 렌더링 */}
             <SpaceColumn>
               {keys.map((key) => (
                 <SpecItemRow key={key}>
                   <SpecLabelInput
-                    value={labelMap[key]}
+                    value={labelMap[key] || ''}
                     onChange={(e) => handleLabelChange(key, e)}
                   />
                 </SpecItemRow>
