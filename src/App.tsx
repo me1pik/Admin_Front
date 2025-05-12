@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import AdminList from './pages/Tab2/Admins/AdminList';
 import UserList from './pages/Tab3/Users/UserList';
+import TicketList from './pages/Tab4/Ticket/TicketList';
+import TicketDetail from './pages/Tab4/Ticket/TicketDetail';
 import MonitoringList from './pages/Tab4/Monitoring/MonitoringList';
 import MonitoringDetail from './pages/Tab4/Monitoring/MonitoringDetail';
 import Layout from './Layout';
@@ -64,6 +66,8 @@ const App: React.FC = () => {
           {/* 여기를 email 파라미터로 변경 */}
           <Route path='/userdetail/:email' element={<UserDetail />} />
 
+          <Route path='/ticketlist' element={<TicketList />} />
+          <Route path='/ticketDetail/:no' element={<TicketDetail />} />
           <Route path='/monitoringlist' element={<MonitoringList />} />
           <Route path='/monitoringdetail/:no' element={<MonitoringDetail />} />
           <Route path='/productlist' element={<ProductList />} />

@@ -144,6 +144,9 @@ const List: React.FC = () => {
                 <SubMenuItem onClick={() => navigate('/monitoringlist')}>
                   대여내역
                 </SubMenuItem>
+                <SubMenuItem onClick={() => navigate('/Ticketlist')}>
+                  이용권내역
+                </SubMenuItem>
               </SubMenu>
             )}
           </NavIcon>
