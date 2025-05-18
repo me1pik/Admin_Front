@@ -9,6 +9,7 @@ import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
 import Pagination from '../../../components/Pagination';
 import {
   getRentalSchedules,
+  updateRentalScheduleStatus,
   RentalScheduleAdminItem,
 } from '../../../api/RentalSchedule/RentalScheduleApi';
 
@@ -18,7 +19,8 @@ const tabs: TabItem[] = [
   { label: '취소내역', path: '취소' },
 ];
 
-const statuses = ['배송완료', '배송준비중', '대기중', '배송중', '배송취소'];
+// 상태 변경용 옵션
+const statuses = ['배송준비중', '배송중', '배송완료'];
 
 const MonitoringList: React.FC = () => {
   const navigate = useNavigate();
@@ -28,7 +30,7 @@ const MonitoringList: React.FC = () => {
   const limit = 10;
 
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-  const [shippingFilter, setShippingFilter] = useState<string>('');
+  const [newStatus, setNewStatus] = useState<string>(''); // 변경할 상태
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
 
   const [allData, setAllData] = useState<MonitoringItem[]>([]);
@@ -36,13 +38,13 @@ const MonitoringList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
-  // API 호출 및 데이터 매핑
+  // 데이터 로드
   useEffect(() => {
-    setLoading(true);
-    setError('');
-    getRentalSchedules(limit, page)
-      .then(({ count, rentals }) => {
-        // API에서 받은 데이터를 MonitoringTable이 기대하는 형식으로 매핑
+    const fetchData = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const { count, rentals } = await getRentalSchedules(limit, page);
         const mapped = rentals.map((item: RentalScheduleAdminItem) => ({
           no: item.id,
           신청일: item.rentalPeriod.split(' ~ ')[0],
@@ -57,15 +59,90 @@ const MonitoringList: React.FC = () => {
         }));
         setAllData(mapped);
         setTotalCount(count);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error(err);
         setError('데이터를 불러오는 중 오류가 발생했습니다.');
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, [page]);
 
-  // 탭별 필터링
+  // 탭 변경
+  const handleTabChange = (tab: TabItem) => {
+    setSelectedTab(tab);
+    setSearchParams({
+      ...Object.fromEntries(searchParams.entries()),
+      page: '1',
+    });
+  };
+
+  // 선택 행 토글
+  const toggleRow = (no: number) => {
+    const copy = new Set(selectedRows);
+    copy.has(no) ? copy.delete(no) : copy.add(no);
+    setSelectedRows(copy);
+  };
+
+  // 전체 선택/해제
+  const toggleAll = () => {
+    if (selectedRows.size === filteredData.length) {
+      setSelectedRows(new Set());
+    } else {
+      setSelectedRows(new Set(filteredData.map((i) => i.no)));
+    }
+  };
+
+  // 일괄 변경
+  const handleBulkChange = async () => {
+    if (!newStatus) {
+      alert('변경할 배송상태를 선택해주세요.');
+      return;
+    }
+    if (selectedRows.size === 0) {
+      alert('변경할 항목을 선택해주세요.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await Promise.all(
+        Array.from(selectedRows).map((id) =>
+          updateRentalScheduleStatus(id, {
+            deliveryStatus: newStatus as '배송준비중' | '배송중' | '배송완료',
+          })
+        )
+      );
+      alert('배송상태가 일괄 변경되었습니다.');
+
+      // 데이터 재로딩
+      const { count, rentals } = await getRentalSchedules(limit, page);
+      const remapped = rentals.map((item: RentalScheduleAdminItem) => ({
+        no: item.id,
+        신청일: item.rentalPeriod.split(' ~ ')[0],
+        주문자: item.userName,
+        대여기간: item.rentalPeriod,
+        브랜드: item.brand,
+        종류: item.category,
+        스타일: item.productNum,
+        색상: item.color,
+        사이즈: item.size,
+        배송상태: item.deliveryStatus,
+      }));
+      setAllData(remapped);
+      setTotalCount(count);
+      setSelectedRows(new Set());
+      setNewStatus('');
+    } catch (err) {
+      console.error(err);
+      alert('일괄 변경 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 탭 + 검색 필터 적용
   const dataByTab = allData.filter((item) => {
     if (selectedTab.label === '전체보기') return true;
     if (selectedTab.label === '진행내역') return item.배송상태 !== '배송취소';
@@ -73,10 +150,9 @@ const MonitoringList: React.FC = () => {
     return true;
   });
 
-  // 검색 + 상태 필터 적용
   const filteredData = dataByTab.filter((item) => {
     const t = searchTerm;
-    const matchSearch =
+    return (
       String(item.no).includes(t) ||
       item.신청일.includes(t) ||
       item.주문자.includes(t) ||
@@ -86,61 +162,26 @@ const MonitoringList: React.FC = () => {
       item.스타일.toLowerCase().includes(t) ||
       item.색상.toLowerCase().includes(t) ||
       item.사이즈.toLowerCase().includes(t) ||
-      item.배송상태.includes(t);
-    const matchStatus = shippingFilter
-      ? item.배송상태 === shippingFilter
-      : true;
-    return matchSearch && matchStatus;
+      item.배송상태.includes(t)
+    );
   });
 
-  // 페이지네이션은 API 페이징 + 클라이언트 내 필터 이후
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
-
-  const handleTabChange = (tab: TabItem) => {
-    setSelectedTab(tab);
-    setSearchParams({
-      ...Object.fromEntries(searchParams.entries()),
-      page: '1',
-    });
-  };
-
-  const handleEdit = (no: number) => {
-    navigate(`/monitoringdetail/${no}`);
-  };
-
-  const toggleRow = (no: number) => {
-    const copy = new Set(selectedRows);
-    copy.has(no) ? copy.delete(no) : copy.add(no);
-    setSelectedRows(copy);
-  };
-
-  const toggleAll = () => {
-    if (selectedRows.size === filteredData.length) {
-      setSelectedRows(new Set());
-    } else {
-      setSelectedRows(new Set(filteredData.map((i) => i.no)));
-    }
-  };
-
-  const handleBulkChange = () => {
-    // TODO: 업데이트 API 호출
-    console.log('bulk update', Array.from(selectedRows), shippingFilter);
-  };
+  const handleEdit = (no: number) => navigate(`/monitoringdetail/${no}`);
 
   return (
     <Content>
       <HeaderTitle>대여 내역</HeaderTitle>
-
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
-
       <InfoBar>
         <TotalCountText>총 {totalCount}건</TotalCountText>
         <FilterGroup>
+          {/* 상태 변경용 셀렉트 */}
           <Select
-            value={shippingFilter}
-            onChange={(e) => setShippingFilter(e.target.value)}
+            value={newStatus}
+            onChange={(e) => setNewStatus(e.target.value)}
           >
-            <option value=''>배송상태 (선택)</option>
+            <option value=''>변경할 상태 선택</option>
             {statuses.map((s) => (
               <option key={s} value={s}>
                 {s}
@@ -150,11 +191,10 @@ const MonitoringList: React.FC = () => {
           <BulkButton onClick={handleBulkChange}>일괄변경</BulkButton>
         </FilterGroup>
       </InfoBar>
-
       {loading ? (
-        <div>로딩 중...</div>
+        <LoadingText>로딩 중...</LoadingText>
       ) : error ? (
-        <div>{error}</div>
+        <ErrorText>{error}</ErrorText>
       ) : (
         <TableContainer>
           <MonitoringTable
@@ -166,7 +206,6 @@ const MonitoringList: React.FC = () => {
           />
         </TableContainer>
       )}
-
       <FooterRow>
         <Pagination totalPages={totalPages} />
       </FooterRow>
@@ -217,6 +256,15 @@ const BulkButton = styled.button`
   color: #fff;
   border: none;
   cursor: pointer;
+`;
+const LoadingText = styled.div`
+  text-align: center;
+  padding: 20px;
+`;
+const ErrorText = styled.div`
+  text-align: center;
+  color: red;
+  padding: 20px;
 `;
 const TableContainer = styled.div`
   box-sizing: border-box;
