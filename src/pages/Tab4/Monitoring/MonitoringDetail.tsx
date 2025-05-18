@@ -1,5 +1,4 @@
 // src/pages/List/Order/MonitoringDetail.tsx
-
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -29,8 +28,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   const [brand] = useState('MICHAA');
   const [color] = useState('Green');
   const [size] = useState('M (66)');
-  const [shippingMethod] = useState('택배');
-  const [tracking] = useState('6909-3074-9676');
+  const [shippingMethod] = useState('매니저 배송');
   const [amount] = useState('55,000');
   const [expectedDate, setExpectedDate] = useState<Date>(
     new Date('2025-04-10')
@@ -38,18 +36,18 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   const [paymentStatus, setPaymentStatus] = useState('결제완료');
 
   // ─── 배송정보 state ───
-  const [sender] = useState('홍길순'); // 발송인
-  const [senderPhone] = useState('010-1111-2222'); // 발송인 연락처
-  const [receiver] = useState('홍길동'); // 수령인
-  const [receiverPhone] = useState('010-1234-5678'); // 수령인 연락처
-  const [message, setMessage] = useState('문 앞에 전달해주세요.'); // 메시지
+  const [sender] = useState('홍길순');
+  const [senderPhone] = useState('010-1111-2222');
+  const [receiver] = useState('홍길동');
+  const [receiverPhone] = useState('010-1234-5678');
+  const [message, setMessage] = useState('문 앞에 전달해주세요.');
   const [deliveryAddress] = useState(
     '(06205) 서울 강남구 대치동 922-4 디엠빌딩 401호'
-  ); // 배송지
-  const [deliveryStatus, setDeliveryStatus] = useState('배송 준비중'); // 배송상태
+  );
+  const [deliveryStatus, setDeliveryStatus] = useState('배송 준비중');
   const [returnAddress] = useState(
     '(06205) 서울 강남구 대치동 922-4 디엠빌딩 401호'
-  ); // 회수지
+  );
 
   // ─── 공통 state ───
   const [activeTab, setActiveTab] = useState(0);
@@ -74,7 +72,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
     setIsModalOpen(false);
     navigate(-1);
   };
-
   const handleDateChange: ReactDatePickerProps['onChange'] = (date) => {
     if (date instanceof Date) setExpectedDate(date);
   };
@@ -91,7 +88,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   return (
     <Container>
       <HeaderRow>
-        <Title>{isCreate ? '주문 등록' : `주문 상세 (${numericNo})`}</Title>
+        <Title>{isCreate ? '주문 등록' : `대여 상세 (${numericNo})`}</Title>
       </HeaderRow>
 
       <SettingsDetailSubHeader {...detailProps} />
@@ -105,7 +102,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
       <DividerDashed />
 
       <ShippingTabBar
-        tabs={['주문상세', '배송정보']}
+        tabs={['주문상세', '배송/회수']}
         activeIndex={activeTab}
         onTabClick={setActiveTab}
       />
@@ -137,8 +134,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
               <label>배송방법</label>
               <InputGroup>
                 <MethodPart>{shippingMethod}</MethodPart>
-                <Divider />
-                <TrackingPart>{tracking}</TrackingPart>
               </InputGroup>
             </Field>
             <Field>
@@ -149,7 +144,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 
           <Row>
             <Field>
-              <label>발송예정</label>
+              <label>대여일자</label>
               <DatePickerContainer>
                 <FaCalendarAlt />
                 <StyledDatePicker
@@ -176,28 +171,17 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 
       {activeTab === 1 && (
         <FormBox>
-          {/* 배송정보 */}
+          {/* 배송/회수 */}
           <Row>
             <Field>
-              <label>발송인</label>
+              <label>수령인</label>
               <input value={sender} readOnly />
             </Field>
             <Field>
               <label>연락처</label>
               <input value={senderPhone} readOnly />
             </Field>
-            <Field>
-              <label>수령인</label>
-              <input value={receiver} readOnly />
-            </Field>
-            <Field>
-              <label>연락처</label>
-              <input value={receiverPhone} readOnly />
-            </Field>
-          </Row>
-
-          <Row>
-            <Field>
+            <Field flex={2}>
               <label>메시지</label>
               <input
                 value={message}
@@ -207,14 +191,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
           </Row>
 
           <Row>
-            <Field style={{ flex: 1, minWidth: 0 }}>
-              <label>배송지</label>
-              <input
-                value={deliveryAddress}
-                readOnly
-                style={{ width: '100%' }}
-              />
-            </Field>
             <Field>
               <label>배송상태</label>
               <select
@@ -227,11 +203,38 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
               </select>
             </Field>
           </Row>
+          <Row>
+            <Field>
+              <label>반납인</label>
+              <input value={sender} readOnly />
+            </Field>
+            <Field>
+              <label>연락처</label>
+              <input value={senderPhone} readOnly />
+            </Field>
+          </Row>
 
           <Row>
-            <Field style={{ flex: 1, minWidth: 0 }}>
+            <Field>
               <label>회수지</label>
-              <input value={returnAddress} readOnly style={{ width: '100%' }} />
+              <input value={returnAddress} readOnly />
+            </Field>
+          </Row>
+
+          <Row>
+            <Field>
+              <label>세탁여부</label>
+              <select>
+                <option>있음</option>
+                <option>없음</option>
+              </select>
+            </Field>
+            <Field>
+              <label>수선여부</label>
+              <select>
+                <option>있음</option>
+                <option>없음</option>
+              </select>
             </Field>
           </Row>
         </FormBox>
@@ -291,10 +294,15 @@ const DividerDashed = styled.hr`
   margin: 24px 0;
 `;
 
+interface FieldProps {
+  flex?: number;
+}
+
 const FormBox = styled.div`
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 0 4px 4px 4px;
+  margin-bottom: 40px;
 `;
 
 const Row = styled.div`
@@ -304,10 +312,12 @@ const Row = styled.div`
   }
 `;
 
-const Field = styled.div`
-  flex: 1;
-  min-width: 200px;
-
+/**
+ * flex: n 으로 너비 비율 조정
+ */
+const Field = styled.div<FieldProps>`
+  flex: ${(p) => p.flex ?? 1};
+  min-width: 0;
   display: flex;
   align-items: center;
   padding: 12px 16px;
@@ -319,21 +329,23 @@ const Field = styled.div`
 
   label {
     width: 80px;
+    white-space: nowrap;
+    text-align: center;
     font-size: 12px;
     font-weight: 700;
+    display: inline-block;
     margin-right: 8px;
-    text-align: center;
   }
 
   input,
   select {
     flex: 1;
     height: 36px;
+    max-width: 300px;
     padding: 0 8px;
     font-size: 12px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    max-width: 200px;
   }
 `;
 
@@ -347,26 +359,10 @@ const InputGroup = styled.div`
 `;
 
 const MethodPart = styled.div`
-  flex: 0 0 60px;
+  flex: 0 0 80px;
   text-align: center;
   font-size: 12px;
   font-weight: 400;
-`;
-
-const Divider = styled.div`
-  width: 1px;
-  height: 100%;
-  background: #ddd;
-`;
-
-const TrackingPart = styled.div`
-  flex: 1;
-  padding: 0 8px;
-  white-space: nowrap;
-  overflow: hidden;
-  font-size: 12px;
-  font-weight: 400;
-  text-overflow: ellipsis;
 `;
 
 const DatePickerContainer = styled.div`
