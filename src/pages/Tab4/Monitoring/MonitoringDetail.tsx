@@ -29,11 +29,11 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   const [color] = useState('Green');
   const [size] = useState('M (66)');
   const [shippingMethod] = useState('매니저 배송');
-  const [amount] = useState('55,000');
+  const [amount] = useState('정기 이용권 (무제한)');
   const [expectedDate, setExpectedDate] = useState<Date>(
     new Date('2025-04-10')
   );
-  const [paymentStatus, setPaymentStatus] = useState('결제완료');
+  const [paymentStatus, setPaymentStatus] = useState('결제상태');
 
   // ─── 배송정보 state ───
   const [sender] = useState('홍길순');
@@ -88,7 +88,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   return (
     <Container>
       <HeaderRow>
-        <Title>{isCreate ? '주문 등록' : `대여 상세 (${numericNo})`}</Title>
+        <Title>{isCreate ? '주문 등록' : `대여내역 (${numericNo})`}</Title>
       </HeaderRow>
 
       <SettingsDetailSubHeader {...detailProps} />
@@ -124,7 +124,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
               <input value={color} readOnly />
             </Field>
           </Row>
-
           <Row>
             <Field>
               <label>사이즈</label>
@@ -137,11 +136,10 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
               </InputGroup>
             </Field>
             <Field>
-              <label>금액</label>
+              <label>이용권</label>
               <input value={amount} readOnly />
             </Field>
           </Row>
-
           <Row>
             <Field>
               <label>대여일자</label>
@@ -161,8 +159,8 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
                 onChange={(e) => setPaymentStatus(e.target.value)}
               >
                 <option>결제완료</option>
-                <option>결제대기</option>
-                <option>취소요청</option>
+                <option>결제취소</option>
+                <option>결제실패</option>
               </select>
             </Field>
           </Row>
@@ -189,8 +187,11 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
               />
             </Field>
           </Row>
-
           <Row>
+            <Field>
+              <label>배송지</label>
+              <input value={deliveryAddress} readOnly />
+            </Field>
             <Field>
               <label>배송상태</label>
               <select
@@ -200,27 +201,28 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
                 <option>배송 준비중</option>
                 <option>배송 중</option>
                 <option>배송 완료</option>
+                <option>배송취소</option>
+                <option>반납중</option>
+                <option>반납완료</option>
               </select>
             </Field>
           </Row>
           <Row>
             <Field>
               <label>반납인</label>
-              <input value={sender} readOnly />
+              <input value={receiver} readOnly />
             </Field>
             <Field>
               <label>연락처</label>
-              <input value={senderPhone} readOnly />
+              <input value={receiverPhone} readOnly />
             </Field>
           </Row>
-
           <Row>
             <Field>
               <label>회수지</label>
               <input value={returnAddress} readOnly />
             </Field>
           </Row>
-
           <Row>
             <Field>
               <label>세탁여부</label>
@@ -255,25 +257,21 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 export default MonitoringDetail;
 
 /* ===== styled-components ===== */
-
 const Container = styled.div`
   width: 100%;
   min-width: 1000px;
   padding: 20px;
 `;
-
 const HeaderRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
 `;
-
 const Title = styled.h1`
   font-weight: 700;
   font-size: 16px;
 `;
-
 const ProductNumber = styled.div`
   display: flex;
   align-items: baseline;
@@ -288,33 +286,25 @@ const ProductNumber = styled.div`
     font-weight: 900;
   }
 `;
-
 const DividerDashed = styled.hr`
   border-top: 1px dashed #ddd;
   margin: 24px 0;
 `;
-
 interface FieldProps {
   flex?: number;
 }
-
 const FormBox = styled.div`
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 0 4px 4px 4px;
   margin-bottom: 40px;
 `;
-
 const Row = styled.div`
   display: flex;
   & + & {
     border-top: 1px solid #ddd;
   }
 `;
-
-/**
- * flex: n 으로 너비 비율 조정
- */
 const Field = styled.div<FieldProps>`
   flex: ${(p) => p.flex ?? 1};
   min-width: 0;
@@ -322,11 +312,9 @@ const Field = styled.div<FieldProps>`
   align-items: center;
   padding: 12px 16px;
   box-sizing: border-box;
-
   &:not(:last-child) {
     border-right: 1px solid #ddd;
   }
-
   label {
     width: 80px;
     white-space: nowrap;
@@ -336,7 +324,6 @@ const Field = styled.div<FieldProps>`
     display: inline-block;
     margin-right: 8px;
   }
-
   input,
   select {
     flex: 1;
@@ -348,7 +335,6 @@ const Field = styled.div<FieldProps>`
     border-radius: 4px;
   }
 `;
-
 const InputGroup = styled.div`
   display: flex;
   align-items: center;
@@ -357,34 +343,13 @@ const InputGroup = styled.div`
   border: 1px solid #ddd;
   border-radius: 4px;
 `;
-
 const MethodPart = styled.div`
   flex: 0 0 80px;
   text-align: center;
   font-size: 12px;
   font-weight: 400;
 `;
-
-const DatePickerContainer = styled.div`
-  display: flex;
-  align-items: center;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 0 12px;
-  height: 36px;
-
-  svg {
-    margin-right: 8px;
-    color: #666;
-  }
-
-  input {
-    border: none;
-    outline: none;
-    font-size: 12px;
-  }
-`;
-
+const DatePickerContainer = styled.div`display:flex;align-items:center;border:1px solid #ddd;border-radius:4px;padding:0 12px;height:36px;svg{margin-right:8px;color:#666;}input{border:none;outline:none;font-size:12px;}}`;
 const StyledDatePicker = styled(DatePicker)`
   border: none;
   outline: none;

@@ -14,13 +14,15 @@ const OrderDetailTopBoxes: React.FC = () => {
             <IconImage src={userDetailImg2} alt='User' />
           </IconPlaceholder>
           <Content>
-            <UserName>
-              <Label>홍길동</Label> <Nick>(mivin)</Nick>
-            </UserName>
-            <Email>goodxx21@naver.com</Email>
-            <Type>
-              <Label>형태</Label> / 제품구매
-            </Type>
+            <Row>
+              <Label>홍길동</Label> <Value>(mivin)</Value>
+            </Row>
+            <Row>
+              <Value>goodxx21@naver.com</Value>
+            </Row>
+            <Row>
+              <Label>이용자</Label> <Value>(일반)</Value>
+            </Row>
           </Content>
         </Box>
 
@@ -33,7 +35,7 @@ const OrderDetailTopBoxes: React.FC = () => {
           </IconPlaceholder>
           <Content>
             <Row>
-              <Label>주문일</Label>
+              <Label>신청일</Label>
               <Value>2025-04-07 (10:03:25)</Value>
             </Row>
             <Row>
@@ -41,8 +43,8 @@ const OrderDetailTopBoxes: React.FC = () => {
               <Value>2906646342SYTIKI</Value>
             </Row>
             <Row>
-              <Label>결제방식</Label>
-              <Value>카드결제</Value>
+              <Label>취소일</Label>
+              <Value>-</Value>
             </Row>
           </Content>
         </Box>
@@ -56,10 +58,7 @@ const OrderDetailTopBoxes: React.FC = () => {
               <Label>포인트 사용</Label>
               <Value>미사용</Value>
             </Row>
-            <Row>
-              <Label>할인코드</Label>
-              <Value>미사용</Value>
-            </Row>
+
             <Row>
               <Label>추가비용</Label>
               <Value>없음</Value>
@@ -121,27 +120,6 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
   gap: 6px;
-`;
-
-const UserName = styled.div`
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-`;
-
-const Nick = styled.span`
-  font-size: 12px;
-  color: #666;
-`;
-
-const Email = styled.div`
-  font-size: 12px;
-  color: #333;
-`;
-
-const Type = styled.div`
-  font-size: 12px;
-  color: #333;
 `;
 
 const Row = styled.div`
