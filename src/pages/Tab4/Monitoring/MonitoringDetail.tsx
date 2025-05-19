@@ -44,7 +44,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   const [deliveryAddress] = useState(
     '(06205) 서울 강남구 대치동 922-4 디엠빌딩 401호'
   );
-  const [deliveryStatus, setDeliveryStatus] = useState('배송 준비중');
+  const [deliveryStatus, setDeliveryStatus] = useState('');
   const [returnAddress] = useState(
     '(06205) 서울 강남구 대치동 922-4 디엠빌딩 401호'
   );
@@ -159,8 +159,8 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
                 onChange={(e) => setPaymentStatus(e.target.value)}
               >
                 <option>결제완료</option>
-                <option>결제취소</option>
-                <option>결제실패</option>
+                <option>취소요청</option>
+                <option>취소완료</option>
               </select>
             </Field>
           </Row>
@@ -198,9 +198,9 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
                 value={deliveryStatus}
                 onChange={(e) => setDeliveryStatus(e.target.value)}
               >
-                <option>배송 준비중</option>
-                <option>배송 중</option>
-                <option>배송 완료</option>
+                <option>배송준비</option>
+                <option>배송중</option>
+                <option>배송완료</option>
                 <option>배송취소</option>
                 <option>반납중</option>
                 <option>반납완료</option>

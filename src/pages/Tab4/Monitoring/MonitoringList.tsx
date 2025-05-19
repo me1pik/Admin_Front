@@ -20,7 +20,14 @@ const tabs: TabItem[] = [
 ];
 
 // 상태 변경용 옵션
-const statuses = ['배송준비중', '배송중', '배송완료'];
+const statuses = [
+  '배송준비',
+  '배송중',
+  '배송완료',
+  '배송취소',
+  '반납중',
+  '반납완료',
+];
 
 const MonitoringList: React.FC = () => {
   const navigate = useNavigate();
