@@ -16,6 +16,7 @@ const hoverAnim = keyframes`
 
 const Button = styled.button`
   padding: 10px 20px;
+
   background-color: #000;
   color: #fff;
   border: none;
@@ -23,6 +24,9 @@ const Button = styled.button`
   font-weight: 700;
   cursor: pointer;
   transition: background-color 0.2s ease;
+
+  /* 텍스트가 항상 한 줄로 나오도록 */
+  white-space: nowrap;
 
   &:hover {
     background-color: #ffae00;
