@@ -55,7 +55,7 @@ const TermsDetail: React.FC<TermsDetailProps> = ({
   const [modalTitle, setModalTitle] = useState<string>('');
   const [modalMessage, setModalMessage] = useState<string>('');
 
-  const handleBack = () => navigate(-1);
+  const handleBack = () => navigate('/terms');
   const handleSave = () => {
     setModalTitle(isCreate ? '등록 완료' : '변경 완료');
     setModalMessage(

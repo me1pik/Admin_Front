@@ -203,7 +203,7 @@ const ProductDetail: React.FC = () => {
       </HeaderRow>
       <TripleButtonDetailSubHeader
         backLabel='목록이동'
-        onBackClick={() => navigate(-1)}
+        onBackClick={() => navigate('/productlist')}
         saveLabel='변경저장'
         onSaveClick={handleSave}
         deleteLabel='삭제'

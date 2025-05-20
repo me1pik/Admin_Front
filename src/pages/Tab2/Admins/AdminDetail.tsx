@@ -84,7 +84,7 @@ const AdminDetail: React.FC = () => {
   const [activeTab, setActiveTab] = useState<number>(0);
 
   /** 서브헤더 버튼 핸들러 */
-  const handleBackClick = () => navigate(-1);
+  const handleBackClick = () => navigate('/adminlist');
   const handleEditClick = () => alert('정보가 수정되었습니다!');
   const handleEndClick = () => alert('종료 처리가 완료되었습니다!');
 

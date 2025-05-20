@@ -50,7 +50,7 @@ const MarketOrderDetail: React.FC<MarketOrderDetailProps> = ({
   const [modalTitle, setModalTitle] = useState('');
   const [modalMessage, setModalMessage] = useState('');
 
-  const handleBack = () => navigate(-1);
+  const handleBack = () => navigate('/marketorderlist');
   const handleSave = () => {
     setModalTitle(isCreate ? '등록 완료' : '변경 완료');
     setModalMessage(

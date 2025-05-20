@@ -66,7 +66,7 @@ const NoticeDetail: React.FC<NoticeDetailProps> = ({
     }
   }, [isCreate, numericNo]);
 
-  const handleBack = () => navigate(-1);
+  const handleBack = () => navigate('/notice');
   const handleSave = () => {
     setModalTitle(isCreate ? '등록 완료' : '변경 완료');
     setModalMessage(

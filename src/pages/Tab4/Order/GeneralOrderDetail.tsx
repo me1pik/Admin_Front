@@ -50,7 +50,7 @@ const GeneralOrderDetail: React.FC<GeneralOrderDetailProps> = ({
   const [modalTitle, setModalTitle] = useState('');
   const [modalMessage, setModalMessage] = useState('');
 
-  const handleBack = () => navigate(-1);
+  const handleBack = () => navigate('/GeneralOrderList');
   const handleSave = () => {
     setModalTitle(isCreate ? '등록 완료' : '변경 완료');
     setModalMessage(

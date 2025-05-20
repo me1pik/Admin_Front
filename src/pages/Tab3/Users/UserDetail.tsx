@@ -397,7 +397,7 @@ const UserDetail: React.FC = () => {
 
   const detailSubHeaderProps: DetailSubHeaderProps = {
     backLabel: '목록이동',
-    onBackClick: () => navigate(-1),
+    onBackClick: () => navigate('/userlist'),
     editLabel: '정보수정',
     onEditClick: () => alert('정보수정!'),
     endLabel: '종료처리',

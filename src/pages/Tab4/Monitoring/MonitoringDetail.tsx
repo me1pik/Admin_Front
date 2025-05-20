@@ -104,7 +104,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
     }
   }, [isCreate, numericNo]);
 
-  const handleBack = () => navigate(-1);
+  const handleBack = () => navigate('/monitoringlist');
 
   const handleSave = async () => {
     if (!isCreate && numericNo) {

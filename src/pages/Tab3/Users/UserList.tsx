@@ -1,3 +1,4 @@
+// src/pages/Tab3/Users/UserList.tsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -12,12 +13,17 @@ const tabs: TabItem[] = [
   { label: '블럭회원', path: '블럭' },
 ];
 
+// 일괄 변경용 상태 옵션
+const statuses = [
+  { label: '일반회원으로 변경', value: 'unblock' },
+  { label: '블럭회원으로 변경', value: 'block' },
+];
+
 const UserList: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get('search')?.toLowerCase() ?? '';
 
-  // URL 쿼리에서 current page 읽기
   const page = parseInt(searchParams.get('page') ?? '1', 10);
   const limit = 10;
 
@@ -26,10 +32,13 @@ const UserList: React.FC = () => {
   const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
 
-  // 총 페이지 수
+  // totalCount 선언 이후에 totalPages 계산
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
 
-  // 서버 호출 함수
+  // 일괄변경 UI 상태
+  const [newStatus, setNewStatus] = useState<string>('');
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -40,7 +49,7 @@ const UserList: React.FC = () => {
 
       const users: User[] = res.users.map((u: any) => ({
         no: u.id,
-        email: u.email, // email 필드 매핑
+        email: u.email,
         status: selectedTab.label === '블럭회원' ? '블럭' : '일반',
         grade: u.membershipLevel,
         name: u.name,
@@ -60,13 +69,11 @@ const UserList: React.FC = () => {
     }
   };
 
-  // 페이지나 탭 변경 시 데이터 재요청
   useEffect(() => {
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, selectedTab]);
 
-  // 탭 변경 핸들러: selectedTab 업데이트 + page=1으로 URL 리셋
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
     const params = Object.fromEntries(searchParams.entries());
@@ -74,11 +81,10 @@ const UserList: React.FC = () => {
     setSearchParams(params);
   };
 
-  // 클라이언트 사이드 검색 필터
   const filteredData = userData.filter((item) =>
     [
       String(item.no),
-      item.email, // email도 검색에 포함
+      item.email,
       item.name,
       item.nickname,
       item.instagram,
@@ -90,8 +96,35 @@ const UserList: React.FC = () => {
     ].some((field) => field.toLowerCase().includes(searchTerm))
   );
 
-  // UserTable의 handleEdit(no: number) 시그니처를 유지하면서,
-  // no를 받아 해당 이메일로 navigate 하도록 처리
+  // 행 토글 (필요하시면 UserTable에도 체크박스 추가해주세요)
+  const toggleRow = (no: number) => {
+    const copy = new Set(selectedRows);
+    copy.has(no) ? copy.delete(no) : copy.add(no);
+    setSelectedRows(copy);
+  };
+  const toggleAll = () => {
+    if (selectedRows.size === filteredData.length) {
+      setSelectedRows(new Set());
+    } else {
+      setSelectedRows(new Set(filteredData.map((i) => i.no)));
+    }
+  };
+
+  const handleBulkChange = () => {
+    if (!newStatus) {
+      alert('변경할 상태를 선택해주세요.');
+      return;
+    }
+    if (selectedRows.size === 0) {
+      alert('변경할 사용자를 선택해주세요.');
+      return;
+    }
+    alert(
+      `선택된 ${selectedRows.size}명 상태를 "${statuses.find((s) => s.value === newStatus)?.label}"로 변경합니다.`
+    );
+    // TODO: API 호출 후 fetchUsers()
+  };
+
   const handleEdit = (no: number) => {
     const user = userData.find((u) => u.no === no);
     if (user) {
@@ -102,18 +135,38 @@ const UserList: React.FC = () => {
   return (
     <Content>
       <HeaderTitle>유저 목록</HeaderTitle>
-
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
 
       <InfoBar>
         <TotalCountText>Total: {filteredData.length}</TotalCountText>
+        <FilterGroup>
+          <Select
+            value={newStatus}
+            onChange={(e) => setNewStatus(e.target.value)}
+          >
+            <option value=''>변경할 상태 선택</option>
+            {statuses.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </Select>
+          <BulkButton onClick={handleBulkChange}>일괄변경</BulkButton>
+        </FilterGroup>
       </InfoBar>
 
       <TableContainer>
         {loading ? (
           <LoadingText>로딩중...</LoadingText>
         ) : (
-          <UserTable filteredData={filteredData} handleEdit={handleEdit} />
+          <UserTable
+            filteredData={filteredData}
+            handleEdit={handleEdit}
+            /* 체크박스 지원 시 아래 3개 prop을 활성화하세요 */
+            // selectedRows={selectedRows}
+            // toggleRow={toggleRow}
+            // toggleAll={toggleAll}
+          />
         )}
       </TableContainer>
 
@@ -126,8 +179,9 @@ const UserList: React.FC = () => {
 
 export default UserList;
 
-/* ====================== Styled Components ====================== */
+/* Styled Components 생략 */
 
+/* Styled Components */
 const Content = styled.div`
   display: flex;
   flex-direction: column;
@@ -157,6 +211,27 @@ const TotalCountText = styled.div`
   font-weight: 900;
   font-size: 12px;
   color: #000000;
+`;
+
+const FilterGroup = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+const Select = styled.select`
+  height: 32px;
+  padding: 0 8px;
+  font-size: 12px;
+  border: 1px solid #ccc;
+`;
+
+const BulkButton = styled.button`
+  height: 32px;
+  padding: 0 12px;
+  background: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
 `;
 
 const TableContainer = styled.div`
