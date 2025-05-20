@@ -47,15 +47,27 @@ export interface RentalScheduleAdminDetailResponse {
   size: string;
   ticketName: string;
   deliveryInfo: DeliveryInfo;
-  paymentStatus: '결제완료' | '결제취소' | '결제실패' | '결제대기' | '환불완료';
-  deliveryStatus: '배송준비중' | '배송중' | '배송완료';
+  paymentStatus?: '결제대기' | '취소요청' | '취소완료';
+  deliveryStatus?:
+    | '배송준비중'
+    | '배송중'
+    | '배송완료'
+    | '배송취소'
+    | '반납중'
+    | '반납완료';
   isCleaned: boolean;
   isRepaired: boolean;
 }
 
 export interface UpdateRentalStatusRequest {
-  paymentStatus?: '결제대기' | '결제완료' | '환불완료';
-  deliveryStatus?: '배송준비중' | '배송중' | '배송완료';
+  paymentStatus?: '결제대기' | '취소요청' | '취소완료';
+  deliveryStatus?:
+    | '배송준비중'
+    | '배송중'
+    | '배송완료'
+    | '배송취소'
+    | '반납중'
+    | '반납완료';
   isCleaned?: boolean;
   isRepaired?: boolean;
 }

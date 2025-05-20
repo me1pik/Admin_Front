@@ -40,8 +40,8 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   const [amount, setAmount] = useState('');
   const [expectedDate, setExpectedDate] = useState<Date>(new Date());
   const [paymentStatus, setPaymentStatus] = useState<
-    '결제완료' | '결제대기' | '환불완료'
-  >('결제완료');
+    '결제대기' | '취소요청' | '취소완료'
+  >('결제대기');
 
   // ─── 배송정보 state ───
   const [sender, setSender] = useState('');
@@ -52,7 +52,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [returnAddress, setReturnAddress] = useState('');
   const [deliveryStatus, setDeliveryStatus] = useState<
-    '배송준비중' | '배송중' | '배송완료'
+    '배송준비중' | '배송중' | '배송완료' | '배송취소' | '반납중' | '반납완료'
   >('배송준비중');
   const [isCleaned, setIsCleaned] = useState(false);
   const [isRepaired, setIsRepaired] = useState(false);
@@ -70,35 +70,31 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
       setLoading(true);
       getRentalScheduleDetail(numericNo)
         .then((data: RentalScheduleAdminDetailResponse) => {
-          // 주문상세
           setBrand(data.brand);
           setAmount(data.ticketName);
           setProductName(`${data.brand} ${data.ticketName}`);
           setColor(data.color);
           setSize(data.size);
-          setPaymentStatus(data.paymentStatus || '결제완료');
+          setPaymentStatus(data.paymentStatus ?? '결제대기');
           setShippingMethod(data.deliveryInfo.shipping.deliveryMethod);
 
-          // 기간 parsing
           const [start] = data.rentalPeriod.split(' ~ ');
           setExpectedDate(new Date(start));
 
-          // 배송정보
           setSender(data.deliveryInfo.shipping.receiver);
           setSenderPhone(data.deliveryInfo.shipping.phone);
           setDeliveryAddress(data.deliveryInfo.shipping.address);
           setMessage(data.deliveryInfo.shipping.message);
 
-          // 회수정보
           setReceiverDetail(data.deliveryInfo.return.detailAddress);
           setReceiverPhone(data.deliveryInfo.return.phone);
           setReturnAddress(data.deliveryInfo.return.address);
 
-          setDeliveryStatus(data.deliveryStatus);
+          setDeliveryStatus(data.deliveryStatus!);
           setIsCleaned(data.isCleaned);
           setIsRepaired(data.isRepaired);
         })
-        .catch((err: any) => {
+        .catch((err) => {
           console.error('상세 조회 실패', err);
           setModalTitle('오류');
           setModalMessage('상세 정보를 불러오지 못했습니다.');
@@ -124,7 +120,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
         setModalTitle('변경 완료');
         setModalMessage('변경 내용을 성공적으로 저장했습니다.');
         setIsModalOpen(true);
-      } catch (err: any) {
+      } catch (err) {
         console.error('수정 실패', err);
         setModalTitle('오류');
         setModalMessage('변경 내용 저장에 실패했습니다. 다시 시도해주세요.');
@@ -185,7 +181,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 
       {activeTab === 0 && (
         <FormBox>
-          {/* 주문상세 */}
           <Row>
             <Field>
               <label>제품명</label>
@@ -232,15 +227,11 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
               <label>결제상태</label>
               <select
                 value={paymentStatus}
-                onChange={(e) =>
-                  setPaymentStatus(
-                    e.target.value as '결제완료' | '결제대기' | '환불완료'
-                  )
-                }
+                onChange={(e) => setPaymentStatus(e.target.value as any)}
               >
-                <option>결제완료</option>
-                <option>결제대기</option>
-                <option>환불완료</option>
+                <option value='결제대기'>결제대기</option>
+                <option value='취소요청'>취소요청</option>
+                <option value='취소완료'>취소완료</option>
               </select>
             </Field>
           </Row>
@@ -249,7 +240,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 
       {activeTab === 1 && (
         <FormBox>
-          {/* 배송/회수 */}
           <Row>
             <Field>
               <label>수령인</label>
@@ -278,15 +268,18 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
                 value={deliveryStatus}
                 onChange={(e) => setDeliveryStatus(e.target.value as any)}
               >
-                <option>배송준비중</option>
-                <option>배송중</option>
-                <option>배송완료</option>
+                <option value='배송준비중'>배송준비중</option>
+                <option value='배송중'>배송중</option>
+                <option value='배송완료'>배송완료</option>
+                <option value='배송취소'>배송취소</option>
+                <option value='반납중'>반납중</option>
+                <option value='반납완료'>반납완료</option>
               </select>
             </Field>
           </Row>
           <Row>
             <Field>
-              <label>반납인 상세</label>
+              <label>반납인</label>
               <input value={receiverDetail} readOnly />
             </Field>
             <Field>
@@ -307,8 +300,8 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
                 value={isCleaned ? '있음' : '없음'}
                 onChange={(e) => setIsCleaned(e.target.value === '있음')}
               >
-                <option>있음</option>
-                <option>없음</option>
+                <option value='있음'>있음</option>
+                <option value='없음'>없음</option>
               </select>
             </Field>
             <Field>
@@ -317,8 +310,8 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
                 value={isRepaired ? '있음' : '없음'}
                 onChange={(e) => setIsRepaired(e.target.value === '있음')}
               >
-                <option>있음</option>
-                <option>없음</option>
+                <option value='있음'>있음</option>
+                <option value='없음'>없음</option>
               </select>
             </Field>
           </Row>
