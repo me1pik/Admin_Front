@@ -418,9 +418,10 @@ const InputGroup = styled.div`
   border-radius: 4px;
 `;
 const MethodPart = styled.div`
-  flex: 0 0 80px;
+  display: flex;
   text-align: center;
   font-size: 12px;
+  padding: 0 8px;
 `;
 const DatePickerContainer = styled.div`
   display: flex;
