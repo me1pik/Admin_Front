@@ -1,5 +1,5 @@
-// src/pages/List/Order/MonitoringDetail.tsx
-import React, { useState } from 'react';
+// src/pages/Tab4/Monitoring/MonitoringDetail.tsx
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
 import DatePicker, { ReactDatePickerProps } from 'react-datepicker';
@@ -11,6 +11,14 @@ import SettingsDetailSubHeader, {
 import OrderDetailTopBoxes from '../../../components/OrderDetailTopBoxes';
 import ShippingTabBar from '../../../components/TabBar';
 import ReusableModal2 from '../../../components/OneButtonModal';
+import Spinner from '../../../components/Spinner';
+
+import {
+  getRentalScheduleDetail,
+  updateRentalScheduleStatus,
+  RentalScheduleAdminDetailResponse,
+  UpdateRentalStatusRequest,
+} from '../../../api/RentalSchedule/RentalScheduleApi';
 
 interface MonitoringDetailProps {
   isCreate?: boolean;
@@ -24,54 +32,120 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   const numericNo = isCreate ? undefined : Number(no);
 
   // ─── 주문상세 state ───
-  const [productName] = useState('울 더블 버튼 페플럼 원피스');
-  const [brand] = useState('MICHAA');
-  const [color] = useState('Green');
-  const [size] = useState('M (66)');
-  const [shippingMethod] = useState('매니저 배송');
-  const [amount] = useState('정기 이용권 (무제한)');
-  const [expectedDate, setExpectedDate] = useState<Date>(
-    new Date('2025-04-10')
-  );
-  const [paymentStatus, setPaymentStatus] = useState('결제상태');
+  const [productName, setProductName] = useState('');
+  const [brand, setBrand] = useState('');
+  const [color, setColor] = useState('');
+  const [size, setSize] = useState('');
+  const [shippingMethod, setShippingMethod] = useState('');
+  const [amount, setAmount] = useState('');
+  const [expectedDate, setExpectedDate] = useState<Date>(new Date());
+  const [paymentStatus, setPaymentStatus] = useState<
+    '결제완료' | '결제대기' | '환불완료'
+  >('결제완료');
 
   // ─── 배송정보 state ───
-  const [sender] = useState('홍길순');
-  const [senderPhone] = useState('010-1111-2222');
-  const [receiver] = useState('홍길동');
-  const [receiverPhone] = useState('010-1234-5678');
-  const [message, setMessage] = useState('문 앞에 전달해주세요.');
-  const [deliveryAddress] = useState(
-    '(06205) 서울 강남구 대치동 922-4 디엠빌딩 401호'
-  );
-  const [deliveryStatus, setDeliveryStatus] = useState('');
-  const [returnAddress] = useState(
-    '(06205) 서울 강남구 대치동 922-4 디엠빌딩 401호'
-  );
+  const [sender, setSender] = useState('');
+  const [senderPhone, setSenderPhone] = useState('');
+  const [receiverDetail, setReceiverDetail] = useState('');
+  const [receiverPhone, setReceiverPhone] = useState('');
+  const [message, setMessage] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [returnAddress, setReturnAddress] = useState('');
+  const [deliveryStatus, setDeliveryStatus] = useState<
+    '배송준비중' | '배송중' | '배송완료'
+  >('배송준비중');
+  const [isCleaned, setIsCleaned] = useState(false);
+  const [isRepaired, setIsRepaired] = useState(false);
 
   // ─── 공통 state ───
   const [activeTab, setActiveTab] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
   const [modalMessage, setModalMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // 상세 조회
+  useEffect(() => {
+    if (!isCreate && numericNo) {
+      setLoading(true);
+      getRentalScheduleDetail(numericNo)
+        .then((data: RentalScheduleAdminDetailResponse) => {
+          // 주문상세
+          setBrand(data.brand);
+          setAmount(data.ticketName);
+          setProductName(`${data.brand} ${data.ticketName}`);
+          setColor(data.color);
+          setSize(data.size);
+          setPaymentStatus(data.paymentStatus || '결제완료');
+          setShippingMethod(data.deliveryInfo.shipping.deliveryMethod);
+
+          // 기간 parsing
+          const [start] = data.rentalPeriod.split(' ~ ');
+          setExpectedDate(new Date(start));
+
+          // 배송정보
+          setSender(data.deliveryInfo.shipping.receiver);
+          setSenderPhone(data.deliveryInfo.shipping.phone);
+          setDeliveryAddress(data.deliveryInfo.shipping.address);
+          setMessage(data.deliveryInfo.shipping.message);
+
+          // 회수정보
+          setReceiverDetail(data.deliveryInfo.return.detailAddress);
+          setReceiverPhone(data.deliveryInfo.return.phone);
+          setReturnAddress(data.deliveryInfo.return.address);
+
+          setDeliveryStatus(data.deliveryStatus);
+          setIsCleaned(data.isCleaned);
+          setIsRepaired(data.isRepaired);
+        })
+        .catch((err: any) => {
+          console.error('상세 조회 실패', err);
+          setModalTitle('오류');
+          setModalMessage('상세 정보를 불러오지 못했습니다.');
+          setIsModalOpen(true);
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [isCreate, numericNo]);
 
   const handleBack = () => navigate(-1);
-  const handleSave = () => {
-    setModalTitle(isCreate ? '등록 완료' : '변경 완료');
-    setModalMessage(
-      isCreate ? '새 주문을 등록하시겠습니까?' : '변경 내용을 저장하시겠습니까?'
-    );
-    setIsModalOpen(true);
+
+  const handleSave = async () => {
+    if (!isCreate && numericNo) {
+      const payload: UpdateRentalStatusRequest = {
+        paymentStatus,
+        deliveryStatus,
+        isCleaned,
+        isRepaired,
+      };
+      try {
+        setLoading(true);
+        await updateRentalScheduleStatus(numericNo, payload);
+        setModalTitle('변경 완료');
+        setModalMessage('변경 내용을 성공적으로 저장했습니다.');
+        setIsModalOpen(true);
+      } catch (err: any) {
+        console.error('수정 실패', err);
+        setModalTitle('오류');
+        setModalMessage('변경 내용 저장에 실패했습니다. 다시 시도해주세요.');
+        setIsModalOpen(true);
+      } finally {
+        setLoading(false);
+      }
+    }
   };
+
   const handleDelete = () => {
     setModalTitle('삭제 완료');
     setModalMessage('주문을 삭제하시겠습니까?');
     setIsModalOpen(true);
   };
+
   const handleConfirm = () => {
     setIsModalOpen(false);
     navigate(-1);
   };
+
   const handleDateChange: ReactDatePickerProps['onChange'] = (date) => {
     if (date instanceof Date) setExpectedDate(date);
   };
@@ -84,6 +158,8 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
     endLabel: isCreate ? '취소' : '삭제',
     onEndClick: isCreate ? handleBack : handleDelete,
   };
+
+  if (loading) return <Spinner />;
 
   return (
     <Container>
@@ -156,11 +232,15 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
               <label>결제상태</label>
               <select
                 value={paymentStatus}
-                onChange={(e) => setPaymentStatus(e.target.value)}
+                onChange={(e) =>
+                  setPaymentStatus(
+                    e.target.value as '결제완료' | '결제대기' | '환불완료'
+                  )
+                }
               >
                 <option>결제완료</option>
-                <option>취소요청</option>
-                <option>취소완료</option>
+                <option>결제대기</option>
+                <option>환불완료</option>
               </select>
             </Field>
           </Row>
@@ -196,21 +276,18 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
               <label>배송상태</label>
               <select
                 value={deliveryStatus}
-                onChange={(e) => setDeliveryStatus(e.target.value)}
+                onChange={(e) => setDeliveryStatus(e.target.value as any)}
               >
-                <option>배송준비</option>
+                <option>배송준비중</option>
                 <option>배송중</option>
                 <option>배송완료</option>
-                <option>배송취소</option>
-                <option>반납중</option>
-                <option>반납완료</option>
               </select>
             </Field>
           </Row>
           <Row>
             <Field>
-              <label>반납인</label>
-              <input value={receiver} readOnly />
+              <label>반납인 상세</label>
+              <input value={receiverDetail} readOnly />
             </Field>
             <Field>
               <label>연락처</label>
@@ -226,14 +303,20 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
           <Row>
             <Field>
               <label>세탁여부</label>
-              <select>
+              <select
+                value={isCleaned ? '있음' : '없음'}
+                onChange={(e) => setIsCleaned(e.target.value === '있음')}
+              >
                 <option>있음</option>
                 <option>없음</option>
               </select>
             </Field>
             <Field>
               <label>수선여부</label>
-              <select>
+              <select
+                value={isRepaired ? '있음' : '없음'}
+                onChange={(e) => setIsRepaired(e.target.value === '있음')}
+              >
                 <option>있음</option>
                 <option>없음</option>
               </select>
@@ -317,11 +400,9 @@ const Field = styled.div<FieldProps>`
   }
   label {
     width: 80px;
-    white-space: nowrap;
     text-align: center;
     font-size: 12px;
     font-weight: 700;
-    display: inline-block;
     margin-right: 8px;
   }
   input,
@@ -347,9 +428,25 @@ const MethodPart = styled.div`
   flex: 0 0 80px;
   text-align: center;
   font-size: 12px;
-  font-weight: 400;
 `;
-const DatePickerContainer = styled.div`display:flex;align-items:center;border:1px solid #ddd;border-radius:4px;padding:0 12px;height:36px;svg{margin-right:8px;color:#666;}input{border:none;outline:none;font-size:12px;}}`;
+const DatePickerContainer = styled.div`
+  display: flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0 12px;
+  height: 36px;
+  svg {
+    margin-right: 8px;
+    color: #666;
+  }
+  input {
+    border: none;
+    outline: none;
+    font-size: 12px;
+    width: 100px;
+  }
+`;
 const StyledDatePicker = styled(DatePicker)`
   border: none;
   outline: none;
