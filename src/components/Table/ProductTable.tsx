@@ -1,3 +1,4 @@
+// src/components/Table/ProductTable.tsx
 import React from 'react';
 import styled, { css } from 'styled-components';
 
@@ -47,6 +48,9 @@ interface ProductTableProps {
   filteredData: ProductItem[];
   handleEdit: (styleCode: string, no: number) => void;
   startNo?: number;
+  selectedRows: Set<number>;
+  toggleRow: (no: number) => void;
+  toggleAll: () => void;
 }
 
 const ellipsis = css`
@@ -59,7 +63,13 @@ const ProductTable: React.FC<ProductTableProps> = ({
   filteredData,
   handleEdit,
   startNo = 0,
+  selectedRows,
+  toggleRow,
+  toggleAll,
 }) => {
+  const allSelected =
+    filteredData.length > 0 && selectedRows.size === filteredData.length;
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case '등록완료':
@@ -91,6 +101,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
   return (
     <Table>
       <colgroup>
+        <col style={{ width: '40px' }} />
         <col style={{ width: '50px' }} />
         <col style={{ width: '150px' }} />
         <col style={{ width: '100px' }} />
@@ -103,6 +114,9 @@ const ProductTable: React.FC<ProductTableProps> = ({
       </colgroup>
       <thead>
         <TableRow>
+          <ThCheckbox>
+            <input type='checkbox' checked={allSelected} onChange={toggleAll} />
+          </ThCheckbox>
           <Th>No.</Th>
           <Th>스타일(품번)</Th>
           <Th>브랜드</Th>
@@ -116,7 +130,14 @@ const ProductTable: React.FC<ProductTableProps> = ({
       </thead>
       <tbody>
         {filteredData.map((item, idx) => (
-          <TableRow key={idx}>
+          <TableRow key={item.no}>
+            <TdCheckbox>
+              <input
+                type='checkbox'
+                checked={selectedRows.has(item.no)}
+                onChange={() => toggleRow(item.no)}
+              />
+            </TdCheckbox>
             <Td>{startNo + idx + 1}</Td>
             <Td onClick={() => handleEdit(item.styleCode, item.no)}>
               <StyleCodeText title={item.styleCode}>
@@ -144,7 +165,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
         {filteredData.length < 10 &&
           Array.from({ length: 10 - filteredData.length }).map((_, i) => (
             <TableRow key={`empty-${i}`}>
-              {Array.from({ length: 9 }).map((_, j) => (
+              {Array.from({ length: 10 }).map((_, j) => (
                 <Td key={j}>&nbsp;</Td>
               ))}
             </TableRow>
@@ -178,6 +199,12 @@ const Th = styled.th`
   border: 1px solid #ddd;
   ${ellipsis}
 `;
+const ThCheckbox = styled.th`
+  text-align: center;
+  vertical-align: middle;
+  background-color: #eee;
+  border: 1px solid #ddd;
+`;
 const Td = styled.td`
   text-align: center;
   vertical-align: middle;
@@ -187,6 +214,11 @@ const Td = styled.td`
   color: #000;
   border: 1px solid #ddd;
   ${ellipsis}
+`;
+const TdCheckbox = styled.td`
+  text-align: center;
+  vertical-align: middle;
+  border: 1px solid #ddd;
 `;
 const StyleCodeText = styled.span`
   font-size: 12px;
