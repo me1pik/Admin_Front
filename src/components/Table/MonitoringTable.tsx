@@ -20,6 +20,8 @@ interface Props {
   selectedRows: Set<number>;
   toggleRow: (no: number) => void;
   toggleAll: () => void;
+  statuses: string[];
+  onSave: (id: number, status: string) => Promise<void>;
 }
 
 const MonitoringTable: React.FC<Props> = ({
@@ -38,7 +40,7 @@ const MonitoringTable: React.FC<Props> = ({
       case '대기중':
         return { bg: '#CD5542' };
       case '배송중':
-        return { bg: '#000000' };
+        return { bg: '#007bff' };
       case '배송취소':
         return { bg: '#AAAAAA' };
       default:

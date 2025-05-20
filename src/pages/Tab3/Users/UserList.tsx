@@ -37,7 +37,7 @@ const UserList: React.FC = () => {
 
   // 일괄변경 UI 상태
   const [newStatus, setNewStatus] = useState<string>('');
-  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  const [selectedRows] = useState<Set<number>>(new Set());
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -95,20 +95,6 @@ const UserList: React.FC = () => {
       item.joinDate,
     ].some((field) => field.toLowerCase().includes(searchTerm))
   );
-
-  // 행 토글 (필요하시면 UserTable에도 체크박스 추가해주세요)
-  const toggleRow = (no: number) => {
-    const copy = new Set(selectedRows);
-    copy.has(no) ? copy.delete(no) : copy.add(no);
-    setSelectedRows(copy);
-  };
-  const toggleAll = () => {
-    if (selectedRows.size === filteredData.length) {
-      setSelectedRows(new Set());
-    } else {
-      setSelectedRows(new Set(filteredData.map((i) => i.no)));
-    }
-  };
 
   const handleBulkChange = () => {
     if (!newStatus) {

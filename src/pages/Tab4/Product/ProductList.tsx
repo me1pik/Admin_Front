@@ -125,7 +125,7 @@ const ProductList: React.FC = () => {
     try {
       await Promise.all(
         Array.from(selectedRows).map((id) =>
-          updateProduct(id, { status: newStatus })
+          updateProduct(id, { status: newStatus } as any)
         )
       );
       // 로컬 상태 업데이트로 UI 반영
