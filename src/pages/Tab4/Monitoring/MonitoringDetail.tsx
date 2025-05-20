@@ -52,8 +52,8 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [returnAddress, setReturnAddress] = useState('');
   const [deliveryStatus, setDeliveryStatus] = useState<
-    '배송준비중' | '배송중' | '배송완료' | '배송취소' | '반납중' | '반납완료'
-  >('배송준비중');
+    '배송준비' | '배송중' | '배송완료' | '배송취소' | '반납중' | '반납완료'
+  >('배송준비');
   const [isCleaned, setIsCleaned] = useState(false);
   const [isRepaired, setIsRepaired] = useState(false);
 
@@ -268,7 +268,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
                 value={deliveryStatus}
                 onChange={(e) => setDeliveryStatus(e.target.value as any)}
               >
-                <option value='배송준비중'>배송준비중</option>
+                <option value='배송준비'>배송준비</option>
                 <option value='배송중'>배송중</option>
                 <option value='배송완료'>배송완료</option>
                 <option value='배송취소'>배송취소</option>

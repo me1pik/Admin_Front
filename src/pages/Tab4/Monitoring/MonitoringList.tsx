@@ -117,7 +117,7 @@ const MonitoringList: React.FC = () => {
       await Promise.all(
         Array.from(selectedRows).map((id) =>
           updateRentalScheduleStatus(id, {
-            deliveryStatus: newStatus as '배송준비중' | '배송중' | '배송완료',
+            deliveryStatus: newStatus as any,
           })
         )
       );
@@ -146,6 +146,36 @@ const MonitoringList: React.FC = () => {
       alert('일괄 변경 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 단건 저장
+  const handleRowSave = async (id: number, status: string) => {
+    try {
+      await updateRentalScheduleStatus(id, {
+        deliveryStatus: status as any,
+      });
+      alert(`#${id} 건이 "${status}" 로 변경 저장되었습니다.`);
+      // 다시 불러오기
+      const { count, rentals } = await getRentalSchedules(limit, page);
+      setTotalCount(count);
+      setAllData(
+        rentals.map((item: RentalScheduleAdminItem) => ({
+          no: item.id,
+          신청일: item.rentalPeriod.split(' ~ ')[0],
+          주문자: item.userName,
+          대여기간: item.rentalPeriod,
+          브랜드: item.brand,
+          종류: item.category,
+          스타일: item.productNum,
+          색상: item.color,
+          사이즈: item.size,
+          배송상태: item.deliveryStatus,
+        }))
+      );
+    } catch (err) {
+      console.error(err);
+      alert(`#${id} 건 저장 중 오류가 발생했습니다.`);
     }
   };
 
@@ -183,7 +213,6 @@ const MonitoringList: React.FC = () => {
       <InfoBar>
         <TotalCountText>총 {totalCount}건</TotalCountText>
         <FilterGroup>
-          {/* 상태 변경용 셀렉트 */}
           <Select
             value={newStatus}
             onChange={(e) => setNewStatus(e.target.value)}
@@ -210,6 +239,8 @@ const MonitoringList: React.FC = () => {
             selectedRows={selectedRows}
             toggleRow={toggleRow}
             toggleAll={toggleAll}
+            statuses={statuses}
+            onSave={handleRowSave}
           />
         </TableContainer>
       )}

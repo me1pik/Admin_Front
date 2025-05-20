@@ -33,7 +33,7 @@ const MonitoringTable: React.FC<Props> = ({
     switch (status) {
       case '배송완료':
         return { bg: '#4AA361' };
-      case '배송준비중':
+      case '배송준비':
         return { bg: '#000000' };
       case '대기중':
         return { bg: '#CD5542' };

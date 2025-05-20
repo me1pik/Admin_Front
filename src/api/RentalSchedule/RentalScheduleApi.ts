@@ -49,7 +49,7 @@ export interface RentalScheduleAdminDetailResponse {
   deliveryInfo: DeliveryInfo;
   paymentStatus?: '결제대기' | '취소요청' | '취소완료';
   deliveryStatus?:
-    | '배송준비중'
+    | '배송준비'
     | '배송중'
     | '배송완료'
     | '배송취소'
@@ -62,7 +62,7 @@ export interface RentalScheduleAdminDetailResponse {
 export interface UpdateRentalStatusRequest {
   paymentStatus?: '결제대기' | '취소요청' | '취소완료';
   deliveryStatus?:
-    | '배송준비중'
+    | '배송준비'
     | '배송중'
     | '배송완료'
     | '배송취소'
@@ -90,9 +90,7 @@ export const getRentalSchedules = async (
 ): Promise<RentalScheduleAdminListResponse> => {
   const response = await Axios.get<RentalScheduleAdminListResponse>(
     '/rental-schedule',
-    {
-      params: { limit, page },
-    }
+    { params: { limit, page } }
   );
   return response.data;
 };
@@ -112,14 +110,14 @@ export const getRentalScheduleDetail = async (
 
 /**
  * 관리자: 대여 상태 수정
- * PATCH /rental-schedule/status/{id}
+ * PATCH /rental-schedule/{id}/status
  */
 export const updateRentalScheduleStatus = async (
   id: number,
   payload: UpdateRentalStatusRequest
 ): Promise<UpdateRentalStatusResponse> => {
   const response = await Axios.patch<UpdateRentalStatusResponse>(
-    `/rental-schedule/status/${id}`,
+    `/rental-schedule/${id}/status`,
     payload
   );
   return response.data;
