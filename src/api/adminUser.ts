@@ -12,7 +12,7 @@ export interface UserDetail {
   phoneNumber: string;
   gender: string;
   instagramId: string;
-  membershipLevel: string;
+  membership: string;
   personalWebpage: string;
   followersCount: number;
   followingCount: number;
@@ -32,7 +32,7 @@ export interface DeleteUserResponse {
 export interface UserSummary {
   id: number;
   status: string;
-  membershipLevel: string;
+  membership: string;
   name: string;
   nickname: string;
   instagramId: string;
