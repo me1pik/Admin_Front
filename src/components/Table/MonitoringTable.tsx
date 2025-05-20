@@ -104,8 +104,7 @@ const MonitoringTable: React.FC<Props> = ({
                 style={{
                   cursor: 'pointer',
                   color: '#007bff',
-                  textAlign: 'left',
-                  paddingLeft: '10px',
+                  textAlign: 'center',
                 }}
               >
                 {item.주문자}
