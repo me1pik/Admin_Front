@@ -1,113 +1,15 @@
-import React from 'react';
+// src/api/Ticket/TicketApi.ts
+
+import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import TicketTable, { TicketItem } from '../../../components/Table/TicketTable';
 import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
 import Pagination from '../../../components/Pagination';
-
-/** 대여 더미 데이터 (이용권 내역) */
-const dummyTicket: TicketItem[] = [
-  {
-    no: 100,
-    paymentDate: '2025-05-01',
-    nextPaymentDate: '2025-06-01',
-    user: '안소천 (솔린)',
-    type: '정기 구독권 (무제한)',
-    usagePeriod: '2025.05.01 ~ 2025.05.31',
-    usageCount: '∞ / 3',
-    status: '결제완료',
-  },
-  {
-    no: 99,
-    paymentDate: '2025-05-01',
-    nextPaymentDate: '2025-06-01',
-    user: '장주연 (바르체자라디오)',
-    type: '정기 구독권 (4회권)',
-    usagePeriod: '2025.05.01 ~ 2025.05.31',
-    usageCount: '4 / 2',
-    status: '결제완료',
-  },
-  {
-    no: 98,
-    paymentDate: '2025-05-01',
-    nextPaymentDate: '-',
-    user: '노경미 (kkkkkk.mi)',
-    type: '정기 구독권 (무제한)',
-    usagePeriod: '-',
-    usageCount: '-',
-    status: '결제대기',
-  },
-  {
-    no: 97,
-    paymentDate: '2025-05-01',
-    nextPaymentDate: '2025-06-01',
-    user: '김채원 (고양이 발바닥)',
-    type: '정기 구독권 (무제한)',
-    usagePeriod: '2025.05.01 ~ 2025.05.31',
-    usageCount: '∞ / 0',
-    status: '결제완료',
-  },
-  {
-    no: 96,
-    paymentDate: '2025-05-01',
-    nextPaymentDate: '-',
-    user: '안소천 (솔린)',
-    type: '1회 이용권',
-    usagePeriod: '2025.05.01 ~ 2025.05.31',
-    usageCount: '1 / 1',
-    status: '결제완료',
-  },
-  {
-    no: 95,
-    paymentDate: '2025-05-01',
-    nextPaymentDate: '2025-06-01',
-    user: '안소천 (솔린)',
-    type: '정기 구독권 (4회권)',
-    usagePeriod: '2025.05.01 ~ 2025.05.31',
-    usageCount: '∞ / 2',
-    status: '결제완료',
-  },
-  {
-    no: 94,
-    paymentDate: '2025-05-01',
-    nextPaymentDate: '-',
-    user: '안소천 (솔린)',
-    type: '정기 구독권 (4회권)',
-    usagePeriod: '-',
-    usageCount: '-',
-    status: '결제대기',
-  },
-  {
-    no: 93,
-    paymentDate: '2025-05-01',
-    nextPaymentDate: '-',
-    user: '안소천 (솔린)',
-    type: '1회 이용권',
-    usagePeriod: '2025.05.01 ~ 2025.05.31',
-    usageCount: '1 / 0',
-    status: '결제완료',
-  },
-  {
-    no: 92,
-    paymentDate: '2025-05-01',
-    nextPaymentDate: '-',
-    user: '안소천 (솔린)',
-    type: '1회 이용권',
-    usagePeriod: '-',
-    usageCount: '-',
-    status: '취소완료',
-  },
-  {
-    no: 91,
-    paymentDate: '2025-05-01',
-    nextPaymentDate: '2025-06-01',
-    user: '안소천 (솔린)',
-    type: '정기 구독권 (4회권)',
-    usagePeriod: '2025.05.01 ~ 2025.05.31',
-    usageCount: '4 / 1',
-    status: '결제완료',
-  },
-];
+import {
+  getAdminPaginatedTickets,
+  AdminTicketItem,
+} from '../../../api/Ticket/TicketApi';
 
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
@@ -120,39 +22,71 @@ const tabs: TabItem[] = [
 const TicketList: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedTab, setSelectedTab] = React.useState<TabItem>(tabs[0]);
+  const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
 
   const page = parseInt(searchParams.get('page') ?? '1', 10);
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
   const limit = 10;
 
-  // 탭별 필터링
-  const dataByTab = dummyTicket.filter((item) =>
-    selectedTab.path === '' ? true : item.status === selectedTab.path
+  // API로부터 가져온 원본 데이터
+  const [adminTickets, setAdminTickets] = useState<AdminTicketItem[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  // 1) API 호출
+  useEffect(() => {
+    setLoading(true);
+    getAdminPaginatedTickets(page, limit)
+      .then(({ total, tickets }) => {
+        setTotalCount(total);
+        setAdminTickets(tickets);
+      })
+      .catch((err) => {
+        console.error('관리자용 티켓 조회 실패:', err);
+      })
+      .finally(() => setLoading(false));
+  }, [page]);
+
+  // 2) 탭 필터링
+  const dataByTab = adminTickets.filter((t) =>
+    selectedTab.path === '' ? true : t.ticket_status === selectedTab.path
   );
 
-  // 검색어 필터링
-  const filteredData = dataByTab.filter((item) => {
-    const t = searchTerm;
+  // 3) 검색 필터링
+  const filteredData = dataByTab.filter((t) => {
+    const txt = searchTerm;
     return (
-      String(item.no).includes(t) ||
-      item.paymentDate.includes(t) ||
-      item.nextPaymentDate.includes(t) ||
-      item.user.toLowerCase().includes(t) ||
-      item.type.toLowerCase().includes(t) ||
-      item.usagePeriod.toLowerCase().includes(t) ||
-      item.usageCount.toLowerCase().includes(t) ||
-      item.status.toLowerCase().includes(t)
+      String(t.id).includes(txt) ||
+      t.purchaseDate.includes(txt) ||
+      t.nextDate.includes(txt) ||
+      t.user.toLowerCase().includes(txt) ||
+      t.ticket_name.toLowerCase().includes(txt) ||
+      t.이용기간.toLowerCase().includes(txt) ||
+      t.ticket_count.toLowerCase().includes(txt) ||
+      t.ticket_status.toLowerCase().includes(txt)
     );
   });
 
-  const totalCount = filteredData.length;
+  // 4) 페이징 UI용 계산 (실제로는 API에서 페이징해 주지만, 검색/탭 필터링 시 클라이언트에서도)
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
+  // 5) AdminTicketItem → TicketItem 매핑
+  const tableData: TicketItem[] = currentPageData.map((t) => ({
+    no: t.id,
+    paymentDate: t.purchaseDate,
+    nextPaymentDate: t.nextDate || '-',
+    user: t.user,
+    type: t.ticket_name,
+    usagePeriod: t.이용기간 === '-' ? '-' : t.이용기간.replace(/-/g, '.'),
+    usageCount: t.ticket_count,
+    status: t.ticket_status,
+  }));
+
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
+    // 탭 바뀌면 항상 1페이지로
     const params = Object.fromEntries(searchParams.entries());
     params.page = '1';
     setSearchParams(params);
@@ -168,11 +102,13 @@ const TicketList: React.FC = () => {
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
 
       <InfoBar>
-        <TotalCountText>총 {totalCount}건</TotalCountText>
+        <TotalCountText>
+          {loading ? '로딩 중...' : `총 ${totalCount}건`}
+        </TotalCountText>
       </InfoBar>
 
       <TableContainer>
-        <TicketTable filteredData={currentPageData} handleEdit={handleEdit} />
+        <TicketTable filteredData={tableData} handleEdit={handleEdit} />
       </TableContainer>
 
       <FooterRow>
