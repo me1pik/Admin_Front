@@ -47,7 +47,7 @@ export interface RentalScheduleAdminDetailResponse {
   size: string;
   ticketName: string;
   deliveryInfo: DeliveryInfo;
-  paymentStatus?: '결제대기' | '취소요청' | '취소완료';
+  paymentStatus?: '결제완료' | '취소요청' | '취소완료';
   deliveryStatus?:
     | '배송준비'
     | '배송중'
@@ -60,7 +60,7 @@ export interface RentalScheduleAdminDetailResponse {
 }
 
 export interface UpdateRentalStatusRequest {
-  paymentStatus?: '결제대기' | '취소요청' | '취소완료';
+  paymentStatus?: '결제완료' | '취소요청' | '취소완료';
   deliveryStatus?:
     | '배송준비'
     | '배송중'
