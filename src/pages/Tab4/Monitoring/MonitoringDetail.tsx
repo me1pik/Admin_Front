@@ -258,10 +258,8 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
             </Field>
             <Field flex={2}>
               <label>메시지</label>
-              <input
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-              />
+              {/* 메시지도 readOnly로 변경 */}
+              <input value={message} readOnly />
             </Field>
           </Row>
           <Row>
