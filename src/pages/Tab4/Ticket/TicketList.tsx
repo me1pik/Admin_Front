@@ -1,5 +1,3 @@
-// src/api/Ticket/TicketApi.ts
-
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -28,7 +26,6 @@ const TicketList: React.FC = () => {
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
   const limit = 10;
 
-  // API로부터 가져온 원본 데이터
   const [adminTickets, setAdminTickets] = useState<AdminTicketItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -67,10 +64,9 @@ const TicketList: React.FC = () => {
     );
   });
 
-  // 4) 페이징 UI용 계산 (실제로는 API에서 페이징해 주지만, 검색/탭 필터링 시 클라이언트에서도)
+  // 4) 서버 페이징에 맞춰 slice 제거
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
-  const offset = (page - 1) * limit;
-  const currentPageData = filteredData.slice(offset, offset + limit);
+  const currentPageData = filteredData;
 
   // 5) AdminTicketItem → TicketItem 매핑
   const tableData: TicketItem[] = currentPageData.map((t) => ({
@@ -86,7 +82,6 @@ const TicketList: React.FC = () => {
 
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
-    // 탭 바뀌면 항상 1페이지로
     const params = Object.fromEntries(searchParams.entries());
     params.page = '1';
     setSearchParams(params);
@@ -120,7 +115,7 @@ const TicketList: React.FC = () => {
 
 export default TicketList;
 
-/* ====================== Styled Components ====================== */
+/* Styled Components 이하 생략(변경 없음) */
 
 const Content = styled.div`
   display: flex;
