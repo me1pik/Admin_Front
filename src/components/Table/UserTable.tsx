@@ -7,7 +7,7 @@ export interface User {
   no: number;
   email: string;
   status: string; // 상태 (예: 인증, 블럭 등)
-  membership: string; // 등급 (예: 일반, 우수 등)
+  grade: string; // 등급 (예: 일반, 우수 등)
   name: string; // 이름
   nickname: string; // 닉네임
   instagram: string; // 계정(인스타)
@@ -102,7 +102,7 @@ const UserTable: React.FC<UserTableProps> = ({ filteredData, handleEdit }) => {
             </Td>
             <Td>{user.no}</Td>
             <Td>{user.status}</Td>
-            <Td>{user.membership}</Td>
+            <Td>{user.grade}</Td>
             <Td>{user.name}</Td>
             <Td>{user.nickname}</Td>
             {/* 인스타 계정: 아바타 + 텍스트를 가로로 배치, 좌측 정렬 */}

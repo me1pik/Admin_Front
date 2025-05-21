@@ -51,7 +51,7 @@ const UserList: React.FC = () => {
         no: u.id,
         email: u.email,
         status: selectedTab.label === '블럭회원' ? '블럭' : '일반',
-        membership: u.membership,
+        grade: u.membershipLevel,
         name: u.name,
         nickname: u.nickname,
         instagram: u.instagramId,
@@ -91,7 +91,7 @@ const UserList: React.FC = () => {
       item.followingFollower,
       item.serviceArea,
       item.status,
-      item.membership,
+      item.grade,
       item.joinDate,
     ].some((field) => field.toLowerCase().includes(searchTerm))
   );
