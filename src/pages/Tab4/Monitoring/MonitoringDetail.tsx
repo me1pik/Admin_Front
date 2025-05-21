@@ -44,13 +44,18 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   >('결제완료');
 
   // ─── 배송정보 state ───
-  const [sender, setSender] = useState('');
-  const [senderPhone, setSenderPhone] = useState('');
-  const [receiverDetail, setReceiverDetail] = useState('');
-  const [receiverPhone, setReceiverPhone] = useState('');
+  const [recipient, setRecipient] = useState('');
+  const [recipientPhone, setRecipientPhone] = useState('');
+  const [shippingAddress, setShippingAddress] = useState('');
+  const [shippingDetail, setShippingDetail] = useState('');
   const [message, setMessage] = useState('');
-  const [deliveryAddress, setDeliveryAddress] = useState('');
+
+  // ─── 회수정보 state ───
   const [returnAddress, setReturnAddress] = useState('');
+  const [returnDetail, setReturnDetail] = useState('');
+  const [returnPhone, setReturnPhone] = useState('');
+
+  // ─── 기타 state ───
   const [deliveryStatus, setDeliveryStatus] = useState<
     '배송준비' | '배송중' | '배송완료' | '배송취소' | '반납중' | '반납완료'
   >('배송준비');
@@ -72,7 +77,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
         .then((data: RentalScheduleAdminDetailResponse) => {
           setBrand(data.brand);
           setAmount(data.ticketName);
-          setProductName(`${data.brand} ${data.ticketName}`);
+          setProductName(data.productNum);
           setColor(data.color);
           setSize(data.size);
           setPaymentStatus(data.paymentStatus ?? '결제완료');
@@ -81,14 +86,15 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
           const [start] = data.rentalPeriod.split(' ~ ');
           setExpectedDate(new Date(start));
 
-          setSender(data.deliveryInfo.shipping.receiver);
-          setSenderPhone(data.deliveryInfo.shipping.phone);
-          setDeliveryAddress(data.deliveryInfo.shipping.address);
+          setRecipient(data.deliveryInfo.shipping.receiver);
+          setRecipientPhone(data.deliveryInfo.shipping.phone);
+          setShippingAddress(data.deliveryInfo.shipping.address);
+          setShippingDetail(data.deliveryInfo.shipping.detailAddress);
           setMessage(data.deliveryInfo.shipping.message);
 
-          setReceiverDetail(data.deliveryInfo.return.detailAddress);
-          setReceiverPhone(data.deliveryInfo.return.phone);
           setReturnAddress(data.deliveryInfo.return.address);
+          setReturnDetail(data.deliveryInfo.return.detailAddress);
+          setReturnPhone(data.deliveryInfo.return.phone);
 
           setDeliveryStatus(data.deliveryStatus!);
           setIsCleaned(data.isCleaned);
@@ -228,6 +234,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
               <select
                 value={paymentStatus}
                 onChange={(e) => setPaymentStatus(e.target.value as any)}
+                disabled={paymentStatus === '취소완료'}
               >
                 <option value='결제완료'>결제완료</option>
                 <option value='취소요청'>취소요청</option>
@@ -243,11 +250,11 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
           <Row>
             <Field>
               <label>수령인</label>
-              <input value={sender} readOnly />
+              <input value={recipient} readOnly />
             </Field>
             <Field>
               <label>연락처</label>
-              <input value={senderPhone} readOnly />
+              <input value={recipientPhone} readOnly />
             </Field>
             <Field flex={2}>
               <label>메시지</label>
@@ -260,8 +267,14 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
           <Row>
             <Field>
               <label>배송지</label>
-              <input value={deliveryAddress} readOnly />
+              <input value={shippingAddress} readOnly />
             </Field>
+            <Field>
+              <label>배송상세</label>
+              <input value={shippingDetail} readOnly />
+            </Field>
+          </Row>
+          <Row>
             <Field>
               <label>배송상태</label>
               <select
@@ -276,21 +289,19 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
                 <option value='반납완료'>반납완료</option>
               </select>
             </Field>
-          </Row>
-          <Row>
-            <Field>
-              <label>반납인</label>
-              <input value={receiverDetail} readOnly />
-            </Field>
             <Field>
               <label>연락처</label>
-              <input value={receiverPhone} readOnly />
+              <input value={returnPhone} readOnly />
             </Field>
           </Row>
           <Row>
             <Field>
               <label>회수지</label>
               <input value={returnAddress} readOnly />
+            </Field>
+            <Field>
+              <label>회수상세</label>
+              <input value={returnDetail} readOnly />
             </Field>
           </Row>
           <Row>
@@ -391,12 +402,19 @@ const Field = styled.div<FieldProps>`
   &:not(:last-child) {
     border-right: 1px solid #ddd;
   }
+
   label {
     width: 80px;
     text-align: center;
     font-size: 12px;
     font-weight: 700;
     margin-right: 8px;
+  }
+  input[readonly],
+  select:disabled,
+  input:disabled {
+    background: #f5f5f5;
+    color: #666;
   }
   input,
   select {
@@ -418,7 +436,6 @@ const InputGroup = styled.div`
   border-radius: 4px;
 `;
 const MethodPart = styled.div`
-  display: flex;
   text-align: center;
   font-size: 12px;
   padding: 0 8px;
