@@ -40,8 +40,8 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   const [amount, setAmount] = useState('');
   const [expectedDate, setExpectedDate] = useState<Date>(new Date());
   const [paymentStatus, setPaymentStatus] = useState<
-    '결제대기' | '취소요청' | '취소완료'
-  >('결제대기');
+    '결제완료' | '취소요청' | '취소완료'
+  >('결제완료');
 
   // ─── 배송정보 state ───
   const [sender, setSender] = useState('');
@@ -75,7 +75,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
           setProductName(`${data.brand} ${data.ticketName}`);
           setColor(data.color);
           setSize(data.size);
-          setPaymentStatus(data.paymentStatus ?? '결제대기');
+          setPaymentStatus(data.paymentStatus ?? '결제완료');
           setShippingMethod(data.deliveryInfo.shipping.deliveryMethod);
 
           const [start] = data.rentalPeriod.split(' ~ ');
@@ -229,7 +229,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
                 value={paymentStatus}
                 onChange={(e) => setPaymentStatus(e.target.value as any)}
               >
-                <option value='결제대기'>결제대기</option>
+                <option value='결제완료'>결제완료</option>
                 <option value='취소요청'>취소요청</option>
                 <option value='취소완료'>취소완료</option>
               </select>
