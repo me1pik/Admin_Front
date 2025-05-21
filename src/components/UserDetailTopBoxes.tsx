@@ -53,7 +53,7 @@ const UserDetailTopBoxes: React.FC<Props> = ({ email }) => {
             </Row>
             <Row>
               <Value>
-                <BoldValue>{user.membership}</BoldValue> (등급)
+                <BoldValue>{user.membershipLevel}</BoldValue> (등급)
               </Value>
             </Row>
           </Content>
