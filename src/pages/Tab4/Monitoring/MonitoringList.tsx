@@ -204,7 +204,8 @@ const MonitoringList: React.FC = () => {
   });
 
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
-  const handleEdit = (no: number) => navigate(`/monitoringdetail/${no}`);
+  const handleEdit = (no: number) =>
+    navigate(`/monitoringdetail/${no}?page=${page}`);
 
   return (
     <Content>

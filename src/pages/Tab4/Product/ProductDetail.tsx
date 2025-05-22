@@ -199,11 +199,11 @@ const ProductDetail: React.FC = () => {
   return (
     <Container>
       <HeaderRow>
-        <Title>제품관리</Title>
+        <Title>제품상세</Title>
       </HeaderRow>
       <TripleButtonDetailSubHeader
         backLabel='목록이동'
-        onBackClick={() => navigate('/productlist')}
+        onBackClick={() => navigate(`/productlist${window.location.search}`)}
         saveLabel='변경저장'
         onSaveClick={handleSave}
         deleteLabel='삭제'

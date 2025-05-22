@@ -1,7 +1,7 @@
 // src/pages/Tab4/Monitoring/MonitoringDetail.tsx
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import DatePicker, { ReactDatePickerProps } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { FaCalendarAlt } from 'react-icons/fa';
@@ -29,6 +29,8 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 }) => {
   const navigate = useNavigate();
   const { no } = useParams<{ no: string }>();
+  const [searchParams] = useSearchParams();
+  const page = searchParams.get('page') ?? '1';
   const numericNo = isCreate ? undefined : Number(no);
 
   // ─── 주문상세 state ───
@@ -110,7 +112,10 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
     }
   }, [isCreate, numericNo]);
 
-  const handleBack = () => navigate('/monitoringlist');
+  // 뒤로가기는 productlist?page= 값으로 이동
+  const handleBack = () => {
+    navigate(`/productlist?page=${page}`);
+  };
 
   const handleSave = async () => {
     if (!isCreate && numericNo) {
@@ -153,7 +158,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   };
 
   const detailProps: DetailSubHeaderProps = {
-    backLabel: '목록이동',
+    backLabel: '목록으로',
     onBackClick: handleBack,
     editLabel: isCreate ? '등록하기' : '변경저장',
     onEditClick: handleSave,
