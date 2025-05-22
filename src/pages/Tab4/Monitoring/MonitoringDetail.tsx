@@ -114,7 +114,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 
   // 뒤로가기는 productlist?page= 값으로 이동
   const handleBack = () => {
-    navigate(`/productlist?page=${page}`);
+    navigate(`/monitoringlist?page=${page}`);
   };
 
   const handleSave = async () => {
