@@ -120,7 +120,7 @@ const UserList: React.FC = () => {
 
   return (
     <Content>
-      <HeaderTitle>유저 목록</HeaderTitle>
+      <HeaderTitle>유저 관리</HeaderTitle>
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
 
       <InfoBar>

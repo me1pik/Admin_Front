@@ -106,7 +106,7 @@ const AdminList: React.FC = () => {
 
   return (
     <Content>
-      <HeaderTitle>관리자 목록</HeaderTitle>
+      <HeaderTitle>관리자 관리</HeaderTitle>
 
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
 

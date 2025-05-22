@@ -17,7 +17,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
   const { no } = useParams<{ no: string }>();
   const numericNo = isCreate ? undefined : Number(no);
 
-  // ─── 티켓 상세 state ───
+  // ─── 이용권 상세 state ───
   const [paymentDate] = useState('2025-05-01');
   const [userName] = useState('안소천(솔린)');
   const [ticketType] = useState('정기 구독권 (무제한)');
@@ -35,13 +35,15 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
   const handleSave = () => {
     setModalTitle(isCreate ? '등록 완료' : '변경 완료');
     setModalMessage(
-      isCreate ? '새 티켓을 등록하시겠습니까?' : '변경 내용을 저장하시겠습니까?'
+      isCreate
+        ? '새 이용권을 등록하시겠습니까?'
+        : '변경 내용을 저장하시겠습니까?'
     );
     setIsModalOpen(true);
   };
   const handleDelete = () => {
     setModalTitle('삭제 완료');
-    setModalMessage('티켓을 삭제하시겠습니까?');
+    setModalMessage('이용권을 삭제하시겠습니까?');
     setIsModalOpen(true);
   };
   const handleConfirm = () => {
@@ -61,7 +63,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
   return (
     <Container>
       <HeaderRow>
-        <Title>{isCreate ? '티켓 등록' : `티켓 상세 (${numericNo})`}</Title>
+        <Title>{isCreate ? '이용권 등록' : `이용권 상세 (${numericNo})`}</Title>
       </HeaderRow>
 
       <SettingsDetailSubHeader {...detailProps} />

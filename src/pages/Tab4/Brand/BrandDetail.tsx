@@ -83,7 +83,7 @@ const BrandDetail: React.FC<BrandDetailProps> = ({
   return (
     <Container>
       <HeaderRow>
-        <Title>{isCreate ? 'Brand 등록' : `Brand 상세 (${numericNo})`}</Title>
+        <Title>{isCreate ? '브랜드 등록' : `브랜드 상세 (${numericNo})`}</Title>
       </HeaderRow>
 
       <SettingsDetailSubHeader {...detailProps} />

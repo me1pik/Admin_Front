@@ -126,7 +126,7 @@ const AdminDetail: React.FC = () => {
   return (
     <Container>
       <HeaderRow>
-        <Title>제품관리</Title>
+        <Title>관리자 상세</Title>
       </HeaderRow>
 
       <ListButtonDetailSubHeader {...detailSubHeaderProps} />

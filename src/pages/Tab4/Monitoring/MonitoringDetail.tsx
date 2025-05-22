@@ -33,7 +33,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   const page = searchParams.get('page') ?? '1';
   const numericNo = isCreate ? undefined : Number(no);
 
-  // ─── 주문상세 state ───
+  // ─── 대여상세 state ───
   const [productName, setProductName] = useState('');
   const [brand, setBrand] = useState('');
   const [color, setColor] = useState('');
@@ -144,7 +144,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 
   const handleDelete = () => {
     setModalTitle('삭제 완료');
-    setModalMessage('주문을 삭제하시겠습니까?');
+    setModalMessage('대여을 삭제하시겠습니까?');
     setIsModalOpen(true);
   };
 
@@ -171,7 +171,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   return (
     <Container>
       <HeaderRow>
-        <Title>{isCreate ? '주문 등록' : `대여내역 (${numericNo})`}</Title>
+        <Title>{isCreate ? '대여 등록' : `대여 상세 (${numericNo})`}</Title>
       </HeaderRow>
 
       <SettingsDetailSubHeader {...detailProps} />
@@ -185,7 +185,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
       <DividerDashed />
 
       <ShippingTabBar
-        tabs={['주문상세', '배송/회수']}
+        tabs={['대여상세', '배송/회수']}
         activeIndex={activeTab}
         onTabClick={setActiveTab}
       />

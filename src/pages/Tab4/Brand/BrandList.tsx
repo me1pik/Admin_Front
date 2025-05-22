@@ -163,7 +163,7 @@ const BrandList: React.FC = () => {
 
   return (
     <Content>
-      <HeaderTitle>브랜드 관리</HeaderTitle>
+      <HeaderTitle>브랜드 목록</HeaderTitle>
 
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
 

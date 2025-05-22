@@ -24,7 +24,7 @@ const GeneralOrderDetail: React.FC<GeneralOrderDetailProps> = ({
   const { no } = useParams<{ no: string }>();
   const numericNo = isCreate ? undefined : Number(no);
 
-  // ─── 주문상세 state ───
+  // ─── 구매상세 state ───
   const [productName] = useState('울 더블 버튼 페플럼 원피스');
   const [brand] = useState('MICHAA');
   const [color] = useState('Green');
@@ -54,13 +54,13 @@ const GeneralOrderDetail: React.FC<GeneralOrderDetailProps> = ({
   const handleSave = () => {
     setModalTitle(isCreate ? '등록 완료' : '변경 완료');
     setModalMessage(
-      isCreate ? '새 주문을 등록하시겠습니까?' : '변경 내용을 저장하시겠습니까?'
+      isCreate ? '새 구매을 등록하시겠습니까?' : '변경 내용을 저장하시겠습니까?'
     );
     setIsModalOpen(true);
   };
   const handleDelete = () => {
     setModalTitle('삭제 완료');
-    setModalMessage('주문을 삭제하시겠습니까?');
+    setModalMessage('구매을 삭제하시겠습니까?');
     setIsModalOpen(true);
   };
   const handleConfirm = () => {
@@ -88,7 +88,7 @@ const GeneralOrderDetail: React.FC<GeneralOrderDetailProps> = ({
   return (
     <Container>
       <HeaderRow>
-        <Title>{isCreate ? '주문 등록' : `주문 상세 (${numericNo})`}</Title>
+        <Title>{isCreate ? '구매 등록' : `구매 상세 (${numericNo})`}</Title>
       </HeaderRow>
 
       <SettingsDetailSubHeader {...detailProps} />
@@ -102,14 +102,14 @@ const GeneralOrderDetail: React.FC<GeneralOrderDetailProps> = ({
       <DividerDashed />
 
       <ShippingTabBar
-        tabs={['주문상세', '배송정보']}
+        tabs={['구매상세', '배송정보']}
         activeIndex={activeTab}
         onTabClick={setActiveTab}
       />
 
       {activeTab === 0 && (
         <FormBox>
-          {/* 주문상세 폼 내용 */}
+          {/* 구매상세 폼 내용 */}
           <Row>
             <Field>
               <label>제품명</label>
