@@ -147,7 +147,7 @@ const ProductList: React.FC = () => {
 
   return (
     <Content>
-      <HeaderTitle>제품목록</HeaderTitle>
+      <HeaderTitle>제품 관리</HeaderTitle>
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
       <InfoBar>
         <TotalCount>Total: {totalCount}</TotalCount>

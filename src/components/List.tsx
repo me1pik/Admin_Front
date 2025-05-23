@@ -148,13 +148,13 @@ const List: React.FC = () => {
                 </SubMenuItem>
                 <SubMenuDivider />
                 <SubMenuItem onClick={() => navigate('/Ticketlist')}>
-                  이용권내역
+                  이용권 내역
                 </SubMenuItem>
                 <SubMenuItem onClick={() => navigate('/monitoringlist')}>
-                  대여내역
+                  대여 내역
                 </SubMenuItem>
                 <SubMenuItem onClick={() => navigate('/GeneralOrderList')}>
-                  구매내역
+                  구매 내역
                 </SubMenuItem>
                 <SubMenuItem onClick={() => navigate('/marketorderlist')}>
                   멜픽 구매내역
