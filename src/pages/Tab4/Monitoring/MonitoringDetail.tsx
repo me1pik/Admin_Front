@@ -40,10 +40,15 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   const [size, setSize] = useState('');
   const [shippingMethod, setShippingMethod] = useState('');
   const [amount, setAmount] = useState('');
-  const [expectedDate, setExpectedDate] = useState<Date>(new Date());
   const [paymentStatus, setPaymentStatus] = useState<
     '결제완료' | '취소요청' | '취소완료'
   >('결제완료');
+
+  // ─── 대여일자 범위 state ───
+  const [rentalDates, setRentalDates] = useState<[Date | null, Date | null]>([
+    null,
+    null,
+  ]);
 
   // ─── 배송정보 state ───
   const [recipient, setRecipient] = useState('');
@@ -85,8 +90,9 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
           setPaymentStatus(data.paymentStatus ?? '결제완료');
           setShippingMethod(data.deliveryInfo.shipping.deliveryMethod);
 
-          const [start] = data.rentalPeriod.split(' ~ ');
-          setExpectedDate(new Date(start));
+          // rentalPeriod: "YYYY-MM-DD ~ YYYY-MM-DD"
+          const [startStr, endStr] = data.rentalPeriod.split(' ~ ');
+          setRentalDates([new Date(startStr), new Date(endStr)]);
 
           setRecipient(data.deliveryInfo.shipping.receiver);
           setRecipientPhone(data.deliveryInfo.shipping.phone);
@@ -112,7 +118,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
     }
   }, [isCreate, numericNo]);
 
-  // 뒤로가기는 productlist?page= 값으로 이동
+  // 뒤로가기
   const handleBack = () => {
     navigate(`/monitoringlist?page=${page}`);
   };
@@ -131,10 +137,9 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
         setModalTitle('변경 완료');
         setModalMessage('변경 내용을 성공적으로 저장했습니다.');
         setIsModalOpen(true);
-      } catch (err) {
-        console.error('수정 실패', err);
+      } catch {
         setModalTitle('오류');
-        setModalMessage('변경 내용 저장에 실패했습니다. 다시 시도해주세요.');
+        setModalMessage('변경 내용 저장에 실패했습니다.');
         setIsModalOpen(true);
       } finally {
         setLoading(false);
@@ -143,8 +148,8 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   };
 
   const handleDelete = () => {
-    setModalTitle('삭제 완료');
-    setModalMessage('대여을 삭제하시겠습니까?');
+    setModalTitle('삭제');
+    setModalMessage('대여를 정말 삭제하시겠습니까?');
     setIsModalOpen(true);
   };
 
@@ -153,8 +158,10 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
     navigate(-1);
   };
 
-  const handleDateChange: ReactDatePickerProps['onChange'] = (date) => {
-    if (date instanceof Date) setExpectedDate(date);
+  // DatePicker 범위 변경 핸들러
+  const handleDateChange: ReactDatePickerProps['onChange'] = (dates) => {
+    const [start, end] = dates as [Date | null, Date | null];
+    setRentalDates([start, end]);
   };
 
   const detailProps: DetailSubHeaderProps = {
@@ -228,9 +235,12 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
               <DatePickerContainer>
                 <FaCalendarAlt />
                 <StyledDatePicker
-                  selected={expectedDate}
+                  selectsRange
+                  startDate={rentalDates[0]}
+                  endDate={rentalDates[1]}
                   onChange={handleDateChange}
                   dateFormat='yyyy.MM.dd'
+                  placeholderText='YYYY.MM.DD ~ YYYY.MM.DD'
                 />
               </DatePickerContainer>
             </Field>
@@ -263,7 +273,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
             </Field>
             <Field flex={2}>
               <label>메시지</label>
-              {/* 메시지도 readOnly로 변경 */}
               <input value={message} readOnly />
             </Field>
           </Row>
@@ -450,6 +459,7 @@ const DatePickerContainer = styled.div`
   border-radius: 4px;
   padding: 0 12px;
   height: 36px;
+  width: 100%;
   svg {
     margin-right: 8px;
     color: #666;
@@ -458,12 +468,12 @@ const DatePickerContainer = styled.div`
     border: none;
     outline: none;
     font-size: 12px;
-    width: 100px;
+    width: 100%;
   }
 `;
 const StyledDatePicker = styled(DatePicker)`
   border: none;
   outline: none;
   font-size: 12px;
-  width: 100px;
+  width: 100%;
 `;
