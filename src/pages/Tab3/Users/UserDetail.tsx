@@ -505,7 +505,7 @@ const UserDetail: React.FC = () => {
       <GlobalStyle />
       {/* 헤더 */}
       <HeaderRow>
-        <Title>유저 상세</Title>
+        <Title>회원 상세</Title>
       </HeaderRow>
       <ListButtonDetailSubHeader {...detailSubHeaderProps} />
 

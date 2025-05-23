@@ -105,7 +105,7 @@ const ProductEvaluation: React.FC = () => {
 
   return (
     <Content>
-      <HeaderTitle>제품평가</HeaderTitle>
+      <HeaderTitle>회원 평가</HeaderTitle>
 
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
 
