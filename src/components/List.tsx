@@ -317,7 +317,8 @@ const SubMenu = styled.div`
   padding: 10px;
   border-radius: 4px;
   border: 1px solid #444;
-  z-index: 1;
+  z-index: 9999;
+
   animation: ${slideFade} 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
 `;
 
