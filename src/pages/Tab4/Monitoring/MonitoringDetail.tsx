@@ -45,11 +45,9 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   >('결제완료');
 
   // ─── 대여일자 범위 state ───
-  const [rentalDates, setRentalDates] = useState<[Date | null, Date | null]>([
-    null,
-    null,
-  ]);
-
+  const [rentalDates, setRentalDates] = useState<
+    [Date | undefined, Date | undefined]
+  >([undefined, undefined]);
   // ─── 배송정보 state ───
   const [recipient, setRecipient] = useState('');
   const [recipientPhone, setRecipientPhone] = useState('');
@@ -160,8 +158,13 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 
   // DatePicker 범위 변경 핸들러
   const handleDateChange: ReactDatePickerProps['onChange'] = (dates) => {
+    if (!dates || !(dates instanceof Array)) {
+      // 선택 해제됐을 때
+      setRentalDates([undefined, undefined]);
+      return;
+    }
     const [start, end] = dates as [Date | null, Date | null];
-    setRentalDates([start, end]);
+    setRentalDates([start ?? undefined, end ?? undefined]);
   };
 
   const detailProps: DetailSubHeaderProps = {

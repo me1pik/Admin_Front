@@ -14,7 +14,7 @@ declare module 'react-datepicker' {
     endDate?: Date;
     monthsShown?: number;
     dayClassName?: (date: Date) => string;
-    // 필요에 따라 더 추가…
+    placeholderText?: string;
   }
 
   const ReactDatePicker: React.ComponentType<ReactDatePickerProps>;
