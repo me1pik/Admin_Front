@@ -53,6 +53,7 @@ const List: React.FC = () => {
         {/* 두 줄로 된 탑바 */}
         <DoubleTopBar />
         <NavIcons>
+          {/* 대시보드 아이콘 */}
           <NavIcon
             onClick={() => navigate('/dashboard')}
             isActive={activeMenu === 'dashboard'}
@@ -64,7 +65,7 @@ const List: React.FC = () => {
             />
           </NavIcon>
 
-          {/* 관리자 아이콘 : 관리자 목록, 분석정보 목록 */}
+          {/* 관리자 아이콘 */}
           <NavIcon
             onClick={() => handleMenuClick('admin')}
             isActive={activeMenu === 'admin'}
@@ -86,7 +87,7 @@ const List: React.FC = () => {
             )}
           </NavIcon>
 
-          {/* 회원 아이콘 : 회원목록, 인벤토리 목록, 통계목록, 정산목록 */}
+          {/* 회원 아이콘 */}
           <NavIcon
             onClick={() => handleMenuClick('member')}
             isActive={activeMenu === 'member'}
@@ -101,23 +102,33 @@ const List: React.FC = () => {
                 <SubMenuItem onClick={() => navigate('/userlist')}>
                   회원 관리
                 </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/pagelist')}>
-                  페이지 목록
+                <SubMenuItem
+                  disabled
+                  style={{ color: '#aaa', cursor: 'default' }}
+                >
+                  회원등급 관리
                 </SubMenuItem>
                 <SubMenuItem onClick={() => navigate('/product-evaluation')}>
-                  제품평가
+                  회원 평가
+                </SubMenuItem>
+
+                {/* Divider 추가 */}
+                <SubMenuDivider />
+
+                <SubMenuItem onClick={() => navigate('/pagelist')}>
+                  멜픽 페이지
                 </SubMenuItem>
                 <SubMenuItem onClick={() => navigate('/saleslist')}>
-                  판매내역
+                  멜픽 판매내역
                 </SubMenuItem>
                 <SubMenuItem onClick={() => navigate('/calculatelist')}>
-                  정산 목록
+                  멜픽 정산내역
                 </SubMenuItem>
               </SubMenu>
             )}
           </NavIcon>
 
-          {/* 결제 아이콘 : 제품 목록, 브랜드목록, 마켓 주문내역, 일반 주문내역 */}
+          {/* 결제 아이콘 */}
           <NavIcon
             onClick={() => handleMenuClick('payment')}
             isActive={activeMenu === 'payment'}
@@ -130,28 +141,29 @@ const List: React.FC = () => {
             {activeMenu === 'payment' && (
               <SubMenu>
                 <SubMenuItem onClick={() => navigate('/productlist')}>
-                  제품 목록
+                  제품 관리
                 </SubMenuItem>
                 <SubMenuItem onClick={() => navigate('/brandlist')}>
-                  브랜드목록
+                  브랜드 관리
                 </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/marketorderlist')}>
-                  멜픽내역
-                </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/GeneralOrderList')}>
-                  구매내역
+                <SubMenuDivider />
+                <SubMenuItem onClick={() => navigate('/Ticketlist')}>
+                  이용권내역
                 </SubMenuItem>
                 <SubMenuItem onClick={() => navigate('/monitoringlist')}>
                   대여내역
                 </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/Ticketlist')}>
-                  이용권내역
+                <SubMenuItem onClick={() => navigate('/GeneralOrderList')}>
+                  구매내역
+                </SubMenuItem>
+                <SubMenuItem onClick={() => navigate('/marketorderlist')}>
+                  멜픽 구매내역
                 </SubMenuItem>
               </SubMenu>
             )}
           </NavIcon>
 
-          {/* 설정 아이콘 : 공지사항, 이용약관, 개인정보보호, FAQ */}
+          {/* 설정 아이콘 */}
           <NavIcon
             onClick={() => handleMenuClick('settings')}
             isActive={activeMenu === 'settings'}
@@ -193,7 +205,6 @@ const List: React.FC = () => {
     </Container>
   );
 };
-
 export default List;
 
 /* ====================== Styled Components ====================== */
@@ -318,24 +329,29 @@ const SubMenu = styled.div`
   border-radius: 4px;
   border: 1px solid #444;
   z-index: 9999;
-
   animation: ${slideFade} 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
 `;
 
-const SubMenuItem = styled.div`
+// 멜픽 페이지 위에 들어갈 구분선
+const SubMenuDivider = styled.div`
+  width: 100%;
+  height: 1px;
+  background: #666;
+  margin: 6px 0;
+`;
+
+const SubMenuItem = styled.div<{ disabled?: boolean }>`
   font-weight: 700;
   font-size: 12px;
   line-height: 13px;
   text-align: center;
-
-  color: #ffffff;
+  color: ${({ disabled }) => (disabled ? '#aaa' : '#fff')};
   padding: 8px 12px;
-  cursor: pointer;
-  text-align: center;
+  cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
   border-radius: 4px;
 
   &:hover {
-    background-color: #f6ac36;
+    background-color: ${({ disabled }) => (disabled ? 'none' : '#f6ac36')};
   }
 `;
 
