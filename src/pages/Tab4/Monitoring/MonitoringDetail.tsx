@@ -459,7 +459,7 @@ const DatePickerContainer = styled.div`
   border-radius: 4px;
   padding: 0 12px;
   height: 36px;
-  width: 100%;
+  width: 200px;
   svg {
     margin-right: 8px;
     color: #666;
