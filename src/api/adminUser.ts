@@ -12,11 +12,15 @@ export interface UserDetail {
   phoneNumber: string;
   gender: string;
   instagramId: string;
-  membershipLevel: string;
   personalWebpage: string;
   followersCount: number;
   followingCount: number;
   name: string;
+  // membership을 string이 아니라 객체로
+  membership: {
+    id: number;
+    name: string;
+  };
 }
 
 /**
@@ -32,7 +36,6 @@ export interface DeleteUserResponse {
 export interface UserSummary {
   id: number;
   status: string;
-  membershipLevel: string;
   name: string;
   nickname: string;
   instagramId: string;
@@ -40,6 +43,7 @@ export interface UserSummary {
   followingCount: number;
   address: string;
   signupDate: string;
+  membership: string;
 }
 
 /**
