@@ -1,4 +1,3 @@
-// src/api/adminUser.ts
 import { Axios } from './Axios';
 
 /**
@@ -16,7 +15,6 @@ export interface UserDetail {
   followersCount: number;
   followingCount: number;
   name: string;
-  // membership을 string이 아니라 객체로
   membership: {
     id: number;
     name: string;
@@ -94,6 +92,43 @@ export interface GetUserClosetResponse {
 }
 
 /**
+ * 유저 멤버십 변경 요청 인터페이스 (PATCH /admin/user/{id}/membership)
+ */
+export interface MembershipChangeRequest {
+  membershipId: number;
+}
+
+/**
+ * 유저 멤버십 변경 응답 인터페이스
+ */
+export interface MembershipChangeResponse {
+  message: string;
+  user: {
+    id: number;
+    email: string;
+    membership: {
+      id: number;
+      name: string;
+      discount_rate: number;
+    };
+  };
+}
+
+/**
+ * 전체 멤버십 조회 시 개별 멤버십 정보 인터페이스 (GET /admin/user/membership/all)
+ */
+export interface Membership {
+  id: number;
+  name: string;
+  discount_rate: number;
+}
+
+/**
+ * 전체 멤버십 조회 응답 인터페이스
+ */
+export type GetAllMembershipsResponse = Membership[];
+
+/**
  * 이메일을 이용하여 사용자 정보를 조회합니다.
  * GET /admin/user/{email}
  */
@@ -155,3 +190,29 @@ export const getUserClosetByEmail = async (
   );
   return response.data;
 };
+
+/**
+ * 특정 유저의 멤버십을 변경합니다. (관리자용)
+ * PATCH /admin/user/{id}/membership
+ */
+export const changeUserMembership = async (
+  id: number,
+  membershipId: number
+): Promise<MembershipChangeResponse> => {
+  const requestBody: MembershipChangeRequest = { membershipId };
+  const response = await Axios.patch(
+    `/admin/user/${id}/membership`,
+    requestBody
+  );
+  return response.data;
+};
+
+/**
+ * 모든 멤버십을 조회합니다. (관리자용)
+ * GET /admin/user/membership/all
+ */
+export const getAllMemberships =
+  async (): Promise<GetAllMembershipsResponse> => {
+    const response = await Axios.get(`/admin/user/membership/all`);
+    return response.data;
+  };

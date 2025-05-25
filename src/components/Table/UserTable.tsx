@@ -1,56 +1,49 @@
-// src/components/Table/UserTable.tsx
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 /** User 인터페이스 */
 export interface User {
   no: number;
   email: string;
-  status: string; // 상태 (예: 인증, 블럭 등)
-  grade: string; // 등급 (예: 일반, 우수 등)
-  name: string; // 이름
-  nickname: string; // 닉네임
-  instagram: string; // 계정(인스타)
-  followingFollower: string; // 팔로잉/팔로우 정보
-  serviceArea: string; // 서비스 지역
-  joinDate: string; // 가입일자
+  status: string;
+  grade: string;
+  name: string;
+  nickname: string;
+  instagram: string;
+  followingFollower: string;
+  serviceArea: string;
+  joinDate: string;
 }
 
-/** UserTable 컴포넌트 Props */
 interface UserTableProps {
   filteredData: User[];
-  handleEdit: (no: number) => void; // 이제 유저 번호(no)를 인자로 받음
+  handleEdit: (no: number) => void;
+  selectedRows: Set<number>;
+  setSelectedRows: React.Dispatch<React.SetStateAction<Set<number>>>;
 }
 
-const UserTable: React.FC<UserTableProps> = ({ filteredData, handleEdit }) => {
-  // 선택된 행의 no 값을 저장하는 상태 (체크박스 선택)
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-
-  // 모든 행이 선택되었는지 여부
+const UserTable: React.FC<UserTableProps> = ({
+  filteredData,
+  handleEdit,
+  selectedRows,
+  setSelectedRows,
+}) => {
   const allSelected =
-    filteredData.length > 0 && selectedIds.size === filteredData.length;
+    filteredData.length > 0 && selectedRows.size === filteredData.length;
 
-  // 헤더 전체 선택 체크박스 변경 핸들러
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
-      // 모든 행 선택
-      const all = new Set(filteredData.map((user) => user.no));
-      setSelectedIds(all);
+      setSelectedRows(new Set(filteredData.map((user) => user.no)));
     } else {
-      // 전체 해제
-      setSelectedIds(new Set());
+      setSelectedRows(new Set());
     }
   };
 
-  // 개별 행 선택 체크박스 변경 핸들러
   const handleRowSelect = (no: number) => {
-    setSelectedIds((prev) => {
+    setSelectedRows((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(no)) {
-        newSet.delete(no);
-      } else {
-        newSet.add(no);
-      }
+      if (newSet.has(no)) newSet.delete(no);
+      else newSet.add(no);
       return newSet;
     });
   };
@@ -58,16 +51,16 @@ const UserTable: React.FC<UserTableProps> = ({ filteredData, handleEdit }) => {
   return (
     <Table>
       <colgroup>
-        <col style={{ width: '40px' }} /> {/* 체크박스 */}
-        <col style={{ width: '50px' }} /> {/* No. */}
-        <col style={{ width: '50px' }} /> {/* 상태 */}
-        <col style={{ width: '50px' }} /> {/* 등급 */}
-        <col style={{ width: '80px' }} /> {/* 이름 */}
-        <col style={{ width: '80px' }} /> {/* 닉네임 */}
-        <col style={{ width: '150px' }} /> {/* 계정(인스타) */}
-        <col style={{ width: '100px' }} /> {/* 팔로잉/팔로우 */}
-        <col style={{ width: '100px' }} /> {/* 서비스 지역 */}
-        <col style={{ width: '100px' }} /> {/* 가입일자 */}
+        <col style={{ width: '40px' }} />
+        <col style={{ width: '50px' }} />
+        <col style={{ width: '50px' }} />
+        <col style={{ width: '50px' }} />
+        <col style={{ width: '80px' }} />
+        <col style={{ width: '80px' }} />
+        <col style={{ width: '150px' }} />
+        <col style={{ width: '100px' }} />
+        <col style={{ width: '100px' }} />
+        <col style={{ width: '100px' }} />
       </colgroup>
       <thead>
         <TableRow>
@@ -91,12 +84,12 @@ const UserTable: React.FC<UserTableProps> = ({ filteredData, handleEdit }) => {
         </TableRow>
       </thead>
       <tbody>
-        {filteredData.map((user, index) => (
-          <TableRow key={index}>
+        {filteredData.map((user) => (
+          <TableRow key={user.no}>
             <Td>
               <input
                 type='checkbox'
-                checked={selectedIds.has(user.no)}
+                checked={selectedRows.has(user.no)}
                 onChange={() => handleRowSelect(user.no)}
               />
             </Td>
@@ -105,11 +98,9 @@ const UserTable: React.FC<UserTableProps> = ({ filteredData, handleEdit }) => {
             <Td>{user.grade}</Td>
             <Td>{user.name}</Td>
             <Td>{user.nickname}</Td>
-            {/* 인스타 계정: 아바타 + 텍스트를 가로로 배치, 좌측 정렬 */}
             <TdLeft>
               <InstaContainer>
                 <Avatar />
-                {/* 클릭 시 handleEdit에 user.no 전달 */}
                 <InstaText onClick={() => handleEdit(user.no)}>
                   {user.email}
                 </InstaText>
@@ -120,19 +111,11 @@ const UserTable: React.FC<UserTableProps> = ({ filteredData, handleEdit }) => {
             <Td>{user.joinDate}</Td>
           </TableRow>
         ))}
+
         {filteredData.length < 10 &&
           Array.from({ length: 10 - filteredData.length }).map((_, i) => (
             <TableRow key={`empty-${i}`}>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <TdLeft>&nbsp;</TdLeft>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
+              {Array(10).fill(<Td>&nbsp;</Td>)}
             </TableRow>
           ))}
       </tbody>
@@ -142,77 +125,62 @@ const UserTable: React.FC<UserTableProps> = ({ filteredData, handleEdit }) => {
 
 export default UserTable;
 
-/* ====================== Styled Components ====================== */
-
+/* Styled Components */
 const Table = styled.table`
   width: 100%;
   table-layout: fixed;
   border-collapse: collapse;
-
   background-color: #ffffff;
   border: 1px solid #dddddd;
 `;
-
 const TableRow = styled.tr`
   height: 44px;
 `;
-
 const Th = styled.th`
   text-align: center;
   vertical-align: middle;
   background-color: #eeeeee;
-
   font-weight: 800;
   font-size: 12px;
   color: #000000;
   border: 1px solid #dddddd;
   white-space: nowrap;
 `;
-
 const Td = styled.td`
   text-align: center;
   vertical-align: middle;
-
   font-weight: 400;
   font-size: 12px;
   color: #000000;
   border: 1px solid #dddddd;
   white-space: nowrap;
 `;
-
 const TdLeft = styled(Td)`
   text-align: left;
 `;
-
 const InstaContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
   margin-left: 10px;
-
   & > span {
     flex: 1;
     min-width: 0;
   }
 `;
-
 const Avatar = styled.div`
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  flex-shrink: 0;
   background-color: #cccccc;
 `;
-
 const InstaText = styled.span`
   cursor: pointer;
   color: #007bff;
-
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-
   &:hover {
     color: #0056b3;
   }

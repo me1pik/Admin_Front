@@ -4,7 +4,13 @@ import styled from 'styled-components';
 import UserTable, { User } from '../../../components/Table/UserTable';
 import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
 import Pagination from '../../../components/Pagination';
-import { getAllUsers, getBlockedUsers } from '../../../api/adminUser';
+import {
+  getAllUsers,
+  getBlockedUsers,
+  changeUserMembership,
+  getAllMemberships,
+  GetAllMembershipsResponse,
+} from '../../../api/adminUser';
 
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
@@ -12,17 +18,10 @@ const tabs: TabItem[] = [
   { label: '블럭회원', path: '블럭' },
 ];
 
-// 일괄 변경용 상태 옵션
-const statuses = [
-  { label: '일반회원으로 변경', value: 'unblock' },
-  { label: '블럭회원으로 변경', value: 'block' },
-];
-
 const UserList: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get('search')?.toLowerCase() ?? '';
-
   const page = parseInt(searchParams.get('page') ?? '1', 10);
   const limit = 10;
 
@@ -31,9 +30,20 @@ const UserList: React.FC = () => {
   const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
 
+  // --- 멤버십 목록을 API에서 가져와서 상태에 저장 ---
+  const [memberships, setMemberships] = useState<GetAllMembershipsResponse>([]);
+  useEffect(() => {
+    getAllMemberships()
+      .then((data) => setMemberships(data))
+      .catch((err) => console.error('멤버십 목록 조회 실패:', err));
+  }, []);
+
+  // 일괄 변경용
+  const [newMembershipId, setNewMembershipId] = useState<number | ''>('');
+  const [isBulkLoading, setIsBulkLoading] = useState(false);
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
-  const [newStatus, setNewStatus] = useState<string>('');
-  const [selectedRows] = useState<Set<number>>(new Set());
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -46,14 +56,12 @@ const UserList: React.FC = () => {
       const users: User[] = res.users.map((u: any) => ({
         no: u.id,
         email: u.email,
-        // 상태 컬럼에 API의 status 값을 직접 표시
         status:
           u.status === 'active'
             ? '일반회원'
             : u.status === 'blocked'
               ? '블럭회원'
               : u.status,
-        // 등급 컬럼에 membership.name 연결
         grade: u.membership?.name || '',
         name: u.name,
         nickname: u.nickname,
@@ -65,6 +73,7 @@ const UserList: React.FC = () => {
 
       setUserData(users);
       setTotalCount(res.total);
+      setSelectedRows(new Set());
     } catch (err) {
       console.error('사용자 목록을 불러오는데 실패했습니다:', err);
     } finally {
@@ -100,18 +109,40 @@ const UserList: React.FC = () => {
   );
 
   const handleBulkChange = () => {
-    if (!newStatus) {
-      alert('변경할 상태를 선택해주세요.');
+    if (newMembershipId === '') {
+      alert('변경할 멤버십을 선택해주세요.');
       return;
     }
     if (selectedRows.size === 0) {
       alert('변경할 사용자를 선택해주세요.');
       return;
     }
-    alert(
-      `선택된 ${selectedRows.size}명 상태를 "${statuses.find((s) => s.value === newStatus)?.label}"로 변경합니다.`
-    );
-    // TODO: API 호출 후 fetchUsers()
+
+    const target = memberships.find((m) => m.id === newMembershipId);
+    if (!target) return;
+
+    if (
+      !window.confirm(
+        `선택된 ${selectedRows.size}명 멤버십을 "${target.name}"로 변경하시겠습니까?`
+      )
+    )
+      return;
+
+    setIsBulkLoading(true);
+    Promise.all(
+      Array.from(selectedRows).map((userId) =>
+        changeUserMembership(userId, newMembershipId)
+      )
+    )
+      .then(() => {
+        alert('멤버십이 성공적으로 변경되었습니다.');
+        fetchUsers();
+      })
+      .catch((err) => {
+        console.error('멤버십 일괄 변경 실패:', err);
+        alert('일부 또는 전체 변경에 실패했습니다.');
+      })
+      .finally(() => setIsBulkLoading(false));
   };
 
   const handleEdit = (no: number) => {
@@ -130,17 +161,28 @@ const UserList: React.FC = () => {
         <TotalCountText>Total: {filteredData.length}</TotalCountText>
         <FilterGroup>
           <Select
-            value={newStatus}
-            onChange={(e) => setNewStatus(e.target.value)}
+            value={newMembershipId}
+            onChange={(e) =>
+              setNewMembershipId(
+                e.target.value === '' ? '' : Number(e.target.value)
+              )
+            }
           >
-            <option value=''>변경할 상태 선택</option>
-            {statuses.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
+            <option value=''>변경할 멤버십 선택</option>
+            {memberships.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
               </option>
             ))}
           </Select>
-          <BulkButton onClick={handleBulkChange}>일괄변경</BulkButton>
+          <BulkButton
+            onClick={handleBulkChange}
+            disabled={
+              newMembershipId === '' || selectedRows.size === 0 || isBulkLoading
+            }
+          >
+            {isBulkLoading ? '변경중...' : '일괄변경'}
+          </BulkButton>
         </FilterGroup>
       </InfoBar>
 
@@ -148,7 +190,12 @@ const UserList: React.FC = () => {
         {loading ? (
           <LoadingText>로딩중...</LoadingText>
         ) : (
-          <UserTable filteredData={filteredData} handleEdit={handleEdit} />
+          <UserTable
+            filteredData={filteredData}
+            handleEdit={handleEdit}
+            selectedRows={selectedRows}
+            setSelectedRows={setSelectedRows}
+          />
         )}
       </TableContainer>
 
@@ -161,7 +208,7 @@ const UserList: React.FC = () => {
 
 export default UserList;
 
-/* Styled Components */
+/* Styled Components (생략 없이 그대로 유지) */
 const Content = styled.div`
   display: flex;
   flex-direction: column;
@@ -170,7 +217,6 @@ const Content = styled.div`
   font-size: 14px;
   padding: 10px;
 `;
-
 const HeaderTitle = styled.h1`
   text-align: left;
   font-weight: 700;
@@ -179,32 +225,27 @@ const HeaderTitle = styled.h1`
   color: #000000;
   margin-bottom: 18px;
 `;
-
 const InfoBar = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 15px;
 `;
-
 const TotalCountText = styled.div`
   font-weight: 900;
   font-size: 12px;
   color: #000000;
 `;
-
 const FilterGroup = styled.div`
   display: flex;
   gap: 8px;
 `;
-
 const Select = styled.select`
   height: 32px;
   padding: 0 8px;
   font-size: 12px;
   border: 1px solid #ccc;
 `;
-
 const BulkButton = styled.button`
   height: 32px;
   padding: 0 12px;
@@ -213,18 +254,15 @@ const BulkButton = styled.button`
   border: none;
   cursor: pointer;
 `;
-
 const TableContainer = styled.div`
   box-sizing: border-box;
 `;
-
 const LoadingText = styled.div`
   font-size: 14px;
   color: #555;
   text-align: center;
   padding: 20px;
 `;
-
 const FooterRow = styled.div`
   display: flex;
   justify-content: space-between;
