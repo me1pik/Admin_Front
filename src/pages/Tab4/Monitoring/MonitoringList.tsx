@@ -52,9 +52,10 @@ const MonitoringList: React.FC = () => {
       setError('');
       try {
         const { count, rentals } = await getRentalSchedules(limit, page);
+        // createAt을 신청일로 사용
         const mapped = rentals.map((item: RentalScheduleAdminItem) => ({
           no: item.id,
-          신청일: item.rentalPeriod.split(' ~ ')[0],
+          신청일: item.createAt,
           주문자: item.userName,
           대여기간: item.rentalPeriod,
           브랜드: item.brand,
@@ -123,11 +124,11 @@ const MonitoringList: React.FC = () => {
       );
       alert('배송상태가 일괄 변경되었습니다.');
 
-      // 데이터 재로딩
+      // 데이터 재로딩 (createAt 반영)
       const { count, rentals } = await getRentalSchedules(limit, page);
       const remapped = rentals.map((item: RentalScheduleAdminItem) => ({
         no: item.id,
-        신청일: item.rentalPeriod.split(' ~ ')[0],
+        신청일: item.createAt,
         주문자: item.userName,
         대여기간: item.rentalPeriod,
         브랜드: item.brand,
@@ -156,13 +157,14 @@ const MonitoringList: React.FC = () => {
         deliveryStatus: status as any,
       });
       alert(`#${id} 건이 "${status}" 로 변경 저장되었습니다.`);
-      // 다시 불러오기
+
+      // 다시 불러오기 (createAt 반영)
       const { count, rentals } = await getRentalSchedules(limit, page);
       setTotalCount(count);
       setAllData(
         rentals.map((item: RentalScheduleAdminItem) => ({
           no: item.id,
-          신청일: item.rentalPeriod.split(' ~ ')[0],
+          신청일: item.createAt,
           주문자: item.userName,
           대여기간: item.rentalPeriod,
           브랜드: item.brand,

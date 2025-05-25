@@ -13,6 +13,7 @@ export interface RentalScheduleAdminItem {
   size: string;
   ticketName: string;
   deliveryStatus: string;
+  createAt: string;
 }
 
 export interface RentalScheduleAdminListResponse {
