@@ -1,4 +1,3 @@
-// src/pages/Tab3/Users/UserList.tsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -32,10 +31,7 @@ const UserList: React.FC = () => {
   const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
 
-  // totalCount 선언 이후에 totalPages 계산
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
-
-  // 일괄변경 UI 상태
   const [newStatus, setNewStatus] = useState<string>('');
   const [selectedRows] = useState<Set<number>>(new Set());
 
@@ -50,11 +46,18 @@ const UserList: React.FC = () => {
       const users: User[] = res.users.map((u: any) => ({
         no: u.id,
         email: u.email,
-        status: selectedTab.label === '블럭회원' ? '블럭' : '일반',
-        grade: u.membershipLevel,
+        // 상태 컬럼에 API의 status 값을 직접 표시
+        status:
+          u.status === 'active'
+            ? '일반회원'
+            : u.status === 'blocked'
+              ? '블럭회원'
+              : u.status,
+        // 등급 컬럼에 membership.name 연결
+        grade: u.membership?.name || '',
         name: u.name,
         nickname: u.nickname,
-        instagram: u.instagramId,
+        instagram: u.instagramId || '',
         followingFollower: `${u.followersCount} / ${u.followingCount}`,
         serviceArea: u.address,
         joinDate: new Date(u.signupDate).toLocaleDateString('ko-KR'),
@@ -145,14 +148,7 @@ const UserList: React.FC = () => {
         {loading ? (
           <LoadingText>로딩중...</LoadingText>
         ) : (
-          <UserTable
-            filteredData={filteredData}
-            handleEdit={handleEdit}
-            /* 체크박스 지원 시 아래 3개 prop을 활성화하세요 */
-            // selectedRows={selectedRows}
-            // toggleRow={toggleRow}
-            // toggleAll={toggleAll}
-          />
+          <UserTable filteredData={filteredData} handleEdit={handleEdit} />
         )}
       </TableContainer>
 
@@ -164,8 +160,6 @@ const UserList: React.FC = () => {
 };
 
 export default UserList;
-
-/* Styled Components 생략 */
 
 /* Styled Components */
 const Content = styled.div`
