@@ -1,50 +1,27 @@
 // src/components/Header.tsx
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import ReusableModal2 from './TwoButtonModal';
+import Cookies from 'js-cookie';
 
 const Header: React.FC = () => {
-  const [isModalOpen, setModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  // 로그아웃 버튼 클릭 시 모달 열기
-  const handleLogoutClick = () => {
-    setModalOpen(true);
-  };
-
-  // 모달 닫기 (아니요 버튼 클릭 시)
-  const handleModalClose = () => {
-    setModalOpen(false);
-  };
-
-  // 모달의 "네" 버튼 클릭 시 로그아웃 처리 후 /login 페이지로 이동
-  const handleConfirmLogout = () => {
-    // 로그아웃 로직 추가 (예: API 호출, 상태 초기화 등)
-    alert('로그아웃 되었습니다.');
-    setModalOpen(false);
+  // 로그아웃 처리: 토큰 삭제 후 이동
+  const handleLogout = () => {
+    Cookies.remove('accessToken');
+    Cookies.remove('refreshToken');
     navigate('/login');
   };
 
   return (
-    <>
-      <HeaderContainer>
-        <GreetingContainer>
-          <UnderlinedName>홍길동</UnderlinedName>
-          <GreetingText> 님! 안녕하세요.</GreetingText>
-        </GreetingContainer>
-        <LogoutButton onClick={handleLogoutClick}>로그아웃</LogoutButton>
-      </HeaderContainer>
-
-      <ReusableModal2
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        onConfirm={handleConfirmLogout}
-        title='로그아웃 확인'
-      >
-        정말 로그아웃 하시겠습니까?
-      </ReusableModal2>
-    </>
+    <HeaderContainer>
+      <GreetingContainer>
+        <UnderlinedName>홍길동</UnderlinedName>
+        <GreetingText> 님! 안녕하세요.</GreetingText>
+      </GreetingContainer>
+      <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
+    </HeaderContainer>
   );
 };
 
@@ -59,7 +36,6 @@ const HeaderContainer = styled.div`
   height: 80px; /* 헤더 높이 */
   margin-right: 60px;
   width: 100vw;
-
   background-color: #ffffff;
 `;
 
@@ -88,7 +64,6 @@ const LogoutButton = styled.button`
   height: 34px;
   background: #ffffff;
   border: 1px solid #dddddd;
-
   font-weight: 800;
   font-size: 14px;
   color: #000000;

@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import styled, { keyframes } from 'styled-components';
 import InputField from '../components/InputField';
-import ReusableModal from '../components/OneButtonModal';
 import { schemaLogin } from '../hooks/ValidationYup';
 import { adminLogin } from '../api/adminAuth';
 import Cookies from 'js-cookie';
@@ -16,9 +15,6 @@ type LoginFormInputs = {
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState('알림');
-  const [modalMessage, setModalMessage] = useState('');
 
   const {
     control,
@@ -32,31 +28,18 @@ const Login: React.FC = () => {
 
   const onSubmit = async (data: LoginFormInputs) => {
     try {
-      // API 호출: 관리자 로그인
       const response = await adminLogin({
         id: data.email,
         password: data.password,
       });
-      // 액세스, 리프레시 토큰 쿠키 저장
+
       Cookies.set('accessToken', response.accessToken, { secure: true });
       Cookies.set('refreshToken', response.refreshToken, { secure: true });
-      setModalTitle('로그인 성공');
-      setModalMessage('로그인에 성공했습니다.');
-      setIsModalOpen(true);
-      // 1초 후 adminlist로 자동 이동
-      setTimeout(() => {
-        setIsModalOpen(false);
-        navigate('/adminlist');
-      }, 1000);
-    } catch (error) {
-      setModalTitle('로그인 실패');
-      setModalMessage('아이디와 비밀번호를 확인해주세요.');
-      setIsModalOpen(true);
-    }
-  };
 
-  const handleModalClose = () => {
-    setIsModalOpen(false);
+      navigate('/adminlist');
+    } catch (error) {
+      // 로그인 실패 시 아무 작업하지 않음
+    }
   };
 
   return (
@@ -99,15 +82,6 @@ const Login: React.FC = () => {
           </ButtonRow>
         </Form>
       </LoginContainer>
-      <ReusableModal
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        title={modalTitle}
-        width='300px'
-        height='200px'
-      >
-        {modalMessage}
-      </ReusableModal>
     </Container>
   );
 };
@@ -153,11 +127,9 @@ const Header = styled.div`
 
 const Title = styled.h2`
   margin: 0;
-
   font-weight: 700;
   font-size: 30px;
   line-height: 40px;
-
   color: #000000;
 `;
 
