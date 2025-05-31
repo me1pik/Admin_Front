@@ -3,6 +3,8 @@ import React, { useState, ChangeEvent, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import { ProductDetailResponse } from '../../api/adminProduct';
 import { sizeGuideConfig } from '../../config/sizeGuideConfig';
+// BulletIcon을 불러옵니다. (Webpack/CRA 기준)
+import BulletIcon from '../../assets/BulletIcon.svg';
 
 interface SizeDisplaySectionProps {
   product?: ProductDetailResponse;
@@ -61,10 +63,10 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
   return (
     <SectionBox>
       <SectionHeader>
-        <Bullet />
+        {/* BulletIcon으로 대체 */}
+        <BulletIconImage src={BulletIcon} alt='bullet icon' />
         <SectionTitleInput value={labelsState.title} readOnly />
       </SectionHeader>
-      <VerticalLine />
 
       <SizeGuideContainer>
         <GuideWrapper>
@@ -78,6 +80,7 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
               onChange={(e) => handleFieldChange('specTitle', e)}
             />
 
+            {/* --- SpaceColumn과 SpecItemRow를 사용해 각 입력창을 배치 --- */}
             <SpaceColumn>
               {keys.map((key) => (
                 <SpecItemRow key={key}>
@@ -116,54 +119,22 @@ const SectionHeader = styled.div`
   margin-bottom: 10px;
 `;
 
-const Bullet = styled.div`
-  position: absolute;
-  left: -27px;
-  top: 0;
+// Bullet을 SVG 아이콘으로 교체하기 위한 styled.img
+const BulletIconImage = styled.img`
   width: 14px;
   height: 14px;
-  border: 1px solid #dddddd;
-  border-radius: 50%;
-  background: #fff;
-  &::after {
-    content: '';
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    width: 6px;
-    height: 6px;
-    background: #f6ae24;
-    border-radius: 50%;
-  }
+  margin-right: 10px; /* 제목과 간격 맞추기 */
 `;
 
 const SectionTitleInput = styled.input`
   font-weight: 800;
   font-size: 14px;
   line-height: 15px;
-  margin-left: 10px;
   border: none;
   background: transparent;
+
   &:read-only {
     color: #000;
-  }
-`;
-
-const VerticalLine = styled.div`
-  position: absolute;
-  left: 0;
-  top: 14px;
-  bottom: 200px;
-  width: 1px;
-  background: #dddddd;
-  &::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 20px;
-    height: 1px;
-    background: #dddddd;
   }
 `;
 
@@ -185,8 +156,8 @@ const ImageContainer = styled.div`
 `;
 
 const SizeProductImage = styled.img`
-  width: 146px;
-  height: 232px;
+  width: 230px;
+  height: auto;
   object-fit: contain;
   margin: 10px;
 `;
@@ -196,22 +167,15 @@ const SizeInfoContainer = styled.div`
   flex-direction: column;
   background: #ffffff;
   border-radius: 4px;
-  padding: 20px 0;
+  padding: 20px;
 `;
 
-const SpecTitleInput = styled.input`
-  font-size: 12px;
-  font-weight: 800;
-  margin-bottom: 20px;
-  text-align: center;
-  border: none;
-  background: transparent;
-`;
-
+/* 원래 생략되었던 SpaceColumn과 SpecItemRow */
 const SpaceColumn = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
+  margin-bottom: 20px; /* SpecTitle과 Note 사이 여유 */
 `;
 
 const SpecItemRow = styled.div`
@@ -219,19 +183,30 @@ const SpecItemRow = styled.div`
   align-items: baseline;
 `;
 
-const SpecLabelInput = styled.input`
-  font-size: 12px;
-  font-weight: 700;
+const SpecTitleInput = styled.input`
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 10px;
   text-align: left;
   border: none;
   background: transparent;
 `;
 
+const SpecLabelInput = styled.input`
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+
+  &:focus {
+    outline: 2px solid #f6ae24;
+  }
+`;
+
 const NoteInput = styled.input`
   font-size: 12px;
   color: #aaa;
-  margin-top: 29px;
   text-align: center;
   border: none;
   background: transparent;
+  width: 100%;
 `;
