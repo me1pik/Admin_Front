@@ -52,19 +52,29 @@ const MonitoringList: React.FC = () => {
       setError('');
       try {
         const { count, rentals } = await getRentalSchedules(limit, page);
-        // createAt을 신청일로 사용
-        const mapped = rentals.map((item: RentalScheduleAdminItem) => ({
-          no: item.id,
-          신청일: item.createAt,
-          주문자: item.userName,
-          대여기간: item.rentalPeriod,
-          브랜드: item.brand,
-          종류: item.category,
-          스타일: item.productNum,
-          색상: item.color,
-          사이즈: item.size,
-          배송상태: item.deliveryStatus,
-        }));
+
+        // createAt에서 날짜 부분(YYYY-MM-DD)만 추출
+        const mapped = rentals.map((item: RentalScheduleAdminItem) => {
+          const rawCreated = item.createAt;
+          const dateCreated =
+            typeof rawCreated === 'string'
+              ? rawCreated.split(' ')[0]
+              : String(rawCreated).split(' ')[0];
+
+          return {
+            no: item.id,
+            신청일: dateCreated,
+            주문자: item.userName,
+            대여기간: item.rentalPeriod,
+            브랜드: item.brand,
+            종류: item.category,
+            스타일: item.productNum,
+            색상: item.color,
+            사이즈: item.size,
+            배송상태: item.deliveryStatus,
+          };
+        });
+
         setAllData(mapped);
         setTotalCount(count);
       } catch (err) {
@@ -126,18 +136,26 @@ const MonitoringList: React.FC = () => {
 
       // 데이터 재로딩 (createAt 반영)
       const { count, rentals } = await getRentalSchedules(limit, page);
-      const remapped = rentals.map((item: RentalScheduleAdminItem) => ({
-        no: item.id,
-        신청일: item.createAt,
-        주문자: item.userName,
-        대여기간: item.rentalPeriod,
-        브랜드: item.brand,
-        종류: item.category,
-        스타일: item.productNum,
-        색상: item.color,
-        사이즈: item.size,
-        배송상태: item.deliveryStatus,
-      }));
+      const remapped = rentals.map((item: RentalScheduleAdminItem) => {
+        const rawCreated = item.createAt;
+        const dateCreated =
+          typeof rawCreated === 'string'
+            ? rawCreated.split(' ')[0]
+            : String(rawCreated).split(' ')[0];
+
+        return {
+          no: item.id,
+          신청일: dateCreated,
+          주문자: item.userName,
+          대여기간: item.rentalPeriod,
+          브랜드: item.brand,
+          종류: item.category,
+          스타일: item.productNum,
+          색상: item.color,
+          사이즈: item.size,
+          배송상태: item.deliveryStatus,
+        };
+      });
       setAllData(remapped);
       setTotalCount(count);
       setSelectedRows(new Set());
@@ -160,11 +178,16 @@ const MonitoringList: React.FC = () => {
 
       // 다시 불러오기 (createAt 반영)
       const { count, rentals } = await getRentalSchedules(limit, page);
-      setTotalCount(count);
-      setAllData(
-        rentals.map((item: RentalScheduleAdminItem) => ({
+      const remapped = rentals.map((item: RentalScheduleAdminItem) => {
+        const rawCreated = item.createAt;
+        const dateCreated =
+          typeof rawCreated === 'string'
+            ? rawCreated.split(' ')[0]
+            : String(rawCreated).split(' ')[0];
+
+        return {
           no: item.id,
-          신청일: item.createAt,
+          신청일: dateCreated,
           주문자: item.userName,
           대여기간: item.rentalPeriod,
           브랜드: item.brand,
@@ -173,8 +196,10 @@ const MonitoringList: React.FC = () => {
           색상: item.color,
           사이즈: item.size,
           배송상태: item.deliveryStatus,
-        }))
-      );
+        };
+      });
+      setTotalCount(count);
+      setAllData(remapped);
     } catch (err) {
       console.error(err);
       alert(`#${id} 건 저장 중 오류가 발생했습니다.`);
