@@ -3,6 +3,8 @@ import React, { ChangeEvent, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { SizeRow } from '../../api/adminProduct';
 import { sizeGuideConfig } from '../../config/sizeGuideConfig';
+// SVG 아이콘을 import (Webpack 또는 CRA 기준)
+import BulletIcon from '../../assets/BulletIcon.svg';
 
 interface Column {
   key: string;
@@ -24,17 +26,19 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   onSizesChange,
   onLabelChange,
 }) => {
+  //
   // 1) config에서 초기 라벨 맵 가져오기
+  //
   const initialLabels = useMemo(
     () => sizeGuideConfig[category]?.labels ?? {},
     [category]
   );
 
-  // 2) 로컬 상태로 라벨 관리
+  // 2) 로컬 상태로 라벨 관리 (읽기 전용)
   const [labelMap, setLabelMap] =
     useState<Record<string, string>>(initialLabels);
 
-  // category 변경 시 라벨 초기화
+  // 카테고리가 바뀔 때마다 라벨 초기화
   useEffect(() => {
     setLabelMap(initialLabels);
   }, [initialLabels]);
@@ -44,20 +48,39 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     onLabelChange?.(labelMap);
   }, [labelMap, onLabelChange]);
 
-  // 3) 컬럼 정의 (size는 고정, 나머지는 labelMap 기반)
+  //
+  // 3) 컬럼 정의 (첫 번째는 빈 헤더, 나머지는 labelMap 기반)
+  //
   const columns: Column[] = useMemo(() => {
     return [
-      { key: 'size', label: '사이즈' },
+      { key: 'size', label: '' },
       ...Object.entries(labelMap).map(([k, v]) => ({ key: k, label: v })),
     ];
   }, [labelMap]);
 
-  // 4) 로우 데이터 변환
+  //
+  // 4) “44 → 55 → 66 → 77 → Free” 순서로 정렬된 rows 상태 생성
+  //
   const [rows, setRows] = useState<RowData[]>([]);
   useEffect(() => {
-    const newRows = sizes.map((item) => {
+    // 우선순위에 따른 사이즈 순서
+    const sizeOrder = ['44', '55', '66', '77', 'Free'];
+
+    // sizes 배열을 복사한 뒤, sizeOrder에 따라 정렬
+    const sortedSizes: SizeRow[] = [...sizes].sort((a, b) => {
+      const ia = sizeOrder.indexOf(a.size);
+      const ib = sizeOrder.indexOf(b.size);
+      // 만약 둘 중 하나가 순서 배열에 없다면, 뒤로 보내도록 Infinity 처리
+      const rankA = ia === -1 ? Infinity : ia;
+      const rankB = ib === -1 ? Infinity : ib;
+      return rankA - rankB;
+    });
+
+    // 정렬된 순서대로 rows 객체 생성
+    const newRows = sortedSizes.map((item) => {
       const row: RowData = { size: item.size };
       Object.keys(labelMap).forEach((k) => {
+        // measurement 키는 "A 어깨넓이" 등으로 시작한다고 가정
         const mKey = Object.keys(item.measurements).find((mk) =>
           mk.startsWith(k + ' ')
         );
@@ -67,13 +90,17 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
       });
       return row;
     });
+
     setRows(newRows);
   }, [sizes, labelMap]);
 
+  //
   // 5) 셀 변경 핸들러
+  //
   const handleCellChange = (ri: number, key: string, value: string) => {
     const updated = rows.map((r, i) => (i === ri ? { ...r, [key]: value } : r));
     setRows(updated);
+
     onSizesChange?.(
       updated.map((r) => ({
         size: r.size,
@@ -88,47 +115,60 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     );
   };
 
-  // 6) 헤더 라벨 직접 수정 핸들러
-  const handleLabelInput = (key: string, e: ChangeEvent<HTMLInputElement>) => {
-    const next = { ...labelMap, [key]: e.target.value };
-    setLabelMap(next);
+  //
+  // 6) 사이즈를 “44(S)”, “55(M)” 등으로 포맷팅
+  //
+  const formatSizeLabel = (size: string) => {
+    switch (size) {
+      case '44':
+        return '44(S)';
+      case '55':
+        return '55(M)';
+      case '66':
+        return '66(L)';
+      case '77':
+        return '77(XL)';
+      case 'Free':
+      case 'free':
+      case 'FREE':
+        return 'Free(F)';
+      default:
+        return size;
+    }
   };
 
   return (
     <SectionBox>
+      {/* ──────────────────────────────────────────────────────── */}
       <Header>
-        <Bullet />
+        {/* BulletIcon으로 대체 */}
+        <BulletIconImage src={BulletIcon} alt='Bullet Icon' />
         <Title>사이즈 가이드</Title>
       </Header>
-      <Line />
-      <TableWrapper>
+
+      <TableContainer>
         <Table>
           <thead>
             <tr>
               {columns.map((col) => (
                 <Th key={col.key}>
-                  {col.key === 'size' ? (
-                    <LabelStatic>{col.label}</LabelStatic>
-                  ) : (
-                    <LabelInput
-                      value={col.label}
-                      onChange={(e) => handleLabelInput(col.key, e)}
-                    />
-                  )}
+                  <HeaderStatic>{col.label}</HeaderStatic>
                 </Th>
               ))}
             </tr>
           </thead>
+
           <tbody>
             {rows.map((row, ri) => (
               <Tr key={ri} even={ri % 2 === 1}>
                 {columns.map((col) => (
                   <Td key={`${ri}-${col.key}`}>
                     {col.key === 'size' ? (
-                      <CellStatic>{row.size}</CellStatic>
+                      <CellSize>{formatSizeLabel(row.size)}</CellSize>
                     ) : (
                       <CellInput
                         value={row[col.key] || ''}
+                        placeholder='-'
                         onChange={(e) =>
                           handleCellChange(ri, col.key, e.target.value)
                         }
@@ -140,114 +180,96 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
             ))}
           </tbody>
         </Table>
-      </TableWrapper>
+      </TableContainer>
     </SectionBox>
   );
 };
 
 export default SizeGuideSection;
 
-/* ---- styled-components ---- */
+/* ===== Styled Components ===== */
 const SectionBox = styled.div`
   position: relative;
-  padding-left: 20px;
   padding-bottom: 20px;
   margin-bottom: 30px;
 `;
+
 const Header = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 8px;
 `;
-const Bullet = styled.div`
-  position: absolute;
-  left: -7px;
-  top: 0;
+
+// 기존 Bullet 대신 img 태그 스타일링
+const BulletIconImage = styled.img`
   width: 14px;
   height: 14px;
-  border: 1px solid #ddd;
-  border-radius: 50%;
-  background: #fff;
-  &::after {
-    content: '';
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    width: 6px;
-    height: 6px;
-    background: #f6ae24;
-    border-radius: 50%;
-  }
+  margin-right: 8px;
 `;
+
 const Title = styled.div`
   font-weight: 800;
   font-size: 14px;
-  margin-left: 10px;
 `;
-const Line = styled.div`
-  position: absolute;
-  left: 0;
-  top: 14px;
-  bottom: 0;
-  width: 1px;
-  background: #ddd;
-`;
-const TableWrapper = styled.div`
+
+const TableContainer = styled.div`
+  margin-top: 10px;
   overflow-x: auto;
 `;
+
 const Table = styled.table`
-  width: auto;
+  width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
+  border: 1px solid #ddd;
 
   th,
   td {
-    border: 1px solid #ddd;
     text-align: center;
-    padding: 4px 6px;
+    padding: 6px 8px;
     font-size: 12px;
     white-space: nowrap;
   }
 `;
+
 const Th = styled.th`
-  background: #f5f5f5;
+  background: #f9f9f9;
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 2;
   font-weight: 700;
 `;
-const LabelInput = styled.input`
-  width: 100px;
-  border: none;
+
+const HeaderStatic = styled.div`
   text-align: center;
-  font-weight: 900;
+  font-weight: 700;
   font-size: 12px;
-  background: transparent;
-  &:focus {
-    outline: 2px solid #f6ae24;
-  }
+  color: #333;
 `;
-const LabelStatic = styled.div`
-  width: 100px;
-  text-align: center;
-  font-weight: 900;
-  font-size: 12px;
-`;
+
 const Tr = styled.tr<{ even: boolean }>`
   background: ${({ even }) => (even ? '#fafafa' : 'transparent')};
 `;
+
 const Td = styled.td``;
-const CellStatic = styled.div`
+
+const CellSize = styled.div`
   font-size: 12px;
-  line-height: 24px;
+  font-weight: 500;
+  color: #000;
 `;
+
 const CellInput = styled.input`
-  width: 40px;
-  height: 24px;
+  width: 60px;
+  height: 28px;
   border: 1px solid #ddd;
   font-size: 12px;
   text-align: center;
+
   &:focus {
     outline: 2px solid #f6ae24;
+  }
+
+  &::placeholder {
+    color: #bbb;
   }
 `;
