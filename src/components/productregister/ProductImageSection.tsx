@@ -1,8 +1,8 @@
 // src/components/productregister/ProductImageSection.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FaTimes, FaLink } from 'react-icons/fa';
-import { ProductDetailResponse } from '../../api/adminProduct';
+
 import BulletIcon from '../../assets/BulletIcon.svg'; // SVG 아이콘 import
 
 interface ProductImageSectionProps {
@@ -20,6 +20,8 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
   handleImageReorder,
   productUrl,
 }) => {
+  const [isCopied, setIsCopied] = useState(false);
+
   const onAddUrl = (idx: number) => {
     const url = window.prompt(
       '이미지 URL을 입력해주세요\n예: https://…jpg#addimg'
@@ -58,6 +60,19 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
     e.preventDefault();
     const from = Number(e.dataTransfer.getData('text/plain'));
     if (!isNaN(from) && from !== idx) handleImageReorder(from, idx);
+  };
+
+  const handleCopyClick = () => {
+    if (!productUrl) return;
+    navigator.clipboard
+      .writeText(productUrl)
+      .then(() => {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000); // 2초 후 버튼 색상 원복
+      })
+      .catch((err) => {
+        console.error('복사 실패:', err);
+      });
   };
 
   return (
@@ -108,12 +123,26 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
           <Label>Add URL</Label>
         </Column>
       </Grid>
+
       <UrlContainer>
-        <UrlLabel>제품 URL</UrlLabel>
+        <HeaderLeft>
+          <BulletIconImage src={BulletIcon} alt='bullet icon' />
+          <Title>제품(원본) URL 정보</Title>
+        </HeaderLeft>
+
         {productUrl ? (
-          <UrlLink href={productUrl} target='_blank' rel='noopener noreferrer'>
-            {productUrl}
-          </UrlLink>
+          <UrlLinkWrapper>
+            <StyledLink
+              href={productUrl}
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              {productUrl}
+            </StyledLink>
+            <CopyButton onClick={handleCopyClick} isCopied={isCopied}>
+              {isCopied ? '복사됨' : '복사'}
+            </CopyButton>
+          </UrlLinkWrapper>
         ) : (
           <UrlText>등록된 URL이 없습니다.</UrlText>
         )}
@@ -125,9 +154,10 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
 export default ProductImageSection;
 
 /* styled-components */
+
 const SectionBox = styled.div`
   position: relative;
-  margin-bottom: 20px;
+  margin-bottom: 240px;
 `;
 
 const Header = styled.div`
@@ -262,15 +292,9 @@ const Label = styled.div`
 `;
 
 const UrlContainer = styled.div`
-  margin-top: 20px;
+  margin-top: 40px;
   display: flex;
   flex-direction: column;
-`;
-
-const UrlLabel = styled.label`
-  font-size: 12px;
-  font-weight: 700;
-  margin-bottom: 8px;
 `;
 
 const UrlText = styled.div`
@@ -279,12 +303,65 @@ const UrlText = styled.div`
   color: #000;
 `;
 
-const UrlLink = styled.a`
-  font-size: 14px;
-  color: #1e88e5;
-  text-decoration: underline;
-  word-break: break-all;
+/**
+ * UrlLinkWrapper: URL 박스 전체를 감싸는 flex 컨테이너
+ * - 높이 30px
+ * - border: 1px solid #ddd
+ * - 내부에 URL 텍스트와 복사 버튼을 나란히 배치
+ */
+const UrlLinkWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 30px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  overflow: hidden;
+  padding: 10px;
+  margin-top: 20px;
+`;
+
+/**
+ * StyledLink: URL 텍스트 부분
+ * - flex: 1 (버튼을 제외한 나머지 영역 차지)
+ * - 폰트 크기 12px, 컬러 #000
+ * - 텍스트가 길면 ellipsis 처리
+ * - 좌우 패딩을 넣어 가독성 확보 (10px씩)
+ */
+const StyledLink = styled.a`
+  flex: 1;
+  font-size: 12px;
+  color: #000;
+  text-decoration: none;
+  padding: 0 10px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
   &:hover {
     color: #1565c0;
   }
+`;
+
+/**
+ * CopyButton: 복사 버튼
+ * - 너비 70px, 높이 30px
+ * - 배경색: 버튼 상태(isCopied)에 따라 변경
+ *   isCopied = true -> 회색(#555)
+ *   isCopied = false -> 검정(#000)
+ * - 글자 색: 흰색
+ * - border-radius: 0
+ * - cursor: pointer
+ */
+const CopyButton = styled.button<{ isCopied: boolean }>`
+  width: 70px;
+  height: 30px;
+  background: ${({ isCopied }) => (isCopied ? '#555' : '#000')};
+  color: #fff;
+  border: none;
+  border-radius: 0;
+  font-size: 12px;
+  cursor: pointer;
+  flex-shrink: 0; /* 버튼 크기 고정 */
 `;
