@@ -1,5 +1,5 @@
 // src/components/productregister/SizeGuideSection.tsx
-import React, { ChangeEvent, useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { SizeRow } from '../../api/adminProduct';
 import { sizeGuideConfig } from '../../config/sizeGuideConfig';
