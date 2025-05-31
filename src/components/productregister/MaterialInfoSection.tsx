@@ -1,6 +1,9 @@
+// src/components/productregister/MaterialInfoSection.tsx
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { ProductDetailResponse } from '../../api/adminProduct';
+// BulletIcon을 불러옵니다. (Webpack/CRA 기준)
+import BulletIcon from '../../assets/BulletIcon.svg';
 
 interface MaterialInfoSectionProps {
   product: ProductDetailResponse;
@@ -49,16 +52,18 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
   return (
     <SectionBox>
       <SectionHeader>
-        <Bullet />
+        {/* BulletIconImage가 일반 inline 요소가 되어 flex 내에서 타이틀과 나란히 정렬됩니다. */}
+        <BulletIconImage src={BulletIcon} alt='bullet icon' />
         <SectionTitle>제품 소재정보</SectionTitle>
       </SectionHeader>
-      <VerticalLine />
-      <Column>
+
+      {/* Title 아래부터 테두리를 적용할 TableContainer */}
+      <TableContainer>
         {/* 두께감 그룹 */}
         <CheckGroupRow>
           <Label>두께감</Label>
           <SizeCheckGroup>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='thickness'
@@ -69,7 +74,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
               />
               매우 두꺼움
             </SizeCheckboxLabel>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='thickness'
@@ -80,7 +85,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
               />
               두꺼움
             </SizeCheckboxLabel>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='thickness'
@@ -91,7 +96,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
               />
               적당
             </SizeCheckboxLabel>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='thickness'
@@ -109,7 +114,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
         <CheckGroupRow>
           <Label>신축성</Label>
           <SizeCheckGroup>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='elasticity'
@@ -120,7 +125,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
               />
               좋음
             </SizeCheckboxLabel>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='elasticity'
@@ -131,7 +136,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
               />
               약간있음
             </SizeCheckboxLabel>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='elasticity'
@@ -142,7 +147,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
               />
               없음
             </SizeCheckboxLabel>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='elasticity'
@@ -160,7 +165,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
         <CheckGroupRow>
           <Label>안감</Label>
           <SizeCheckGroup>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='lining'
@@ -171,7 +176,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
               />
               전체안감
             </SizeCheckboxLabel>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='lining'
@@ -182,7 +187,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
               />
               부분안감
             </SizeCheckboxLabel>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='lining'
@@ -193,7 +198,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
               />
               기모안감
             </SizeCheckboxLabel>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='lining'
@@ -211,7 +216,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
         <CheckGroupRow>
           <Label>촉감</Label>
           <SizeCheckGroup>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='fit'
@@ -222,7 +227,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
               />
               뻣뻣함
             </SizeCheckboxLabel>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='fit'
@@ -233,7 +238,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
               />
               까슬함
             </SizeCheckboxLabel>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='fit'
@@ -244,7 +249,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
               />
               적당
             </SizeCheckboxLabel>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='fit'
@@ -262,7 +267,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
         <CheckGroupRow>
           <Label>비침</Label>
           <SizeCheckGroup>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='transparency'
@@ -273,7 +278,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
               />
               비침있음
             </SizeCheckboxLabel>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='transparency'
@@ -284,7 +289,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
               />
               약간있음
             </SizeCheckboxLabel>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='transparency'
@@ -295,7 +300,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
               />
               적당
             </SizeCheckboxLabel>
-            <SizeCheckboxLabel style={{ minWidth: '100px' }}>
+            <SizeCheckboxLabel>
               <SizeCheckbox
                 type='checkbox'
                 name='transparency'
@@ -308,7 +313,7 @@ const MaterialInfoSection: React.FC<MaterialInfoSectionProps> = ({
             </SizeCheckboxLabel>
           </SizeCheckGroup>
         </CheckGroupRow>
-      </Column>
+      </TableContainer>
     </SectionBox>
   );
 };
@@ -319,112 +324,128 @@ export default MaterialInfoSection;
 const SectionBox = styled.div`
   position: relative;
   margin-bottom: 20px;
-  padding-left: 20px;
+  max-width: 600px;
 `;
 
 const SectionHeader = styled.div`
   display: flex;
   align-items: center;
-  position: relative;
   margin-bottom: 10px;
 `;
 
-const Bullet = styled.div`
-  position: absolute;
-  left: -27px;
-  top: 0;
+// Bullet을 SVG 아이콘으로 교체하기 위한 styled.img (절대위치 제거)
+const BulletIconImage = styled.img`
   width: 14px;
   height: 14px;
-  border: 1px solid #dddddd;
-  border-radius: 50%;
-  background: #fff;
-  &::after {
-    content: '';
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    width: 6px;
-    height: 6px;
-    background: #f6ae24;
-    border-radius: 50%;
-  }
+  margin-right: 8px; /* 타이틀과의 간격 */
 `;
 
 const SectionTitle = styled.div`
   font-weight: 800;
   font-size: 14px;
   line-height: 15px;
-  margin-left: 10px;
 `;
 
-const VerticalLine = styled.div`
-  position: absolute;
-  left: 0;
-  top: 14px;
-  bottom: 20px;
-  width: 1px;
-  background: #dddddd;
-`;
-
-const Column = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-`;
-
-const CheckGroupRow = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-`;
-
-const Label = styled.label`
+/**
+ * TableContainer: 제목 아래부터 테두리를 감싸는 컨테이너
+ * - 기존 border는 그대로 유지하며,
+ * - ::before를 활용해 라벨 칸 오른쪽에 연속된 세로 경계선을 추가합니다.
+ */
+const TableContainer = styled.div`
   position: relative;
-  min-width: 40px;
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+  overflow: hidden;
 
-  font-weight: 900;
-  font-size: 12px;
-  line-height: 13px;
-  margin-right: 10px;
-  padding-left: 10px;
+  /* 라벨 칸 너비(80px)에 맞춰 세로 경계선을 테이블 전체 높이에 걸쳐 그림 */
   &::before {
     content: '';
     position: absolute;
-    left: -20px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 1px;
+    top: 0;
+    bottom: 0;
+    left: 80px; /* Label width (box-sizing: border-box 기준) */
+    width: 1px;
     background: #dddddd;
   }
 `;
 
-const SizeCheckGroup = styled.div`
+/**
+ * CheckGroupRow: 각 행(row)마다 아래쪽에 구분선(border-bottom)을 적용
+ * 마지막 행에는 구분선이 없도록 &:last-child 처리
+ * align-items: stretch를 사용해서 Label이 부모 높이를 채우도록 유지
+ */
+const CheckGroupRow = styled.div`
   display: flex;
-  gap: 10px;
-  align-items: center;
+  align-items: stretch;
+  padding: 10px 0;
+  border-bottom: 1px solid #dddddd;
+
+  &:last-child {
+    border-bottom: none;
+  }
 `;
 
+/**
+ * Label: 왼쪽 컬럼(라벨) 영역
+ * - 기존 border-right를 제거했습니다.
+ * - 높이를 부모에 맞춰 채우기 위해 align-self: stretch; 유지
+ */
+const Label = styled.label`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  width: 80px; /* box-sizing: border-box 기준, padding 포함됨 */
+  font-weight: 900;
+  font-size: 12px;
+  line-height: 13px;
+  padding: 0 10px;
+  text-align: center;
+  /* border-right 삭제 */
+  box-sizing: border-box;
+`;
+
+/**
+ * SizeCheckGroup: 오른쪽 컬럼(체크박스 그룹) 영역
+ * - 왼쪽 Label 만큼의 너비를 제외한 나머지 영역을 채우도록 flex:1
+ * - 체크박스들을 가로로 정렬하고, 간격(gap) 지정
+ * - 좌우 패딩을 줘서 테두리에 붙지 않도록 함
+ */
+const SizeCheckGroup = styled.div`
+  flex: 1;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  padding: 0 10px;
+`;
+
+/**
+ * SizeCheckboxLabel: 각 개별 체크박스 + 텍스트 묶음
+ */
 const SizeCheckboxLabel = styled.label`
   display: flex;
   align-items: center;
   cursor: pointer;
-
   font-weight: 700;
   font-size: 12px;
   line-height: 13px;
+  width: 100px;
   color: #000;
 `;
 
+/**
+ * SizeCheckbox: 커스텀 체크박스 스타일
+ * - 기본 테두리, 체크 시 주황색 체크 표시(::after 사용)
+ */
 const SizeCheckbox = styled.input.attrs({ type: 'checkbox' })`
   appearance: none;
   border: 1px solid #ddd;
-  margin-bottom: 5px;
   width: 20px;
   height: 20px;
   margin-right: 5px;
   cursor: pointer;
   position: relative;
+
   &:checked::after {
     content: '';
     position: absolute;
@@ -436,6 +457,7 @@ const SizeCheckbox = styled.input.attrs({ type: 'checkbox' })`
     border-bottom: 3px solid orange;
     transform: rotate(-45deg);
   }
+
   &:focus {
     outline: none;
   }
