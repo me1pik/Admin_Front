@@ -10,7 +10,6 @@ import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../../../components/Header/SettingsDetailSubHeader';
 import OrderDetailTopBoxes from '../../../components/OrderDetailTopBoxes';
-import ShippingTabBar from '../../../components/TabBar';
 import ReusableModal2 from '../../../components/OneButtonModal';
 
 interface MarketOrderDetailProps {
@@ -45,7 +44,6 @@ const MarketOrderDetail: React.FC<MarketOrderDetailProps> = ({
   const [deliveryStatus, setDeliveryStatus] = useState('배송 준비중');
 
   // ─── 공통 state ───
-  const [activeTab, setActiveTab] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
   const [modalMessage, setModalMessage] = useState('');
@@ -55,14 +53,14 @@ const MarketOrderDetail: React.FC<MarketOrderDetailProps> = ({
     setModalTitle(isCreate ? '등록 완료' : '변경 완료');
     setModalMessage(
       isCreate
-        ? '새 멜픽구매을 등록하시겠습니까?'
+        ? '새 멜픽구매를 등록하시겠습니까?'
         : '변경 내용을 저장하시겠습니까?'
     );
     setIsModalOpen(true);
   };
   const handleDelete = () => {
     setModalTitle('삭제 완료');
-    setModalMessage('멜픽구매을 삭제하시겠습니까?');
+    setModalMessage('멜픽구매를 삭제하시겠습니까?');
     setIsModalOpen(true);
   };
   const handleConfirm = () => {
@@ -75,7 +73,6 @@ const MarketOrderDetail: React.FC<MarketOrderDetailProps> = ({
     if (date instanceof Date) {
       setExpectedDate(date);
     }
-    // range 선택 시 array 처리도 가능
   };
 
   const detailProps: DetailSubHeaderProps = {
@@ -105,120 +102,112 @@ const MarketOrderDetail: React.FC<MarketOrderDetailProps> = ({
       <OrderDetailTopBoxes />
       <DividerDashed />
 
-      <ShippingTabBar
-        tabs={['멜픽구매 상세', '배송정보']}
-        activeIndex={activeTab}
-        onTabClick={setActiveTab}
-      />
+      {/* ─── 멜픽구매상세 섹션 ─────────────────────────────────────────────────── */}
+      <SessionHeader>멜픽구매 상세</SessionHeader>
+      <FormBox>
+        <Row>
+          <Field>
+            <label>제품명</label>
+            <input value={productName} readOnly />
+          </Field>
+          <Field>
+            <label>브랜드</label>
+            <input value={brand} readOnly />
+          </Field>
+          <Field>
+            <label>색상</label>
+            <input value={color} readOnly />
+          </Field>
+        </Row>
 
-      {activeTab === 0 && (
-        <FormBox>
-          {/* 멜픽구매상세 폼 내용 */}
-          <Row>
-            <Field>
-              <label>제품명</label>
-              <input value={productName} readOnly />
-            </Field>
-            <Field>
-              <label>브랜드</label>
-              <input value={brand} readOnly />
-            </Field>
-            <Field>
-              <label>색상</label>
-              <input value={color} readOnly />
-            </Field>
-          </Row>
+        <Row>
+          <Field>
+            <label>사이즈</label>
+            <input value={size} readOnly />
+          </Field>
+          <Field>
+            <label>배송방법</label>
+            <InputGroup>
+              <MethodPart>{shippingMethod}</MethodPart>
+              <Divider />
+              <TrackingPart>{tracking}</TrackingPart>
+            </InputGroup>
+          </Field>
+          <Field>
+            <label>금액</label>
+            <input value={amount} readOnly />
+          </Field>
+        </Row>
 
-          <Row>
-            <Field>
-              <label>사이즈</label>
-              <input value={size} readOnly />
-            </Field>
-            <Field>
-              <label>배송방법</label>
-              <InputGroup>
-                <MethodPart>{shippingMethod}</MethodPart>
-                <Divider />
-                <TrackingPart>{tracking}</TrackingPart>
-              </InputGroup>
-            </Field>
-            <Field>
-              <label>금액</label>
-              <input value={amount} readOnly />
-            </Field>
-          </Row>
-
-          <Row>
-            <Field>
-              <label>발송예정</label>
-              <DatePickerContainer>
-                <FaCalendarAlt />
-                <StyledDatePicker
-                  selected={expectedDate}
-                  onChange={handleDateChange}
-                  dateFormat='yyyy.MM.dd'
-                />
-              </DatePickerContainer>
-              <Hint>(제품 신청일로부터 3일 이내)</Hint>
-            </Field>
-            <Field>
-              <label>결제상태</label>
-              <select
-                value={paymentStatus}
-                onChange={(e) => setPaymentStatus(e.target.value)}
-              >
-                <option>결제완료</option>
-                <option>결제대기</option>
-                <option>취소요청</option>
-              </select>
-            </Field>
-          </Row>
-        </FormBox>
-      )}
-
-      {activeTab === 1 && (
-        <FormBox>
-          {/* 배송정보 폼 내용 */}
-          <Row>
-            <Field>
-              <label>수령인</label>
-              <input value={receiver} readOnly />
-            </Field>
-            <Field>
-              <label>연락처</label>
-              <input value={phone} readOnly />
-            </Field>
-            <Field>
-              <label>메시지</label>
-              <input
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
+        <Row>
+          <Field>
+            <label>발송예정</label>
+            <DatePickerContainer>
+              <FaCalendarAlt />
+              <StyledDatePicker
+                selected={expectedDate}
+                onChange={handleDateChange}
+                dateFormat='yyyy.MM.dd'
               />
-            </Field>
-          </Row>
+            </DatePickerContainer>
+            <Hint>(제품 신청일로부터 3일 이내)</Hint>
+          </Field>
+          <Field>
+            <label>결제상태</label>
+            <select
+              value={paymentStatus}
+              onChange={(e) => setPaymentStatus(e.target.value)}
+            >
+              <option>결제완료</option>
+              <option>결제대기</option>
+              <option>취소요청</option>
+            </select>
+          </Field>
+        </Row>
+      </FormBox>
 
-          <Row>
-            <Field style={{ minWidth: '100%' }}>
-              <label>배송지</label>
-              <input value={address} readOnly style={{ width: '100%' }} />
-            </Field>
-          </Row>
+      {/* ─── 배송정보 섹션 ─────────────────────────────────────────────────── */}
+      <SessionHeader>배송정보</SessionHeader>
+      <FormBox>
+        <Row>
+          <Field>
+            <label>수령인</label>
+            <input value={receiver} readOnly />
+          </Field>
+          <Field>
+            <label>연락처</label>
+            <input value={phone} readOnly />
+          </Field>
+          <Field>
+            <label>메시지</label>
+            <input
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+          </Field>
+        </Row>
 
-          <Row>
-            <Field>
-              <label>배송상태</label>
-              <select
-                value={deliveryStatus}
-                onChange={(e) => setDeliveryStatus(e.target.value)}
-              >
-                <option>배송 준비중</option>
-                <option>배송 중</option>
-                <option>배송 완료</option>
-              </select>
-            </Field>
-          </Row>
-        </FormBox>
-      )}
+        <Row>
+          <Field style={{ minWidth: '100%' }}>
+            <label>배송지</label>
+            <input value={address} readOnly style={{ width: '100%' }} />
+          </Field>
+        </Row>
+
+        <Row>
+          <Field>
+            <label>배송상태</label>
+            <select
+              value={deliveryStatus}
+              onChange={(e) => setDeliveryStatus(e.target.value)}
+            >
+              <option>배송 준비중</option>
+              <option>배송 중</option>
+              <option>배송 완료</option>
+            </select>
+          </Field>
+        </Row>
+      </FormBox>
 
       <ReusableModal2
         isOpen={isModalOpen}
@@ -274,14 +263,37 @@ const DividerDashed = styled.hr`
   margin: 24px 0;
 `;
 
+/* ─── SessionHeader 스타일 (MonitoringDetail과 동일) ───────────────────────────────── */
+const SessionHeader = styled.div`
+  box-sizing: border-box;
+  background: #eeeeee;
+  border: 1px solid #dddddd;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  padding: 16px 20px;
+  font-family: 'NanumSquare Neo OTF';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 13px;
+  text-align: center;
+  color: #000000;
+  margin-top: 24px;
+  margin-bottom: -1px;
+  width: fit-content;
+`;
+
+/* ─── FormBox, Row, Field 등 기존 스타일 ─────────────────────────────────────────────── */
 const FormBox = styled.div`
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 0 4px 4px 4px;
+  margin-bottom: 40px;
 `;
 
 const Row = styled.div`
   display: flex;
+
   & + & {
     border-top: 1px solid #ddd;
   }
@@ -376,7 +388,6 @@ const DatePickerContainer = styled.div`
   }
 `;
 
-// 제네릭 완전히 제거했습니다
 const StyledDatePicker = styled(DatePicker)`
   border: none;
   outline: none;
