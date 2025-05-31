@@ -1,7 +1,9 @@
+// src/components/productregister/FabricInfoSection.tsx
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FaPlus, FaTimes } from 'react-icons/fa';
 import { ProductDetailResponse } from '../../api/adminProduct';
+import BulletIcon from '../../assets/BulletIcon.svg'; // SVG 아이콘 import
 
 interface FabricInfoSectionProps {
   product: ProductDetailResponse;
@@ -144,7 +146,7 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
     <Container>
       <Header>
         <HeaderLeft>
-          <Bullet />
+          <BulletIconImage src={BulletIcon} alt='bullet icon' />
           <Title>제품 원단정보</Title>
         </HeaderLeft>
       </Header>
@@ -153,7 +155,6 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
           <FaPlus />
         </AddButton>
       </OutsideButtonWrapper>
-      <Divider />
 
       <TableWrapper>
         <Table>
@@ -229,21 +230,36 @@ export default FabricInfoSection;
 const Container = styled.div`
   position: relative;
   margin-bottom: 20px;
-  padding-left: 24px;
 `;
+
 const Header = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 8px;
 `;
+
 const HeaderLeft = styled.div`
   display: flex;
   align-items: center;
 `;
+
+// BulletIconImage: SVG 아이콘을 렌더링하기 위한 styled.img
+const BulletIconImage = styled.img`
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+`;
+
+const Title = styled.div`
+  font-weight: 700;
+  font-size: 15px;
+`;
+
+// “열 추가” 버튼을 감싸는 영역
 const OutsideButtonWrapper = styled.div`
   text-align: right;
   margin-bottom: 8px;
 `;
+
 const AddButton = styled.button`
   background: none;
   border: none;
@@ -254,18 +270,12 @@ const AddButton = styled.button`
     color: #333;
   }
 `;
-const Divider = styled.div`
-  position: absolute;
-  left: 0;
-  top: 14px;
-  bottom: 20px;
-  width: 2px;
-  background: #ddd;
-`;
+
 const TableWrapper = styled.div`
   overflow-x: auto;
   margin-top: 12px;
 `;
+
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
@@ -274,7 +284,6 @@ const Table = styled.table`
     border: 1px solid #ccc;
     text-align: center;
     font-size: 13px;
-    /* min-width 제거, width 고정 */
     width: 250px;
     padding: 8px;
   }
@@ -287,21 +296,23 @@ const Table = styled.table`
     background: #fafafa;
     font-weight: 600;
     color: #333;
-    /* 카테고리 열(label)은 좀 좁게, 필요하다면 따로 width 조정 가능 */
     width: auto;
   }
 `;
+
 const CellTd = styled.td<{ empty: boolean }>`
   position: relative;
   padding: 8px 28px 8px 8px;
   background: ${({ empty }) => (empty ? '#f9f9f9' : '#fff')};
 `;
+
 const CellRow = styled.div`
   display: flex;
   gap: 6px;
   justify-content: center;
   align-items: center;
 `;
+
 const MaterialInput = styled.input<{ empty: boolean }>`
   flex: 1;
   max-width: 100px;
@@ -316,10 +327,12 @@ const MaterialInput = styled.input<{ empty: boolean }>`
     outline: 2px solid #f6ae24;
   }
 `;
+
 const PercentWrapper = styled.div`
   display: flex;
   align-items: center;
 `;
+
 const NumberInput = styled.input<{ empty: boolean }>`
   width: 36px;
   height: 30px;
@@ -333,11 +346,13 @@ const NumberInput = styled.input<{ empty: boolean }>`
     outline: 2px solid #f6ae24;
   }
 `;
+
 const Suffix = styled.span`
   margin-left: 4px;
   font-size: 13px;
   color: #666;
 `;
+
 const DeleteButton = styled.button`
   position: absolute;
   top: 0px;
@@ -359,28 +374,4 @@ const DeleteButton = styled.button`
     background: #ff4d4f;
     color: #fff;
   }
-`;
-const Bullet = styled.div`
-  position: absolute;
-  left: -28px;
-  width: 14px;
-  height: 14px;
-  border: 1px solid #ddd;
-  border-radius: 50%;
-  background: #fff;
-  &::after {
-    content: '';
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    width: 6px;
-    height: 6px;
-    background: #f6ae24;
-    border-radius: 50%;
-  }
-`;
-const Title = styled.div`
-  font-weight: 700;
-  font-size: 15px;
-  margin-left: 12px;
 `;
