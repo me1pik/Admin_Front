@@ -1,6 +1,9 @@
+// src/components/productregister/ProductImageSection.tsx
 import React from 'react';
 import styled from 'styled-components';
 import { FaTimes, FaLink } from 'react-icons/fa';
+import { ProductDetailResponse } from '../../api/adminProduct';
+import BulletIcon from '../../assets/BulletIcon.svg'; // SVG 아이콘 import
 
 interface ProductImageSectionProps {
   images: string[];
@@ -60,14 +63,16 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
   return (
     <SectionBox>
       <Header>
-        <Bullet />
-        <Title>제품 이미지</Title>
+        <HeaderLeft>
+          <BulletIconImage src={BulletIcon} alt='bullet icon' />
+          <Title>제품 이미지</Title>
+        </HeaderLeft>
         <BatchButton onClick={onBatchUrl} title='URL 일괄 삽입'>
           <FaLink size={18} />
           <span>URL 일괄 삽입</span>
         </BatchButton>
       </Header>
-      <Divider />
+
       <Grid>
         {images.map((src, idx) => (
           <Column key={idx}>
@@ -123,37 +128,34 @@ export default ProductImageSection;
 const SectionBox = styled.div`
   position: relative;
   margin-bottom: 20px;
-  padding-left: 20px;
 `;
+
 const Header = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 10px;
 `;
+
+/**
+ * HeaderLeft: 블릿 아이콘과 타이틀을 가로로 정렬
+ */
+const HeaderLeft = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+// BulletIconImage: SVG 아이콘을 렌더링하기 위한 styled.img
+const BulletIconImage = styled.img`
+  width: 14px;
+  height: 14px;
+  margin-right: 8px; /* 타이틀과의 간격 */
+`;
+
 const Title = styled.div`
   font-weight: 800;
   font-size: 14px;
-  margin-left: 10px;
 `;
-const Bullet = styled.div`
-  position: absolute;
-  left: -27px;
-  width: 14px;
-  height: 14px;
-  border: 1px solid #ddd;
-  border-radius: 50%;
-  background: #fff;
-  &::after {
-    content: '';
-    position: absolute;
-    left: 4px;
-    top: 4px;
-    width: 6px;
-    height: 6px;
-    background: #f6ae24;
-    border-radius: 50%;
-  }
-`;
+
 const BatchButton = styled.button`
   margin-left: auto;
   background: none;
@@ -168,28 +170,24 @@ const BatchButton = styled.button`
     color: #1565c0;
   }
 `;
-const Divider = styled.div`
-  position: absolute;
-  left: 0;
-  top: 24px;
-  bottom: 0;
-  width: 1px;
-  background: #ddd;
-`;
+
 const Grid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 20px;
 `;
+
 const Column = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
 `;
+
 const DragWrapper = styled.div`
   position: relative;
   cursor: move;
 `;
+
 const IdxLabel = styled.div`
   position: absolute;
   top: 4px;
@@ -200,6 +198,7 @@ const IdxLabel = styled.div`
   font-size: 10px;
   border-radius: 2px;
 `;
+
 const ImgBox = styled.div<{ isMain?: boolean }>`
   width: 140px;
   height: 200px;
@@ -210,11 +209,13 @@ const ImgBox = styled.div<{ isMain?: boolean }>`
   justify-content: center;
   position: relative;
 `;
+
 const Img = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
 `;
+
 const DeleteBtn = styled.button`
   position: absolute;
   top: 4px;
@@ -232,6 +233,7 @@ const DeleteBtn = styled.button`
     background-color: #fce4ec;
   }
 `;
+
 const EmptyBox = styled.div`
   width: 140px;
   height: 200px;
@@ -242,6 +244,7 @@ const EmptyBox = styled.div`
   justify-content: center;
   cursor: pointer;
 `;
+
 const AddBtn = styled.button`
   background: none;
   border: none;
@@ -250,27 +253,32 @@ const AddBtn = styled.button`
   align-items: center;
   justify-content: center;
 `;
+
 const Label = styled.div`
   margin-top: 20px;
   font-size: 12px;
   font-weight: 700;
   text-align: center;
 `;
+
 const UrlContainer = styled.div`
   margin-top: 20px;
   display: flex;
   flex-direction: column;
 `;
+
 const UrlLabel = styled.label`
   font-size: 12px;
   font-weight: 700;
   margin-bottom: 8px;
 `;
+
 const UrlText = styled.div`
   font-size: 14px;
   word-break: break-all;
   color: #000;
 `;
+
 const UrlLink = styled.a`
   font-size: 14px;
   color: #1e88e5;
