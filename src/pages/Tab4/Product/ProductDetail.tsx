@@ -111,8 +111,13 @@ const ProductDetail: React.FC = () => {
       setImages(data.product_img || []);
       setSizeGuides(data.sizesByCategory || {});
       setChanged({});
-    } catch {
-      setError('제품 상세 정보를 불러오는데 실패했습니다.');
+    } catch (fetchErr: any) {
+      console.error('제품 상세 정보를 불러오는 중 오류 발생:', fetchErr);
+      setError(
+        fetchErr?.message
+          ? `제품 상세 정보를 불러오는데 실패했습니다: ${fetchErr.message}`
+          : '제품 상세 정보를 불러오는데 실패했습니다.'
+      );
     } finally {
       setLoading(false);
     }
@@ -144,16 +149,25 @@ const ProductDetail: React.FC = () => {
         const rawComp = (changed.fabricComposition ||
           product.fabricComposition) as Record<string, string>;
         const sortedComp: Record<string, string> = {};
+
         Object.entries(rawComp || {}).forEach(([key, value]) => {
+          if (typeof value !== 'string') {
+            return; // 문자열이 아닐 경우 건너뜀
+          }
           const items = value
             .split(/\s*,\s*/)
             .map((str) => {
-              const [material, numStr] = str.split(/\s+/);
-              const percent = parseInt(numStr.replace('%', ''), 10) || 0;
+              const parts = str.split(/\s+/);
+              const material = parts[0] || '';
+              const numStr = parts[1] || '';
+              const percent = numStr
+                ? parseInt(numStr.replace('%', ''), 10) || 0
+                : 0;
               return { material, percent };
             })
             .filter((item) => item.material && item.percent > 0)
             .sort((a, b) => b.percent - a.percent);
+
           if (items.length > 0) {
             sortedComp[key] = items
               .map((i) => `${i.material} ${i.percent}%`)
@@ -177,12 +191,19 @@ const ProductDetail: React.FC = () => {
         }
 
         const cleaned = cleanPayload(payload);
+        // 디버그용: 전송 payload 콘솔 출력
+        console.log('업데이트 전송 payload:', cleaned);
+
         const updated = await updateProduct(product.id, cleaned);
         await fetchDetail(updated.id);
         setChanged({});
         openResult('수정 완료되었습니다.');
-      } catch {
-        openResult('수정에 실패했습니다.');
+      } catch (updateErr: any) {
+        console.error('제품 수정 중 오류 발생:', updateErr);
+        const detailedMessage = updateErr?.response?.data?.message
+          ? updateErr.response.data.message
+          : updateErr?.message || `${updateErr}`;
+        openResult(`수정에 실패했습니다: ${detailedMessage}`);
       }
     });
   };
