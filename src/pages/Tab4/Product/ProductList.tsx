@@ -10,7 +10,7 @@ import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
 import Pagination from '../../../components/Pagination';
 import {
   getProducts,
-  updateProduct,
+  updateProductsStatus,
   ProductListParams,
   ProductListResponse,
 } from '../../../api/adminProduct';
@@ -27,7 +27,13 @@ const tabs: TabItem[] = [
   { label: '판매종료', path: '판매종료' },
 ];
 
-const statuses = ['등록완료', '등록대기', '판매종료'];
+// **newStatus** 값을 숫자 형태의 문자열로 설정합니다.
+// 예를 들어 '0': 등록대기, '1': 등록완료, '2': 판매종료 등으로 매핑
+const statuses: Array<{ label: string; value: string }> = [
+  { label: '등록완료', value: '1' },
+  { label: '등록대기', value: '0' },
+  { label: '판매종료', value: '2' },
+];
 
 const ProductList: React.FC = () => {
   const navigate = useNavigate();
@@ -50,6 +56,7 @@ const ProductList: React.FC = () => {
   const [totalPages, setTotalPages] = useState<number>(1);
   const limit = 10;
 
+  // newStatus는 숫자 형태의 문자열('0', '1', '2')만을 받습니다.
   const [newStatus, setNewStatus] = useState<string>('');
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
 
@@ -122,20 +129,31 @@ const ProductList: React.FC = () => {
       alert('변경할 상품을 선택해주세요.');
       return;
     }
+
     try {
-      await Promise.all(
-        Array.from(selectedRows).map((id) =>
-          updateProduct(id, { status: newStatus } as any)
-        )
-      );
-      // 로컬 상태 업데이트로 UI 반영
+      // 숫자로 변환된 newStatus 값을 registration 필드로 전달
+      const idsArray = Array.from(selectedRows);
+      await updateProductsStatus({
+        ids: idsArray,
+        registration: parseInt(newStatus, 10),
+      });
+
+      // UI에 반영: 선택된 상품들의 status를 label로 업데이트
+      const statusLabel =
+        statuses.find((s) => s.value === newStatus)?.label || '';
       setProductData((prev) =>
         prev.map((item) =>
-          selectedRows.has(item.no) ? { ...item, status: newStatus } : item
+          selectedRows.has(item.no)
+            ? {
+                ...item,
+                status: statusLabel,
+              }
+            : item
         )
       );
+
       alert(
-        `선택된 ${selectedRows.size}개 상품을 "${newStatus}" 상태로 일괄 변경했습니다.`
+        `선택된 ${selectedRows.size}개 상품을 "${statusLabel}" 상태로 일괄 변경했습니다.`
       );
       setSelectedRows(new Set());
       setNewStatus('');
@@ -158,8 +176,8 @@ const ProductList: React.FC = () => {
           >
             <option value=''>변경할 상태</option>
             {statuses.map((s) => (
-              <option key={s} value={s}>
-                {s}
+              <option key={s.value} value={s.value}>
+                {s.label}
               </option>
             ))}
           </Select>

@@ -121,9 +121,29 @@ export const createProduct = async (
   return response.data;
 };
 
+/**
+ * 제품 등록 상태 일괄 수정 (관리자 전용)
+ * PATCH /admin/products-management/status/cn
+ */
+export interface BulkUpdateStatusRequest {
+  ids: number[];
+  registration: number;
+}
+
+export const updateProductsStatus = async (
+  payload: BulkUpdateStatusRequest
+): Promise<void> => {
+  const response = await Axios.patch(
+    '/admin/products-management/status/cn',
+    payload
+  );
+  return response.data;
+};
+
 export default {
   getProducts,
   getProductDetail,
   updateProduct,
   createProduct,
+  updateProductsStatus,
 };
