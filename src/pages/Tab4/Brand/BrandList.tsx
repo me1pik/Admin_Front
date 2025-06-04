@@ -1,104 +1,32 @@
-// src/pages/BrandList.tsx
+// src/pages/Tab4/Brand/BrandList.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import BrandTable, { BrandItem } from '../../../components/Table/BrandTable';
 import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
 import Pagination from '../../../components/Pagination';
-import RegisterButton from '../../../components/RegisterButton'; // 새 버튼 컴포넌트 임포트
+import RegisterButton from '../../../components/RegisterButton';
+import { getAdminBrandList, AdminBrand } from '../../../api/brand/brandApi';
 
-/** 더미 브랜드 데이터 */
-const dummyBrands: BrandItem[] = [
-  {
-    no: 13486,
-    group: '대현 (DAEHYUN)',
-    brand: 'CC Collect',
-    quantity: 340,
-    discount: 20,
-    manager: '김미정 매니저',
-    contact: '010-1234-5678',
-    registerDate: '2024-11-15',
-    status: '등록완료',
-  },
-  {
-    no: 13487,
-    group: '대현 (DAEHYUN)',
-    brand: 'MUJO',
-    quantity: 340,
-    discount: 20,
-    manager: '김미정 매니저',
-    contact: '010-1234-5678',
-    registerDate: '2024-11-15',
-    status: '등록완료',
-  },
-  {
-    no: 13488,
-    group: '대현 (DAEHYUN)',
-    brand: 'DEWL',
-    quantity: 340,
-    discount: 20,
-    manager: '김미정 매니저',
-    contact: '010-1234-5678',
-    registerDate: '2024-11-15',
-    status: '등록완료',
-  },
-  {
-    no: 13489,
-    group: '대현 (DAEHYUN)',
-    brand: 'ZZOC',
-    quantity: 340,
-    discount: 20,
-    manager: '김미정 매니저',
-    contact: '010-1234-5678',
-    registerDate: '2024-11-15',
-    status: '등록완료',
-  },
-  {
-    no: 13490,
-    group: '대현 (DAEHYUN)',
-    brand: 'SATIN',
-    quantity: 340,
-    discount: 20,
-    manager: '김미정 매니저',
-    contact: '010-1234-5678',
-    registerDate: '2024-11-15',
-    status: '등록완료',
-  },
-  {
-    no: 13491,
-    group: '대현 (DAEHYUN)',
-    brand: 'MICHAA',
-    quantity: 340,
-    discount: 20,
-    manager: '김미정 매니저',
-    contact: '010-1234-5678',
-    registerDate: '2024-11-15',
-    status: '등록완료',
-  },
-  {
-    no: 13492,
-    group: '대현 (DAEHYUN)',
-    brand: 'R2D',
-    quantity: 340,
-    discount: 20,
-    manager: '김미정 매니저',
-    contact: '010-1234-5678',
-    registerDate: '2024-11-15',
-    status: '등록대기',
-  },
-  {
-    no: 13493,
-    group: '대현 (DAEHYUN)',
-    brand: 'RIGOIST',
-    quantity: 340,
-    discount: 20,
-    manager: '김미정 매니저',
-    contact: '010-1234-5678',
-    registerDate: '2024-11-15',
-    status: '계약종료',
-  },
-];
+// --------------------
+// AdminBrand → BrandItem 매핑 함수
+// --------------------
+const mapAdminBrandToBrandItem = (b: AdminBrand): BrandItem => {
+  return {
+    no: b.id,
+    group: b.groupName,
+    brand: b.brandName,
+    // 백엔드에 quantity, discount, registerDate, status 필드가 없으므로
+    // 필요하다면 실제 API 스펙에 맞춰 여기 값을 수정하세요.
+    quantity: 0,
+    discount: 0,
+    manager: b.contactPerson,
+    contact: b.contactNumber,
+    registerDate: '', // 예: b.registerDate 가 있다면 사용
+    status: b.isActive ? '등록완료' : '계약종료', // 혹은 b.isPopular, b.isActive 조합으로 변경
+  };
+};
 
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
@@ -110,14 +38,42 @@ const tabs: TabItem[] = [
 const BrandList: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
 
-  // URL 쿼리에서 현재 페이지 읽기
+  // API에서 불러온 원본 데이터(AdminBrand)
+  const [adminBrands, setAdminBrands] = useState<AdminBrand[]>([]);
+  // 화면용 데이터(BrandItem)
+  const [brandData, setBrandData] = useState<BrandItem[]>([]);
+  // 로딩/에러 상태
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // URL 쿼리 값: search, page
+  const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
   const page = parseInt(searchParams.get('page') ?? '1', 10);
   const limit = 10;
 
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-  const [BrandData] = useState<BrandItem[]>(dummyBrands);
+
+  // 1) 컴포넌트 마운트 시 AdminBrand 목록 조회
+  useEffect(() => {
+    const fetchAdminBrands = async () => {
+      setIsLoading(true);
+      try {
+        const data = await getAdminBrandList();
+        setAdminBrands(data);
+        // 매핑 후 brandData 세팅
+        const mapped = data.map((b) => mapAdminBrandToBrandItem(b));
+        setBrandData(mapped);
+      } catch (err) {
+        console.error('관리자용 브랜드 목록 조회 실패:', err);
+        setError('브랜드 목록을 불러오는 중 오류가 발생했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAdminBrands();
+  }, []);
 
   // 탭 변경 시 URL의 page=1로 리셋
   const handleTabChange = (tab: TabItem) => {
@@ -127,8 +83,18 @@ const BrandList: React.FC = () => {
     setSearchParams(params);
   };
 
+  // 로딩 상태일 때
+  if (isLoading) {
+    return <LoadingMessage>브랜드 목록을 불러오는 중...</LoadingMessage>;
+  }
+
+  // 에러 상태일 때
+  if (error) {
+    return <ErrorMessage>{error}</ErrorMessage>;
+  }
+
   // 1차 탭별 필터링
-  const dataByTab = BrandData.filter((item) =>
+  const dataByTab = brandData.filter((item) =>
     selectedTab.label === '전체보기' ? true : item.status === selectedTab.label
   );
 
@@ -154,9 +120,12 @@ const BrandList: React.FC = () => {
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
+  // 편집 버튼 클릭시
   const handleEdit = (no: number) => {
     navigate(`/Branddetail/${no}`);
   };
+
+  // 브랜드 등록 버튼 클릭시
   const handleRegisterClick = () => {
     navigate('/Brandregister');
   };
@@ -222,4 +191,18 @@ const FooterRow = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-top: 40px;
+`;
+
+const LoadingMessage = styled.div`
+  padding: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: #888;
+`;
+
+const ErrorMessage = styled.div`
+  padding: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: red;
 `;
