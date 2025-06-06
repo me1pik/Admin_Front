@@ -93,7 +93,7 @@ const AdminDetail: React.FC = () => {
     onBackClick: handleBackClick,
     editLabel: '정보수정',
     onEditClick: handleEditClick,
-    endLabel: '종료처리',
+    endLabel: '삭제',
     onEndClick: handleEndClick,
   };
 

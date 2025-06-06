@@ -54,7 +54,7 @@ const AdminCreate: React.FC = () => {
       setIsSubmitting(true);
       await createAdmin(formData); // POST /admin 호출
       // 생성 완료 후 목록 페이지로 이동
-      navigate('/admin');
+      navigate('/adminlist');
     } catch (err: any) {
       console.error('관리자 생성 오류', err);
       setErrorMessage(
