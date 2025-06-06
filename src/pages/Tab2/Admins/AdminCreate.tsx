@@ -6,10 +6,14 @@ import styled from 'styled-components';
 import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../../../components/Header/SettingsDetailSubHeader';
+import ShippingTabBar from '../../../components/TabBar'; // 탭바 컴포넌트 임포트
 import { createAdmin, AdminCreateRequest } from '../../../api/admin';
 
 const AdminCreate: React.FC = () => {
   const navigate = useNavigate();
+
+  // 탭 인덱스 상태
+  const [activeTab, setActiveTab] = useState<number>(0);
 
   // 폼 입력값 상태 관리
   const [formData, setFormData] = useState<AdminCreateRequest>({
@@ -21,7 +25,6 @@ const AdminCreate: React.FC = () => {
     status: 'active',
   });
 
-  // isSubmitting: 제출 중 여부 (첫 번째 요소는 사용하지 않으므로 언더바로 처리)
   const [, setIsSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -90,89 +93,106 @@ const AdminCreate: React.FC = () => {
       {/* === 상단 서브헤더: 뒤로가기 / 등록하기 / 취소 버튼 === */}
       <SettingsDetailSubHeader {...detailProps} />
 
-      {/* 구분선 */}
-      <MiddleDivider />
+      {/* === 대시형 구분선 === */}
+      <DividerDashed />
 
-      {/* === 폼 입력 영역 === */}
-      <Form onSubmit={(e) => e.preventDefault()}>
-        {errorMessage && <ErrorText>{errorMessage}</ErrorText>}
+      {/* === 탭바: 관리자 정보 탭 === */}
+      <ShippingTabBar
+        tabs={['관리자 정보']}
+        activeIndex={activeTab}
+        onTabClick={setActiveTab}
+      />
 
-        <FormRow>
-          <Label htmlFor='id'>아이디</Label>
-          <Input
-            type='text'
-            id='id'
-            value={formData.id}
-            onChange={handleChange('id')}
-            placeholder='예: admin1'
-          />
-        </FormRow>
+      {/* === 탭 콘텐츠: activeTab === 0 일 때 폼 표시 === */}
+      {activeTab === 0 && (
+        <FormBox>
+          {errorMessage && <ErrorText>{errorMessage}</ErrorText>}
 
-        <FormRow>
-          <Label htmlFor='name'>이름</Label>
-          <Input
-            type='text'
-            id='name'
-            value={formData.name}
-            onChange={handleChange('name')}
-            placeholder='예: 김철수'
-          />
-        </FormRow>
+          <Row>
+            <Field>
+              <label htmlFor='id'>아이디</label>
+              <input
+                type='text'
+                id='id'
+                value={formData.id}
+                onChange={handleChange('id')}
+                placeholder='예: admin1'
+              />
+            </Field>
+          </Row>
 
-        <FormRow>
-          <Label htmlFor='password'>비밀번호</Label>
-          <Input
-            type='password'
-            id='password'
-            value={formData.password}
-            onChange={handleChange('password')}
-            placeholder='비밀번호를 입력하세요'
-          />
-        </FormRow>
+          <Row>
+            <Field>
+              <label htmlFor='name'>이름</label>
+              <input
+                type='text'
+                id='name'
+                value={formData.name}
+                onChange={handleChange('name')}
+                placeholder='예: 김철수'
+              />
+            </Field>
+          </Row>
 
-        <FormRow>
-          <Label htmlFor='email'>이메일</Label>
-          <Input
-            type='email'
-            id='email'
-            value={formData.email}
-            onChange={handleChange('email')}
-            placeholder='예: admin1@example.com'
-          />
-        </FormRow>
+          <Row>
+            <Field>
+              <label htmlFor='password'>비밀번호</label>
+              <input
+                type='password'
+                id='password'
+                value={formData.password}
+                onChange={handleChange('password')}
+                placeholder='비밀번호를 입력하세요'
+              />
+            </Field>
+          </Row>
 
-        <FormRow>
-          <Label htmlFor='role'>역할(Role)</Label>
-          <Select
-            id='role'
-            value={formData.role}
-            onChange={handleChange('role')}
-          >
-            <option value='admin'>admin</option>
-            <option value='superadmin'>superadmin</option>
-            {/* 필요에 따라 옵션 추가 */}
-          </Select>
-        </FormRow>
+          <Row>
+            <Field>
+              <label htmlFor='email'>이메일</label>
+              <input
+                type='email'
+                id='email'
+                value={formData.email}
+                onChange={handleChange('email')}
+                placeholder='예: admin1@example.com'
+              />
+            </Field>
+          </Row>
 
-        <FormRow>
-          <Label htmlFor='status'>상태(Status)</Label>
-          <Select
-            id='status'
-            value={formData.status}
-            onChange={handleChange('status')}
-          >
-            <option value='active'>active</option>
-            <option value='blocked'>blocked</option>
-            {/* 필요에 따라 옵션 추가 */}
-          </Select>
-        </FormRow>
+          <Row>
+            <Field>
+              <label htmlFor='role'>역할(Role)</label>
+              <select
+                id='role'
+                value={formData.role}
+                onChange={handleChange('role')}
+              >
+                <option value='admin'>admin</option>
+                {/* 필요에 따라 옵션 추가 */}
+              </select>
+            </Field>
+          </Row>
 
-        {/* 숨겨진 submit 버튼 (엔터 입력 시에도 동작하도록) */}
-        <button type='submit' style={{ display: 'none' }}></button>
-      </Form>
+          <Row>
+            <Field>
+              <label htmlFor='status'>상태(Status)</label>
+              <select
+                id='status'
+                value={formData.status}
+                onChange={handleChange('status')}
+              >
+                <option value='active'>active</option>
+                <option value='blocked'>blocked</option>
+                {/* 필요에 따라 옵션 추가 */}
+              </select>
+            </Field>
+          </Row>
 
-      {/* === 하단 여백 === */}
-      <FooterSpacing />
+          {/* 숨겨진 submit 버튼 (엔터 입력 시에도 동작하도록) */}
+          <button type='submit' style={{ display: 'none' }} />
+        </FormBox>
+      )}
     </Container>
   );
 };
@@ -183,14 +203,15 @@ export default AdminCreate;
 
 const Container = styled.div`
   width: 100%;
+  min-width: 1000px;
   padding: 20px;
-  background: #fff;
 `;
 
 const HeaderRow = styled.div`
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 `;
 
 const Title = styled.h1`
@@ -198,55 +219,62 @@ const Title = styled.h1`
   font-size: 16px;
 `;
 
-const MiddleDivider = styled.hr`
-  border-top: 1px dashed #dddddd;
-  margin: 10px 0 30px;
+const DividerDashed = styled.hr`
+  border-top: 1px dashed #ddd;
+  margin: 24px 0;
 `;
 
-const Form = styled.form`
+const FormBox = styled.div`
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 0 4px 4px 4px;
+`;
+
+const Row = styled.div`
   display: flex;
-  flex-direction: column;
-`;
 
-const FormRow = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: 18px;
-`;
-
-const Label = styled.label`
-  width: 100px;
-  flex-shrink: 0;
-  font-size: 14px;
-  font-weight: 600;
-`;
-
-const Input = styled.input`
-  flex-grow: 1;
-  padding: 8px 10px;
-  max-width: 300px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-
-  &:focus {
-    outline: none;
-    border-color: #4a90e2;
+  & + & {
+    border-top: 1px solid #ddd;
   }
 `;
 
-const Select = styled.select`
-  flex-grow: 1;
-  padding: 8px 10px;
-  max-width: 200px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background: #fff;
+const Field = styled.div`
+  width: 100%;
+  min-width: 300px;
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  box-sizing: border-box;
 
-  &:focus {
-    outline: none;
-    border-color: #4a90e2;
+  &:not(:last-child) {
+    border-right: 1px solid #ddd;
+  }
+
+  label {
+    width: 80px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-right: 8px;
+    text-align: center;
+  }
+
+  input {
+    width: 200px;
+    height: 36px;
+    padding: 0 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+
+  select {
+    width: 200px;
+    height: 36px;
+    padding: 0 8px;
+    border: 1px solid #000;
+    border-radius: 4px;
+    box-sizing: border-box;
+    background: #fff;
   }
 `;
 
@@ -255,8 +283,4 @@ const ErrorText = styled.div`
   font-size: 13px;
   margin-bottom: 18px;
   text-align: center;
-`;
-
-const FooterSpacing = styled.div`
-  height: 50px;
 `;
