@@ -40,7 +40,7 @@ import FAQDetail from './pages/Tab5/FAQ/FAQDetail';
 import CreateFAQ from './pages/Tab5/FAQ/CreateFAQ';
 import Dashboard from './pages/Tab1/Dashboard';
 import AnalysisInfo from './pages/Tab2/Analysis/AnalysisInfo';
-
+import AdminCreate from './pages/Tab2/Admins/AdminCreate';
 const App: React.FC = () => {
   return (
     <BrowserRouter>
@@ -52,6 +52,7 @@ const App: React.FC = () => {
         {/* Layout 내부에 Outlet을 사용하여 공통 UI를 구성 */}
         <Route element={<Layout />}>
           <Route path='/adminlist' element={<AdminList />} />
+          <Route path='/admin-create' element={<AdminCreate />} />
           <Route path='/admindetail/:no' element={<AdminDetail />} />
           <Route path='/userlist' element={<UserList />} />
           <Route path='/Pagelist' element={<PageList />} />

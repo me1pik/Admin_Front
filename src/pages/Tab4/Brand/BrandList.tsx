@@ -17,14 +17,14 @@ const mapAdminBrandToBrandItem = (b: AdminBrand): BrandItem => {
     no: b.id,
     group: b.groupName,
     brand: b.brandName,
-    // 백엔드에 quantity, discount, registerDate, status 필드가 없으므로
-    // 필요하다면 실제 API 스펙에 맞춰 여기 값을 수정하세요.
+    // quantity, discount, registerDate 필드는 API에 없으므로 기본값을 설정합니다.
     quantity: 0,
     discount: 0,
     manager: b.contactPerson,
     contact: b.contactNumber,
-    registerDate: '', // 예: b.registerDate 가 있다면 사용
-    status: b.isActive ? '등록완료' : '계약종료', // 혹은 b.isPopular, b.isActive 조합으로 변경
+    registerDate: '', // 예: b.registerDate 필드가 있으면 해당 값을 사용하세요.
+    // isActive 값에 따라 상태를 '등록완료' 또는 '계약종료'로 표시
+    status: b.isActive ? '등록완료' : '계약종료',
   };
 };
 
@@ -39,9 +39,7 @@ const BrandList: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // API에서 불러온 원본 데이터(AdminBrand)
-  const [adminBrands, setAdminBrands] = useState<AdminBrand[]>([]);
-  // 화면용 데이터(BrandItem)
+  // 화면에 표시할 BrandItem 데이터
   const [brandData, setBrandData] = useState<BrandItem[]>([]);
   // 로딩/에러 상태
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -60,8 +58,7 @@ const BrandList: React.FC = () => {
       setIsLoading(true);
       try {
         const data = await getAdminBrandList();
-        setAdminBrands(data);
-        // 매핑 후 brandData 세팅
+        // 받아온 AdminBrand 배열을 BrandItem 배열로 매핑하여 상태에 저장
         const mapped = data.map((b) => mapAdminBrandToBrandItem(b));
         setBrandData(mapped);
       } catch (err) {
@@ -120,12 +117,12 @@ const BrandList: React.FC = () => {
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
 
-  // 편집 버튼 클릭시
+  // 편집 버튼 클릭 시 상세 페이지로 이동
   const handleEdit = (no: number) => {
     navigate(`/Branddetail/${no}`);
   };
 
-  // 브랜드 등록 버튼 클릭시
+  // 브랜드 등록 버튼 클릭 시 등록 페이지로 이동
   const handleRegisterClick = () => {
     navigate('/Brandregister');
   };
