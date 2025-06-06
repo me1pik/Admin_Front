@@ -1,5 +1,6 @@
-// src/components/AdminTable.tsx
-import React, { useState } from 'react';
+// src/components/Table/AdminTable.tsx
+
+import React from 'react';
 import styled from 'styled-components';
 
 /** Admin 인터페이스 (임시 데이터용) */
@@ -18,40 +19,24 @@ export interface Admin {
 interface AdminTableProps {
   filteredData: Admin[];
   handleEdit: (id: string) => void; // 이메일 클릭 시 수정/상세 페이지로 이동
+
+  // 아래 3가지 props 추가
+  selectedIds: Set<number>;
+  onSelectChange: (no: number, checked: boolean) => void;
+  onSelectAll: (checked: boolean) => void;
 }
 
 const AdminTable: React.FC<AdminTableProps> = ({
   filteredData,
   handleEdit,
+  selectedIds,
+  onSelectChange,
+  onSelectAll,
 }) => {
-  // 선택된 행의 no 값을 저장하는 상태 (체크박스 선택)
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-
+  // 모두 선택되었는지 여부
   const allSelected =
-    filteredData.length > 0 && selectedIds.size === filteredData.length;
-
-  // 헤더 전체 선택 체크박스 변경 핸들러
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      const all = new Set(filteredData.map((manager) => manager.no));
-      setSelectedIds(all);
-    } else {
-      setSelectedIds(new Set());
-    }
-  };
-
-  // 개별 행 선택 체크박스 변경 핸들러
-  const handleRowSelect = (no: number) => {
-    setSelectedIds((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(no)) {
-        newSet.delete(no);
-      } else {
-        newSet.add(no);
-      }
-      return newSet;
-    });
-  };
+    filteredData.length > 0 &&
+    filteredData.every((mgr) => selectedIds.has(mgr.no));
 
   // 접속 기록이 없는 경우 '-'로 표시
   const getLastLogin = (lastLogin: string) => {
@@ -60,7 +45,6 @@ const AdminTable: React.FC<AdminTableProps> = ({
 
   return (
     <Table>
-      {/* colgroup을 사용하여 각 열에 개별 고정 너비 지정 */}
       <colgroup>
         <col style={{ width: '40px' }} /> {/* 체크박스 */}
         <col style={{ width: '50px' }} /> {/* No. */}
@@ -77,7 +61,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
           <Th>
             <input
               type='checkbox'
-              onChange={handleSelectAll}
+              onChange={(e) => onSelectAll(e.target.checked)}
               checked={allSelected}
               disabled={filteredData.length === 0}
             />
@@ -93,13 +77,13 @@ const AdminTable: React.FC<AdminTableProps> = ({
         </tr>
       </thead>
       <tbody>
-        {filteredData.map((manager, index) => (
-          <tr key={index}>
+        {filteredData.map((manager) => (
+          <tr key={manager.no}>
             <Td>
               <input
                 type='checkbox'
                 checked={selectedIds.has(manager.no)}
-                onChange={() => handleRowSelect(manager.no)}
+                onChange={(e) => onSelectChange(manager.no, e.target.checked)}
               />
             </Td>
             <Td>{manager.no}</Td>
@@ -184,7 +168,6 @@ const Td = styled.td`
 `;
 
 const IdCell = styled(Td)`
-  /* 추가적으로 최소 5글자 보장 */
   min-width: 5ch;
 `;
 

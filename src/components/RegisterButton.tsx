@@ -16,7 +16,7 @@ const hoverAnim = keyframes`
 
 const Button = styled.button`
   padding: 10px 20px;
-
+  min-width: 100px;
   background-color: #000;
   color: #fff;
   border: none;
