@@ -67,7 +67,7 @@ const AdminCreate: React.FC = () => {
 
   // 취소 버튼 클릭 시 목록으로 돌아가기
   const handleCancel = () => {
-    navigate('/admin');
+    navigate('/adminlist');
   };
 
   // SettingsDetailSubHeader에 내려줄 props
