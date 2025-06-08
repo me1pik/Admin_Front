@@ -1,5 +1,6 @@
 // src/pages/Brand/BrandDetail.tsx
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import SettingsDetailSubHeader, {
@@ -10,12 +11,20 @@ import ShippingTabBar from '../../../components/TabBar';
 import ReusableModal2 from '../../../components/OneButtonModal';
 import { TabItem } from '../../../components/Header/SearchSubHeader';
 
+// API 불러오기
+import {
+  getAdminBrandDetail,
+  updateAdminBrand,
+  createAdminBrand,
+  getAdminBrandSelectOptions,
+} from '../../../api/brand/brandApi';
+
 interface BrandDetailProps {
   isCreate?: boolean;
   selectOptions?: TabItem[];
 }
 
-const defaultOptions: TabItem[] = [
+const defaultTabs: TabItem[] = [
   { label: '서비스', path: '서비스' },
   { label: '주문/결제', path: '주문/결제' },
   { label: '배송/반품', path: '배송/반품' },
@@ -24,43 +33,105 @@ const defaultOptions: TabItem[] = [
 
 const BrandDetail: React.FC<BrandDetailProps> = ({
   isCreate = false,
-  selectOptions: propOptions,
+  selectOptions: propTabs,
 }) => {
   const navigate = useNavigate();
   const location = useLocation() as { state?: { selectOptions: TabItem[] } };
   const { no } = useParams<{ no: string }>();
-  const options = isCreate
-    ? (propOptions ?? defaultOptions)
-    : (location.state?.selectOptions ?? defaultOptions);
   const numericNo = isCreate ? undefined : Number(no);
+  const tabs = isCreate
+    ? (propTabs ?? defaultTabs)
+    : (location.state?.selectOptions ?? defaultTabs);
 
-  const [groupCompany, setGroupCompany] = useState(
-    isCreate ? '' : '대현 (DAEHYUN)'
-  );
-  const [brand, setBrand] = useState(isCreate ? '' : 'MOJO');
-  const [productCount, setProductCount] = useState(isCreate ? '' : '340');
-  const [discountRate, setDiscountRate] = useState(isCreate ? '' : '20%');
-  const [manager, setManager] = useState(isCreate ? '' : '김미영 매니저.');
-  const [contact, setContact] = useState(isCreate ? '' : '010-1234-5678');
-  const [status, setStatus] = useState(
-    isCreate ? options[0].label : '등록대기'
-  );
+  // — 폼 필드
+  const [groupCompany, setGroupCompany] = useState('');
+  const [brandName, setBrandName] = useState('');
+  const [productCount, setProductCount] = useState<number>(0);
+  const [discountRate, setDiscountRate] = useState<string>('');
+  const [manager, setManager] = useState('');
+  const [contact, setContact] = useState('');
+  const [status, setStatus] = useState<string>('');
 
+  // — 옵션 리스트
+  const [discountOptions, setDiscountOptions] = useState<string[]>([]);
+  const [statusOptions, setStatusOptions] = useState<string[]>([]);
+
+  // — UI 상태
   const [activeTab, setActiveTab] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
   const [modalMessage, setModalMessage] = useState('');
 
-  const handleBack = () => navigate('/brandlist');
-  const handleSave = () => {
-    setModalTitle(isCreate ? '등록 완료' : '변경 완료');
-    setModalMessage(
-      isCreate
-        ? '새 Brand를 등록하시겠습니까?'
-        : '변경 내용을 저장하시겠습니까?'
-    );
-    setIsModalOpen(true);
+  // 1) 옵션 먼저, 그다음 상세 데이터 로드
+  useEffect(() => {
+    const init = async () => {
+      try {
+        // 1) 셀렉트 옵션 로드
+        const opts = await getAdminBrandSelectOptions();
+        setDiscountOptions(opts.discountRates);
+        setStatusOptions(opts.statusOptions);
+
+        // 2) 상세 모드일 때만 데이터 로드
+        if (!isCreate && numericNo != null) {
+          const data = await getAdminBrandDetail(numericNo);
+          setGroupCompany(data.groupName);
+          setBrandName(data.brandName);
+          setProductCount(data.productCount);
+          // 저장된 값이 있으면 그대로, 없으면 첫 옵션으로
+          setDiscountRate(
+            data.discount_rate != null
+              ? String(data.discount_rate)
+              : opts.discountRates[0]
+          );
+          setManager(data.contactPerson ?? '');
+          setContact(data.contactNumber ?? '');
+          setStatus(data.status);
+        } else if (isCreate) {
+          // 등록 모드일 때도 첫 옵션을 기본으로 선택
+          setDiscountRate(opts.discountRates[0]);
+        }
+      } catch (err) {
+        console.error('초기 로드 실패:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    init();
+  }, [isCreate, numericNo]);
+
+  // 2) 저장 핸들러 (등록·수정)
+  const handleSave = async () => {
+    try {
+      const body = {
+        groupName: groupCompany,
+        brandName,
+        productCount,
+        discount_rate: discountRate !== '' ? Number(discountRate) : undefined,
+        contactPerson: manager,
+        contactNumber: contact,
+        status,
+      };
+      if (isCreate) {
+        await createAdminBrand(body);
+      } else if (numericNo != null) {
+        await updateAdminBrand(numericNo, body);
+      }
+      setModalTitle(isCreate ? '등록 완료' : '변경 완료');
+      setModalMessage(
+        isCreate ? '새 Brand가 등록되었습니다.' : '변경 내용이 저장되었습니다.'
+      );
+      setIsModalOpen(true);
+    } catch (err) {
+      console.error('브랜드 저장 실패:', err);
+      setModalTitle('오류');
+      setModalMessage('저장 중 오류가 발생했습니다.');
+      setIsModalOpen(true);
+    }
   };
+
+  const handleBack = () => navigate('/brandlist');
   const handleDelete = () => {
     setModalTitle('삭제 완료');
     setModalMessage('Brand를 삭제하시겠습니까?');
@@ -79,6 +150,10 @@ const BrandDetail: React.FC<BrandDetailProps> = ({
     endLabel: isCreate ? '취소' : '삭제',
     onEndClick: isCreate ? handleBack : handleDelete,
   };
+
+  if (isLoading) {
+    return <LoadingMessage>로딩 중...</LoadingMessage>;
+  }
 
   return (
     <Container>
@@ -104,6 +179,7 @@ const BrandDetail: React.FC<BrandDetailProps> = ({
 
       {activeTab === 0 && (
         <FormBox>
+          {/* 1행 */}
           <Row>
             <Field>
               <label>그룹사</label>
@@ -114,27 +190,32 @@ const BrandDetail: React.FC<BrandDetailProps> = ({
             </Field>
             <Field>
               <label>브랜드</label>
-              <input value={brand} onChange={(e) => setBrand(e.target.value)} />
+              <input
+                value={brandName}
+                onChange={(e) => setBrandName(e.target.value)}
+              />
             </Field>
             <Field>
               <label>제품수</label>
               <input
+                type='number'
                 value={productCount}
-                onChange={(e) => setProductCount(e.target.value)}
+                onChange={(e) => setProductCount(Number(e.target.value))}
               />
             </Field>
           </Row>
 
+          {/* 2행 */}
           <Row>
             <Field>
-              <label>할인율</label>
+              <label>할인율(%)</label>
               <select
                 value={discountRate}
                 onChange={(e) => setDiscountRate(e.target.value)}
               >
-                {Array.from({ length: 21 }, (_, i) => `${i * 5}%`).map((v) => (
-                  <option key={v} value={v}>
-                    {v}
+                {discountOptions.map((d) => (
+                  <option key={d} value={d}>
+                    {d}%
                   </option>
                 ))}
               </select>
@@ -155,7 +236,7 @@ const BrandDetail: React.FC<BrandDetailProps> = ({
             </Field>
           </Row>
 
-          {/* 수정된 상태 필드 Row */}
+          {/* 3행 */}
           <Row>
             <Field>
               <label>상태</label>
@@ -163,16 +244,14 @@ const BrandDetail: React.FC<BrandDetailProps> = ({
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
               >
-                {['등록대기', '등록완료', '계약종료'].map((v) => (
-                  <option key={v} value={v}>
-                    {v}
+                <option value=''>선택</option>
+                {statusOptions.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
                   </option>
                 ))}
               </select>
-              <span>
-                - 상태 설정은 3가지 (등록대기 / 등록완료 / 계약종료)로
-                구성됩니다.
-              </span>
+              <span>- 상태 설정은 등록완료 / 등록대기 / 계약종료</span>
             </Field>
           </Row>
         </FormBox>
@@ -192,32 +271,28 @@ const BrandDetail: React.FC<BrandDetailProps> = ({
 
 export default BrandDetail;
 
-/* ===== styled-components ===== */
+/* styled-components */
 
 const Container = styled.div`
   width: 100%;
   min-width: 1000px;
   padding: 20px;
 `;
-
 const HeaderRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
 `;
-
 const Title = styled.h1`
   font-weight: 700;
   font-size: 16px;
 `;
-
 const ProductNumber = styled.div`
   display: flex;
   align-items: baseline;
   gap: 4px;
   margin: 10px 0 24px;
-
   strong {
     font-size: 12px;
     font-weight: 700;
@@ -227,38 +302,31 @@ const ProductNumber = styled.div`
     font-weight: 900;
   }
 `;
-
 const DividerDashed = styled.hr`
   border-top: 1px dashed #ddd;
   margin: 24px 0;
 `;
-
 const FormBox = styled.div`
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 0 4px 4px 4px;
 `;
-
 const Row = styled.div`
   display: flex;
-
   & + & {
     border-top: 1px solid #ddd;
   }
 `;
-
 const Field = styled.div`
-  width: 100%;
+  flex: 1;
   min-width: 300px;
   display: flex;
   align-items: center;
   padding: 12px 16px;
   box-sizing: border-box;
-
   &:not(:last-child) {
     border-right: 1px solid #ddd;
   }
-
   label {
     width: 80px;
     font-size: 12px;
@@ -266,28 +334,24 @@ const Field = styled.div`
     margin-right: 8px;
     text-align: center;
   }
-
-  input {
-    width: 200px;
+  input,
+  select {
+    flex: 1;
     height: 36px;
     padding: 0 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
     box-sizing: border-box;
   }
-
-  select {
-    width: 200px;
-    height: 36px;
-    padding: 0 8px;
-    border: 1px solid #000;
-    border-radius: 4px;
-    box-sizing: border-box;
-  }
-
   span {
     font-size: 12px;
     color: #666;
     margin-left: 20px;
   }
+`;
+const LoadingMessage = styled.div`
+  padding: 40px;
+  text-align: center;
+  font-size: 14px;
+  color: #888;
 `;
