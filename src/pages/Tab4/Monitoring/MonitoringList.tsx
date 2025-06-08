@@ -1,4 +1,3 @@
-// src/pages/MonitoringList.tsx
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -18,8 +17,6 @@ const tabs: TabItem[] = [
   { label: '진행내역', path: '진행내역' },
   { label: '취소내역', path: '취소' },
 ];
-
-// 상태 변경용 옵션
 const statuses = [
   '배송준비',
   '배송중',
@@ -37,7 +34,7 @@ const MonitoringList: React.FC = () => {
   const limit = 10;
 
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-  const [newStatus, setNewStatus] = useState<string>(''); // 변경할 상태
+  const [newStatus, setNewStatus] = useState<string>('');
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
 
   const [allData, setAllData] = useState<MonitoringItem[]>([]);
@@ -45,25 +42,18 @@ const MonitoringList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
-  // 데이터 로드
   useEffect(() => {
-    const fetchData = async () => {
+    (async () => {
       setLoading(true);
       setError('');
       try {
-        const { count, rentals } = await getRentalSchedules(limit, page);
-
-        // createAt에서 날짜 부분(YYYY-MM-DD)만 추출
-        const mapped = rentals.map((item: RentalScheduleAdminItem) => {
-          const rawCreated = item.createAt;
-          const dateCreated =
-            typeof rawCreated === 'string'
-              ? rawCreated.split(' ')[0]
-              : String(rawCreated).split(' ')[0];
-
-          return {
+        const first = await getRentalSchedules(1, 1);
+        const total = first.count;
+        const { rentals } = await getRentalSchedules(total, 1);
+        const mapped: MonitoringItem[] = rentals.map(
+          (item: RentalScheduleAdminItem) => ({
             no: item.id,
-            신청일: dateCreated,
+            신청일: item.createAt.split(' ')[0],
             주문자: item.userName,
             대여기간: item.rentalPeriod,
             브랜드: item.brand,
@@ -71,166 +61,123 @@ const MonitoringList: React.FC = () => {
             스타일: item.productNum,
             색상: item.color,
             사이즈: item.size,
+            이용권: item.ticketName,
             배송상태: item.deliveryStatus,
-          };
-        });
-
+          })
+        );
         setAllData(mapped);
-        setTotalCount(count);
+        setTotalCount(total);
       } catch (err) {
         console.error(err);
         setError('데이터를 불러오는 중 오류가 발생했습니다.');
       } finally {
         setLoading(false);
       }
-    };
-    fetchData();
-  }, [page]);
+    })();
+  }, []);
 
-  // 탭 변경
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
-    setSearchParams({
-      ...Object.fromEntries(searchParams.entries()),
-      page: '1',
-    });
+    setSearchParams({ status: tab.path });
+    setSelectedRows(new Set());
   };
 
-  // 선택 행 토글
-  const toggleRow = (no: number) => {
-    const copy = new Set(selectedRows);
-    copy.has(no) ? copy.delete(no) : copy.add(no);
-    setSelectedRows(copy);
-  };
-
-  // 전체 선택/해제
-  const toggleAll = () => {
-    if (selectedRows.size === filteredData.length) {
-      setSelectedRows(new Set());
-    } else {
-      setSelectedRows(new Set(filteredData.map((i) => i.no)));
-    }
-  };
-
-  // 일괄 변경
-  const handleBulkChange = async () => {
-    if (!newStatus) {
-      alert('변경할 배송상태를 선택해주세요.');
-      return;
-    }
-    if (selectedRows.size === 0) {
-      alert('변경할 항목을 선택해주세요.');
-      return;
-    }
-
+  const reloadAll = async () => {
     setLoading(true);
     try {
-      await Promise.all(
-        Array.from(selectedRows).map((id) =>
-          updateRentalScheduleStatus(id, {
-            deliveryStatus: newStatus as any,
-          })
-        )
-      );
-      alert('배송상태가 일괄 변경되었습니다.');
-
-      // 데이터 재로딩 (createAt 반영)
-      const { count, rentals } = await getRentalSchedules(limit, page);
-      const remapped = rentals.map((item: RentalScheduleAdminItem) => {
-        const rawCreated = item.createAt;
-        const dateCreated =
-          typeof rawCreated === 'string'
-            ? rawCreated.split(' ')[0]
-            : String(rawCreated).split(' ')[0];
-
-        return {
-          no: item.id,
-          신청일: dateCreated,
-          주문자: item.userName,
-          대여기간: item.rentalPeriod,
-          브랜드: item.brand,
-          종류: item.category,
-          스타일: item.productNum,
-          색상: item.color,
-          사이즈: item.size,
-          배송상태: item.deliveryStatus,
-        };
-      });
-      setAllData(remapped);
-      setTotalCount(count);
+      const first = await getRentalSchedules(1, 1);
+      const total = first.count;
+      const { rentals } = await getRentalSchedules(total, 1);
+      const mapped = rentals.map((item: RentalScheduleAdminItem) => ({
+        no: item.id,
+        신청일: item.createAt.split(' ')[0],
+        주문자: item.userName,
+        대여기간: item.rentalPeriod,
+        브랜드: item.brand,
+        종류: item.category,
+        스타일: item.productNum,
+        색상: item.color,
+        사이즈: item.size,
+        이용권: item.ticketName,
+        배송상태: item.deliveryStatus,
+      }));
+      setAllData(mapped);
+      setTotalCount(total);
       setSelectedRows(new Set());
       setNewStatus('');
-    } catch (err) {
-      console.error(err);
-      alert('일괄 변경 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }
   };
 
-  // 단건 저장
-  const handleRowSave = async (id: number, status: string) => {
+  const handleBulkChange = async () => {
+    if (!newStatus) return alert('변경할 배송상태를 선택해주세요.');
+    if (!selectedRows.size) return alert('선택된 항목이 없습니다.');
+    setLoading(true);
     try {
-      await updateRentalScheduleStatus(id, {
-        deliveryStatus: status as any,
-      });
-      alert(`#${id} 건이 "${status}" 로 변경 저장되었습니다.`);
-
-      // 다시 불러오기 (createAt 반영)
-      const { count, rentals } = await getRentalSchedules(limit, page);
-      const remapped = rentals.map((item: RentalScheduleAdminItem) => {
-        const rawCreated = item.createAt;
-        const dateCreated =
-          typeof rawCreated === 'string'
-            ? rawCreated.split(' ')[0]
-            : String(rawCreated).split(' ')[0];
-
-        return {
-          no: item.id,
-          신청일: dateCreated,
-          주문자: item.userName,
-          대여기간: item.rentalPeriod,
-          브랜드: item.brand,
-          종류: item.category,
-          스타일: item.productNum,
-          색상: item.color,
-          사이즈: item.size,
-          배송상태: item.deliveryStatus,
-        };
-      });
-      setTotalCount(count);
-      setAllData(remapped);
-    } catch (err) {
-      console.error(err);
-      alert(`#${id} 건 저장 중 오류가 발생했습니다.`);
+      await Promise.all(
+        Array.from(selectedRows).map((id) =>
+          updateRentalScheduleStatus(id, { deliveryStatus: newStatus as any })
+        )
+      );
+      alert('배송상태가 일괄 변경되었습니다.');
+      await reloadAll();
+    } catch {
+      alert('일괄 변경 중 오류가 발생했습니다.');
+      setLoading(false);
     }
   };
 
-  // 탭 + 검색 필터 적용
-  const dataByTab = allData.filter((item) => {
-    if (selectedTab.label === '전체보기') return true;
-    if (selectedTab.label === '진행내역') return item.배송상태 !== '배송취소';
-    if (selectedTab.label === '취소내역') return item.배송상태 === '배송취소';
-    return true;
-  });
+  const handleRowSave = async (id: number, status: string) => {
+    setLoading(true);
+    try {
+      await updateRentalScheduleStatus(id, { deliveryStatus: status as any });
+      alert('상태가 변경되었습니다.');
+      await reloadAll();
+    } catch {
+      alert('변경 중 오류가 발생했습니다.');
+      setLoading(false);
+    }
+  };
 
-  const filteredData = dataByTab.filter((item) => {
+  const dataByTab = allData.filter((i) =>
+    selectedTab.label === '전체보기'
+      ? true
+      : selectedTab.label === '진행내역'
+        ? i.배송상태 !== '배송취소'
+        : i.배송상태 === '배송취소'
+  );
+  const filtered = dataByTab.filter((i) => {
     const t = searchTerm;
-    return (
-      String(item.no).includes(t) ||
-      item.신청일.includes(t) ||
-      item.주문자.includes(t) ||
-      item.대여기간.includes(t) ||
-      item.브랜드.includes(t) ||
-      item.종류.includes(t) ||
-      item.스타일.toLowerCase().includes(t) ||
-      item.색상.toLowerCase().includes(t) ||
-      item.사이즈.toLowerCase().includes(t) ||
-      item.배송상태.includes(t)
-    );
+    return [
+      String(i.no),
+      i.신청일,
+      i.주문자,
+      i.대여기간,
+      i.브랜드,
+      i.종류,
+      i.스타일,
+      i.색상,
+      i.사이즈,
+      i.배송상태,
+    ]
+      .join(' ')
+      .toLowerCase()
+      .includes(t);
   });
+  const totalPages = Math.max(1, Math.ceil(filtered.length / limit));
+  const paged = filtered.slice((page - 1) * limit, page * limit);
 
-  const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+  const toggleAll = () =>
+    setSelectedRows((prev) =>
+      prev.size === paged.length ? new Set() : new Set(paged.map((i) => i.no))
+    );
+  const toggleRow = (no: number) =>
+    setSelectedRows((prev) => {
+      const s = new Set(prev);
+      s.has(no) ? s.delete(no) : s.add(no);
+      return s;
+    });
   const handleEdit = (no: number) =>
     navigate(`/monitoringdetail/${no}?page=${page}`);
 
@@ -245,7 +192,7 @@ const MonitoringList: React.FC = () => {
             value={newStatus}
             onChange={(e) => setNewStatus(e.target.value)}
           >
-            <option value=''>변경할 상태 선택</option>
+            <option value=''>변경할 상태</option>
             {statuses.map((s) => (
               <option key={s} value={s}>
                 {s}
@@ -256,13 +203,13 @@ const MonitoringList: React.FC = () => {
         </FilterGroup>
       </InfoBar>
       {loading ? (
-        <LoadingText>로딩 중...</LoadingText>
+        <LoadingText>로딩 중…</LoadingText>
       ) : error ? (
         <ErrorText>{error}</ErrorText>
       ) : (
         <TableContainer>
           <MonitoringTable
-            filteredData={filteredData}
+            filteredData={paged}
             handleEdit={handleEdit}
             selectedRows={selectedRows}
             toggleRow={toggleRow}
@@ -278,21 +225,18 @@ const MonitoringList: React.FC = () => {
     </Content>
   );
 };
-
 export default MonitoringList;
 
-/* Styled */
 const Content = styled.div`
   display: flex;
   flex-direction: column;
   background: #fff;
-  flex-grow: 1;
   padding: 10px;
   font-size: 14px;
 `;
 const HeaderTitle = styled.h1`
-  font-weight: 700;
   font-size: 16px;
+  font-weight: 700;
   margin-bottom: 18px;
 `;
 const InfoBar = styled.div`

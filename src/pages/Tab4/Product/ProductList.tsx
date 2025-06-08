@@ -1,6 +1,6 @@
 // src/pages/ProductList.tsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import ProductTable, {
@@ -11,13 +11,14 @@ import Pagination from '../../../components/Pagination';
 import {
   getProducts,
   updateProductsStatus,
-  ProductListParams,
   ProductListResponse,
 } from '../../../api/adminProduct';
 
 // API에서 내려주는 원시 아이템 타입 (retailPrice 포함)
 interface RawProductItem extends ProductItem {
   retailPrice: number;
+  // 컬러 필드 포함
+  color: string;
 }
 
 const tabs: TabItem[] = [
@@ -27,8 +28,7 @@ const tabs: TabItem[] = [
   { label: '판매종료', path: '판매종료' },
 ];
 
-// **newStatus** 값을 숫자 형태의 문자열로 설정합니다.
-// 예를 들어 '0': 등록대기, '1': 등록완료, '2': 판매종료 등으로 매핑
+// newStatus 매핑
 const statuses: Array<{ label: string; value: string }> = [
   { label: '등록완료', value: '1' },
   { label: '등록대기', value: '0' },
@@ -39,54 +39,63 @@ const ProductList: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const searchTerm = searchParams.get('search') ?? '';
+  // URL 파라미터
   const page = parseInt(searchParams.get('page') ?? '1', 10);
+  const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
   const statusParam = searchParams.get('status') ?? tabs[0].path;
 
   const matchedTab = tabs.find((t) => t.path === statusParam) || tabs[0];
   const [selectedTab, setSelectedTab] = useState<TabItem>(matchedTab);
 
-  useEffect(() => {
-    const updated = tabs.find((t) => t.path === statusParam);
-    if (updated) setSelectedTab(updated);
-  }, [statusParam]);
+  // 전체 데이터
+  const [allData, setAllData] = useState<ProductItem[]>([]);
 
-  const [productData, setProductData] = useState<ProductItem[]>([]);
-  const [totalCount, setTotalCount] = useState<number>(0);
-  const [totalPages, setTotalPages] = useState<number>(1);
-  const limit = 10;
-
-  // newStatus는 숫자 형태의 문자열('0', '1', '2')만을 받습니다.
   const [newStatus, setNewStatus] = useState<string>('');
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
 
-  const fetchProducts = async () => {
-    const params: ProductListParams = {
-      status: selectedTab.label !== '전체보기' ? selectedTab.label : undefined,
-      search: searchTerm || undefined,
-      page,
-      limit,
-    };
-    try {
-      const res: ProductListResponse = await getProducts(params);
-      const uiItems: ProductItem[] = (res.items as RawProductItem[]).map(
-        ({ retailPrice, ...rest }) => ({
-          ...rest,
-          price: retailPrice,
-        })
-      );
-      setProductData(uiItems);
-      setTotalCount(res.totalCount);
-      setTotalPages(res.totalPages);
-    } catch (err) {
-      console.error('제품 목록 로드 실패', err);
-    }
-  };
+  const limit = 10;
 
+  // 1) 전체 개수 → 전체 데이터 한 번에 불러오기
   useEffect(() => {
-    fetchProducts();
-  }, [selectedTab, searchTerm, page]);
+    const fetchAll = async () => {
+      try {
+        // 총 개수 요청
+        const first: ProductListResponse = await getProducts({
+          status: undefined,
+          search: undefined,
+          page: 1,
+          limit: 1,
+        });
+        const total = first.totalCount;
 
+        // 전체 데이터 요청
+        const res: ProductListResponse = await getProducts({
+          status: undefined,
+          search: undefined,
+          page: 1,
+          limit: total,
+        });
+        const uiItems: ProductItem[] = (res.items as RawProductItem[]).map(
+          ({ retailPrice, color, ...rest }) => ({
+            ...rest,
+            price: retailPrice,
+            color,
+          })
+        );
+        setAllData(uiItems);
+      } catch (err) {
+        console.error('제품 전체 조회 실패', err);
+      }
+    };
+    fetchAll();
+  }, []);
+
+  // 탭 URL 동기화
+  useEffect(() => {
+    setSelectedTab(matchedTab);
+  }, [matchedTab]);
+
+  // 탭 변경
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
     const params = Object.fromEntries(searchParams.entries());
@@ -95,31 +104,30 @@ const ProductList: React.FC = () => {
     setSearchParams(params);
   };
 
-  const handlePageChange = (newPage: number) => {
-    const params = Object.fromEntries(searchParams.entries());
-    params.page = newPage.toString();
-    setSearchParams(params);
-  };
+  // 2) 탭 필터링
+  const dataByTab = allData.filter((item) =>
+    selectedTab.path === '전체보기' ? true : item.status === selectedTab.path
+  );
 
-  const handleEdit = (_styleCode: string, no: number) => {
-    navigate(`/productdetail/${no}${window.location.search}`);
-  };
+  // 3) 검색 필터링 (case-insensitive)
+  const filtered = dataByTab.filter((item) => {
+    const txt = searchTerm;
+    return (
+      String(item.no).toLowerCase().includes(txt) ||
+      item.styleCode.toLowerCase().includes(txt) ||
+      item.brand.toLowerCase().includes(txt) ||
+      item.category.toLowerCase().includes(txt) ||
+      item.color.toLowerCase().includes(txt) ||
+      String(item.price).toLowerCase().includes(txt) ||
+      item.status.toLowerCase().includes(txt)
+    );
+  });
 
-  const toggleRow = (no: number) => {
-    const copy = new Set(selectedRows);
-    if (copy.has(no)) copy.delete(no);
-    else copy.add(no);
-    setSelectedRows(copy);
-  };
+  // 4) 클라이언트 페이지네이션
+  const totalPages = Math.max(1, Math.ceil(filtered.length / limit));
+  const paginated = filtered.slice((page - 1) * limit, page * limit);
 
-  const toggleAll = () => {
-    if (selectedRows.size === productData.length) {
-      setSelectedRows(new Set());
-    } else {
-      setSelectedRows(new Set(productData.map((item) => item.no)));
-    }
-  };
-
+  // 5) 일괄 상태 변경
   const handleBulkChange = async () => {
     if (!newStatus) {
       alert('변경할 상태를 선택해주세요.');
@@ -129,31 +137,21 @@ const ProductList: React.FC = () => {
       alert('변경할 상품을 선택해주세요.');
       return;
     }
-
     try {
-      // 숫자로 변환된 newStatus 값을 registration 필드로 전달
-      const idsArray = Array.from(selectedRows);
+      const ids = Array.from(selectedRows);
       await updateProductsStatus({
-        ids: idsArray,
+        ids,
         registration: parseInt(newStatus, 10),
       });
 
-      // UI에 반영: 선택된 상품들의 status를 label로 업데이트
-      const statusLabel =
-        statuses.find((s) => s.value === newStatus)?.label || '';
-      setProductData((prev) =>
+      const label = statuses.find((s) => s.value === newStatus)?.label || '';
+      setAllData((prev) =>
         prev.map((item) =>
-          selectedRows.has(item.no)
-            ? {
-                ...item,
-                status: statusLabel,
-              }
-            : item
+          selectedRows.has(item.no) ? { ...item, status: label } : item
         )
       );
-
       alert(
-        `선택된 ${selectedRows.size}개 상품을 "${statusLabel}" 상태로 일괄 변경했습니다.`
+        `선택된 ${selectedRows.size}개 상품을 "${label}" 상태로 변경했습니다.`
       );
       setSelectedRows(new Set());
       setNewStatus('');
@@ -163,12 +161,32 @@ const ProductList: React.FC = () => {
     }
   };
 
+  // 체크박스 토글
+  const toggleRow = (no: number) => {
+    const copy = new Set(selectedRows);
+    copy.has(no) ? copy.delete(no) : copy.add(no);
+    setSelectedRows(copy);
+  };
+  const toggleAll = () => {
+    if (selectedRows.size === paginated.length) {
+      setSelectedRows(new Set());
+    } else {
+      setSelectedRows(new Set(paginated.map((i) => i.no)));
+    }
+  };
+
+  // 편집 이동
+  const handleEdit = (_styleCode: string, no: number) => {
+    navigate(`/productdetail/${no}${window.location.search}`);
+  };
+
   return (
     <Content>
       <HeaderTitle>제품 관리</HeaderTitle>
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
+
       <InfoBar>
-        <TotalCount>Total: {totalCount}</TotalCount>
+        <TotalCount>Total: {filtered.length}건</TotalCount>
         <FilterGroup>
           <Select
             value={newStatus}
@@ -184,9 +202,10 @@ const ProductList: React.FC = () => {
           <BulkButton onClick={handleBulkChange}>일괄변경</BulkButton>
         </FilterGroup>
       </InfoBar>
+
       <TableContainer>
         <ProductTable
-          filteredData={productData}
+          filteredData={paginated}
           handleEdit={handleEdit}
           startNo={(page - 1) * limit}
           selectedRows={selectedRows}
@@ -194,11 +213,16 @@ const ProductList: React.FC = () => {
           toggleAll={toggleAll}
         />
       </TableContainer>
+
       <FooterRow>
         <Pagination
           currentPage={page}
           totalPages={totalPages}
-          onPageChange={handlePageChange}
+          onPageChange={(p) => {
+            const params = Object.fromEntries(searchParams.entries());
+            params.page = p.toString();
+            setSearchParams(params);
+          }}
         />
       </FooterRow>
     </Content>
@@ -207,6 +231,7 @@ const ProductList: React.FC = () => {
 
 export default ProductList;
 
+/* Styled Components */
 const Content = styled.div`
   display: flex;
   flex-direction: column;

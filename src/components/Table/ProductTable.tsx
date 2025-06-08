@@ -2,29 +2,6 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
 
-/** 인라인 색상 옵션 — 분리 컴포넌트 없이 */
-const colorOptions = [
-  { label: '전체색상', value: '' },
-  { label: '화이트', value: 'WHITE' },
-  { label: '블랙', value: 'BLACK' },
-  { label: '그레이', value: 'GRAY' },
-  { label: '네이비', value: 'NAVY' },
-  { label: '아이보리', value: 'IVORY' },
-  { label: '베이지', value: 'BEIGE' },
-  { label: '브라운', value: 'BROWN' },
-  { label: '카키', value: 'KHAKI' },
-  { label: '그린', value: 'GREEN' },
-  { label: '블루', value: 'BLUE' },
-  { label: '퍼플', value: 'PURPLE' },
-  { label: '버건디', value: 'BURGUNDY' },
-  { label: '레드', value: 'RED' },
-  { label: '핑크', value: 'PINK' },
-  { label: '옐로우', value: 'YELLOW' },
-  { label: '오렌지', value: 'ORANGE' },
-  { label: '마젠타', value: 'MAGENTA' },
-  { label: '민트', value: 'MINT' },
-] as const;
-
 const SIZE_LABELS: Record<string, string> = {
   '44': 'S',
   '55': 'M',
@@ -95,9 +72,6 @@ const ProductTable: React.FC<ProductTableProps> = ({
       .join(' / ');
   };
 
-  const getColorLabel = (value: string) =>
-    colorOptions.find((o) => o.value === value)?.label || value;
-
   return (
     <Table>
       <colgroup>
@@ -146,7 +120,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
             </Td>
             <Td title={item.brand}>{item.brand}</Td>
             <Td title={item.category}>{item.category}</Td>
-            <Td title={item.color}>{getColorLabel(item.color)}</Td>
+            <Td title={item.color}>{item.color}</Td>
             <Td title={item.size}>{formatSize(item.size)}</Td>
             <Td title={`${item.price.toLocaleString()}원`}>
               {item.price.toLocaleString()}원

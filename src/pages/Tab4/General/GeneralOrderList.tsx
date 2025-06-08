@@ -9,7 +9,7 @@ import GeneralOrderListTable, {
 import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
 import Pagination from '../../../components/Pagination';
 
-/** 더미 데이터 (배송 관련 필드 제거, 결제 필드 추가) */
+/** 더미 데이터 */
 const dummyGeneralOrderList: GeneralOrderListItem[] = [
   {
     no: 13486,
@@ -123,9 +123,7 @@ const GeneralOrderList: React.FC = () => {
   // 탭 변경 핸들러 (페이지 리셋)
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
-    const params = Object.fromEntries(searchParams.entries());
-    params.page = '1';
-    setSearchParams(params);
+    setSearchParams({ status: tab.path, page: '1' });
   };
 
   // 탭별 필터링
@@ -139,12 +137,12 @@ const GeneralOrderList: React.FC = () => {
     return ['취소요청', '환불 진행중', '결제실패'].includes(item.paymentStatus);
   });
 
-  // 검색어 필터링
+  // 검색어 필터링 (case-insensitive)
   const filteredData = dataByTab.filter((item) => {
     const t = searchTerm;
     return (
-      String(item.no).includes(t) ||
-      item.orderDate.includes(t) ||
+      String(item.no).toLowerCase().includes(t) ||
+      item.orderDate.toLowerCase().includes(t) ||
       item.buyerAccount.toLowerCase().includes(t) ||
       item.brand.toLowerCase().includes(t) ||
       item.styleCode.toLowerCase().includes(t) ||
@@ -172,6 +170,7 @@ const GeneralOrderList: React.FC = () => {
     <Content>
       <HeaderTitle>구매 내역</HeaderTitle>
 
+      {/* SubHeader 에 검색 Input 포함 */}
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
 
       <InfoBar>
@@ -195,7 +194,6 @@ const GeneralOrderList: React.FC = () => {
 export default GeneralOrderList;
 
 /* Styled Components */
-
 const Content = styled.div`
   display: flex;
   flex-direction: column;
@@ -204,30 +202,23 @@ const Content = styled.div`
   font-size: 14px;
   padding: 10px;
 `;
-
 const HeaderTitle = styled.h1`
-  text-align: left;
-
   font-weight: 700;
   font-size: 16px;
   margin-bottom: 18px;
 `;
-
 const InfoBar = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 15px;
 `;
-
 const TotalCountText = styled.div`
   font-weight: 900;
   font-size: 12px;
 `;
-
 const TableContainer = styled.div`
   box-sizing: border-box;
 `;
-
 const FooterRow = styled.div`
   display: flex;
   justify-content: space-between;

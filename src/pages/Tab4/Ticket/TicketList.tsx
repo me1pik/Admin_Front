@@ -1,3 +1,4 @@
+// src/pages/Ticket/TicketList.tsx
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -22,40 +23,55 @@ const TicketList: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
 
+  // 파라미터
   const page = parseInt(searchParams.get('page') ?? '1', 10);
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
   const limit = 10;
 
-  const [adminTickets, setAdminTickets] = useState<AdminTicketItem[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
+  // 전체 데이터
+  const [allTickets, setAllTickets] = useState<AdminTicketItem[]>([]);
+
   const [loading, setLoading] = useState(false);
 
-  // 1) API 호출
+  // 1) 전체 데이터 한 번에 불러오기
   useEffect(() => {
-    setLoading(true);
-    getAdminPaginatedTickets(page, limit)
-      .then(({ total, tickets }) => {
-        setTotalCount(total);
-        setAdminTickets(tickets);
-      })
-      .catch((err) => {
-        console.error('관리자용 티켓 조회 실패:', err);
-      })
-      .finally(() => setLoading(false));
-  }, [page]);
+    const fetchAll = async () => {
+      setLoading(true);
+      try {
+        // 1-1. 전체 개수 얻기
+        const first = await getAdminPaginatedTickets(1, 1);
+        const total = first.total;
 
-  // 2) 탭 필터링
-  const dataByTab = adminTickets.filter((t) =>
+        // 1-2. 전체 데이터 한 번에 요청
+        const { tickets } = await getAdminPaginatedTickets(1, total);
+        setAllTickets(tickets);
+      } catch (err) {
+        console.error('관리자용 티켓 전체 조회 실패:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAll();
+  }, []);
+
+  // 2) 탭 변경 핸들러 (status 필터 + 페이지 1로)
+  const handleTabChange = (tab: TabItem) => {
+    setSelectedTab(tab);
+    setSearchParams({ status: tab.path });
+  };
+
+  // 3) 탭 필터링
+  const dataByTab = allTickets.filter((t) =>
     selectedTab.path === '' ? true : t.ticket_status === selectedTab.path
   );
 
-  // 3) 검색 필터링
+  // 4) 검색 필터링 (case-insensitive)
   const filteredData = dataByTab.filter((t) => {
     const txt = searchTerm;
     return (
-      String(t.id).includes(txt) ||
-      t.purchaseDate.includes(txt) ||
-      t.nextDate.includes(txt) ||
+      String(t.id).toLowerCase().includes(txt) ||
+      t.purchaseDate.toLowerCase().includes(txt) ||
+      (t.nextDate || '-').toLowerCase().includes(txt) ||
       t.user.toLowerCase().includes(txt) ||
       t.ticket_name.toLowerCase().includes(txt) ||
       t.이용기간.toLowerCase().includes(txt) ||
@@ -64,12 +80,12 @@ const TicketList: React.FC = () => {
     );
   });
 
-  // 4) 서버 페이징에 맞춰 slice 제거
-  const totalPages = Math.max(1, Math.ceil(totalCount / limit));
-  const currentPageData = filteredData;
+  // 5) 클라이언트 페이지네이션
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / limit));
+  const paginated = filteredData.slice((page - 1) * limit, page * limit);
 
-  // 5) AdminTicketItem → TicketItem 매핑
-  const tableData: TicketItem[] = currentPageData.map((t) => ({
+  // 6) 테이블용 매핑
+  const tableData: TicketItem[] = paginated.map((t) => ({
     no: t.id,
     paymentDate: t.purchaseDate,
     nextPaymentDate: t.nextDate || '-',
@@ -79,13 +95,6 @@ const TicketList: React.FC = () => {
     usageCount: t.ticket_count,
     status: t.ticket_status,
   }));
-
-  const handleTabChange = (tab: TabItem) => {
-    setSelectedTab(tab);
-    const params = Object.fromEntries(searchParams.entries());
-    params.page = '1';
-    setSearchParams(params);
-  };
 
   const handleEdit = (no: number) => {
     navigate(`/ticketDetail/${no}`);
@@ -98,7 +107,7 @@ const TicketList: React.FC = () => {
 
       <InfoBar>
         <TotalCountText>
-          {loading ? '로딩 중...' : `총 ${totalCount}건`}
+          {loading ? '로딩 중...' : `총 ${filteredData.length}건`}
         </TotalCountText>
       </InfoBar>
 
@@ -115,8 +124,7 @@ const TicketList: React.FC = () => {
 
 export default TicketList;
 
-/* Styled Components 이하 생략(변경 없음) */
-
+/* Styled Components */
 const Content = styled.div`
   display: flex;
   flex-direction: column;
@@ -125,28 +133,23 @@ const Content = styled.div`
   font-size: 14px;
   padding: 16px;
 `;
-
 const HeaderTitle = styled.h1`
   font-size: 16px;
   font-weight: 700;
   margin-bottom: 12px;
 `;
-
 const InfoBar = styled.div`
   display: flex;
   justify-content: flex-start;
   margin-bottom: 8px;
 `;
-
 const TotalCountText = styled.div`
   font-weight: 700;
   font-size: 12px;
 `;
-
 const TableContainer = styled.div`
   flex-grow: 1;
 `;
-
 const FooterRow = styled.div`
   display: flex;
   justify-content: center;
