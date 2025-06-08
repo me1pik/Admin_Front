@@ -11,8 +11,8 @@ export interface AdminBrand {
   brandName: string;
   contactPerson: string;
   contactNumber: string;
-  imageUrl: string;
-  isPopular: boolean;
+  productNum: number;
+  discount_rate: number;
   isActive: boolean;
 }
 
@@ -60,6 +60,7 @@ export interface CreateAdminBrandRequest {
   discount_rate: number;
   location: string;
   status: string;
+  productCount: number;
 }
 
 /**
@@ -87,6 +88,7 @@ export interface UpdateAdminBrandRequest {
   discount_rate?: number;
   location?: string;
   status?: string;
+  productCount?: number;
 }
 
 /**

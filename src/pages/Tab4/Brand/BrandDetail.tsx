@@ -2,46 +2,30 @@
 
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../../../components/Header/SettingsDetailSubHeader';
 import SettingsDetailTopBoxes from '../../../components/SettingsDetailTopBoxes';
 import ShippingTabBar from '../../../components/TabBar';
 import ReusableModal2 from '../../../components/OneButtonModal';
-import { TabItem } from '../../../components/Header/SearchSubHeader';
 
-// API 불러오기
 import {
   getAdminBrandDetail,
   updateAdminBrand,
   createAdminBrand,
   getAdminBrandSelectOptions,
 } from '../../../api/brand/brandApi';
+import { CreateAdminBrandRequest } from '../../../api/brand/brandApi';
 
 interface BrandDetailProps {
   isCreate?: boolean;
-  selectOptions?: TabItem[];
 }
 
-const defaultTabs: TabItem[] = [
-  { label: '서비스', path: '서비스' },
-  { label: '주문/결제', path: '주문/결제' },
-  { label: '배송/반품', path: '배송/반품' },
-  { label: '이용권', path: '이용권' },
-];
-
-const BrandDetail: React.FC<BrandDetailProps> = ({
-  isCreate = false,
-  selectOptions: propTabs,
-}) => {
+const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
   const navigate = useNavigate();
-  const location = useLocation() as { state?: { selectOptions: TabItem[] } };
   const { no } = useParams<{ no: string }>();
   const numericNo = isCreate ? undefined : Number(no);
-  const tabs = isCreate
-    ? (propTabs ?? defaultTabs)
-    : (location.state?.selectOptions ?? defaultTabs);
 
   // — 폼 필드
   const [groupCompany, setGroupCompany] = useState('');
@@ -63,33 +47,25 @@ const BrandDetail: React.FC<BrandDetailProps> = ({
   const [modalTitle, setModalTitle] = useState('');
   const [modalMessage, setModalMessage] = useState('');
 
-  // 1) 옵션 먼저, 그다음 상세 데이터 로드
+  // 초기 데이터 로드
   useEffect(() => {
     const init = async () => {
       try {
-        // 1) 셀렉트 옵션 로드
         const opts = await getAdminBrandSelectOptions();
         setDiscountOptions(opts.discountRates);
         setStatusOptions(opts.statusOptions);
 
-        // 2) 상세 모드일 때만 데이터 로드
         if (!isCreate && numericNo != null) {
           const data = await getAdminBrandDetail(numericNo);
           setGroupCompany(data.groupName);
           setBrandName(data.brandName);
           setProductCount(data.productCount);
-          // 저장된 값이 있으면 그대로, 없으면 첫 옵션으로
           setDiscountRate(
-            data.discount_rate != null
-              ? String(data.discount_rate)
-              : opts.discountRates[0]
+            data.discount_rate != null ? String(data.discount_rate) : ''
           );
           setManager(data.contactPerson ?? '');
           setContact(data.contactNumber ?? '');
           setStatus(data.status);
-        } else if (isCreate) {
-          // 등록 모드일 때도 첫 옵션을 기본으로 선택
-          setDiscountRate(opts.discountRates[0]);
         }
       } catch (err) {
         console.error('초기 로드 실패:', err);
@@ -97,27 +73,45 @@ const BrandDetail: React.FC<BrandDetailProps> = ({
         setIsLoading(false);
       }
     };
-
     init();
   }, [isCreate, numericNo]);
 
-  // 2) 저장 핸들러 (등록·수정)
+  // 저장 핸들러
   const handleSave = async () => {
     try {
-      const body = {
+      const base: Omit<
+        CreateAdminBrandRequest,
+        | 'groupName'
+        | 'brandName'
+        | 'productCount'
+        | 'discount_rate'
+        | 'contactPerson'
+        | 'contactNumber'
+        | 'status'
+      > = {
+        imageUrl: '',
+        isPopular: false,
+        isActive: true,
+        location: '',
+      };
+
+      const body: CreateAdminBrandRequest = {
+        ...base,
         groupName: groupCompany,
         brandName,
         productCount,
-        discount_rate: discountRate !== '' ? Number(discountRate) : undefined,
+        discount_rate: Number(discountRate) || 0,
         contactPerson: manager,
         contactNumber: contact,
         status,
       };
+
       if (isCreate) {
         await createAdminBrand(body);
       } else if (numericNo != null) {
         await updateAdminBrand(numericNo, body);
       }
+
       setModalTitle(isCreate ? '등록 완료' : '변경 완료');
       setModalMessage(
         isCreate ? '새 Brand가 등록되었습니다.' : '변경 내용이 저장되었습니다.'
@@ -171,6 +165,7 @@ const BrandDetail: React.FC<BrandDetailProps> = ({
       <SettingsDetailTopBoxes />
       <DividerDashed />
 
+      {/* “상세내용” 탭바 */}
       <ShippingTabBar
         tabs={['상세내용']}
         activeIndex={activeTab}
@@ -213,6 +208,7 @@ const BrandDetail: React.FC<BrandDetailProps> = ({
                 value={discountRate}
                 onChange={(e) => setDiscountRate(e.target.value)}
               >
+                <option value=''>선택</option>
                 {discountOptions.map((d) => (
                   <option key={d} value={d}>
                     {d}%
@@ -271,7 +267,7 @@ const BrandDetail: React.FC<BrandDetailProps> = ({
 
 export default BrandDetail;
 
-/* styled-components */
+/* ====================== styled-components ====================== */
 
 const Container = styled.div`
   width: 100%;
