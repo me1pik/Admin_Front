@@ -1,5 +1,3 @@
-// src/api/ticket/admin.ts
-
 import { Axios } from '../Axios';
 
 /**
@@ -38,6 +36,46 @@ export const getAdminPaginatedTickets = async (
     {
       params: { page, limit },
     }
+  );
+  return response.data;
+};
+
+/**
+ * 관리자용: 이용권 상태 변경
+ *
+ * PATCH /ticket/{id}/status
+ *
+ * @param id - 변경할 티켓 ID
+ * @param body - { status: string; isActive: boolean }
+ * @returns 수정된 티켓 정보
+ */
+export const changeTicketStatus = async (
+  id: number,
+  body: {
+    status: string;
+    isActive: boolean;
+  }
+): Promise<AdminTicketItem> => {
+  const response = await Axios.patch<AdminTicketItem>(
+    `/ticket/${id}/status`,
+    body
+  );
+  return response.data;
+};
+
+/**
+ * 관리자용: 무제한권 ↔ 제한권 전환 (4회권 ID = 2, 무제한권 ID = 3)
+ *
+ * PATCH /ticket/convert-ticket/{ticketId}
+ *
+ * @param ticketId - 변경할 티켓 ID
+ * @returns 변경된 티켓 반환
+ */
+export const convertTicketType = async (
+  ticketId: number
+): Promise<AdminTicketItem> => {
+  const response = await Axios.patch<AdminTicketItem>(
+    `/ticket/convert-ticket/${ticketId}`
   );
   return response.data;
 };

@@ -1,4 +1,3 @@
-// src/pages/Ticket/TicketList.tsx
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -7,6 +6,7 @@ import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
 import Pagination from '../../../components/Pagination';
 import {
   getAdminPaginatedTickets,
+  changeTicketStatus,
   AdminTicketItem,
 } from '../../../api/Ticket/TicketApi';
 
@@ -23,6 +23,12 @@ const TicketList: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
 
+  // 체크박스 상태
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  // 일괄변경용 상태
+  const [newStatus, setNewStatus] = useState<string>('');
+  const [bulkLoading, setBulkLoading] = useState(false);
+
   // 파라미터
   const page = parseInt(searchParams.get('page') ?? '1', 10);
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
@@ -30,46 +36,42 @@ const TicketList: React.FC = () => {
 
   // 전체 데이터
   const [allTickets, setAllTickets] = useState<AdminTicketItem[]>([]);
-
   const [loading, setLoading] = useState(false);
 
-  // 1) 전체 데이터 한 번에 불러오기
-  useEffect(() => {
-    const fetchAll = async () => {
-      setLoading(true);
-      try {
-        // 1-1. 전체 개수 얻기
-        const first = await getAdminPaginatedTickets(1, 1);
-        const total = first.total;
+  // 조회 함수
+  const fetchAll = async () => {
+    setLoading(true);
+    try {
+      const first = await getAdminPaginatedTickets(1, 1);
+      const total = first.total;
+      const { tickets } = await getAdminPaginatedTickets(1, total);
+      setAllTickets(tickets);
+      setSelectedRows(new Set());
+    } catch (err) {
+      console.error('전체 조회 실패:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        // 1-2. 전체 데이터 한 번에 요청
-        const { tickets } = await getAdminPaginatedTickets(1, total);
-        setAllTickets(tickets);
-      } catch (err) {
-        console.error('관리자용 티켓 전체 조회 실패:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  useEffect(() => {
     fetchAll();
   }, []);
 
-  // 2) 탭 변경 핸들러 (status 필터 + 페이지 1로)
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
     setSearchParams({ status: tab.path });
+    setSelectedRows(new Set());
   };
 
-  // 3) 탭 필터링
   const dataByTab = allTickets.filter((t) =>
     selectedTab.path === '' ? true : t.ticket_status === selectedTab.path
   );
 
-  // 4) 검색 필터링 (case-insensitive)
   const filteredData = dataByTab.filter((t) => {
     const txt = searchTerm;
     return (
-      String(t.id).toLowerCase().includes(txt) ||
+      String(t.id).includes(txt) ||
       t.purchaseDate.toLowerCase().includes(txt) ||
       (t.nextDate || '-').toLowerCase().includes(txt) ||
       t.user.toLowerCase().includes(txt) ||
@@ -80,24 +82,52 @@ const TicketList: React.FC = () => {
     );
   });
 
-  // 5) 클라이언트 페이지네이션
   const totalPages = Math.max(1, Math.ceil(filteredData.length / limit));
   const paginated = filteredData.slice((page - 1) * limit, page * limit);
 
-  // 6) 테이블용 매핑
   const tableData: TicketItem[] = paginated.map((t) => ({
     no: t.id,
     paymentDate: t.purchaseDate,
     nextPaymentDate: t.nextDate || '-',
     user: t.user,
     type: t.ticket_name,
-    usagePeriod: t.이용기간 === '-' ? '-' : t.이용기간.replace(/-/g, '.'),
+    usagePeriod: t.이용기간.replace(/-/g, '.') || '-',
     usageCount: t.ticket_count,
     status: t.ticket_status,
   }));
 
   const handleEdit = (no: number) => {
     navigate(`/ticketDetail/${no}`);
+  };
+
+  // 일괄변경 핸들러
+  const handleBulkChange = async () => {
+    if (!newStatus || selectedRows.size === 0) return;
+    if (
+      !window.confirm(
+        `선택된 ${selectedRows.size}건 상태를 "${newStatus}"로 변경하시겠습니까?`
+      )
+    )
+      return;
+    setBulkLoading(true);
+    try {
+      await Promise.all(
+        Array.from(selectedRows).map((id) =>
+          changeTicketStatus(id, {
+            status: newStatus,
+            isActive: newStatus !== '취소완료',
+          })
+        )
+      );
+      alert('상태가 변경되었습니다.');
+      setNewStatus('');
+      fetchAll();
+    } catch (err) {
+      console.error('일괄 상태 변경 실패:', err);
+      alert('일괄 변경 중 오류가 발생했습니다.');
+    } finally {
+      setBulkLoading(false);
+    }
   };
 
   return (
@@ -109,10 +139,34 @@ const TicketList: React.FC = () => {
         <TotalCountText>
           {loading ? '로딩 중...' : `총 ${filteredData.length}건`}
         </TotalCountText>
+        <FilterGroup>
+          <Select
+            value={newStatus}
+            onChange={(e) => setNewStatus(e.target.value)}
+          >
+            <option value=''>변경할 상태 선택</option>
+            {tabs.slice(1).map((tab) => (
+              <option key={tab.path} value={tab.path}>
+                {tab.label}
+              </option>
+            ))}
+          </Select>
+          <BulkButton
+            onClick={handleBulkChange}
+            disabled={!newStatus || bulkLoading}
+          >
+            {bulkLoading ? '변경중...' : '일괄변경'}
+          </BulkButton>
+        </FilterGroup>
       </InfoBar>
 
       <TableContainer>
-        <TicketTable filteredData={tableData} handleEdit={handleEdit} />
+        <TicketTable
+          filteredData={tableData}
+          handleEdit={handleEdit}
+          selectedRows={selectedRows}
+          setSelectedRows={setSelectedRows}
+        />
       </TableContainer>
 
       <FooterRow>
@@ -140,12 +194,32 @@ const HeaderTitle = styled.h1`
 `;
 const InfoBar = styled.div`
   display: flex;
-  justify-content: flex-start;
+  align-items: center;
   margin-bottom: 8px;
 `;
 const TotalCountText = styled.div`
   font-weight: 700;
   font-size: 12px;
+`;
+const FilterGroup = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+`;
+const Select = styled.select`
+  height: 32px;
+  padding: 0 8px;
+  font-size: 12px;
+  border: 1px solid #ccc;
+`;
+const BulkButton = styled.button`
+  height: 32px;
+  padding: 0 12px;
+  background: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
 `;
 const TableContainer = styled.div`
   flex-grow: 1;

@@ -1,4 +1,3 @@
-// src/components/Table/TicketTable.tsx
 import React from 'react';
 import styled from 'styled-components';
 
@@ -17,12 +16,36 @@ export interface TicketItem {
 interface TicketTableProps {
   filteredData: TicketItem[];
   handleEdit: (no: number) => void;
+  selectedRows: Set<number>;
+  setSelectedRows: React.Dispatch<React.SetStateAction<Set<number>>>;
 }
 
 const TicketTable: React.FC<TicketTableProps> = ({
   filteredData,
   handleEdit,
+  selectedRows,
+  setSelectedRows,
 }) => {
+  const allSelected =
+    filteredData.length > 0 && selectedRows.size === filteredData.length;
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedRows(new Set(filteredData.map((t) => t.no)));
+    } else {
+      setSelectedRows(new Set());
+    }
+  };
+
+  const handleRowSelect = (no: number) => {
+    setSelectedRows((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(no)) newSet.delete(no);
+      else newSet.add(no);
+      return newSet;
+    });
+  };
+
   const getStatusStyle = (status: string) => {
     switch (status) {
       case '결제완료':
@@ -41,6 +64,7 @@ const TicketTable: React.FC<TicketTableProps> = ({
   return (
     <Table>
       <colgroup>
+        <col style={{ width: '40px' }} /> {/* 체크박스 */}
         <col style={{ width: '50px' }} /> {/* 번호 */}
         <col style={{ width: '100px' }} /> {/* 결제일 */}
         <col style={{ width: '100px' }} /> {/* 다음결제일 */}
@@ -52,6 +76,14 @@ const TicketTable: React.FC<TicketTableProps> = ({
       </colgroup>
       <thead>
         <TableRow>
+          <Th>
+            <input
+              type='checkbox'
+              onChange={handleSelectAll}
+              checked={allSelected}
+              disabled={filteredData.length === 0}
+            />
+          </Th>
           <Th>번호</Th>
           <Th>결제일</Th>
           <Th>다음결제일</Th>
@@ -67,6 +99,13 @@ const TicketTable: React.FC<TicketTableProps> = ({
           const style = getStatusStyle(item.status);
           return (
             <TableRow key={item.no}>
+              <Td>
+                <input
+                  type='checkbox'
+                  checked={selectedRows.has(item.no)}
+                  onChange={() => handleRowSelect(item.no)}
+                />
+              </Td>
               <Td>{item.no}</Td>
               <Td>{item.paymentDate}</Td>
               <Td>{item.nextPaymentDate}</Td>
@@ -86,7 +125,7 @@ const TicketTable: React.FC<TicketTableProps> = ({
         {filteredData.length < 10 &&
           Array.from({ length: 10 - filteredData.length }).map((_, i) => (
             <TableRow key={`empty-${i}`}>
-              {Array.from({ length: 8 }).map((__, idx) => (
+              {Array.from({ length: 9 }).map((__, idx) => (
                 <Td key={idx}>&nbsp;</Td>
               ))}
             </TableRow>
@@ -112,7 +151,6 @@ const TableRow = styled.tr`
   height: 44px;
   &:hover {
     background-color: #f8f9fa;
-    cursor: pointer;
   }
 `;
 
