@@ -2,16 +2,27 @@ import { Axios } from '../Axios';
 
 /**
  * 관리자용 이용권 항목 스펙
+ * 백엔드 예시 응답:
+ * {
+ *   "id": 17,
+ *   "purchaseDate": "2025-05-01",
+ *   "nextDate": "2025-06-01",
+ *   "user": "홍길동 (gildong)",
+ *   "ticket_name": "무제한 이용권",
+ *   "이용기간": "2025-05-01 ~ 2025-08-01",
+ *   "ticket_count": "∞ / 3",
+ *   "ticket_status": "ACTIVE"
+ * }
  */
 export interface AdminTicketItem {
   id: number;
-  purchaseDate: string;
-  nextDate: string;
-  user: string;
-  ticket_name: string;
-  이용기간: string;
-  ticket_count: string;
-  ticket_status: string;
+  purchaseDate: string; // 결제일, ISO 날짜 문자열
+  nextDate: string; // 다음 결제일, ISO 날짜 문자열
+  user: string; // 사용자 이름 혹은 식별자 (예: "홍길동 (gildong)")
+  ticket_name: string; // 티켓 종류 이름 (예: "무제한 이용권")
+  이용기간: string; // 예: "2025-05-01 ~ 2025-08-01"
+  ticket_count: string; // 예: "∞ / 3"
+  ticket_status: string; // 예: "ACTIVE", "PENDING", "CANCEL_REQUEST", "CANCELLED" 등 백엔드 정의 값
 }
 
 /**
@@ -40,6 +51,7 @@ export const getAdminPaginatedTickets = async (
 
 /**
  * 관리자용: 단일 이용권 상세 조회
+ * 명세에 따라 GET /ticket/user/{id}
  */
 export const getAdminTicketById = async (
   id: number
@@ -50,6 +62,8 @@ export const getAdminTicketById = async (
 
 /**
  * 관리자용: 이용권 상태 변경
+ * - body 예시: { status: "CANCELLED", isActive: false }
+ * - 백엔드 스펙에 맞춰 status 값과 isActive 처리 로직 확인 후 전달
  */
 export const changeTicketStatus = async (
   id: number,
@@ -75,4 +89,13 @@ export const convertTicketType = async (
     `/ticket/convert-ticket/${ticketId}`
   );
   return response.data;
+};
+
+/**
+ * 관리자용: 이용권 삭제
+ * - 예: DELETE /ticket/{id}
+ * - 백엔드에 실제 삭제 엔드포인트가 다르면 수정 필요
+ */
+export const deleteAdminTicketById = async (id: number): Promise<void> => {
+  await Axios.delete(`/ticket/${id}`);
 };
