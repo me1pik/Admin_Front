@@ -130,7 +130,7 @@ export const updateAdminBrand = async (
  * (기존 deleteBrand 경로가 /brand/{id}였으나, 관리자용 삭제가 /brand/admin/{id}라면 수정 필요)
  */
 export const deleteAdminBrand = async (id: number): Promise<void> => {
-  await Axios.delete(`/brand/admin/${id}`);
+  await Axios.delete(`/brand/${id}`);
 };
 
 /**

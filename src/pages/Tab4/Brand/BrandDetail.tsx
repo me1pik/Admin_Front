@@ -8,7 +8,7 @@ import SettingsDetailSubHeader, {
 } from '../../../components/Header/SettingsDetailSubHeader';
 import SettingsDetailTopBoxes from '../../../components/SettingsDetailTopBoxes';
 import ShippingTabBar from '../../../components/TabBar';
-import ReusableModal2 from '../../../components/OneButtonModal';
+import ReusableModal2 from '../../../components/TwoButtonModal';
 
 import {
   getAdminBrandDetail,
@@ -22,31 +22,26 @@ import {
 } from '../../../api/brand/brandApi';
 
 interface BrandDetailProps {
-  // 생성 모드를 route param 등으로 구분하려면, 예: /branddetail/create 경로일 때 isCreate=true로 처리
   isCreate?: boolean;
 }
 
 const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
   const navigate = useNavigate();
   const { no } = useParams<{ no: string }>();
-  // no가 'create' 같은 문자열일 때 생성 모드로 처리 가능
   const numericNo =
     !isCreate && no && /^\d+$/.test(no) ? Number(no) : undefined;
 
-  // — 폼 필드 상태
   const [groupCompany, setGroupCompany] = useState<string>('');
   const [brandName, setBrandName] = useState<string>('');
   const [productCount, setProductCount] = useState<number>(0);
-  const [discountRate, setDiscountRate] = useState<string>(''); // 문자열로 선택/입력
+  const [discountRate, setDiscountRate] = useState<string>('');
   const [manager, setManager] = useState<string>('');
   const [contact, setContact] = useState<string>('');
-  const [status, setStatus] = useState<string>(''); // 상태 문자열
+  const [status, setStatus] = useState<string>('');
 
-  // — 옵션 리스트
   const [discountOptions, setDiscountOptions] = useState<string[]>([]);
   const [statusOptions, setStatusOptions] = useState<string[]>([]);
 
-  // — UI 상태
   const [activeTab, setActiveTab] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -54,7 +49,6 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
   const [modalMessage, setModalMessage] = useState<string>('');
   const [confirmAction, setConfirmAction] = useState<'delete' | null>(null);
 
-  // 초기 데이터 로드
   useEffect(() => {
     const init = async () => {
       setIsLoading(true);
@@ -63,7 +57,6 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
         setDiscountOptions(opts.discountRates || []);
         setStatusOptions(opts.statusOptions || []);
 
-        // 상세 조회 모드
         if (numericNo != null) {
           const data: AdminBrandDetail = await getAdminBrandDetail(numericNo);
           setGroupCompany(data.groupName ?? '');
@@ -76,27 +69,25 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
           );
           setManager(data.contactPerson ?? '');
           setContact(data.contactNumber ?? '');
-          // isActive → status 문자열 매핑
           if (data.isActive) {
-            if (opts.statusOptions.includes('등록완료')) {
-              setStatus('등록완료');
-            } else {
-              setStatus(opts.statusOptions[0] || '');
-            }
+            setStatus(
+              opts.statusOptions.includes('등록완료')
+                ? '등록완료'
+                : opts.statusOptions[0] || ''
+            );
           } else {
-            if (opts.statusOptions.includes('계약종료')) {
-              setStatus('계약종료');
-            } else {
-              setStatus(opts.statusOptions[0] || '');
-            }
+            setStatus(
+              opts.statusOptions.includes('계약종료')
+                ? '계약종료'
+                : opts.statusOptions[0] || ''
+            );
           }
         } else {
-          // 생성 모드: 기본 status 설정
-          if (opts.statusOptions.includes('등록대기')) {
-            setStatus('등록대기');
-          } else {
-            setStatus(opts.statusOptions[0] || '');
-          }
+          setStatus(
+            opts.statusOptions.includes('등록대기')
+              ? '등록대기'
+              : opts.statusOptions[0] || ''
+          );
         }
       } catch (err) {
         console.error('초기 로드 실패:', err);
@@ -107,17 +98,9 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
     init();
   }, [numericNo]);
 
-  // 저장 핸들러
   const handleSave = async () => {
     try {
-      // status 문자열을 isActive로 변환
-      let isActiveValue: boolean;
-      if (status === '등록완료') {
-        isActiveValue = true;
-      } else {
-        isActiveValue = false;
-      }
-      // body 구성 (필요 필드만)
+      const isActiveValue = status === '등록완료';
       const bodyCreate: CreateAdminBrandRequest = {
         groupName: groupCompany,
         brandName: brandName,
@@ -125,9 +108,9 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
         contactNumber: contact,
         discount_rate: Number(discountRate) || 0,
         isActive: isActiveValue,
-        imageUrl: '', // UI 추가 시 설정
-        isPopular: false, // UI 추가 시 설정
-        brand_category: '', // UI 추가 시 설정
+        imageUrl: '',
+        isPopular: false,
+        brand_category: '',
       };
       const bodyUpdate: UpdateAdminBrandRequest = {
         groupName: groupCompany,
@@ -136,7 +119,6 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
         contactNumber: contact,
         discount_rate: Number(discountRate) || 0,
         isActive: isActiveValue,
-        // imageUrl/isPopular/brand_category 등 필요 시 포함
       };
 
       if (numericNo != null) {
@@ -165,12 +147,14 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
   const handleBack = () => {
     navigate('/brandlist');
   };
+
   const handleDelete = () => {
     setModalTitle('삭제 확인');
     setModalMessage('정말 브랜드를 삭제하시겠습니까?');
     setConfirmAction('delete');
     setIsModalOpen(true);
   };
+
   const handleConfirm = async () => {
     setIsModalOpen(false);
     if (confirmAction === 'delete' && numericNo != null) {
@@ -178,18 +162,15 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
         await deleteAdminBrand(numericNo);
         setModalTitle('삭제 완료');
         setModalMessage('브랜드가 삭제되었습니다.');
+        setConfirmAction(null);
         setIsModalOpen(true);
-        // 삭제 후 목록으로 돌아가기
-        navigate('/brandlist');
       } catch (err) {
         console.error('삭제 실패:', err);
         setModalTitle('오류');
         setModalMessage('삭제 중 오류가 발생했습니다.');
+        setConfirmAction(null);
         setIsModalOpen(true);
       }
-    } else {
-      // 단순 확인 모드일 때
-      setIsModalOpen(false);
     }
   };
 
@@ -224,7 +205,6 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
       <SettingsDetailTopBoxes />
       <DividerDashed />
 
-      {/* “상세내용” 탭바 */}
       <ShippingTabBar
         tabs={['상세내용']}
         activeIndex={activeTab}
@@ -233,7 +213,6 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
 
       {activeTab === 0 && (
         <FormBox>
-          {/* 1행: 그룹사, 브랜드명, 제품수 */}
           <Row>
             <Field>
               <label>그룹사</label>
@@ -259,7 +238,6 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
             </Field>
           </Row>
 
-          {/* 2행: 할인율, 담당자, 연락처 */}
           <Row>
             <Field>
               <label>할인율(%)</label>
@@ -291,7 +269,6 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
             </Field>
           </Row>
 
-          {/* 3행: 상태 */}
           <Row>
             <Field>
               <label>상태</label>
