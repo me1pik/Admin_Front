@@ -10,18 +10,11 @@ import RegisterButton from '../../../components/RegisterButton';
 // API 불러오기
 import { getAdminBrandList, AdminBrand } from '../../../api/brand/brandApi';
 
-/**
- * AdminBrand 스펙에 productCount가 포함되어 있을 수 있고,
- * 기존 코드에서 productNum을 사용했으나 스펙 변경에 따라 productCount로 매핑하거나 기본값 0 사용.
- * createdAt을 registerDate로 표시.
- */
 const mapAdminBrandToBrandItem = (b: AdminBrand): BrandItem => {
-  // productCount가 AdminBrand에 있으면 사용, 없으면 0
   const quantity =
-    // @ts-ignore: AdminBrand 타입에 productCount가 있을 수 있다면 사용
+    // @ts-ignore
     typeof (b as any).productCount === 'number' ? (b as any).productCount : 0;
 
-  // createdAt을 YYYY-MM-DD 형태로 포맷
   let registerDateStr = '';
   if ((b as any).createdAt) {
     try {
@@ -63,11 +56,14 @@ const BrandList: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 검색어, 페이지 파라미터
   const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
   const page = parseInt(searchParams.get('page') ?? '1', 10);
   const limit = 10;
-  const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
+
+  // 현재 선택된 탭 라벨은 status 파라미터로부터 유추
+  const statusParam = searchParams.get('status');
+  const activeTabLabel =
+    tabs.find((tab) => tab.path === statusParam)?.label ?? '전체보기';
 
   useEffect(() => {
     const fetchAdminBrands = async () => {
@@ -75,7 +71,6 @@ const BrandList: React.FC = () => {
       setError(null);
       try {
         const data = await getAdminBrandList();
-        // 매핑
         const mapped = data.map(mapAdminBrandToBrandItem);
         setBrandData(mapped);
       } catch (err) {
@@ -86,29 +81,28 @@ const BrandList: React.FC = () => {
       }
     };
     fetchAdminBrands();
-    // 빈 deps로 한 번만 호출
   }, []);
 
   const handleTabChange = (tab: TabItem) => {
-    setSelectedTab(tab);
-    // 탭 변경 시 페이지 1로 초기화, 기존 search는 유지
     const params = Object.fromEntries(searchParams.entries());
     params.page = '1';
+    params.status = tab.path;
     setSearchParams(params);
   };
 
   if (isLoading) {
     return <LoadingMessage>브랜드 목록을 불러오는 중...</LoadingMessage>;
   }
+
   if (error) {
     return <ErrorMessage>{error}</ErrorMessage>;
   }
 
-  // 탭 필터링: status 필드와 일치하는지 비교
+  // 필터링
   const dataByTab = brandData.filter((item) =>
-    selectedTab.label === '전체보기' ? true : item.status === selectedTab.label
+    activeTabLabel === '전체보기' ? true : item.status === activeTabLabel
   );
-  // 검색어 필터링
+
   const filteredData = dataByTab.filter((item) => {
     const t = searchTerm;
     const registerLower = item.registerDate
@@ -133,23 +127,17 @@ const BrandList: React.FC = () => {
   const currentPageData = filteredData.slice(offset, offset + limit);
 
   const handleEdit = (no: number) => {
-    // 상세 페이지 경로: /branddetail/:no
     navigate(`/branddetail/${no}`);
   };
+
   const handleRegisterClick = () => {
-    // 등록 페이지가 있다면 해당 경로로. 예: /branddetail/create 혹은 별도 경로
     navigate(`/branddetail/create`);
-    // 만약 별도 생성 페이지가 없다면, 적절히 수정하세요.
   };
 
   return (
     <Content>
       <HeaderTitle>브랜드 관리</HeaderTitle>
-      <SubHeader
-        tabs={tabs}
-        onTabChange={handleTabChange}
-        selectedTab={selectedTab}
-      />
+      <SubHeader tabs={tabs} onTabChange={handleTabChange} />
       <InfoBar>
         <TotalCount>Total: {totalCount}</TotalCount>
       </InfoBar>

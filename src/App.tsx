@@ -66,7 +66,14 @@ const App: React.FC = () => {
           <Route path='/monitoringdetail/:no' element={<MonitoringDetail />} />
           <Route path='/productlist' element={<ProductList />} />
           <Route path='/productdetail/:no' element={<ProductDetail />} />
-
+          <Route path='/Pagelist' element={<PageList />} />
+          <Route path='/pagedetail/:no' element={<PageDetail />} />
+          <Route path='/product-evaluation' element={<ProductEvaluation />} />
+          <Route path='/evaluationdetail/:no' element={<EvaluationDetail />} />
+          <Route path='/saleslist' element={<SalesList />} />
+          <Route path='/salesdetail/:no' element={<SalesDetail />} />
+          <Route path='/calculatelist' element={<CalculateList />} />
+          <Route path='/calculatedetail/:no' element={<CalculateDetail />} />
           {/* 브랜드 관리 */}
           <Route path='/brandlist' element={<BrandList />} />
           <Route path='/branddetail/:no' element={<BrandDetail />} />
