@@ -1,4 +1,4 @@
-// src/pages/Brand/BrandDetail.tsx
+// src/pages/Tab4/Brand/BrandDetail.tsx
 
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
@@ -15,57 +15,88 @@ import {
   updateAdminBrand,
   createAdminBrand,
   getAdminBrandSelectOptions,
+  AdminBrandDetail,
+  CreateAdminBrandRequest,
+  UpdateAdminBrandRequest,
+  deleteAdminBrand,
 } from '../../../api/brand/brandApi';
-import { CreateAdminBrandRequest } from '../../../api/brand/brandApi';
 
 interface BrandDetailProps {
+  // 생성 모드를 route param 등으로 구분하려면, 예: /branddetail/create 경로일 때 isCreate=true로 처리
   isCreate?: boolean;
 }
 
 const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
   const navigate = useNavigate();
   const { no } = useParams<{ no: string }>();
-  const numericNo = isCreate ? undefined : Number(no);
+  // no가 'create' 같은 문자열일 때 생성 모드로 처리 가능
+  const numericNo =
+    !isCreate && no && /^\d+$/.test(no) ? Number(no) : undefined;
 
-  // — 폼 필드
-  const [groupCompany, setGroupCompany] = useState('');
-  const [brandName, setBrandName] = useState('');
+  // — 폼 필드 상태
+  const [groupCompany, setGroupCompany] = useState<string>('');
+  const [brandName, setBrandName] = useState<string>('');
   const [productCount, setProductCount] = useState<number>(0);
-  const [discountRate, setDiscountRate] = useState<string>('');
-  const [manager, setManager] = useState('');
-  const [contact, setContact] = useState('');
-  const [status, setStatus] = useState<string>('');
+  const [discountRate, setDiscountRate] = useState<string>(''); // 문자열로 선택/입력
+  const [manager, setManager] = useState<string>('');
+  const [contact, setContact] = useState<string>('');
+  const [status, setStatus] = useState<string>(''); // 상태 문자열
 
   // — 옵션 리스트
   const [discountOptions, setDiscountOptions] = useState<string[]>([]);
   const [statusOptions, setStatusOptions] = useState<string[]>([]);
 
   // — UI 상태
-  const [activeTab, setActiveTab] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState('');
-  const [modalMessage, setModalMessage] = useState('');
+  const [activeTab, setActiveTab] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [modalTitle, setModalTitle] = useState<string>('');
+  const [modalMessage, setModalMessage] = useState<string>('');
+  const [confirmAction, setConfirmAction] = useState<'delete' | null>(null);
 
   // 초기 데이터 로드
   useEffect(() => {
     const init = async () => {
+      setIsLoading(true);
       try {
         const opts = await getAdminBrandSelectOptions();
-        setDiscountOptions(opts.discountRates);
-        setStatusOptions(opts.statusOptions);
+        setDiscountOptions(opts.discountRates || []);
+        setStatusOptions(opts.statusOptions || []);
 
-        if (!isCreate && numericNo != null) {
-          const data = await getAdminBrandDetail(numericNo);
-          setGroupCompany(data.groupName);
-          setBrandName(data.brandName);
-          setProductCount(data.productCount);
+        // 상세 조회 모드
+        if (numericNo != null) {
+          const data: AdminBrandDetail = await getAdminBrandDetail(numericNo);
+          setGroupCompany(data.groupName ?? '');
+          setBrandName(data.brandName ?? '');
+          setProductCount(
+            typeof data.productCount === 'number' ? data.productCount : 0
+          );
           setDiscountRate(
             data.discount_rate != null ? String(data.discount_rate) : ''
           );
           setManager(data.contactPerson ?? '');
           setContact(data.contactNumber ?? '');
-          setStatus(data.status);
+          // isActive → status 문자열 매핑
+          if (data.isActive) {
+            if (opts.statusOptions.includes('등록완료')) {
+              setStatus('등록완료');
+            } else {
+              setStatus(opts.statusOptions[0] || '');
+            }
+          } else {
+            if (opts.statusOptions.includes('계약종료')) {
+              setStatus('계약종료');
+            } else {
+              setStatus(opts.statusOptions[0] || '');
+            }
+          }
+        } else {
+          // 생성 모드: 기본 status 설정
+          if (opts.statusOptions.includes('등록대기')) {
+            setStatus('등록대기');
+          } else {
+            setStatus(opts.statusOptions[0] || '');
+          }
         }
       } catch (err) {
         console.error('초기 로드 실패:', err);
@@ -74,75 +105,101 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
       }
     };
     init();
-  }, [isCreate, numericNo]);
+  }, [numericNo]);
 
   // 저장 핸들러
   const handleSave = async () => {
     try {
-      const base: Omit<
-        CreateAdminBrandRequest,
-        | 'groupName'
-        | 'brandName'
-        | 'productCount'
-        | 'discount_rate'
-        | 'contactPerson'
-        | 'contactNumber'
-        | 'status'
-      > = {
-        imageUrl: '',
-        isPopular: false,
-        isActive: true,
-        location: '',
-      };
-
-      const body: CreateAdminBrandRequest = {
-        ...base,
+      // status 문자열을 isActive로 변환
+      let isActiveValue: boolean;
+      if (status === '등록완료') {
+        isActiveValue = true;
+      } else {
+        isActiveValue = false;
+      }
+      // body 구성 (필요 필드만)
+      const bodyCreate: CreateAdminBrandRequest = {
         groupName: groupCompany,
-        brandName,
-        productCount,
-        discount_rate: Number(discountRate) || 0,
+        brandName: brandName,
         contactPerson: manager,
         contactNumber: contact,
-        status,
+        discount_rate: Number(discountRate) || 0,
+        isActive: isActiveValue,
+        imageUrl: '', // UI 추가 시 설정
+        isPopular: false, // UI 추가 시 설정
+        brand_category: '', // UI 추가 시 설정
+      };
+      const bodyUpdate: UpdateAdminBrandRequest = {
+        groupName: groupCompany,
+        brandName: brandName,
+        contactPerson: manager,
+        contactNumber: contact,
+        discount_rate: Number(discountRate) || 0,
+        isActive: isActiveValue,
+        // imageUrl/isPopular/brand_category 등 필요 시 포함
       };
 
-      if (isCreate) {
-        await createAdminBrand(body);
-      } else if (numericNo != null) {
-        await updateAdminBrand(numericNo, body);
+      if (numericNo != null) {
+        await updateAdminBrand(numericNo, bodyUpdate);
+      } else {
+        await createAdminBrand(bodyCreate);
       }
 
-      setModalTitle(isCreate ? '등록 완료' : '변경 완료');
+      setModalTitle(numericNo != null ? '변경 완료' : '등록 완료');
       setModalMessage(
-        isCreate ? '새 Brand가 등록되었습니다.' : '변경 내용이 저장되었습니다.'
+        numericNo != null
+          ? '변경 내용이 저장되었습니다.'
+          : '새 브랜드가 등록되었습니다.'
       );
+      setConfirmAction(null);
       setIsModalOpen(true);
     } catch (err) {
       console.error('브랜드 저장 실패:', err);
       setModalTitle('오류');
       setModalMessage('저장 중 오류가 발생했습니다.');
+      setConfirmAction(null);
       setIsModalOpen(true);
     }
   };
 
-  const handleBack = () => navigate('/brandlist');
+  const handleBack = () => {
+    navigate('/brandlist');
+  };
   const handleDelete = () => {
-    setModalTitle('삭제 완료');
-    setModalMessage('Brand를 삭제하시겠습니까?');
+    setModalTitle('삭제 확인');
+    setModalMessage('정말 브랜드를 삭제하시겠습니까?');
+    setConfirmAction('delete');
     setIsModalOpen(true);
   };
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     setIsModalOpen(false);
-    navigate(-1);
+    if (confirmAction === 'delete' && numericNo != null) {
+      try {
+        await deleteAdminBrand(numericNo);
+        setModalTitle('삭제 완료');
+        setModalMessage('브랜드가 삭제되었습니다.');
+        setIsModalOpen(true);
+        // 삭제 후 목록으로 돌아가기
+        navigate('/brandlist');
+      } catch (err) {
+        console.error('삭제 실패:', err);
+        setModalTitle('오류');
+        setModalMessage('삭제 중 오류가 발생했습니다.');
+        setIsModalOpen(true);
+      }
+    } else {
+      // 단순 확인 모드일 때
+      setIsModalOpen(false);
+    }
   };
 
   const detailProps: DetailSubHeaderProps = {
-    backLabel: '목록이동',
+    backLabel: '목록 이동',
     onBackClick: handleBack,
-    editLabel: isCreate ? '등록하기' : '변경저장',
+    editLabel: numericNo != null ? '변경 저장' : '등록하기',
     onEditClick: handleSave,
-    endLabel: isCreate ? '취소' : '삭제',
-    onEndClick: isCreate ? handleBack : handleDelete,
+    endLabel: numericNo != null ? '삭제' : '취소',
+    onEndClick: numericNo != null ? handleDelete : handleBack,
   };
 
   if (isLoading) {
@@ -152,14 +209,16 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
   return (
     <Container>
       <HeaderRow>
-        <Title>{isCreate ? '브랜드 등록' : `브랜드 상세 (${numericNo})`}</Title>
+        <Title>
+          {numericNo != null ? `브랜드 상세 (${numericNo})` : '브랜드 등록'}
+        </Title>
       </HeaderRow>
 
       <SettingsDetailSubHeader {...detailProps} />
 
       <ProductNumber>
         <strong>번호</strong>
-        <span>{numericNo ?? '-'}</span>
+        <span>{numericNo != null ? numericNo : '-'}</span>
       </ProductNumber>
 
       <SettingsDetailTopBoxes />
@@ -174,7 +233,7 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
 
       {activeTab === 0 && (
         <FormBox>
-          {/* 1행 */}
+          {/* 1행: 그룹사, 브랜드명, 제품수 */}
           <Row>
             <Field>
               <label>그룹사</label>
@@ -200,7 +259,7 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
             </Field>
           </Row>
 
-          {/* 2행 */}
+          {/* 2행: 할인율, 담당자, 연락처 */}
           <Row>
             <Field>
               <label>할인율(%)</label>
@@ -232,7 +291,7 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
             </Field>
           </Row>
 
-          {/* 3행 */}
+          {/* 3행: 상태 */}
           <Row>
             <Field>
               <label>상태</label>
@@ -247,7 +306,7 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
                   </option>
                 ))}
               </select>
-              <span>- 상태 설정은 등록완료 / 등록대기 / 계약종료</span>
+              <span>- 상태 설정은 {statusOptions.join(' / ')}</span>
             </Field>
           </Row>
         </FormBox>
@@ -315,7 +374,7 @@ const Row = styled.div`
 `;
 const Field = styled.div`
   flex: 1;
-  min-width: 300px;
+  width: 200px;
   display: flex;
   align-items: center;
   padding: 12px 16px;
@@ -332,7 +391,7 @@ const Field = styled.div`
   }
   input,
   select {
-    flex: 1;
+    width: 200px;
     height: 36px;
     padding: 0 8px;
     border: 1px solid #ddd;

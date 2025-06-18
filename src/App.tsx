@@ -1,3 +1,5 @@
+// src/App.tsx
+
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
@@ -41,6 +43,7 @@ import CreateFAQ from './pages/Tab5/FAQ/CreateFAQ';
 import Dashboard from './pages/Tab1/Dashboard';
 import AnalysisInfo from './pages/Tab2/Analysis/AnalysisInfo';
 import AdminCreate from './pages/Tab2/Admins/AdminCreate';
+
 const App: React.FC = () => {
   return (
     <BrowserRouter>
@@ -55,26 +58,19 @@ const App: React.FC = () => {
           <Route path='/admin-create' element={<AdminCreate />} />
           <Route path='/admindetail/:no' element={<AdminDetail />} />
           <Route path='/userlist' element={<UserList />} />
-          <Route path='/Pagelist' element={<PageList />} />
-          <Route path='/pagedetail/:no' element={<PageDetail />} />
-          <Route path='/product-evaluation' element={<ProductEvaluation />} />
-          <Route path='/evaluationdetail/:no' element={<EvaluationDetail />} />
-          <Route path='/saleslist' element={<SalesList />} />
-          <Route path='/salesdetail/:no' element={<SalesDetail />} />
-          <Route path='/calculatelist' element={<CalculateList />} />
-          <Route path='/calculatedetail/:no' element={<CalculateDetail />} />
-
-          {/* 여기를 email 파라미터로 변경 */}
+          {/* 이메일 파라미터 예시 */}
           <Route path='/userdetail/:email' element={<UserDetail />} />
-
           <Route path='/ticketlist' element={<TicketList />} />
           <Route path='/ticketDetail/:no' element={<TicketDetail />} />
           <Route path='/monitoringlist' element={<MonitoringList />} />
           <Route path='/monitoringdetail/:no' element={<MonitoringDetail />} />
           <Route path='/productlist' element={<ProductList />} />
           <Route path='/productdetail/:no' element={<ProductDetail />} />
+
+          {/* 브랜드 관리 */}
           <Route path='/brandlist' element={<BrandList />} />
           <Route path='/branddetail/:no' element={<BrandDetail />} />
+
           <Route path='/generalorderList' element={<GeneralOrderList />} />
           <Route
             path='/generalorderdetail/:no'

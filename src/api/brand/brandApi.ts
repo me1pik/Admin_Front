@@ -3,7 +3,8 @@
 import { Axios } from '../Axios';
 
 /**
- * 관리자용 브랜드 정보 타입
+ * 관리자용 브랜드 정보 (목록) 타입
+ * GET /brand/admin/list
  */
 export interface AdminBrand {
   id: number;
@@ -11,27 +12,41 @@ export interface AdminBrand {
   brandName: string;
   contactPerson: string;
   contactNumber: string;
-  productNum: number;
-  discount_rate: number;
+  imageUrl: string;
+  isPopular: boolean;
   isActive: boolean;
+  discount_rate: number;
+  brand_category: string;
+  createdAt: string;
+  // 목록에는 productCount가 없으므로 제외
 }
 
 /**
  * 관리자용 브랜드 상세 정보 타입
+ * GET /brand/admin/{id}
  */
-export interface AdminBrandDetail extends AdminBrand {
+export interface AdminBrandDetail {
+  id: number;
+  groupName: string;
+  brandName: string;
+  contactPerson: string;
+  contactNumber: string;
+  imageUrl: string;
+  isPopular: boolean;
+  isActive: boolean;
   discount_rate: number;
-  location: string;
-  status: string;
+  brand_category: string;
   productCount: number;
+  createdAt: string;
+  // 필요하다면 추가 필드: 예: updatedAt 등
 }
 
 /**
  * 관리자용 전체 브랜드 목록 조회
- * GET /brand/admin
+ * GET /brand/admin/list
  */
 export const getAdminBrandList = async (): Promise<AdminBrand[]> => {
-  const response = await Axios.get<AdminBrand[]>('/brand/admin');
+  const response = await Axios.get<AdminBrand[]>('/brand/admin/list');
   return response.data;
 };
 
@@ -48,6 +63,8 @@ export const getAdminBrandDetail = async (
 
 /**
  * 관리자용 브랜드 등록 요청 타입
+ * POST /brand/admin
+ * (등록 API 스펙이 주어지지 않았으므로, 백엔드 문서에 맞춰 필드를 확인 후 사용하세요)
  */
 export interface CreateAdminBrandRequest {
   groupName: string;
@@ -58,9 +75,9 @@ export interface CreateAdminBrandRequest {
   isPopular: boolean;
   isActive: boolean;
   discount_rate: number;
-  location: string;
-  status: string;
-  productCount: number;
+  brand_category: string;
+  // 상세에 productCount, createdAt는 서버에서 채워주는 경우가 일반적이므로 요청에는 제외
+  // 기타 요청 필드가 있다면 여기에 추가
 }
 
 /**
@@ -76,6 +93,7 @@ export const createAdminBrand = async (
 
 /**
  * 관리자용 브랜드 수정 요청 타입
+ * PATCH /brand/admin/{id}
  */
 export interface UpdateAdminBrandRequest {
   groupName?: string;
@@ -86,9 +104,9 @@ export interface UpdateAdminBrandRequest {
   isPopular?: boolean;
   isActive?: boolean;
   discount_rate?: number;
-  location?: string;
-  status?: string;
-  productCount?: number;
+  brand_category?: string;
+  // productCount는 보통 서버에서 관리; 수정 API 스펙에 포함되는지 확인 후 추가
+  // 기타 수정 가능한 필드가 있다면 여기에 추가
 }
 
 /**
@@ -107,15 +125,18 @@ export const updateAdminBrand = async (
 };
 
 /**
- * 브랜드 삭제
- * DELETE /brand/{id}
+ * 브랜드 삭제 (관리자)
+ * DELETE /brand/admin/{id}
+ * (기존 deleteBrand 경로가 /brand/{id}였으나, 관리자용 삭제가 /brand/admin/{id}라면 수정 필요)
  */
-export const deleteBrand = async (id: number): Promise<void> => {
-  await Axios.delete(`/brand/${id}`);
+export const deleteAdminBrand = async (id: number): Promise<void> => {
+  await Axios.delete(`/brand/admin/${id}`);
 };
 
 /**
  * 관리자용 select 박스 옵션 타입
+ * GET /brand/admin/select-options
+ * (스펙이 주어졌다면 유지)
  */
 export interface AdminBrandSelectOptions {
   discountRates: string[];
@@ -139,6 +160,6 @@ export default {
   getAdminBrandDetail,
   createAdminBrand,
   updateAdminBrand,
-  deleteBrand,
+  deleteAdminBrand,
   getAdminBrandSelectOptions,
 };
