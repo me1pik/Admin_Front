@@ -25,30 +25,16 @@ const AdminList: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // URL 쿼리에서 검색어와 페이지를 읽어옴
-  const searchTerm = (searchParams.get('search') ?? '').toLowerCase();
+  // URL 쿼리: search, page, status(tab)
+  const searchTerm = (searchParams.get('search') ?? '').toLowerCase().trim();
   const page = parseInt(searchParams.get('page') ?? '1', 10);
+  const statusParam = searchParams.get('status') ?? tabs[0].path;
+  const matchedTab = tabs.find((t) => t.path === statusParam) || tabs[0];
+  const [selectedTab, setSelectedTab] = useState<TabItem>(matchedTab);
 
-  const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-  const [adminData, setAdminData] = useState<Admin[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set()); // 선택된 관리자 no 목록
-  const limit = 10;
+  const limit = 10; // 페이지당 항목 수
 
-  // API에서 내려주는 raw Admin을 테이블용 타입으로 변환
-  const mapAdminData = (admins: any[]): Admin[] =>
-    admins.map((admin) => ({
-      no: admin.no,
-      status: admin.status,
-      id: admin.id,
-      team: admin.role || '',
-      name: admin.name,
-      email: admin.email,
-      lastLogin: admin.lastLogin || '-', // lastLogin 필드가 있다면 사용
-      registeredAt: admin.signupDate || admin.createdAt, // 가입일 또는 생성일
-    }));
-
-  // 서버에서 관리자 목록을 가져오는 함수 (useCallback으로 감쌈)
+  // 서버에서 관리자 목록을 가져오는 함수
   const fetchAdmins = useCallback(async () => {
     try {
       let res: GetAdminsResponse;
@@ -59,24 +45,61 @@ const AdminList: React.FC = () => {
       } else {
         res = await getBlockedAdmins(limit, page);
       }
-
+      // total과 admin 목록 세팅
       setTotalCount(res.total);
-      setAdminData(mapAdminData(res.admins));
-      setSelectedIds(new Set()); // 목록이 바뀌면 선택 초기화
+      setAdminData(
+        // map to Admin 타입
+        res.admins.map((admin: any) => ({
+          no: admin.no,
+          status: admin.status,
+          id: admin.id,
+          team: admin.role || '',
+          name: admin.name,
+          email: admin.email,
+          lastLogin: admin.lastLogin
+            ? new Date(admin.lastLogin).toLocaleDateString('ko-KR')
+            : '-',
+          registeredAt: admin.signupDate
+            ? new Date(admin.signupDate).toLocaleDateString('ko-KR')
+            : admin.createdAt
+              ? new Date(admin.createdAt).toLocaleDateString('ko-KR')
+              : '-',
+        }))
+      );
+      setSelectedIds(new Set()); // 목록 변경 시 선택 초기화
     } catch (err) {
       console.error('관리자 데이터 로드 실패', err);
     }
   }, [selectedTab, page]);
 
-  // selectedTab 또는 page가 바뀔 때마다 서버 호출
+  // state: 서버에서 받아온 현재 페이지 adminData, totalCount, 선택된 IDs
+  const [adminData, setAdminData] = useState<Admin[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+
+  // 탭 변경 시 URL 및 state 동기화
+  const handleTabChange = (tab: TabItem) => {
+    setSelectedTab(tab);
+    const params = Object.fromEntries(searchParams.entries());
+    params.status = tab.path;
+    params.page = '1';
+    setSearchParams(params);
+  };
+
+  // URL의 status 파라미터가 바뀌면 selectedTab 동기화
+  useEffect(() => {
+    setSelectedTab(matchedTab);
+  }, [matchedTab]);
+
+  // selectedTab 또는 page 변경 시 fetch
   useEffect(() => {
     fetchAdmins();
   }, [fetchAdmins]);
 
-  // 클라이언트 사이드 필터링: (검색어가 없으면 adminData 그대로, 있으면 filter)
+  // 클라이언트 사이드 검색 필터링: 현재 페이지(adminData) 내에서 필터링
   const filteredData = adminData.filter((item) => {
+    if (!searchTerm) return true;
     const t = searchTerm;
-    if (!t) return true;
     return (
       String(item.no).includes(t) ||
       item.id.toLowerCase().includes(t) ||
@@ -89,54 +112,57 @@ const AdminList: React.FC = () => {
     );
   });
 
-  // 페이징 UI를 위한 “전체 페이지 수”
+  // Pagination 계산: totalCount는 서버 전체 개수, 페이지 수 계산
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
-  // 실제 테이블에는 server에서 받은 adminData를 그대로 쓰되,
-  // (혹시 검색어가 있는 경우) client-side 검색 결과인 filteredData를 보여줌
+  // 안전하게 현재 page 범위 제한
+  const safePage = Math.min(Math.max(page, 1), totalPages);
+  // 현재 보여줄 데이터: 서버에서 이미 페이지네이션되어 온 adminData에, 검색이 있으면 filteredData 사용
+  // (서버에서 온 adminData가 이미 해당 페이지 항목이므로, filteredData도 최대 limit 개)
   const currentPageData = filteredData;
 
-  // 이메일 클릭 시 수정/상세 페이지로 이동
-  const handleEdit = (id: string) => {
-    const admin = adminData.find((a) => a.id === id);
-    if (admin) navigate(`/admindetail/${admin.no}`);
+  // 페이지 변경 핸들러
+  const handlePageChange = (p: number) => {
+    const params = Object.fromEntries(searchParams.entries());
+    params.page = String(p);
+    setSearchParams(params);
+    setSelectedIds(new Set()); // 페이지 바뀌면 선택 초기화
   };
 
-  // 관리자 등록 클릭
-  const handleRegisterClick = () => {
-    navigate('/admin-create');
-  };
-
-  // 선택된 행이 바뀔 때 호출되는 콜백 (AdminTable에서 내려줌)
+  // 선택된 행 변경
   const handleSelectChange = (no: number, checked: boolean) => {
     setSelectedIds((prev) => {
       const newSet = new Set(prev);
-      if (checked) {
-        newSet.add(no);
-      } else {
-        newSet.delete(no);
-      }
+      if (checked) newSet.add(no);
+      else newSet.delete(no);
       return newSet;
     });
   };
-
-  // 전체 선택/해제 시 호출되는 콜백
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      const all = new Set(currentPageData.map((mgr) => mgr.no));
-      setSelectedIds(all);
+      const allNos = currentPageData.map((a) => a.no);
+      setSelectedIds(new Set(allNos));
     } else {
       setSelectedIds(new Set());
     }
   };
 
-  // 관리자 삭제 버튼 클릭 핸들러 (체크된 것들만 삭제)
+  // 편집/상세 이동
+  const handleEdit = (id: string) => {
+    const admin = adminData.find((a) => a.id === id);
+    if (admin) navigate(`/admindetail/${admin.no}`);
+  };
+
+  // 등록 버튼
+  const handleRegisterClick = () => {
+    navigate('/admin-create');
+  };
+
+  // 삭제
   const handleDeleteClick = async () => {
     if (selectedIds.size === 0) {
       alert('삭제할 관리자를 하나 이상 선택해주세요.');
       return;
     }
-
-    // 확인 알림
     if (
       !window.confirm(
         `선택된 ${selectedIds.size}명의 관리자를 삭제하시겠습니까?`
@@ -144,33 +170,28 @@ const AdminList: React.FC = () => {
     ) {
       return;
     }
-
     try {
-      // 선택된 no에 대응되는 관리자 id를 찾아 삭제
       for (const no of selectedIds) {
         const adminToDelete = adminData.find((a) => a.no === no);
         if (!adminToDelete) {
           console.warn(`no=${no} 관리자 정보를 찾을 수 없습니다.`);
           continue;
         }
-
-        // 실제 삭제 API에는 id(문자열) 값을 넘겨야 함
         await deleteAdmin(adminToDelete.id);
       }
       alert(`선택된 ${selectedIds.size}명의 관리자를 삭제했습니다.`);
+      // 삭제 후 현재 페이지 다시 로드
       fetchAdmins();
+      setSelectedIds(new Set());
+      // 페이지 재설정: 필요 시 page=1 or 유지
+      // 여기서는 단순히 현재 URL page를 1로 리셋:
+      const params = Object.fromEntries(searchParams.entries());
+      params.page = '1';
+      setSearchParams(params);
     } catch (err) {
       console.error('관리자 삭제 실패', err);
       alert('삭제 중 오류가 발생했습니다.');
     }
-  };
-
-  // 탭 변경 시
-  const handleTabChange = (tab: TabItem) => {
-    setSelectedTab(tab);
-    const params = Object.fromEntries(searchParams.entries());
-    params.page = '1';
-    setSearchParams(params);
   };
 
   return (
@@ -180,6 +201,7 @@ const AdminList: React.FC = () => {
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
 
       <InfoBar>
+        {/* 서버 전체 개수(totalCount)나, 검색 후 현재 페이지 내 필터 개수를 보여주려면 아래를 조정 */}
         <TotalCountText>Total: {totalCount}</TotalCountText>
       </InfoBar>
 
@@ -203,7 +225,11 @@ const AdminList: React.FC = () => {
             관리자삭제
           </DeleteButton>
         </ButtonGroup>
-        <Pagination totalPages={totalPages} />
+        <Pagination
+          currentPage={safePage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </FooterRow>
     </Content>
   );
@@ -250,13 +276,11 @@ const FooterRow = styled.div`
   margin-top: 40px;
 `;
 
-// Register 버튼과 Delete 버튼을 묶어주는 그룹
 const ButtonGroup = styled.div`
   display: flex;
   gap: 10px;
 `;
 
-// 단순한 스타일의 삭제 버튼 (필요에 따라 스타일 변경 가능)
 const DeleteButton = styled.button<{ disabled: boolean }>`
   background: ${({ disabled }) => (disabled ? '#ccc' : '#e74c3c')};
   color: #fff;

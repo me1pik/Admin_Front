@@ -6,10 +6,10 @@ import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
 import Pagination from '../../../components/Pagination';
 import {
   getAllUsers,
-  getBlockedUsers,
   changeUserMembership,
   getAllMemberships,
   GetAllMembershipsResponse,
+  // 가정: API에서 전체 개수 조회를 위해 getAllUsers(limit, page)를 사용
 } from '../../../api/adminUser';
 
 const tabs: TabItem[] = [
@@ -21,16 +21,21 @@ const tabs: TabItem[] = [
 const UserList: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const searchTerm = searchParams.get('search')?.toLowerCase() ?? '';
+
+  // URL 쿼리: search, page, status(tab)
+  const searchTerm = searchParams.get('search')?.toLowerCase().trim() ?? '';
   const page = parseInt(searchParams.get('page') ?? '1', 10);
-  const limit = 10;
+  const statusParam = searchParams.get('status') ?? tabs[0].path;
+  const matchedTab = tabs.find((t) => t.path === statusParam) || tabs[0];
+  const [selectedTab, setSelectedTab] = useState<TabItem>(matchedTab);
 
-  const [selectedTab, setSelectedTab] = useState<TabItem>(tabs[0]);
-  const [userData, setUserData] = useState<User[]>([]);
-  const [totalCount, setTotalCount] = useState<number>(0);
-  const [loading, setLoading] = useState(false);
+  const limit = 10; // 페이지당 항목 수
 
-  // --- 멤버십 목록을 API에서 가져와서 상태에 저장 ---
+  // 전체 사용자 데이터 (Raw)
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [loadingAll, setLoadingAll] = useState(false);
+
+  // memberships for bulk change
   const [memberships, setMemberships] = useState<GetAllMembershipsResponse>([]);
   useEffect(() => {
     getAllMemberships()
@@ -38,21 +43,21 @@ const UserList: React.FC = () => {
       .catch((err) => console.error('멤버십 목록 조회 실패:', err));
   }, []);
 
-  // 일괄 변경용
+  // bulk change
   const [newMembershipId, setNewMembershipId] = useState<number | ''>('');
   const [isBulkLoading, setIsBulkLoading] = useState(false);
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
 
-  const totalPages = Math.max(1, Math.ceil(totalCount / limit));
-
-  const fetchUsers = async () => {
-    setLoading(true);
+  // 1) 전체 사용자 목록 한 번에 불러오기
+  const fetchAllUsers = async () => {
+    setLoadingAll(true);
     try {
-      const res =
-        selectedTab.label === '블럭회원'
-          ? await getBlockedUsers(limit, page)
-          : await getAllUsers(limit, page);
+      // 1-1) 총 개수 요청: limit=1, page=1으로 total 얻기
+      const firstRes = await getAllUsers(1, 1);
+      const totalCount = firstRes.total;
 
+      // 1-2) 전체 데이터 요청: limit=totalCount, page=1
+      const res = await getAllUsers(totalCount, 1);
       const users: User[] = res.users.map((u: any) => ({
         no: u.id,
         email: u.email,
@@ -70,44 +75,69 @@ const UserList: React.FC = () => {
         serviceArea: u.address,
         joinDate: new Date(u.signupDate).toLocaleDateString('ko-KR'),
       }));
-
-      setUserData(users);
-      setTotalCount(res.total);
+      setAllUsers(users);
+      // 초기 선택행 해제
       setSelectedRows(new Set());
     } catch (err) {
-      console.error('사용자 목록을 불러오는데 실패했습니다:', err);
+      console.error('전체 사용자 목록을 불러오는데 실패했습니다:', err);
     } finally {
-      setLoading(false);
+      setLoadingAll(false);
     }
   };
 
+  // 컴포넌트 마운트 시와, 탭/검색어가 바뀔 때 전체 다시 로드
   useEffect(() => {
-    fetchUsers();
+    fetchAllUsers();
+    // statusParam이나 searchTerm이 바뀌어도 전체 재로딩?
+    // 현재는 탭 변경 시 전체 다시 불러옴. 검색어는 클라이언트 필터링이므로 전체 재요청 불필요하지만,
+    // 신규 사용자가 생겼을 가능성 반영 위해 탭 변경 시만 재요청해도 무방.
+    // searchTerm 의존은 생략해도 됨(클라이언트 필터링).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, selectedTab]);
+  }, [statusParam]);
 
+  // 탭 변경 시 URL 반영, currentPage 초기화
   const handleTabChange = (tab: TabItem) => {
     setSelectedTab(tab);
     const params = Object.fromEntries(searchParams.entries());
+    params.status = tab.path;
     params.page = '1';
     setSearchParams(params);
+    // fetchAllUsers(); // useEffect에서 statusParam 의존으로 자동 호출
   };
 
-  const filteredData = userData.filter((item) =>
-    [
-      String(item.no),
-      item.email,
-      item.name,
-      item.nickname,
-      item.instagram,
-      item.followingFollower,
-      item.serviceArea,
-      item.status,
-      item.grade,
-      item.joinDate,
-    ].some((field) => field.toLowerCase().includes(searchTerm))
+  // 2) 탭 필터링
+  const dataByTab = allUsers.filter((item) =>
+    selectedTab.label === '전체보기' ? true : item.status === selectedTab.label
   );
 
+  // 3) 검색 필터링
+  const filteredData = dataByTab.filter((item) => {
+    const txt = searchTerm;
+    if (!txt) return true;
+    return (
+      String(item.no).toLowerCase().includes(txt) ||
+      item.email.toLowerCase().includes(txt) ||
+      item.name.toLowerCase().includes(txt) ||
+      item.nickname.toLowerCase().includes(txt) ||
+      item.instagram.toLowerCase().includes(txt) ||
+      item.followingFollower.toLowerCase().includes(txt) ||
+      item.serviceArea.toLowerCase().includes(txt) ||
+      item.status.toLowerCase().includes(txt) ||
+      item.grade.toLowerCase().includes(txt) ||
+      item.joinDate.toLowerCase().includes(txt)
+    );
+  });
+
+  // 4) 페이지네이션 계산
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / limit));
+  // URL의 page가 범위를 벗어나면 보정
+  const currentPage = Math.min(Math.max(page, 1), totalPages);
+  const paginated = filteredData.slice(
+    (currentPage - 1) * limit,
+    currentPage * limit
+  );
+
+  // bulk change
   const handleBulkChange = () => {
     if (newMembershipId === '') {
       alert('변경할 멤버십을 선택해주세요.');
@@ -136,7 +166,8 @@ const UserList: React.FC = () => {
     )
       .then(() => {
         alert('멤버십이 성공적으로 변경되었습니다.');
-        fetchUsers();
+        // 전체 재로딩
+        fetchAllUsers();
       })
       .catch((err) => {
         console.error('멤버십 일괄 변경 실패:', err);
@@ -146,10 +177,17 @@ const UserList: React.FC = () => {
   };
 
   const handleEdit = (no: number) => {
-    const user = userData.find((u) => u.no === no);
+    const user = allUsers.find((u) => u.no === no);
     if (user) {
       navigate(`/userdetail/${encodeURIComponent(user.email)}`);
     }
+  };
+
+  // 페이지 변경 시 URL 쿼리 반영
+  const onPageChange = (p: number) => {
+    const params = Object.fromEntries(searchParams.entries());
+    params.page = p.toString();
+    setSearchParams(params);
   };
 
   return (
@@ -187,11 +225,11 @@ const UserList: React.FC = () => {
       </InfoBar>
 
       <TableContainer>
-        {loading ? (
+        {loadingAll ? (
           <LoadingText>로딩중...</LoadingText>
         ) : (
           <UserTable
-            filteredData={filteredData}
+            filteredData={paginated}
             handleEdit={handleEdit}
             selectedRows={selectedRows}
             setSelectedRows={setSelectedRows}
@@ -200,7 +238,11 @@ const UserList: React.FC = () => {
       </TableContainer>
 
       <FooterRow>
-        <Pagination totalPages={totalPages} />
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+        />
       </FooterRow>
     </Content>
   );
