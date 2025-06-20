@@ -17,6 +17,7 @@ import {
   updateRentalScheduleStatus,
   RentalScheduleAdminDetailResponse,
   UpdateRentalStatusRequest,
+  changeRentalSchedulePeriod, // 날짜 변경 API
 } from '../../../api/RentalSchedule/RentalScheduleApi';
 
 interface MonitoringDetailProps {
@@ -45,6 +46,10 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 
   // ─── 대여일자 범위 state ───
   const [rentalDates, setRentalDates] = useState<
+    [Date | undefined, Date | undefined]
+  >([undefined, undefined]);
+  // 초기 조회 시점의 원래 날짜를 저장해두어 변경 여부 비교
+  const [originalDates, setOriginalDates] = useState<
     [Date | undefined, Date | undefined]
   >([undefined, undefined]);
 
@@ -89,7 +94,10 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 
           // rentalPeriod: "YYYY-MM-DD ~ YYYY-MM-DD"
           const [startStr, endStr] = data.rentalPeriod.split(' ~ ');
-          setRentalDates([new Date(startStr), new Date(endStr)]);
+          const startDate = new Date(startStr);
+          const endDate = new Date(endStr);
+          setRentalDates([startDate, endDate]);
+          setOriginalDates([startDate, endDate]);
 
           setRecipient(data.deliveryInfo.shipping.receiver);
           setRecipientPhone(data.deliveryInfo.shipping.phone);
@@ -120,21 +128,72 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
     navigate(`/monitoringlist?page=${page}`);
   };
 
+  // 저장 처리: 상태 변경 + (필요 시) 대여일자 변경 API 호출
   const handleSave = async () => {
     if (!isCreate && numericNo) {
-      const payload: UpdateRentalStatusRequest = {
-        paymentStatus,
-        deliveryStatus,
-        isCleaned,
-        isRepaired,
-      };
+      setLoading(true);
       try {
-        setLoading(true);
+        // 1) 대여일자 변경이 필요한지 확인
+        const [origStart, origEnd] = originalDates;
+        const [newStart, newEnd] = rentalDates;
+        let dateChanged = false;
+        let formattedStart = '';
+        let formattedEnd = '';
+        if (
+          newStart instanceof Date &&
+          newEnd instanceof Date &&
+          origStart instanceof Date &&
+          origEnd instanceof Date
+        ) {
+          // 날짜 비교: time 값으로 비교
+          if (
+            newStart.getTime() !== origStart.getTime() ||
+            newEnd.getTime() !== origEnd.getTime()
+          ) {
+            dateChanged = true;
+            // "YYYY-MM-DD" 형식으로 포맷
+            formattedStart = newStart.toISOString().split('T')[0];
+            formattedEnd = newEnd.toISOString().split('T')[0];
+          }
+        } else if (
+          newStart instanceof Date &&
+          newEnd instanceof Date &&
+          (origStart === undefined || origEnd === undefined)
+        ) {
+          // 원래 값이 없었는데 새로 입력된 경우
+          dateChanged = true;
+          formattedStart = newStart.toISOString().split('T')[0];
+          formattedEnd = newEnd.toISOString().split('T')[0];
+        }
+        // 2) 날짜 변경 API 호출
+        if (dateChanged) {
+          await changeRentalSchedulePeriod(numericNo, {
+            startDate: formattedStart,
+            endDate: formattedEnd,
+          });
+          // originalDates 갱신
+          setOriginalDates([newStart!, newEnd!]);
+        }
+
+        // 3) 상태 변경 API 호출
+        const payload: UpdateRentalStatusRequest = {
+          paymentStatus,
+          deliveryStatus,
+          isCleaned,
+          isRepaired,
+        };
         await updateRentalScheduleStatus(numericNo, payload);
+
         setModalTitle('변경 완료');
-        setModalMessage('변경 내용을 성공적으로 저장했습니다.');
+        let messageText = '변경 내용을 성공적으로 저장했습니다.';
+        if (dateChanged) {
+          messageText =
+            '대여 기간 및 기타 변경 내용을 성공적으로 저장했습니다.';
+        }
+        setModalMessage(messageText);
         setIsModalOpen(true);
-      } catch {
+      } catch (err) {
+        console.error('저장 실패', err);
         setModalTitle('오류');
         setModalMessage('변경 내용 저장에 실패했습니다.');
         setIsModalOpen(true);

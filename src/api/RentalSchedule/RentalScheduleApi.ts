@@ -123,3 +123,44 @@ export const updateRentalScheduleStatus = async (
   );
   return response.data;
 };
+
+/**
+ * 관리자: 대여 기간 변경
+ * PATCH /admin/rental/{id}/change-period
+ *
+ * Request body:
+ * {
+ *   startDate: "YYYY-MM-DD",
+ *   endDate: "YYYY-MM-DD"
+ * }
+ *
+ * Response example:
+ * {
+ *   "message": "대여 기간이 성공적으로 수정되었습니다.",
+ *   "rentalId": 123,
+ *   "newStartDate": "2025-07-01",
+ *   "newEndDate": "2025-07-07"
+ * }
+ */
+export interface ChangeRentalPeriodRequest {
+  startDate: string; // "YYYY-MM-DD"
+  endDate: string; // "YYYY-MM-DD"
+}
+
+export interface ChangeRentalPeriodResponse {
+  message: string;
+  rentalId: number;
+  newStartDate: string; // "YYYY-MM-DD"
+  newEndDate: string; // "YYYY-MM-DD"
+}
+
+export const changeRentalSchedulePeriod = async (
+  id: number,
+  payload: ChangeRentalPeriodRequest
+): Promise<ChangeRentalPeriodResponse> => {
+  const response = await Axios.patch<ChangeRentalPeriodResponse>(
+    `/admin/rental/${id}/change-period`,
+    payload
+  );
+  return response.data;
+};
