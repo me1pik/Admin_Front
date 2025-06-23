@@ -17,7 +17,7 @@ import {
   updateRentalScheduleStatus,
   RentalScheduleAdminDetailResponse,
   UpdateRentalStatusRequest,
-  changeRentalSchedulePeriod, // 날짜 변경 API
+  changeRentalSchedulePeriod,
 } from '../../../api/RentalSchedule/RentalScheduleApi';
 
 interface MonitoringDetailProps {
@@ -32,6 +32,9 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   const [searchParams] = useSearchParams();
   const page = searchParams.get('page') ?? '1';
   const numericNo = isCreate ? undefined : Number(no);
+
+  // ─── userId for OrderDetailTopBoxes ───
+  const [userId, setUserId] = useState<number | null>(null);
 
   // ─── 대여상세 state ───
   const [productName, setProductName] = useState('');
@@ -48,7 +51,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   const [rentalDates, setRentalDates] = useState<
     [Date | undefined, Date | undefined]
   >([undefined, undefined]);
-  // 초기 조회 시점의 원래 날짜를 저장해두어 변경 여부 비교
   const [originalDates, setOriginalDates] = useState<
     [Date | undefined, Date | undefined]
   >([undefined, undefined]);
@@ -84,6 +86,10 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
       setLoading(true);
       getRentalScheduleDetail(numericNo)
         .then((data: RentalScheduleAdminDetailResponse) => {
+          // ① OrderDetailTopBoxes용 userId 세팅
+          setUserId(data.userId);
+
+          // ② 주문 상세 정보 세팅
           setBrand(data.brand);
           setAmount(data.ticketName);
           setProductName(data.productNum);
@@ -92,23 +98,26 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
           setPaymentStatus(data.paymentStatus ?? '결제완료');
           setShippingMethod(data.deliveryInfo.shipping.deliveryMethod);
 
-          // rentalPeriod: "YYYY-MM-DD ~ YYYY-MM-DD"
+          // ③ 대여 기간 세팅
           const [startStr, endStr] = data.rentalPeriod.split(' ~ ');
           const startDate = new Date(startStr);
           const endDate = new Date(endStr);
           setRentalDates([startDate, endDate]);
           setOriginalDates([startDate, endDate]);
 
+          // ④ 배송 정보
           setRecipient(data.deliveryInfo.shipping.receiver);
           setRecipientPhone(data.deliveryInfo.shipping.phone);
           setShippingAddress(data.deliveryInfo.shipping.address);
           setShippingDetail(data.deliveryInfo.shipping.detailAddress);
           setMessage(data.deliveryInfo.shipping.message);
 
+          // ⑤ 회수 정보
           setReturnAddress(data.deliveryInfo.return.address);
           setReturnDetail(data.deliveryInfo.return.detailAddress);
           setReturnPhone(data.deliveryInfo.return.phone);
 
+          // ⑥ 기타 상태
           setDeliveryStatus(data.deliveryStatus!);
           setIsCleaned(data.isCleaned);
           setIsRepaired(data.isRepaired);
@@ -128,12 +137,12 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
     navigate(`/monitoringlist?page=${page}`);
   };
 
-  // 저장 처리: 상태 변경 + (필요 시) 대여일자 변경 API 호출
+  // 저장 처리
   const handleSave = async () => {
     if (!isCreate && numericNo) {
       setLoading(true);
       try {
-        // 1) 대여일자 변경이 필요한지 확인
+        // 날짜 변경 체크
         const [origStart, origEnd] = originalDates;
         const [newStart, newEnd] = rentalDates;
         let dateChanged = false;
@@ -143,39 +152,23 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
           newStart instanceof Date &&
           newEnd instanceof Date &&
           origStart instanceof Date &&
-          origEnd instanceof Date
+          origEnd instanceof Date &&
+          (newStart.getTime() !== origStart.getTime() ||
+            newEnd.getTime() !== origEnd.getTime())
         ) {
-          // 날짜 비교: time 값으로 비교
-          if (
-            newStart.getTime() !== origStart.getTime() ||
-            newEnd.getTime() !== origEnd.getTime()
-          ) {
-            dateChanged = true;
-            // "YYYY-MM-DD" 형식으로 포맷
-            formattedStart = newStart.toISOString().split('T')[0];
-            formattedEnd = newEnd.toISOString().split('T')[0];
-          }
-        } else if (
-          newStart instanceof Date &&
-          newEnd instanceof Date &&
-          (origStart === undefined || origEnd === undefined)
-        ) {
-          // 원래 값이 없었는데 새로 입력된 경우
           dateChanged = true;
           formattedStart = newStart.toISOString().split('T')[0];
           formattedEnd = newEnd.toISOString().split('T')[0];
         }
-        // 2) 날짜 변경 API 호출
         if (dateChanged) {
           await changeRentalSchedulePeriod(numericNo, {
             startDate: formattedStart,
             endDate: formattedEnd,
           });
-          // originalDates 갱신
-          setOriginalDates([newStart!, newEnd!]);
+          setOriginalDates([newStart, newEnd]);
         }
 
-        // 3) 상태 변경 API 호출
+        // 상태 변경 API
         const payload: UpdateRentalStatusRequest = {
           paymentStatus,
           deliveryStatus,
@@ -185,12 +178,11 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
         await updateRentalScheduleStatus(numericNo, payload);
 
         setModalTitle('변경 완료');
-        let messageText = '변경 내용을 성공적으로 저장했습니다.';
-        if (dateChanged) {
-          messageText =
-            '대여 기간 및 기타 변경 내용을 성공적으로 저장했습니다.';
-        }
-        setModalMessage(messageText);
+        setModalMessage(
+          dateChanged
+            ? '대여 기간 및 기타 변경 내용을 성공적으로 저장했습니다.'
+            : '변경 내용을 성공적으로 저장했습니다.'
+        );
         setIsModalOpen(true);
       } catch (err) {
         console.error('저장 실패', err);
@@ -203,6 +195,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
     }
   };
 
+  // 삭제 확인 모달
   const handleDelete = () => {
     setModalTitle('삭제');
     setModalMessage('대여를 정말 삭제하시겠습니까?');
@@ -217,7 +210,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   // DatePicker 범위 변경 핸들러
   const handleDateChange: ReactDatePickerProps['onChange'] = (dates) => {
     if (!dates || !(dates instanceof Array)) {
-      // 선택 해제됐을 때
       setRentalDates([undefined, undefined]);
       return;
     }
@@ -225,6 +217,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
     setRentalDates([start ?? undefined, end ?? undefined]);
   };
 
+  // 서브헤더 버튼 props
   const detailProps: DetailSubHeaderProps = {
     backLabel: '목록으로',
     onBackClick: handleBack,
@@ -238,22 +231,26 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 
   return (
     <Container>
-      {/* 최상단 제목 */}
+      {/* 상단 제목 */}
       <HeaderRow>
         <Title>{isCreate ? '대여 등록' : `대여 상세 (${numericNo})`}</Title>
       </HeaderRow>
 
+      {/* 뒤로/저장/삭제 버튼 */}
       <SettingsDetailSubHeader {...detailProps} />
 
+      {/* 대여번호 */}
       <ProductNumber>
         <strong>번호</strong>
         <span>{numericNo ?? '-'}</span>
       </ProductNumber>
 
-      <OrderDetailTopBoxes />
+      {/* 상단 요약 박스 */}
+      {userId !== null && <OrderDetailTopBoxes userId={userId} />}
+
       <DividerDashed />
 
-      {/* ─── 주문상세 섹션 ─────────────────────────────────────────────────────────────── */}
+      {/* ─── 주문상세 섹션 ─────────────────────────────────────────── */}
       <SessionHeader>주문상세</SessionHeader>
       <FormBox>
         <Row>
@@ -316,7 +313,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
         </Row>
       </FormBox>
 
-      {/* ─── 배송/회수 섹션 ─────────────────────────────────────────────────────────────── */}
+      {/* ─── 배송/회수 섹션 ─────────────────────────────────────────── */}
       <SessionHeader>배송/회수</SessionHeader>
       <FormBox>
         <Row>
@@ -397,6 +394,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
         </Row>
       </FormBox>
 
+      {/* 확인/취소 모달 */}
       <ReusableModal2
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -412,6 +410,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 export default MonitoringDetail;
 
 /* ===== styled-components ===== */
+
 const Container = styled.div`
   width: 100%;
   min-width: 1000px;
@@ -450,29 +449,21 @@ const DividerDashed = styled.hr`
   margin: 24px 0;
 `;
 
-/* ─── 여기부터 변경된 세션 헤더 스타일 ─────────────────────────────────────────────────────────────── */
 const SessionHeader = styled.div`
   box-sizing: border-box;
   background: #eeeeee;
   border: 1px solid #dddddd;
-  /* 아래쪽 테두리를 폼(FormBox) 테두리와 이어붙이려면 없애줍니다 */
   border-bottom: none;
   border-radius: 8px 8px 0 0;
   padding: 16px 20px;
-  font-family: 'NanumSquare Neo OTF';
-  font-style: normal;
   font-weight: 700;
   font-size: 12px;
-  line-height: 13px;
   text-align: center;
-  color: #000000;
-  /* FormBox 위에 겹치게 만들기 위해 살짝 아래쪽으로 이동하고, 폼과 경계선 이어지도록 margin-bottom: -1px; */
   margin-top: 24px;
   margin-bottom: -1px;
   width: fit-content;
 `;
 
-/* ─── FormBox, Row, Field 등 기존 스타일 ─────────────────────────────────────────────────────────────── */
 interface FieldProps {
   flex?: number;
 }
@@ -487,7 +478,6 @@ const FormBox = styled.div`
 const Row = styled.div`
   display: flex;
 
-  /* 두 Row 사이에 구분선 넣기 */
   & + & {
     border-top: 1px solid #ddd;
   }
@@ -501,7 +491,6 @@ const Field = styled.div<FieldProps>`
   padding: 12px 16px;
   box-sizing: border-box;
 
-  /* 컬럼(필드)마다 구분선 추가 (마지막 컬럼 제외) */
   &:not(:last-child) {
     border-right: 1px solid #ddd;
   }
@@ -514,7 +503,6 @@ const Field = styled.div<FieldProps>`
     margin-right: 8px;
   }
 
-  /* readOnly 또는 disabled 필드 스타일 */
   input[readonly],
   select:disabled,
   input:disabled {
@@ -522,7 +510,6 @@ const Field = styled.div<FieldProps>`
     color: #666;
   }
 
-  /* 일반 input, select 스타일 */
   input,
   select {
     flex: 1;

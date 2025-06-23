@@ -1,67 +1,108 @@
 // src/components/OrderDetailTopBoxes.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import userDetailImg2 from '../assets/userDetailImg2.svg';
 import storeDetailImg from '../assets/storeDetailImg.svg';
+import {
+  getRentalSchedulesByUserId,
+  RentalScheduleByUserIdItem,
+} from '../api/RentalSchedule/RentalScheduleApi';
 
-const OrderDetailTopBoxes: React.FC = () => {
+interface Props {
+  userId: number;
+}
+
+const OrderDetailTopBoxes: React.FC<Props> = ({ userId }) => {
+  const [data, setData] = useState<RentalScheduleByUserIdItem | null>(null);
+
+  useEffect(() => {
+    const fetchSummary = async () => {
+      try {
+        const schedules = await getRentalSchedulesByUserId(userId);
+        if (schedules.length > 0) setData(schedules[0]);
+      } catch (err) {
+        console.error('OrderDetailTopBoxes: 요약 정보 조회 실패', err);
+      }
+    };
+    fetchSummary();
+  }, [userId]);
+
+  const formatDateTime = (iso: string) => {
+    const d = new Date(iso);
+    const date = d.toISOString().split('T')[0];
+    const time = d.toTimeString().split(' ')[0];
+    return `${date} (${time})`;
+  };
+
   return (
     <Container>
       <BoxWrapper>
-        {/* 1. 회원정보 */}
         <Box>
           <IconPlaceholder>
             <IconImage src={userDetailImg2} alt='User' />
           </IconPlaceholder>
           <Content>
             <Row>
-              <Label>홍길동</Label> <Value>(mivin)</Value>
+              <Label>{data?.userName ?? '-'}</Label>
+              <Value>({data?.nickname ?? '-'})</Value>
             </Row>
             <Row>
-              <Value>goodxx21@naver.com</Value>
+              <Value>{data?.userEmail ?? '-'}</Value>
             </Row>
             <Row>
-              <Label>이용자</Label> <Value>(일반)</Value>
+              <Label>이용자</Label>
+              <Value>({data?.userMembership ?? '-'})</Value>
             </Row>
           </Content>
         </Box>
 
         <Divider />
 
-        {/* 2. 주문정보 */}
         <Box>
           <IconPlaceholder>
-            <IconImage src={storeDetailImg} alt='Store Detail' />
+            <IconImage src={storeDetailImg} alt='Store' />
           </IconPlaceholder>
           <Content>
             <Row>
               <Label>신청일</Label>
-              <Value>2025-04-07 (10:03:25)</Value>
+              <Value>{data ? formatDateTime(data.createAt) : '-'}</Value>
             </Row>
             <Row>
               <Label>주문번호</Label>
-              <Value>2906646342SYTIKI</Value>
+              <Value>{data?.orderNum ?? '-'}</Value>
             </Row>
             <Row>
               <Label>취소일</Label>
-              <Value>-</Value>
+              <Value>
+                {data?.cancelAt ? formatDateTime(data.cancelAt) : '-'}
+              </Value>
             </Row>
           </Content>
         </Box>
 
         <Divider />
 
-        {/* 3. 추가정보 */}
         <Box>
           <Content>
             <Row>
               <Label>포인트 사용</Label>
-              <Value>미사용</Value>
+              <Value>
+                {data
+                  ? data.pointUsed > 0
+                    ? `${data.pointUsed.toLocaleString()}원`
+                    : '미사용'
+                  : '-'}
+              </Value>
             </Row>
-
             <Row>
               <Label>추가비용</Label>
-              <Value>없음</Value>
+              <Value>
+                {data
+                  ? data.extraCharge > 0
+                    ? `${data.extraCharge.toLocaleString()}원`
+                    : '없음'
+                  : '-'}
+              </Value>
             </Row>
           </Content>
         </Box>
@@ -71,6 +112,8 @@ const OrderDetailTopBoxes: React.FC = () => {
 };
 
 export default OrderDetailTopBoxes;
+
+// (생략되지 않은 styled-components는 기존과 동일)
 
 /* ======================= Styled Components ======================= */
 
