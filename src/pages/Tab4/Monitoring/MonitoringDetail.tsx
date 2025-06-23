@@ -350,6 +350,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
               <option value='배송준비'>배송준비</option>
               <option value='배송중'>배송중</option>
               <option value='배송완료'>배송완료</option>
+              <option value='배송보류'>배송보류</option>
               <option value='배송취소'>배송취소</option>
               <option value='반납중'>반납중</option>
               <option value='반납완료'>반납완료</option>
