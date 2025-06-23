@@ -2,10 +2,6 @@
 
 import { Axios } from '../Axios';
 
-/**
- * 관리자: 전체 대여 내역 조회 (페이징 지원)
- * GET /rental-schedule?limit={limit}&page={page}
- */
 export interface RentalScheduleAdminItem {
   id: number;
   userName: string;
@@ -25,21 +21,6 @@ export interface RentalScheduleAdminListResponse {
   rentals: RentalScheduleAdminItem[];
 }
 
-export const getRentalSchedules = async (
-  limit: number = 10,
-  page: number = 1
-): Promise<RentalScheduleAdminListResponse> => {
-  const response = await Axios.get<RentalScheduleAdminListResponse>(
-    '/rental-schedule',
-    { params: { limit, page } }
-  );
-  return response.data;
-};
-
-/**
- * 관리자: 특정 대여 내역 상세 조회
- * GET /rental-schedule/detail/{id}
- */
 export interface DeliveryInfo {
   shipping: {
     address: string;
@@ -58,7 +39,6 @@ export interface DeliveryInfo {
 
 export interface RentalScheduleAdminDetailResponse {
   id: number;
-  userId: number; // 추가
   userName: string;
   rentalPeriod: string;
   brand: string;
@@ -80,19 +60,6 @@ export interface RentalScheduleAdminDetailResponse {
   isRepaired: boolean;
 }
 
-export const getRentalScheduleDetail = async (
-  id: number
-): Promise<RentalScheduleAdminDetailResponse> => {
-  const response = await Axios.get<RentalScheduleAdminDetailResponse>(
-    `/rental-schedule/detail/${id}`
-  );
-  return response.data;
-};
-
-/**
- * 관리자: 대여 상태 수정
- * PATCH /rental-schedule/{id}/status
- */
 export interface UpdateRentalStatusRequest {
   paymentStatus?: '결제완료' | '취소요청' | '취소완료';
   deliveryStatus?:
@@ -114,6 +81,38 @@ export interface UpdateRentalStatusResponse {
   is_repaired: boolean;
 }
 
+/**
+ * 관리자: 전체 대여 내역 조회 (페이징 지원)
+ * GET /rental-schedule?limit={limit}&page={page}
+ */
+export const getRentalSchedules = async (
+  limit: number = 10,
+  page: number = 1
+): Promise<RentalScheduleAdminListResponse> => {
+  const response = await Axios.get<RentalScheduleAdminListResponse>(
+    '/rental-schedule',
+    { params: { limit, page } }
+  );
+  return response.data;
+};
+
+/**
+ * 관리자: 특정 대여 내역 상세 조회
+ * GET /rental-schedule/detail/{id}
+ */
+export const getRentalScheduleDetail = async (
+  id: number
+): Promise<RentalScheduleAdminDetailResponse> => {
+  const response = await Axios.get<RentalScheduleAdminDetailResponse>(
+    `/rental-schedule/detail/${id}`
+  );
+  return response.data;
+};
+
+/**
+ * 관리자: 대여 상태 수정
+ * PATCH /rental-schedule/{id}/status
+ */
 export const updateRentalScheduleStatus = async (
   id: number,
   payload: UpdateRentalStatusRequest
@@ -128,17 +127,31 @@ export const updateRentalScheduleStatus = async (
 /**
  * 관리자: 대여 기간 변경
  * PATCH /admin/rental/{id}/change-period
+ *
+ * Request body:
+ * {
+ *   startDate: "YYYY-MM-DD",
+ *   endDate: "YYYY-MM-DD"
+ * }
+ *
+ * Response example:
+ * {
+ *   "message": "대여 기간이 성공적으로 수정되었습니다.",
+ *   "rentalId": 123,
+ *   "newStartDate": "2025-07-01",
+ *   "newEndDate": "2025-07-07"
+ * }
  */
 export interface ChangeRentalPeriodRequest {
-  startDate: string;
-  endDate: string;
+  startDate: string; // "YYYY-MM-DD"
+  endDate: string; // "YYYY-MM-DD"
 }
 
 export interface ChangeRentalPeriodResponse {
   message: string;
   rentalId: number;
-  newStartDate: string;
-  newEndDate: string;
+  newStartDate: string; // "YYYY-MM-DD"
+  newEndDate: string; // "YYYY-MM-DD"
 }
 
 export const changeRentalSchedulePeriod = async (
@@ -148,46 +161,6 @@ export const changeRentalSchedulePeriod = async (
   const response = await Axios.patch<ChangeRentalPeriodResponse>(
     `/admin/rental/${id}/change-period`,
     payload
-  );
-  return response.data;
-};
-
-/**
- * 관리자: 유저 ID로 대여 내역 조회
- * GET /rental-schedule/search-by-user-id?userId={userId}
- */
-export interface RentalScheduleByUserIdItem {
-  no: number;
-  userName: string;
-  nickname: string;
-  userEmail: string;
-  userMembership: string;
-  createAt: string;
-  orderNum: number; // order_num → orderNum
-  cancelAt: string | null; // cancel_at → cancelAt
-  pointUsed: number;
-  extraCharge: number;
-  productName: string;
-  brand: string;
-  color: string;
-  size: string;
-  deliveryMethod: string; // delivery_method → deliveryMethod
-  ticketName: string;
-  rentalPeriod: string;
-  category: string;
-  paymentStatus: string;
-  deliveryInfo: DeliveryInfo; // delivery_info → deliveryInfo
-  deliveryStatus: string;
-  isCleaned: boolean; // is_cleaned → isCleaned
-  isRepaired: boolean; // is_repaired → isRepaired
-}
-
-export const getRentalSchedulesByUserId = async (
-  userId: number
-): Promise<RentalScheduleByUserIdItem[]> => {
-  const response = await Axios.get<RentalScheduleByUserIdItem[]>(
-    '/rental-schedule/search-by-user-id',
-    { params: { userId } }
   );
   return response.data;
 };
