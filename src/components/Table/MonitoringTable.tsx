@@ -54,14 +54,14 @@ const MonitoringTable: React.FC<Props> = ({
         <col style={{ width: '40px' }} /> {/* 체크박스 */}
         <col style={{ width: '50px' }} /> {/* 번호 */}
         <col style={{ width: '100px' }} /> {/* 신청일 */}
-        <col style={{ width: '50px' }} /> {/* 주문자 */}
-        <col style={{ width: '150px' }} /> {/* 대여기간 */}
+        <col style={{ width: '100px' }} /> {/* 주문자 */}
+        <col style={{ width: '170px' }} /> {/* 대여기간 */}
         <col style={{ width: '80px' }} /> {/* 브랜드 */}
         <col style={{ width: '80px' }} /> {/* 종류 */}
         <col style={{ width: '120px' }} /> {/* 스타일(품번) */}
-        <col style={{ width: '80px' }} /> {/* 색상 */}
-        <col style={{ width: '80px' }} /> {/* 사이즈 */}
-        <col style={{ width: '80px' }} /> {/* 배송상태 */}
+        <col style={{ width: '60px' }} /> {/* 색상 */}
+        <col style={{ width: '60px' }} /> {/* 사이즈 */}
+        <col style={{ width: '60px' }} /> {/* 배송상태 */}
       </colgroup>
       <thead>
         <TableRow>

@@ -1,3 +1,5 @@
+// src/pages/Tab4/Monitoring/MonitoringList.tsx
+
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -10,7 +12,7 @@ import {
   getRentalSchedules,
   updateRentalScheduleStatus,
   RentalScheduleAdminItem,
-} from '../../../api/RentalSchedule/RentalScheduleApi';
+} from '../../../api/RentalSchedule/RentalScheduleApi'; // 경로 확인: api 파일명을 맞춰주세요
 
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
@@ -47,14 +49,16 @@ const MonitoringList: React.FC = () => {
       setLoading(true);
       setError('');
       try {
+        // 전체 건수 조회
         const first = await getRentalSchedules(1, 1);
         const total = first.count;
+        // 전체 데이터 한 번에 조회
         const { rentals } = await getRentalSchedules(total, 1);
         const mapped: MonitoringItem[] = rentals.map(
           (item: RentalScheduleAdminItem) => ({
             no: item.id,
             신청일: item.createAt.split(' ')[0],
-            주문자: item.userName,
+            주문자: `${item.userName}(${item.nickname})`,
             대여기간: item.rentalPeriod,
             브랜드: item.brand,
             종류: item.category,
@@ -91,7 +95,7 @@ const MonitoringList: React.FC = () => {
       const mapped = rentals.map((item: RentalScheduleAdminItem) => ({
         no: item.id,
         신청일: item.createAt.split(' ')[0],
-        주문자: item.userName,
+        주문자: `${item.userName}(${item.nickname})`,
         대여기간: item.rentalPeriod,
         브랜드: item.brand,
         종류: item.category,
@@ -105,6 +109,8 @@ const MonitoringList: React.FC = () => {
       setTotalCount(total);
       setSelectedRows(new Set());
       setNewStatus('');
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }

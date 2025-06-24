@@ -4,7 +4,35 @@ import styled from 'styled-components';
 import userDetailImg2 from '../assets/userDetailImg2.svg';
 import storeDetailImg from '../assets/storeDetailImg.svg';
 
-const OrderDetailTopBoxes: React.FC = () => {
+interface OrderDetailTopBoxesProps {
+  userName: string;
+  nickname: string;
+  userEmail: string;
+  userMembership: string;
+  createAt: string; // "YYYY-MM-DD HH:mm:ss"
+  orderNum: string | number;
+  cancelAt?: string | null;
+  pointUsed: number;
+  extraCharge?: number;
+}
+
+const OrderDetailTopBoxes: React.FC<OrderDetailTopBoxesProps> = ({
+  userName,
+  nickname,
+  userEmail,
+  userMembership,
+  createAt,
+  orderNum,
+  cancelAt,
+  pointUsed,
+  extraCharge,
+}) => {
+  // createAt 예시 포맷: "2025-06-22 18:32:10"
+  const formatCreateAt = (s: string) => {
+    // 이미 "YYYY-MM-DD HH:mm:ss"라면 그대로 반환하거나, 필요시 다른 포맷으로 가공
+    return s;
+  };
+
   return (
     <Container>
       <BoxWrapper>
@@ -15,53 +43,58 @@ const OrderDetailTopBoxes: React.FC = () => {
           </IconPlaceholder>
           <Content>
             <Row>
-              <Label>홍길동</Label> <Value>(mivin)</Value>
+              <Label>{userName}</Label> <Value>({nickname})</Value>
             </Row>
             <Row>
-              <Value>goodxx21@naver.com</Value>
+              <Value>{userEmail}</Value>
             </Row>
             <Row>
-              <Label>이용자</Label> <Value>(일반)</Value>
+              <Label>이용자</Label> <Value>({userMembership})</Value>
             </Row>
           </Content>
         </Box>
 
         <Divider />
 
-        {/* 2. 주문정보 */}
+        {/* 2. 주문/신청 정보 */}
         <Box>
           <IconPlaceholder>
-            <IconImage src={storeDetailImg} alt='Store Detail' />
+            <IconImage src={storeDetailImg} alt='Order Info' />
           </IconPlaceholder>
           <Content>
             <Row>
               <Label>신청일</Label>
-              <Value>2025-04-07 (10:03:25)</Value>
+              <Value>{formatCreateAt(createAt)}</Value>
             </Row>
             <Row>
               <Label>주문번호</Label>
-              <Value>2906646342SYTIKI</Value>
+              <Value>{orderNum}</Value>
             </Row>
             <Row>
               <Label>취소일</Label>
-              <Value>-</Value>
+              <Value>{cancelAt && cancelAt !== '' ? cancelAt : '-'}</Value>
             </Row>
           </Content>
         </Box>
 
         <Divider />
 
-        {/* 3. 추가정보 */}
+        {/* 3. 추가정보: 포인트/추가비용 */}
         <Box>
           <Content>
             <Row>
               <Label>포인트 사용</Label>
-              <Value>미사용</Value>
+              <Value>
+                {pointUsed > 0 ? `${pointUsed.toLocaleString()}원` : '미사용'}
+              </Value>
             </Row>
-
             <Row>
               <Label>추가비용</Label>
-              <Value>없음</Value>
+              <Value>
+                {extraCharge && extraCharge > 0
+                  ? `${extraCharge.toLocaleString()}원`
+                  : '없음'}
+              </Value>
             </Row>
           </Content>
         </Box>
@@ -73,7 +106,6 @@ const OrderDetailTopBoxes: React.FC = () => {
 export default OrderDetailTopBoxes;
 
 /* ======================= Styled Components ======================= */
-
 const Container = styled.div`
   width: 100%;
   min-width: 1000px;

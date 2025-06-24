@@ -20,6 +20,11 @@ import {
   changeRentalSchedulePeriod, // 날짜 변경 API
 } from '../../../api/RentalSchedule/RentalScheduleApi';
 
+import {
+  getRentalScheduleByRentalId,
+  RentalScheduleByIdResponse,
+} from '../../../api/RentalSchedule/RentalScheduleApi'; // 방금 구현한 함수 경로 확인
+
 interface MonitoringDetailProps {
   isCreate?: boolean;
 }
@@ -32,6 +37,10 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   const [searchParams] = useSearchParams();
   const page = searchParams.get('page') ?? '1';
   const numericNo = isCreate ? undefined : Number(no);
+
+  // ─── 헤더 정보 state ───
+  const [headerInfo, setHeaderInfo] =
+    useState<RentalScheduleByIdResponse | null>(null);
 
   // ─── 대여상세 state ───
   const [productName, setProductName] = useState('');
@@ -48,7 +57,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   const [rentalDates, setRentalDates] = useState<
     [Date | undefined, Date | undefined]
   >([undefined, undefined]);
-  // 초기 조회 시점의 원래 날짜를 저장해두어 변경 여부 비교
   const [originalDates, setOriginalDates] = useState<
     [Date | undefined, Date | undefined]
   >([undefined, undefined]);
@@ -82,6 +90,17 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   useEffect(() => {
     if (!isCreate && numericNo) {
       setLoading(true);
+      // 1) 헤더용 정보 조회
+      getRentalScheduleByRentalId(numericNo)
+        .then((hdr) => {
+          setHeaderInfo(hdr);
+        })
+        .catch((err) => {
+          console.error('헤더 정보 조회 실패', err);
+          // 에러 시에도 상세 조회는 계속함
+        });
+
+      // 2) 상세 조회
       getRentalScheduleDetail(numericNo)
         .then((data: RentalScheduleAdminDetailResponse) => {
           setBrand(data.brand);
@@ -128,12 +147,12 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
     navigate(`/monitoringlist?page=${page}`);
   };
 
-  // 저장 처리: 상태 변경 + (필요 시) 대여일자 변경 API 호출
+  // 저장 처리: 상태 변경 + 대여일자 변경 API 호출
   const handleSave = async () => {
     if (!isCreate && numericNo) {
       setLoading(true);
       try {
-        // 1) 대여일자 변경이 필요한지 확인
+        // 1) 대여일자 변경 확인
         const [origStart, origEnd] = originalDates;
         const [newStart, newEnd] = rentalDates;
         let dateChanged = false;
@@ -145,13 +164,11 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
           origStart instanceof Date &&
           origEnd instanceof Date
         ) {
-          // 날짜 비교: time 값으로 비교
           if (
             newStart.getTime() !== origStart.getTime() ||
             newEnd.getTime() !== origEnd.getTime()
           ) {
             dateChanged = true;
-            // "YYYY-MM-DD" 형식으로 포맷
             formattedStart = newStart.toISOString().split('T')[0];
             formattedEnd = newEnd.toISOString().split('T')[0];
           }
@@ -160,7 +177,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
           newEnd instanceof Date &&
           (origStart === undefined || origEnd === undefined)
         ) {
-          // 원래 값이 없었는데 새로 입력된 경우
           dateChanged = true;
           formattedStart = newStart.toISOString().split('T')[0];
           formattedEnd = newEnd.toISOString().split('T')[0];
@@ -171,7 +187,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
             startDate: formattedStart,
             endDate: formattedEnd,
           });
-          // originalDates 갱신
           setOriginalDates([newStart!, newEnd!]);
         }
 
@@ -217,7 +232,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   // DatePicker 범위 변경 핸들러
   const handleDateChange: ReactDatePickerProps['onChange'] = (dates) => {
     if (!dates || !(dates instanceof Array)) {
-      // 선택 해제됐을 때
       setRentalDates([undefined, undefined]);
       return;
     }
@@ -250,7 +264,21 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
         <span>{numericNo ?? '-'}</span>
       </ProductNumber>
 
-      <OrderDetailTopBoxes />
+      {/* 헤더 정보 전달: headerInfo가 있으면 props로 넣어줌 */}
+      {headerInfo && (
+        <OrderDetailTopBoxes
+          userName={headerInfo.userName}
+          nickname={headerInfo.nickname}
+          userEmail={headerInfo.userEmail}
+          userMembership={headerInfo.userMembership}
+          createAt={headerInfo.createAt}
+          orderNum={headerInfo.orderNum}
+          cancelAt={headerInfo.cancelAt}
+          pointUsed={headerInfo.pointUsed}
+          extraCharge={headerInfo.extraCharge}
+        />
+      )}
+
       <DividerDashed />
 
       {/* ─── 주문상세 섹션 ─────────────────────────────────────────────────────────────── */}
@@ -353,7 +381,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
               <option value='배송준비'>배송준비</option>
               <option value='배송중'>배송중</option>
               <option value='배송완료'>배송완료</option>
-              <option value='배송보류'>배송보류</option>
               <option value='배송취소'>배송취소</option>
               <option value='반납중'>반납중</option>
               <option value='반납완료'>반납완료</option>
@@ -451,32 +478,27 @@ const DividerDashed = styled.hr`
   margin: 24px 0;
 `;
 
-/* ─── 여기부터 변경된 세션 헤더 스타일 ─────────────────────────────────────────────────────────────── */
+interface FieldProps {
+  flex?: number;
+}
+
+/* ─── SessionHeader 스타일 ─────────────────────────────────────────────────────────────── */
 const SessionHeader = styled.div`
   box-sizing: border-box;
   background: #eeeeee;
   border: 1px solid #dddddd;
-  /* 아래쪽 테두리를 폼(FormBox) 테두리와 이어붙이려면 없애줍니다 */
   border-bottom: none;
   border-radius: 8px 8px 0 0;
   padding: 16px 20px;
   font-family: 'NanumSquare Neo OTF';
-  font-style: normal;
   font-weight: 700;
   font-size: 12px;
-  line-height: 13px;
   text-align: center;
-  color: #000000;
-  /* FormBox 위에 겹치게 만들기 위해 살짝 아래쪽으로 이동하고, 폼과 경계선 이어지도록 margin-bottom: -1px; */
+  color: #000;
   margin-top: 24px;
   margin-bottom: -1px;
   width: fit-content;
 `;
-
-/* ─── FormBox, Row, Field 등 기존 스타일 ─────────────────────────────────────────────────────────────── */
-interface FieldProps {
-  flex?: number;
-}
 
 const FormBox = styled.div`
   background: #fff;
@@ -487,8 +509,6 @@ const FormBox = styled.div`
 
 const Row = styled.div`
   display: flex;
-
-  /* 두 Row 사이에 구분선 넣기 */
   & + & {
     border-top: 1px solid #ddd;
   }
@@ -501,12 +521,9 @@ const Field = styled.div<FieldProps>`
   align-items: center;
   padding: 12px 16px;
   box-sizing: border-box;
-
-  /* 컬럼(필드)마다 구분선 추가 (마지막 컬럼 제외) */
   &:not(:last-child) {
     border-right: 1px solid #ddd;
   }
-
   label {
     width: 80px;
     text-align: center;
@@ -514,16 +531,12 @@ const Field = styled.div<FieldProps>`
     font-weight: 700;
     margin-right: 8px;
   }
-
-  /* readOnly 또는 disabled 필드 스타일 */
   input[readonly],
   select:disabled,
   input:disabled {
     background: #f5f5f5;
     color: #666;
   }
-
-  /* 일반 input, select 스타일 */
   input,
   select {
     flex: 1;
@@ -559,12 +572,10 @@ const DatePickerContainer = styled.div`
   padding: 0 12px;
   height: 36px;
   width: 200px;
-
   svg {
     margin-right: 8px;
     color: #666;
   }
-
   input {
     border: none;
     outline: none;
