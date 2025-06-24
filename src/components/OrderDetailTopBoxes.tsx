@@ -5,14 +5,14 @@ import userDetailImg2 from '../assets/userDetailImg2.svg';
 import storeDetailImg from '../assets/storeDetailImg.svg';
 
 interface OrderDetailTopBoxesProps {
-  userName: string;
-  nickname: string;
-  userEmail: string;
-  userMembership: string;
-  createAt: string; // "YYYY-MM-DD HH:mm:ss"
-  orderNum: string | number;
+  userName?: string;
+  nickname?: string;
+  userEmail?: string;
+  userMembership?: string;
+  createAt?: string; // "YYYY-MM-DD HH:mm:ss"
+  orderNum?: string | number;
   cancelAt?: string | null;
-  pointUsed: number;
+  pointUsed?: number;
   extraCharge?: number;
 }
 
@@ -27,9 +27,8 @@ const OrderDetailTopBoxes: React.FC<OrderDetailTopBoxesProps> = ({
   pointUsed,
   extraCharge,
 }) => {
-  // createAt 예시 포맷: "2025-06-22 18:32:10"
-  const formatCreateAt = (s: string) => {
-    // 이미 "YYYY-MM-DD HH:mm:ss"라면 그대로 반환하거나, 필요시 다른 포맷으로 가공
+  const formatCreateAt = (s?: string) => {
+    if (!s) return '-';
     return s;
   };
 
@@ -43,13 +42,15 @@ const OrderDetailTopBoxes: React.FC<OrderDetailTopBoxesProps> = ({
           </IconPlaceholder>
           <Content>
             <Row>
-              <Label>{userName}</Label> <Value>({nickname})</Value>
+              <Label>{userName ?? '-'}</Label>
+              <Value>({nickname ?? '-'})</Value>
             </Row>
             <Row>
-              <Value>{userEmail}</Value>
+              <Value>{userEmail ?? '-'}</Value>
             </Row>
             <Row>
-              <Label>이용자</Label> <Value>({userMembership})</Value>
+              <Label>이용자</Label>
+              <Value>({userMembership ?? '-'})</Value>
             </Row>
           </Content>
         </Box>
@@ -68,7 +69,7 @@ const OrderDetailTopBoxes: React.FC<OrderDetailTopBoxesProps> = ({
             </Row>
             <Row>
               <Label>주문번호</Label>
-              <Value>{orderNum}</Value>
+              <Value>{orderNum ?? '-'}</Value>
             </Row>
             <Row>
               <Label>취소일</Label>
@@ -85,7 +86,9 @@ const OrderDetailTopBoxes: React.FC<OrderDetailTopBoxesProps> = ({
             <Row>
               <Label>포인트 사용</Label>
               <Value>
-                {pointUsed > 0 ? `${pointUsed.toLocaleString()}원` : '미사용'}
+                {pointUsed && pointUsed > 0
+                  ? `${pointUsed.toLocaleString()}원`
+                  : '미사용'}
               </Value>
             </Row>
             <Row>

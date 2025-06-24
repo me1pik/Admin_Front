@@ -17,13 +17,14 @@ import {
   updateRentalScheduleStatus,
   RentalScheduleAdminDetailResponse,
   UpdateRentalStatusRequest,
-  changeRentalSchedulePeriod, // 날짜 변경 API
+  changeRentalSchedulePeriod,
 } from '../../../api/RentalSchedule/RentalScheduleApi';
 
+// 수정: 존재하지 않는 타입 대신 정확한 인터페이스를 import
 import {
   getRentalScheduleByRentalId,
-  RentalScheduleByIdResponse,
-} from '../../../api/RentalSchedule/RentalScheduleApi'; // 방금 구현한 함수 경로 확인
+  RentalScheduleAdminByRentalIdResponse,
+} from '../../../api/RentalSchedule/RentalScheduleApi';
 
 interface MonitoringDetailProps {
   isCreate?: boolean;
@@ -40,7 +41,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 
   // ─── 헤더 정보 state ───
   const [headerInfo, setHeaderInfo] =
-    useState<RentalScheduleByIdResponse | null>(null);
+    useState<RentalScheduleAdminByRentalIdResponse | null>(null);
 
   // ─── 대여상세 state ───
   const [productName, setProductName] = useState('');
