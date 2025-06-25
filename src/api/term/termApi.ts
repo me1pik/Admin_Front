@@ -17,26 +17,28 @@ export interface TermPolicyItem {
 
 /**
  * 생성 요청 바디 인터페이스
+ * author는 서버에서 자동 설정되거나, 필요 시 요청에 포함할 수 있지만
+ * 예시 스펙에서는 생략 가능하므로 optional 처리하지 않고 프론트에서 title/type/category/content를 보냄.
  */
 export interface CreateTermPolicyRequest {
   title: string;
   type: '이용약관' | '개인정보보호' | 'FAQ';
   category: string;
   content: string;
-  // author는 서버에서 설정되는 경우 생략 가능
+  // author를 클라이언트에서 직접 보내야 하는 경우가 있다면 optional로 추가 가능:
+  // author?: string;
 }
 
 /**
  * 수정 요청 바디 인터페이스
- * 필요에 따라 모든 필드를 optional로 처리할 수 있으나,
- * 보통 프론트에서는 전체 필드를 보내거나 변경된 필드만 보내도록 함.
+ * 필요에 따라 optional로 처리. 전체 필드를 보내거나 변경된 필드만 보낼 수 있음.
  */
 export interface UpdateTermPolicyRequest {
   title?: string;
   type?: '이용약관' | '개인정보보호' | 'FAQ';
   category?: string;
   content?: string;
-  author?: string; // 필요 시 프론트에서 보내도록 서버에서 허용할 경우
+  author?: string; // 서버에서 허용할 경우
 }
 
 /**
@@ -68,7 +70,7 @@ export interface FetchTermPoliciesParams {
 export async function fetchTermPolicies(
   params?: FetchTermPoliciesParams
 ): Promise<TermPolicyItem[]> {
-  // params 객체 자체를 그대로 params로 전달하면, undefined인 프로퍼티는 Axios가 알아서 제외
+  // Axios.get 시 params 객체에 undefined 프로퍼티가 있으면 자동 제외됨
   const response = await Axios.get<TermPolicyItem[]>('/admin/terms-policy', {
     params,
   });
