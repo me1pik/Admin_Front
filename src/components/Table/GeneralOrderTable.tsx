@@ -2,7 +2,6 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { getStatusStyle } from '../common/Table';
 
 /** 구매 아이템 인터페이스 */
 export interface GeneralOrderListItem {
@@ -27,6 +26,24 @@ const GeneralOrderListTable: React.FC<GeneralOrderListTableProps> = ({
   filteredData,
   handleEdit,
 }) => {
+  // 상태별 배경색과 레이블 매핑
+  const getPaymentStyle = (status: string) => {
+    switch (status) {
+      case '결제완료':
+        return { background: '#4AA361', label: '결제완료' };
+      case '취소요청':
+        return { background: '#000000', label: '취소요청' };
+      case '환불 진행중':
+        return { background: '#CD5542', label: '환불 진행중' };
+      case '환불완료':
+        return { background: '#F39C12', label: '환불완료' };
+      case '결제실패':
+        return { background: '#AAAAAA', label: '결제실패' };
+      default:
+        return { background: '#6c757d', label: status };
+    }
+  };
+
   return (
     <Table>
       <colgroup>
@@ -55,6 +72,7 @@ const GeneralOrderListTable: React.FC<GeneralOrderListTableProps> = ({
       </thead>
       <tbody>
         {filteredData.map((item, idx) => {
+          const paymentInfo = getPaymentStyle(item.paymentStatus);
           return (
             <TableRow key={idx}>
               <Td>{item.no}</Td>
@@ -71,8 +89,10 @@ const GeneralOrderListTable: React.FC<GeneralOrderListTableProps> = ({
               <Td>{item.color}</Td>
               <Td>{item.paymentMethod}</Td>
               <Td>
-                <StatusBadge style={getStatusStyle(item.paymentStatus)}>
-                  {item.paymentStatus}
+                <StatusBadge
+                  style={{ backgroundColor: paymentInfo.background }}
+                >
+                  {paymentInfo.label}
                 </StatusBadge>
               </Td>
             </TableRow>

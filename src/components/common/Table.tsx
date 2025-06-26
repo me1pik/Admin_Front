@@ -191,17 +191,6 @@ export const getStatusColor = (status: string) => {
   }
 };
 
-// 상태별 색상 반환 (배경/글자색)
-export function getStatusStyle(status: string): {
-  background: string;
-  color: string;
-} {
-  return (
-    theme.colors.status[status as keyof typeof theme.colors.status] ||
-    theme.colors.status['기본']
-  );
-}
-
 // 공통 스타일
 export const ellipsis = css`
   overflow: hidden;

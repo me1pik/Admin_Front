@@ -1,7 +1,6 @@
 // src/components/Table/user/UsageHistoryTable.tsx
 import React from 'react';
 import styled from 'styled-components';
-import { getStatusStyle } from '../../common/Table';
 
 /** 스크린샷 예시에 맞춘 UsageHistoryRow 인터페이스 */
 export interface UsageHistoryRow {
@@ -20,6 +19,27 @@ export interface UsageHistoryRow {
 interface UsageHistoryTableProps {
   data: UsageHistoryRow[];
 }
+
+/**
+ * 상태(status)에 따른 배경색과 라벨을 반환
+ * 필요에 따라 색상이나 라벨을 수정하세요.
+ */
+const getStatusStyle = (status: string) => {
+  switch (status) {
+    case '배송완료':
+      return { background: '#4AA361', label: '배송완료' };
+    case '배송준비중':
+      return { background: '#000000', label: '배송준비중' };
+    case '배송중':
+      return { background: '#3071B2', label: '배송중' };
+    case '주문취소중':
+      return { background: '#CD5542', label: '주문취소중' };
+    case '주문취소':
+      return { background: '#AAAAAA', label: '주문취소' };
+    default:
+      return { background: '#6c757d', label: status };
+  }
+};
 
 const UsageHistoryTable: React.FC<UsageHistoryTableProps> = ({ data }) => {
   // 10행 고정을 위해 부족한 행의 개수 계산
@@ -54,6 +74,7 @@ const UsageHistoryTable: React.FC<UsageHistoryTableProps> = ({ data }) => {
         </thead>
         <tbody>
           {data.map((row, idx) => {
+            const styleInfo = getStatusStyle(row.status);
             return (
               <tr key={idx}>
                 <Td>{row.no}</Td>
@@ -65,8 +86,10 @@ const UsageHistoryTable: React.FC<UsageHistoryTableProps> = ({ data }) => {
                 <Td>{row.size}</Td>
                 <Td>{row.color}</Td>
                 <Td>
-                  <StatusBadge style={getStatusStyle(row.status)}>
-                    {row.status}
+                  <StatusBadge
+                    style={{ backgroundColor: styleInfo.background }}
+                  >
+                    {styleInfo.label}
                   </StatusBadge>
                 </Td>
               </tr>

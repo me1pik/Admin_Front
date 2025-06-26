@@ -1,6 +1,5 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
-import { getStatusStyle } from '../common/Table';
 
 /** 제품 아이템 인터페이스 */
 export interface BrandItem {
@@ -33,6 +32,20 @@ const BrandTable: React.FC<BrandTableProps> = ({
   filteredData,
   handleEdit,
 }) => {
+  // 상태별 배경색 반환 함수
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case '등록완료':
+        return '#4AA361'; // 초록
+      case '등록대기':
+        return '#3071B2'; // 파랑
+      case '계약종료':
+        return '#CD5542'; // 주황/빨강
+      default:
+        return '#6c757d'; // 회색
+    }
+  };
+
   return (
     <Table>
       <colgroup>
@@ -76,7 +89,7 @@ const BrandTable: React.FC<BrandTableProps> = ({
             <Td>
               <StatusBadge
                 title={item.status}
-                style={getStatusStyle(item.status)}
+                style={{ backgroundColor: getStatusColor(item.status) }}
               >
                 {item.status}
               </StatusBadge>

@@ -1,7 +1,6 @@
 // src/components/Table/MonitoringTable.tsx
 import React from 'react';
 import styled from 'styled-components';
-import { getStatusStyle } from '../common/Table';
 
 export interface MonitoringItem {
   no: number;
@@ -33,6 +32,27 @@ const MonitoringTable: React.FC<Props> = ({
   toggleRow,
   toggleAll,
 }) => {
+  const getBadgeStyle = (status: string): { bg: string; color: string } => {
+    switch (status) {
+      case '신청완료':
+        return { bg: '#ffb300', color: '#FFFFFF' };
+      case '배송준비':
+        return { bg: '#000000', color: '#FFFFFF' };
+      case '배송중':
+        return { bg: '#007bff', color: '#FFFFFF' };
+      case '배송완료':
+        return { bg: '#4AA361', color: '#FFFFFF' };
+      case '배송취소':
+        return { bg: '#c02626', color: '#FFFFFF' };
+      case '반납중':
+        return { bg: '#6c757d', color: '#FFFFFF' };
+      case '반납완료':
+        return { bg: '#6c757d', color: '#FFFFFF' };
+      default:
+        return { bg: '#6c757d', color: '#FFFFFF' };
+    }
+  };
+
   return (
     <Table>
       <colgroup>
@@ -74,6 +94,7 @@ const MonitoringTable: React.FC<Props> = ({
       </thead>
       <tbody>
         {filteredData.map((item) => {
+          const badge = getBadgeStyle(item.배송상태);
           return (
             <TableRow key={item.no}>
               <Td>
@@ -102,7 +123,9 @@ const MonitoringTable: React.FC<Props> = ({
               <Td>{item.색상}</Td>
               <Td>{item.사이즈}</Td>
               <Td>
-                <StatusBadge style={getStatusStyle(item.배송상태)}>
+                <StatusBadge
+                  style={{ background: badge.bg, color: badge.color }}
+                >
                   {item.배송상태}
                 </StatusBadge>
               </Td>
