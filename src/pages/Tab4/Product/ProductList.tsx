@@ -1,4 +1,4 @@
-// src/pages/ProductList.tsx
+// src/pages/Tab4/Product/ProductList.tsx
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -14,13 +14,6 @@ import {
   ProductListResponse,
 } from '../../../api/adminProduct';
 
-// API에서 내려주는 원시 아이템 타입 (retailPrice 포함)
-interface RawProductItem extends ProductItem {
-  retailPrice: number;
-  // 컬러 필드 포함
-  color: string;
-}
-
 const tabs: TabItem[] = [
   { label: '전체보기', path: '전체보기' },
   { label: '등록완료', path: '등록완료' },
@@ -28,7 +21,6 @@ const tabs: TabItem[] = [
   { label: '판매종료', path: '판매종료' },
 ];
 
-// newStatus 매핑
 const statuses: Array<{ label: string; value: string }> = [
   { label: '등록완료', value: '1' },
   { label: '등록대기', value: '0' },
@@ -49,7 +41,6 @@ const ProductList: React.FC = () => {
 
   // 전체 데이터
   const [allData, setAllData] = useState<ProductItem[]>([]);
-
   const [newStatus, setNewStatus] = useState<string>('');
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
 
@@ -59,7 +50,6 @@ const ProductList: React.FC = () => {
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        // 총 개수 요청
         const first: ProductListResponse = await getProducts({
           status: undefined,
           search: undefined,
@@ -68,20 +58,26 @@ const ProductList: React.FC = () => {
         });
         const total = first.totalCount;
 
-        // 전체 데이터 요청
         const res: ProductListResponse = await getProducts({
           status: undefined,
           search: undefined,
           page: 1,
           limit: total,
         });
-        const uiItems: ProductItem[] = (res.items as RawProductItem[]).map(
-          ({ retailPrice, color, ...rest }) => ({
-            ...rest,
-            price: retailPrice,
-            color,
-          })
-        );
+
+        // any[]로 취급해서 color가 null일 경우 ''로 대체
+        const uiItems: ProductItem[] = (res.items as any[]).map((item) => ({
+          no: item.no,
+          styleCode: item.styleCode,
+          brand: item.brand,
+          category: item.category,
+          color: item.color ?? '',
+          size: item.size,
+          price: item.retailPrice,
+          registerDate: item.registerDate,
+          status: item.status,
+        }));
+
         setAllData(uiItems);
       } catch (err) {
         console.error('제품 전체 조회 실패', err);
@@ -101,6 +97,7 @@ const ProductList: React.FC = () => {
     const params = Object.fromEntries(searchParams.entries());
     params.status = tab.path;
     params.page = '1';
+    delete params.search;
     setSearchParams(params);
   };
 
@@ -114,12 +111,12 @@ const ProductList: React.FC = () => {
     const txt = searchTerm;
     return (
       String(item.no).toLowerCase().includes(txt) ||
-      item.styleCode.toLowerCase().includes(txt) ||
-      item.brand.toLowerCase().includes(txt) ||
-      item.category.toLowerCase().includes(txt) ||
-      item.color.toLowerCase().includes(txt) ||
+      (item.styleCode ?? '').toLowerCase().includes(txt) ||
+      (item.brand ?? '').toLowerCase().includes(txt) ||
+      (item.category ?? '').toLowerCase().includes(txt) ||
+      (item.color ?? '').toLowerCase().includes(txt) ||
       String(item.price).toLowerCase().includes(txt) ||
-      item.status.toLowerCase().includes(txt)
+      (item.status ?? '').toLowerCase().includes(txt)
     );
   });
 
@@ -138,9 +135,8 @@ const ProductList: React.FC = () => {
       return;
     }
     try {
-      const ids = Array.from(selectedRows);
       await updateProductsStatus({
-        ids,
+        ids: Array.from(selectedRows),
         registration: parseInt(newStatus, 10),
       });
 
