@@ -291,3 +291,8 @@ export const getRentalScheduleByRentalId = async (
   };
   return mapped;
 };
+
+// 대여 스케줄 삭제
+export const deleteRentalSchedule = async (id: number): Promise<void> => {
+  await Axios.delete(`/rental-schedule/${id}`);
+};

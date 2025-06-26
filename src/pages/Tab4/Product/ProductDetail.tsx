@@ -8,8 +8,7 @@ import MaterialInfoSection from '../../../components/productregister/MaterialInf
 import FabricInfoSection from '../../../components/productregister/FabricInfoSection';
 import ProductImageSection from '../../../components/productregister/ProductImageSection';
 import DetailTopBoxes from '../../../components/DetailTopBoxes';
-import ReusableModal from '../../../components/TwoButtonModal';
-import ReusableModal2 from '../../../components/OneButtonModal';
+import { Modal } from '../../../components/common/Modal';
 
 import {
   getProductDetail,
@@ -282,11 +281,12 @@ const ProductDetail: React.FC = () => {
         </>
       )}
 
-      <ReusableModal
+      <Modal
         isOpen={confirmConfig.open}
         title='알림'
         width='400px'
         height='200px'
+        variant='twoButton'
         onClose={() => setConfirmConfig((c) => ({ ...c, open: false }))}
         onConfirm={async () => {
           setConfirmConfig((c) => ({ ...c, open: false }));
@@ -294,16 +294,17 @@ const ProductDetail: React.FC = () => {
         }}
       >
         {confirmConfig.message}
-      </ReusableModal>
-      <ReusableModal2
+      </Modal>
+      <Modal
         isOpen={resultConfig.open}
         title='알림'
         width='400px'
         height='200px'
+        variant='oneButton'
         onClose={() => setResultConfig((c) => ({ ...c, open: false }))}
       >
         {resultConfig.message}
-      </ReusableModal2>
+      </Modal>
     </Container>
   );
 };

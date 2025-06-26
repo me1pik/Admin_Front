@@ -1,6 +1,6 @@
 import React, { useState, forwardRef } from 'react';
 import styled from 'styled-components';
-import Button02 from '../components/Button02';
+import { Button } from './common/Button';
 
 type InputFieldProps = {
   label: string;
@@ -120,9 +120,9 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
 
               {buttonLabel && (
                 <ButtonWrapper>
-                  <Button02 onClick={onButtonClick} color={buttonColor}>
+                  <Button onClick={onButtonClick} color={buttonColor}>
                     {buttonLabel}
-                  </Button02>
+                  </Button>
                 </ButtonWrapper>
               )}
             </InputWrapper>

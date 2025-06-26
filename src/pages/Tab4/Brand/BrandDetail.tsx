@@ -8,7 +8,7 @@ import SettingsDetailSubHeader, {
 } from '../../../components/Header/SettingsDetailSubHeader';
 import SettingsDetailTopBoxes from '../../../components/SettingsDetailTopBoxes';
 import ShippingTabBar from '../../../components/TabBar';
-import ReusableModal2 from '../../../components/TwoButtonModal';
+import { Modal } from '../../../components/common/Modal';
 
 import {
   getAdminBrandDetail,
@@ -47,7 +47,9 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalTitle, setModalTitle] = useState<string>('');
   const [modalMessage, setModalMessage] = useState<string>('');
-  const [confirmAction, setConfirmAction] = useState<'delete' | null>(null);
+  const [confirmAction, setConfirmAction] = useState<'delete' | 'save' | null>(
+    null
+  );
 
   useEffect(() => {
     const init = async () => {
@@ -99,6 +101,13 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
   }, [numericNo]);
 
   const handleSave = async () => {
+    setModalTitle('변경 확인');
+    setModalMessage('변경 내용을 저장하시겠습니까?');
+    setConfirmAction('save');
+    setIsModalOpen(true);
+  };
+
+  const executeSave = async () => {
     try {
       const isActiveValue = status === '등록완료';
       const bodyCreate: CreateAdminBrandRequest = {
@@ -171,6 +180,8 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
         setConfirmAction(null);
         setIsModalOpen(true);
       }
+    } else if (confirmAction === 'save') {
+      executeSave();
     }
   };
 
@@ -289,14 +300,19 @@ const BrandDetail: React.FC<BrandDetailProps> = ({ isCreate = false }) => {
         </FormBox>
       )}
 
-      <ReusableModal2
+      <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirm}
         title={modalTitle}
+        variant={
+          modalTitle === '변경 확인' || modalTitle === '삭제 확인'
+            ? 'twoButton'
+            : 'oneButton'
+        }
       >
         {modalMessage}
-      </ReusableModal2>
+      </Modal>
     </Container>
   );
 };

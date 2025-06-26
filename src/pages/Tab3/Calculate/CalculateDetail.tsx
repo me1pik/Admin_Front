@@ -7,7 +7,7 @@ import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../../../components/Header/SettingsDetailSubHeader';
 import ShippingTabBar from '../../../components/TabBar';
-import ReusableModal2 from '../../../components/OneButtonModal';
+import { Modal } from '../../../components/common/Modal';
 import CalculateDetailTopBoxes from '../../../components/CalculateDetailTopBoxes';
 
 interface CalculateDetailProps {
@@ -192,14 +192,14 @@ const CalculateDetail: React.FC<CalculateDetailProps> = ({
         </DetailSection>
       )}
 
-      <ReusableModal2
+      <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirm}
         title='확인'
       >
         저장하시겠습니까?
-      </ReusableModal2>
+      </Modal>
     </Container>
   );
 };

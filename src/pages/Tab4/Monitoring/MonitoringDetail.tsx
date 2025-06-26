@@ -9,7 +9,7 @@ import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../../../components/Header/SettingsDetailSubHeader';
 import OrderDetailTopBoxes from '../../../components/OrderDetailTopBoxes';
-import ReusableModal2 from '../../../components/OneButtonModal';
+import { Modal } from '../../../components/common/Modal';
 import Spinner from '../../../components/Spinner';
 
 import {
@@ -18,6 +18,7 @@ import {
   RentalScheduleAdminDetailResponse,
   UpdateRentalStatusRequest,
   changeRentalSchedulePeriod,
+  deleteRentalSchedule,
 } from '../../../api/RentalSchedule/RentalScheduleApi';
 
 import {
@@ -151,6 +152,13 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 
   // 저장 처리
   const handleSave = async () => {
+    setModalTitle('변경 확인');
+    setModalMessage('변경 내용을 저장하시겠습니까?');
+    setIsModalOpen(true);
+  };
+
+  // 실제 저장 실행
+  const executeSave = async () => {
     if (!isCreate && numericNo) {
       setLoading(true);
       try {
@@ -218,15 +226,43 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 
   // 삭제 핸들러
   const handleDelete = () => {
-    setModalTitle('삭제');
+    setModalTitle('삭제 확인');
     setModalMessage('대여를 정말 삭제하시겠습니까?');
     setIsModalOpen(true);
+  };
+
+  // 실제 삭제 실행
+  const executeDelete = async () => {
+    if (numericNo) {
+      setLoading(true);
+      try {
+        await deleteRentalSchedule(numericNo);
+        setModalTitle('삭제 완료');
+        setModalMessage('대여가 성공적으로 삭제되었습니다.');
+        setIsModalOpen(true);
+      } catch (err) {
+        console.error('삭제 실패', err);
+        setModalTitle('오류');
+        setModalMessage('삭제에 실패했습니다.');
+        setIsModalOpen(true);
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   // 모달 확인
   const handleConfirm = () => {
     setIsModalOpen(false);
-    navigate(-1);
+
+    // 현재 모달 상태에 따라 적절한 액션 실행
+    if (modalTitle === '변경 확인') {
+      executeSave();
+    } else if (modalTitle === '삭제 확인') {
+      executeDelete();
+    } else if (modalTitle === '변경 완료' || modalTitle === '삭제 완료') {
+      navigate(-1);
+    }
   };
 
   // DatePicker 변경 핸들러
@@ -424,14 +460,19 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
         </Row>
       </FormBox>
 
-      <ReusableModal2
+      <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirm}
         title={modalTitle}
+        variant={
+          modalTitle === '변경 확인' || modalTitle === '삭제 확인'
+            ? 'twoButton'
+            : 'oneButton'
+        }
       >
         {modalMessage}
-      </ReusableModal2>
+      </Modal>
     </Container>
   );
 };

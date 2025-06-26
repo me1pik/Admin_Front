@@ -6,7 +6,7 @@ import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../../../components/Header/SettingsDetailSubHeader';
 import ShippingTabBar from '../../../components/TabBar';
-import ReusableModal2 from '../../../components/OneButtonModal';
+import { Modal } from '../../../components/common/Modal';
 import SalesDetailTopBoxes from '../../../components/SalesDetailTopBoxes';
 
 interface SalesDetailProps {
@@ -33,6 +33,8 @@ const SalesDetail: React.FC<SalesDetailProps> = ({ isCreate = false }) => {
 
   const [activeTab, setActiveTab] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalMessage, setModalMessage] = useState('');
 
   // 더미 주문 데이터
   const [orders] = useState<OrderItem[]>([
@@ -123,11 +125,28 @@ const SalesDetail: React.FC<SalesDetailProps> = ({ isCreate = false }) => {
   ]);
 
   const handleBack = () => navigate(-1);
-  const handleSave = () => setIsModalOpen(true);
+  const handleSave = () => {
+    setModalTitle('변경 확인');
+    setModalMessage('변경 내용을 저장하시겠습니까?');
+    setIsModalOpen(true);
+  };
   const handleDelete = () => setIsModalOpen(true);
+
+  // 실제 저장 실행
+  const executeSave = async () => {
+    // 실제 저장 로직을 여기에 구현
+    setModalTitle('변경 완료');
+    setModalMessage('변경 내용이 저장되었습니다.');
+    setIsModalOpen(true);
+  };
+
   const handleConfirm = () => {
     setIsModalOpen(false);
-    navigate(-1);
+    if (modalTitle === '변경 확인') {
+      executeSave();
+    } else if (modalTitle === '변경 완료' || modalTitle === '삭제 완료') {
+      navigate(-1);
+    }
   };
 
   const detailProps: DetailSubHeaderProps = {
@@ -213,14 +232,19 @@ const SalesDetail: React.FC<SalesDetailProps> = ({ isCreate = false }) => {
         </DetailSection>
       )}
 
-      <ReusableModal2
+      <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirm}
-        title='확인'
+        title={modalTitle}
+        variant={
+          modalTitle === '변경 확인' || modalTitle === '삭제 확인'
+            ? 'twoButton'
+            : 'oneButton'
+        }
       >
-        저장하시겠습니까?
-      </ReusableModal2>
+        {modalMessage}
+      </Modal>
     </Container>
   );
 };
