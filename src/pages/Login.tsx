@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import styled, { keyframes } from 'styled-components';
-import { Input } from '../components/common/Input';
+import InputField from '../components/InputField';
 import { schemaLogin } from '../hooks/ValidationYup';
 import { adminLogin } from '../api/adminAuth';
 import Cookies from 'js-cookie';
@@ -53,7 +53,7 @@ const Login: React.FC = () => {
             control={control}
             name='email'
             render={({ field }) => (
-              <Input
+              <InputField
                 label='계정(이메일)'
                 id='email'
                 type='text'
@@ -67,7 +67,7 @@ const Login: React.FC = () => {
             control={control}
             name='password'
             render={({ field }) => (
-              <Input
+              <InputField
                 label='비밀번호'
                 id='password'
                 type='password'

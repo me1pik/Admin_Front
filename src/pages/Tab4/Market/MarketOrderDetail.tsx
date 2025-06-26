@@ -10,7 +10,7 @@ import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../../../components/Header/SettingsDetailSubHeader';
 import OrderDetailTopBoxes from '../../../components/OrderDetailTopBoxes';
-import { Modal } from '../../../components/common/Modal';
+import ReusableModal2 from '../../../components/OneButtonModal';
 
 interface MarketOrderDetailProps {
   isCreate?: boolean;
@@ -50,8 +50,12 @@ const MarketOrderDetail: React.FC<MarketOrderDetailProps> = ({
 
   const handleBack = () => navigate('/marketorderlist');
   const handleSave = () => {
-    setModalTitle('변경 확인');
-    setModalMessage('변경 내용을 저장하시겠습니까?');
+    setModalTitle(isCreate ? '등록 완료' : '변경 완료');
+    setModalMessage(
+      isCreate
+        ? '새 멜픽구매를 등록하시겠습니까?'
+        : '변경 내용을 저장하시겠습니까?'
+    );
     setIsModalOpen(true);
   };
   const handleDelete = () => {
@@ -61,11 +65,7 @@ const MarketOrderDetail: React.FC<MarketOrderDetailProps> = ({
   };
   const handleConfirm = () => {
     setIsModalOpen(false);
-    if (modalTitle === '변경 확인') {
-      executeSave();
-    } else if (modalTitle === '변경 완료' || modalTitle === '삭제 완료') {
-      navigate(-1);
-    }
+    navigate(-1);
   };
 
   // onChange 오류 해결: ReactDatePickerProps['onChange'] 사용
@@ -73,14 +73,6 @@ const MarketOrderDetail: React.FC<MarketOrderDetailProps> = ({
     if (date instanceof Date) {
       setExpectedDate(date);
     }
-  };
-
-  // 실제 저장 실행
-  const executeSave = async () => {
-    // 실제 저장 로직을 여기에 구현
-    setModalTitle('변경 완료');
-    setModalMessage('변경 내용이 저장되었습니다.');
-    setIsModalOpen(true);
   };
 
   const detailProps: DetailSubHeaderProps = {
@@ -217,19 +209,14 @@ const MarketOrderDetail: React.FC<MarketOrderDetailProps> = ({
         </Row>
       </FormBox>
 
-      <Modal
+      <ReusableModal2
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirm}
         title={modalTitle}
-        variant={
-          modalTitle === '변경 확인' || modalTitle === '삭제 확인'
-            ? 'twoButton'
-            : 'oneButton'
-        }
       >
         {modalMessage}
-      </Modal>
+      </ReusableModal2>
     </Container>
   );
 };

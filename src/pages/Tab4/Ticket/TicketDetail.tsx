@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../../../components/Header/SettingsDetailSubHeader';
-import { Modal } from '../../../components/common/Modal';
+import ReusableModal2 from '../../../components/TwoButtonModal';
 import Spinner from '../../../components/Spinner';
 import {
   getAdminTicketById,
@@ -95,8 +95,8 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
   const handleBack = () => navigate(-1);
 
   const handleSave = () => {
-    setModalTitle('변경 확인');
-    setModalMessage('변경 내용을 저장하시겠습니까?');
+    setModalTitle('변경 저장');
+    setModalMessage('변경된 항목을 저장하시겠습니까?');
     setPendingAction('save');
     setIsModalOpen(true);
   };
@@ -108,83 +108,65 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
     setIsModalOpen(true);
   };
 
-  const executeSave = async () => {
-    if (!ticket) return;
-    const statusChanged = status !== originalStatus;
-    const typeChanged = type !== originalType;
-    if (!statusChanged && !typeChanged) {
-      setModalTitle('안내');
-      setModalMessage('변경된 내용이 없습니다.');
-      setPendingAction(null);
-      setIsModalOpen(true);
-      return;
-    }
-    setLoading(true);
-    try {
-      if (statusChanged) {
-        const isActive = status !== '취소완료';
-        await changeTicketStatus(ticket.id, { status, isActive });
-        setOriginalStatus(status);
-      }
-      if (typeChanged) {
-        if (
-          (originalType === '정기 구독권(4회권)' && type === '정기 구독권(무제한)') ||
-          (originalType === '정기 구독권(무제한)' && type === '정기 구독권(4회권)')
-        ) {
-          const updated = await convertTicketType(ticket.id);
-          if (updated && typeof updated.ticket_name === 'string') {
-            setTicket(updated);
-            let newType = updated.ticket_name;
-            if (updated.ticket_name.includes('정기 구독권') && updated.ticket_name.includes('4회')) {
-              newType = '정기 구독권(4회권)';
-            } else if (updated.ticket_name.includes('정기 구독권') && updated.ticket_name.includes('무제한')) {
-              newType = '정기 구독권(무제한)';
-            }
-            setType(newType);
-            setOriginalType(newType);
-            setStatus(updated.ticket_status);
-            setOriginalStatus(updated.ticket_status);
-          }
-        } else if (type === '1회 이용권') {
-          setModalTitle('안내');
-          setModalMessage('"1회 이용권"은 변환 API가 제공되지 않습니다.');
-          setPendingAction(null);
-          setIsModalOpen(true);
-          setType(originalType);
-          setLoading(false);
-          return;
-        } else {
-          setModalTitle('안내');
-          setModalMessage('선택한 종류로 변경할 수 없습니다.');
-          setPendingAction(null);
-          setIsModalOpen(true);
-          setType(originalType);
-          setLoading(false);
-          return;
-        }
-      }
-      setModalTitle('변경 완료');
-      setModalMessage('변경 내용이 저장되었습니다.');
-      setPendingAction(null);
-      setIsModalOpen(true);
-    } catch (err) {
-      setModalTitle('오류');
-      setModalMessage('저장 중 오류가 발생했습니다.');
-      setPendingAction(null);
-      setIsModalOpen(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleConfirm = async () => {
     setIsModalOpen(false);
-    if (pendingAction === 'save') {
-      await executeSave();
+    if (pendingAction === 'save' && ticket) {
+      await performSave(ticket.id);
     } else if (pendingAction === 'delete' && ticket) {
       await performDelete(ticket.id);
     }
     setPendingAction(null);
+  };
+
+  const performSave = async (id: number) => {
+    if (!ticket) return;
+    const statusChanged = status !== originalStatus;
+    const typeChanged = type !== originalType;
+
+    if (!statusChanged && !typeChanged) {
+      alert('변경이 완료되었습니다.');
+      return;
+    }
+    setLoading(true);
+    try {
+      // 1) 상태 변경
+      if (statusChanged) {
+        // 예: "취소완료"라면 isActive=false 등 로직 필요시 변환
+        const isActive = status !== '취소완료';
+        // 여기서 백엔드가 status 한글/영어 중 어떤 값을 기대하는지 맞춰서 body.status로 전달해야 함
+        await changeTicketStatus(id, { status, isActive });
+        setOriginalStatus(status);
+      }
+      // 2) 종류 변경
+      if (typeChanged) {
+        // 정기권 간 전환: originalType 과 type 이 두 옵션일 때만 호출
+        if (
+          (originalType === '정기 구독권(4회권)' &&
+            type === '정기 구독권(무제한)') ||
+          (originalType === '정기 구독권(무제한)' &&
+            type === '정기 구독권(4회권)')
+        ) {
+          const updated = await convertTicketType(id);
+          if (updated && typeof updated.ticket_name === 'string') {
+            setTicket(updated);
+            // 응답 ticket_name에 따라 다시 type 판단: 단, 백엔드가 ticket_name을 "정기 구독권(4회권)" 등으로 반환하는지 확인 필요
+            let newType = updated.ticket_name;
+            if (
+              updated.ticket_name.includes('정기 구독권') &&
+              updated.ticket_name.includes('4회')
+            ) {
+              newType = '정기 구독권(4회권)';
+            } else if (
+              updated.ticket_name.includes('정기 구독권') &&
+              updated.ticket_name.includes('무제한')
+            ) {
+              newType = '정기 구독권(무제한)';
+            }
+            setType(newType);
+            setOriginalType(newType);
+            // 상태도 동기화
+            setStatus(updated.ticket_status);
+            setOriginalStatus(updated.ticket_status);
           } else {
             console.warn(
               'convertTicketType 응답에 ticket_name이 없습니다.',
@@ -194,10 +176,10 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
         }
         // 1회 이용권 선택 시
         else if (type === '1회 이용권') {
-          alert('"1회 이용권"은 변환 API가 제공되지 않습니다.');
+          alert('“1회 이용권”은 변환 API가 제공되지 않습니다.');
           setType(originalType);
         }
-        // 그 외: 초기값이 "회차 이용권" 등이고, 사용자가 TYPE_OPTIONS 중 하나 선택했거나,
+        // 그 외: 초기값이 “회차 이용권” 등이고, 사용자가 TYPE_OPTIONS 중 하나 선택했거나,
         // 또는 TYPE_OPTIONS 중 하나에서 다른 값 선택했으나 originalType이 해당 옵션이 아닐 때
         else {
           alert('선택한 종류로 변경할 수 없습니다.');
@@ -343,15 +325,14 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
         </>
       )}
 
-      <Modal
+      <ReusableModal2
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirm}
         title={modalTitle}
-        variant='oneButton'
       >
         {modalMessage}
-      </Modal>
+      </ReusableModal2>
     </Container>
   );
 };

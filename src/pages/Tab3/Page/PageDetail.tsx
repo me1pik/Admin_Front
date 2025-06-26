@@ -5,7 +5,7 @@ import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../../../components/Header/SettingsDetailSubHeader';
 import ShippingTabBar from '../../../components/TabBar';
-import { Modal } from '../../../components/common/Modal';
+import ReusableModal2 from '../../../components/OneButtonModal';
 import PageDetailTopBoxes from '../../../components/PageDetailTopBoxes';
 
 interface PageDetailProps {
@@ -143,14 +143,14 @@ const PageDetail: React.FC<PageDetailProps> = ({ isCreate = false }) => {
         )}
       </DetailSection>
 
-      <Modal
+      <ReusableModal2
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirm}
         title='확인'
       >
         저장하시겠습니까?
-      </Modal>
+      </ReusableModal2>
     </Container>
   );
 };

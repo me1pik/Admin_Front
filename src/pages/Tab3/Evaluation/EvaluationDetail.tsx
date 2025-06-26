@@ -7,7 +7,7 @@ import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
 } from '../../../components/Header/SettingsDetailSubHeader';
 import ShippingTabBar from '../../../components/TabBar';
-import { Modal } from '../../../components/common/Modal';
+import ReusableModal2 from '../../../components/OneButtonModal';
 import EvaluationDetailTopBoxes from '../../../components/EvaluationDetailTopBoxes';
 import { FaStar, FaRegStar } from 'react-icons/fa';
 
@@ -24,12 +24,6 @@ const EvaluationDetail: React.FC<EvaluationDetailProps> = ({
 
   const [activeTab, setActiveTab] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [resultConfig, setResultConfig] = useState({
-    open: false,
-    message: '',
-  });
-  const [modalTitle, setModalTitle] = useState('');
-  const [modalMessage, setModalMessage] = useState('');
 
   // 더미 데이터
   const regDate = '2025-11-15';
@@ -38,28 +32,11 @@ const EvaluationDetail: React.FC<EvaluationDetailProps> = ({
   const reviewText = `예쁘긴 하나 66사이즈인 저에게는 좀 작아요. 반짝반짝하니 얼굴에 조명 효과를 주나 봅니다.\n유독 예쁘보인다는 소리를 듣습니다. 줌이 좀 넉넉하면 좋았겠다는 아쉬움이 남습니다.`;
 
   const handleBack = () => navigate(-1);
-  const handleSave = () => {
-    setModalTitle('변경 확인');
-    setModalMessage('변경 내용을 저장하시겠습니까?');
-    setIsModalOpen(true);
-  };
+  const handleSave = () => setIsModalOpen(true);
   const handleDelete = () => setIsModalOpen(true);
-
-  // 실제 저장 실행
-  const executeSave = async () => {
-    // 실제 저장 로직을 여기에 구현
-    setModalTitle('변경 완료');
-    setModalMessage('변경 내용이 저장되었습니다.');
-    setIsModalOpen(true);
-  };
-
   const handleConfirm = () => {
     setIsModalOpen(false);
-    if (modalTitle === '변경 확인') {
-      executeSave();
-    } else if (modalTitle === '변경 완료' || modalTitle === '삭제 완료') {
-      navigate(-1);
-    }
+    navigate(-1);
   };
 
   const detailProps: DetailSubHeaderProps = {
@@ -145,30 +122,14 @@ const EvaluationDetail: React.FC<EvaluationDetailProps> = ({
         </DetailSection>
       )}
 
-      <Modal
+      <ReusableModal2
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirm}
-        title={modalTitle}
-        variant={
-          modalTitle === '변경 확인' || modalTitle === '삭제 확인'
-            ? 'twoButton'
-            : 'oneButton'
-        }
+        title='확인'
       >
-        {modalMessage}
-      </Modal>
-
-      <Modal
-        isOpen={resultConfig.open}
-        title='알림'
-        width='400px'
-        height='200px'
-        variant='oneButton'
-        onClose={() => setResultConfig((c) => ({ ...c, open: false }))}
-      >
-        {resultConfig.message}
-      </Modal>
+        저장하시겠습니까?
+      </ReusableModal2>
     </Container>
   );
 };

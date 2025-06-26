@@ -10,7 +10,7 @@ import ShippingTabBar from '../../../components/TabBar';
 import SettingsDetailTable, {
   SettingsDetailRow,
 } from '../../../components/Table/Setting/SettingsDetailTable';
-import { Modal } from '../../../components/common/Modal';
+import ReusableModal2 from '../../../components/OneButtonModal';
 import { TabItem } from '../../../components/Header/SearchSubHeader';
 
 // Props 정의
@@ -113,14 +113,14 @@ const PrivacyDetail: React.FC<PrivacyDetailProps> = ({
         <SettingsDetailTable data={[initialRow]} selectOptions={options} />
       )}
 
-      <Modal
+      <ReusableModal2
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirm}
         title={modalTitle}
       >
         {modalMessage}
-      </Modal>
+      </ReusableModal2>
     </Container>
   );
 };
