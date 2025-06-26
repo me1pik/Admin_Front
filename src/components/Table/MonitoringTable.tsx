@@ -1,3 +1,4 @@
+// src/components/Table/MonitoringTable.tsx
 import React from 'react';
 import styled from 'styled-components';
 
@@ -31,37 +32,41 @@ const MonitoringTable: React.FC<Props> = ({
   toggleRow,
   toggleAll,
 }) => {
-  const getBadgeStyle = (status: string) => {
+  const getBadgeStyle = (status: string): { bg: string; color: string } => {
     switch (status) {
-      case '배송완료':
-        return { bg: '#4AA361' };
+      case '신청완료':
+        return { bg: '#ffb300', color: '#FFFFFF' };
       case '배송준비':
-        return { bg: '#000000' };
-      case '대기중':
-        return { bg: '#CD5542' };
+        return { bg: '#000000', color: '#FFFFFF' };
       case '배송중':
-        return { bg: '#007bff' };
+        return { bg: '#007bff', color: '#FFFFFF' };
+      case '배송완료':
+        return { bg: '#4AA361', color: '#FFFFFF' };
       case '배송취소':
-        return { bg: '#AAAAAA' };
+        return { bg: '#c02626', color: '#FFFFFF' };
+      case '반납중':
+        return { bg: '#6c757d', color: '#FFFFFF' };
+      case '반납완료':
+        return { bg: '#6c757d', color: '#FFFFFF' };
       default:
-        return { bg: '#6c757d' };
+        return { bg: '#6c757d', color: '#FFFFFF' };
     }
   };
 
   return (
     <Table>
       <colgroup>
-        <col style={{ width: '40px' }} /> {/* 체크박스 */}
-        <col style={{ width: '50px' }} /> {/* 번호 */}
-        <col style={{ width: '100px' }} /> {/* 신청일 */}
-        <col style={{ width: '100px' }} /> {/* 주문자 */}
-        <col style={{ width: '170px' }} /> {/* 대여기간 */}
-        <col style={{ width: '80px' }} /> {/* 브랜드 */}
-        <col style={{ width: '80px' }} /> {/* 종류 */}
-        <col style={{ width: '120px' }} /> {/* 스타일(품번) */}
-        <col style={{ width: '60px' }} /> {/* 색상 */}
-        <col style={{ width: '60px' }} /> {/* 사이즈 */}
-        <col style={{ width: '60px' }} /> {/* 배송상태 */}
+        <col style={{ width: '40px' }} />
+        <col style={{ width: '50px' }} />
+        <col style={{ width: '100px' }} />
+        <col style={{ width: '100px' }} />
+        <col style={{ width: '170px' }} />
+        <col style={{ width: '80px' }} />
+        <col style={{ width: '80px' }} />
+        <col style={{ width: '120px' }} />
+        <col style={{ width: '60px' }} />
+        <col style={{ width: '60px' }} />
+        <col style={{ width: '60px' }} />
       </colgroup>
       <thead>
         <TableRow>
@@ -118,14 +123,15 @@ const MonitoringTable: React.FC<Props> = ({
               <Td>{item.색상}</Td>
               <Td>{item.사이즈}</Td>
               <Td>
-                <StatusBadge style={{ background: badge.bg }}>
+                <StatusBadge
+                  style={{ background: badge.bg, color: badge.color }}
+                >
                   {item.배송상태}
                 </StatusBadge>
               </Td>
             </TableRow>
           );
         })}
-        {/* 빈 행 채우기 */}
         {filteredData.length < 10 &&
           Array.from({ length: 10 - filteredData.length }).map((_, i) => (
             <TableRow key={`empty-${i}`}>
@@ -141,7 +147,6 @@ const MonitoringTable: React.FC<Props> = ({
 
 export default MonitoringTable;
 
-/* Styled */
 const Table = styled.table`
   width: 100%;
   table-layout: fixed;
@@ -175,5 +180,4 @@ const StatusBadge = styled.div`
   line-height: 24px;
   font-size: 10px;
   font-weight: 800;
-  color: #fff;
 `;

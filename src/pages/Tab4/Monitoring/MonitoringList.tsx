@@ -1,5 +1,4 @@
 // src/pages/Tab4/Monitoring/MonitoringList.tsx
-
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -12,14 +11,16 @@ import {
   getRentalSchedules,
   updateRentalScheduleStatus,
   RentalScheduleAdminItem,
-} from '../../../api/RentalSchedule/RentalScheduleApi'; // 경로 확인: api 파일명을 맞춰주세요
+} from '../../../api/RentalSchedule/RentalScheduleApi';
 
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
   { label: '진행내역', path: '진행내역' },
   { label: '취소내역', path: '취소' },
 ];
+// '신청완료'를 맨 앞에 추가
 const statuses = [
+  '신청완료',
   '배송준비',
   '배송중',
   '배송완료',
@@ -49,10 +50,8 @@ const MonitoringList: React.FC = () => {
       setLoading(true);
       setError('');
       try {
-        // 전체 건수 조회
         const first = await getRentalSchedules(1, 1);
         const total = first.count;
-        // 전체 데이터 한 번에 조회
         const { rentals } = await getRentalSchedules(total, 1);
         const mapped: MonitoringItem[] = rentals.map(
           (item: RentalScheduleAdminItem) => ({

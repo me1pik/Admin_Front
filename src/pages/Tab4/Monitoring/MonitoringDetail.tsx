@@ -20,7 +20,6 @@ import {
   changeRentalSchedulePeriod,
 } from '../../../api/RentalSchedule/RentalScheduleApi';
 
-// 수정: 존재하지 않는 타입 대신 정확한 인터페이스를 import
 import {
   getRentalScheduleByRentalId,
   RentalScheduleAdminByRentalIdResponse,
@@ -76,8 +75,14 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 
   // ─── 기타 state ───
   const [deliveryStatus, setDeliveryStatus] = useState<
-    '배송준비' | '배송중' | '배송완료' | '배송취소' | '반납중' | '반납완료'
-  >('배송준비');
+    | '신청완료'
+    | '배송준비'
+    | '배송중'
+    | '배송완료'
+    | '배송취소'
+    | '반납중'
+    | '반납완료'
+  >('신청완료');
   const [isCleaned, setIsCleaned] = useState(false);
   const [isRepaired, setIsRepaired] = useState(false);
 
@@ -91,17 +96,14 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
   useEffect(() => {
     if (!isCreate && numericNo) {
       setLoading(true);
-      // 1) 헤더용 정보 조회
+      // 헤더 정보 조회
       getRentalScheduleByRentalId(numericNo)
-        .then((hdr) => {
-          setHeaderInfo(hdr);
-        })
+        .then((hdr) => setHeaderInfo(hdr))
         .catch((err) => {
           console.error('헤더 정보 조회 실패', err);
-          // 에러 시에도 상세 조회는 계속함
         });
 
-      // 2) 상세 조회
+      // 상세 조회
       getRentalScheduleDetail(numericNo)
         .then((data: RentalScheduleAdminDetailResponse) => {
           setBrand(data.brand);
@@ -112,7 +114,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
           setPaymentStatus(data.paymentStatus ?? '결제완료');
           setShippingMethod(data.deliveryInfo.shipping.deliveryMethod);
 
-          // rentalPeriod: "YYYY-MM-DD ~ YYYY-MM-DD"
           const [startStr, endStr] = data.rentalPeriod.split(' ~ ');
           const startDate = new Date(startStr);
           const endDate = new Date(endStr);
@@ -143,36 +144,34 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
     }
   }, [isCreate, numericNo]);
 
-  // 뒤로가기
+  // 뒤로가기 핸들러
   const handleBack = () => {
     navigate(`/monitoringlist?page=${page}`);
   };
 
-  // 저장 처리: 상태 변경 + 대여일자 변경 API 호출
+  // 저장 처리
   const handleSave = async () => {
     if (!isCreate && numericNo) {
       setLoading(true);
       try {
-        // 1) 대여일자 변경 확인
+        // 날짜 변경 확인
         const [origStart, origEnd] = originalDates;
         const [newStart, newEnd] = rentalDates;
         let dateChanged = false;
         let formattedStart = '';
         let formattedEnd = '';
+
         if (
           newStart instanceof Date &&
           newEnd instanceof Date &&
           origStart instanceof Date &&
-          origEnd instanceof Date
+          origEnd instanceof Date &&
+          (newStart.getTime() !== origStart.getTime() ||
+            newEnd.getTime() !== origEnd.getTime())
         ) {
-          if (
-            newStart.getTime() !== origStart.getTime() ||
-            newEnd.getTime() !== origEnd.getTime()
-          ) {
-            dateChanged = true;
-            formattedStart = newStart.toISOString().split('T')[0];
-            formattedEnd = newEnd.toISOString().split('T')[0];
-          }
+          dateChanged = true;
+          formattedStart = newStart.toISOString().split('T')[0];
+          formattedEnd = newEnd.toISOString().split('T')[0];
         } else if (
           newStart instanceof Date &&
           newEnd instanceof Date &&
@@ -182,7 +181,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
           formattedStart = newStart.toISOString().split('T')[0];
           formattedEnd = newEnd.toISOString().split('T')[0];
         }
-        // 2) 날짜 변경 API 호출
+
         if (dateChanged) {
           await changeRentalSchedulePeriod(numericNo, {
             startDate: formattedStart,
@@ -191,7 +190,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
           setOriginalDates([newStart!, newEnd!]);
         }
 
-        // 3) 상태 변경 API 호출
         const payload: UpdateRentalStatusRequest = {
           paymentStatus,
           deliveryStatus,
@@ -201,12 +199,11 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
         await updateRentalScheduleStatus(numericNo, payload);
 
         setModalTitle('변경 완료');
-        let messageText = '변경 내용을 성공적으로 저장했습니다.';
-        if (dateChanged) {
-          messageText =
-            '대여 기간 및 기타 변경 내용을 성공적으로 저장했습니다.';
-        }
-        setModalMessage(messageText);
+        setModalMessage(
+          dateChanged
+            ? '대여 기간 및 기타 변경 내용을 성공적으로 저장했습니다.'
+            : '변경 내용을 성공적으로 저장했습니다.'
+        );
         setIsModalOpen(true);
       } catch (err) {
         console.error('저장 실패', err);
@@ -219,20 +216,22 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
     }
   };
 
+  // 삭제 핸들러
   const handleDelete = () => {
     setModalTitle('삭제');
     setModalMessage('대여를 정말 삭제하시겠습니까?');
     setIsModalOpen(true);
   };
 
+  // 모달 확인
   const handleConfirm = () => {
     setIsModalOpen(false);
     navigate(-1);
   };
 
-  // DatePicker 범위 변경 핸들러
+  // DatePicker 변경 핸들러
   const handleDateChange: ReactDatePickerProps['onChange'] = (dates) => {
-    if (!dates || !(dates instanceof Array)) {
+    if (!Array.isArray(dates)) {
       setRentalDates([undefined, undefined]);
       return;
     }
@@ -253,7 +252,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 
   return (
     <Container>
-      {/* 최상단 제목 */}
       <HeaderRow>
         <Title>{isCreate ? '대여 등록' : `대여 상세 (${numericNo})`}</Title>
       </HeaderRow>
@@ -265,7 +263,6 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
         <span>{numericNo ?? '-'}</span>
       </ProductNumber>
 
-      {/* 헤더 정보 전달: headerInfo가 있으면 props로 넣어줌 */}
       {headerInfo && (
         <OrderDetailTopBoxes
           userName={headerInfo.userName}
@@ -282,7 +279,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
 
       <DividerDashed />
 
-      {/* ─── 주문상세 섹션 ─────────────────────────────────────────────────────────────── */}
+      {/* 주문상세 */}
       <SessionHeader>주문상세</SessionHeader>
       <FormBox>
         <Row>
@@ -345,7 +342,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
         </Row>
       </FormBox>
 
-      {/* ─── 배송/회수 섹션 ─────────────────────────────────────────────────────────────── */}
+      {/* 배송/회수 */}
       <SessionHeader>배송/회수</SessionHeader>
       <FormBox>
         <Row>
@@ -379,6 +376,7 @@ const MonitoringDetail: React.FC<MonitoringDetailProps> = ({
               value={deliveryStatus}
               onChange={(e) => setDeliveryStatus(e.target.value as any)}
             >
+              <option value='신청완료'>신청완료</option>
               <option value='배송준비'>배송준비</option>
               <option value='배송중'>배송중</option>
               <option value='배송완료'>배송완료</option>

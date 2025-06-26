@@ -70,6 +70,7 @@ export interface RentalScheduleAdminDetailResponse {
   deliveryInfo: DeliveryInfo;
   paymentStatus?: '결제완료' | '취소요청' | '취소완료';
   deliveryStatus?:
+    | '신청완료'
     | '배송준비'
     | '배송중'
     | '배송완료'
@@ -96,6 +97,7 @@ export const getRentalScheduleDetail = async (
 export interface UpdateRentalStatusRequest {
   paymentStatus?: '결제완료' | '취소요청' | '취소완료';
   deliveryStatus?:
+    | '신청완료'
     | '배송준비'
     | '배송중'
     | '배송완료'
