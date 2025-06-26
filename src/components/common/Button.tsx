@@ -44,6 +44,7 @@ const getButtonStyles = (variant: ButtonProps['variant'] = 'primary') => {
       `;
     case 'danger':
       return css`
+        background-color: ${theme.colors.error};
         color: ${theme.colors.white};
         &:hover:not(:disabled) {
           background-color: ${theme.colors.error}dd;
@@ -52,6 +53,7 @@ const getButtonStyles = (variant: ButtonProps['variant'] = 'primary') => {
     default:
       return css`
         background-color: ${theme.colors.primary};
+        color: ${theme.colors.white};
         &:hover:not(:disabled) {
           background-color: ${theme.colors.primary}dd;
         }

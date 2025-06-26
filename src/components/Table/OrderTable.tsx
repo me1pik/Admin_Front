@@ -1,6 +1,7 @@
 // src/components/OrderTable.tsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { getStatusStyle } from '../common/Table';
 
 /** 주문 인터페이스 */
 export interface Order {
@@ -50,24 +51,6 @@ const OrderTable: React.FC<OrderTableProps> = ({
       }
       return newSet;
     });
-  };
-
-  // 결제상태 배경색 + 텍스트(흰색)
-  const getStatusStyle = (status: string) => {
-    switch (status) {
-      case '결제 완료':
-        return { background: '#3071B2', label: '결제완료' };
-      case '취소일정':
-        return { background: '#000000', label: '취소일정' };
-      case '환불 진행중':
-        return { background: '#CD5542', label: '환불진행' };
-      case '환불 완료':
-        return { background: '#F69636', label: '환불완료' };
-      case '결제실패':
-        return { background: '#AAAAAA', label: '결제실패' };
-      default:
-        return { background: '#000000', label: status };
-    }
   };
 
   return (
@@ -132,9 +115,7 @@ const OrderTable: React.FC<OrderTableProps> = ({
               <Td>{order.productOption}</Td>
               <Td>{order.paymentMethod}</Td>
               <Td>
-                <StatusBadge style={{ backgroundColor: statusInfo.background }}>
-                  {statusInfo.label}
-                </StatusBadge>
+                <StatusBadge style={statusInfo}>{statusInfo.label}</StatusBadge>
               </Td>
             </TableRow>
           );

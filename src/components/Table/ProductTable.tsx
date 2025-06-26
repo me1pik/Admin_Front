@@ -1,6 +1,7 @@
 // src/components/Table/ProductTable.tsx
 import React from 'react';
 import styled, { css } from 'styled-components';
+import { getStatusStyle } from '../common/Table';
 
 const SIZE_LABELS: Record<string, string> = {
   '44': 'S',
@@ -46,19 +47,6 @@ const ProductTable: React.FC<ProductTableProps> = ({
 }) => {
   const allSelected =
     filteredData.length > 0 && selectedRows.size === filteredData.length;
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case '등록완료':
-        return '#4AA361';
-      case '등록대기':
-        return '#3071B2';
-      case '판매종료':
-        return '#CD5542';
-      default:
-        return '#6c757d';
-    }
-  };
 
   const formatSize = (raw: string) => {
     if (/free/i.test(raw)) return 'Free';
@@ -127,10 +115,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
             </Td>
             <Td title={item.registerDate}>{item.registerDate}</Td>
             <Td>
-              <StatusBadge
-                title={item.status}
-                style={{ backgroundColor: getStatusColor(item.status) }}
-              >
+              <StatusBadge style={getStatusStyle(item.status)}>
                 {item.status}
               </StatusBadge>
             </Td>

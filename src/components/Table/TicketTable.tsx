@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { getStatusStyle } from '../common/Table';
 
 /** 이용권 아이템 인터페이스 */
 export interface TicketItem {
@@ -46,21 +47,6 @@ const TicketTable: React.FC<TicketTableProps> = ({
     });
   };
 
-  const getStatusStyle = (status: string) => {
-    switch (status) {
-      case '결제완료':
-        return { background: '#3071B2', label: '결제완료' };
-      case '결제대기':
-        return { background: '#CD5542', label: '결제대기' };
-      case '이용완료':
-        return { background: '#28a745', label: '이용완료' };
-      case '취소완료':
-        return { background: '#AAAAAA', label: '취소완료' };
-      default:
-        return { background: '#6c757d', label: status };
-    }
-  };
-
   return (
     <Table>
       <colgroup>
@@ -96,7 +82,6 @@ const TicketTable: React.FC<TicketTableProps> = ({
       </thead>
       <tbody>
         {filteredData.map((item) => {
-          const style = getStatusStyle(item.status);
           return (
             <TableRow key={item.no}>
               <Td>
@@ -114,8 +99,8 @@ const TicketTable: React.FC<TicketTableProps> = ({
               <Td>{item.usagePeriod}</Td>
               <Td>{item.usageCount}</Td>
               <Td>
-                <StatusBadge style={{ backgroundColor: style.background }}>
-                  {style.label}
+                <StatusBadge style={getStatusStyle(item.status)}>
+                  {item.status}
                 </StatusBadge>
               </Td>
             </TableRow>
