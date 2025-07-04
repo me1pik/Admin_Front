@@ -1,5 +1,5 @@
 // src/components/productregister/SizeGuideSection.tsx
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { SizeRow } from '../../api/adminProduct';
 import { sizeGuideConfig } from '../../config/sizeGuideConfig';
@@ -18,8 +18,8 @@ export interface SizeGuideSectionProps {
   onSizesChange?: (sizes: SizeRow[]) => void;
   /** 변경된 라벨을 부모로 전달 */
   onLabelChange?: (labels: Record<string, string>) => void;
-  /** 기존 라벨 데이터 */
-  existingLabels?: Record<string, string>;
+  /** 현재 라벨을 가져오는 함수를 설정 */
+  onSetGetCurrentLabels?: (getLabels: () => Record<string, string>) => void;
 }
 
 const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
@@ -27,7 +27,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   sizes,
   onSizesChange,
   onLabelChange,
-  existingLabels,
+  onSetGetCurrentLabels,
 }) => {
   //
   // 1) config에서 초기 라벨 맵 가져오기
@@ -37,48 +37,85 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     [category]
   );
 
-  // 2) 로컬 상태로 라벨 관리 (편집 가능)
-  const [labelMap, setLabelMap] =
-    useState<Record<string, string>>(initialLabels);
+  // 2) 카테고리 변경 감지
+  const [currentCategory, setCurrentCategory] = useState(category);
+  const [editedLabels, setEditedLabels] = useState<Record<string, string>>({});
 
-  // 카테고리가 바뀔 때마다 라벨 초기화
+  // 3) 카테고리가 변경되면 편집된 라벨 초기화
   useEffect(() => {
-    // 기존 라벨이 있으면 사용, 없으면 기본값 사용
-    const mergedLabels = { ...initialLabels, ...existingLabels };
-    setLabelMap(mergedLabels);
+    if (currentCategory !== category) {
+      setCurrentCategory(category);
+      setEditedLabels({});
+    }
+  }, [category, currentCategory]);
 
-    // 알파벳을 제거하고 실제 라벨 텍스트만 저장
-    const cleanLabels: Record<string, string> = {};
-    Object.entries(mergedLabels).forEach(([k, v]) => {
+  // 4) 라벨 맵 계산 (카테고리 변경 시 config 라벨 우선)
+  const labelMap = useMemo(() => {
+    // 카테고리가 변경되면 config의 라벨을 우선 사용
+    // 편집된 라벨이 있으면 그것을 사용
+    const baseLabels = initialLabels;
+    return { ...baseLabels, ...editedLabels };
+  }, [initialLabels, editedLabels]);
+
+  // 카테고리가 바뀔 때만 라벨 초기화
+  useEffect(() => {
+    // 카테고리가 변경되면 편집된 라벨 초기화
+    setEditedLabels({});
+  }, [category]);
+
+  // 현재 라벨을 가져오는 함수
+  const getCurrentLabels = useCallback(() => {
+    console.log('getCurrentLabels 호출됨');
+    console.log('현재 labelMap:', labelMap);
+
+    // labelMap에서 실제 표에 표시된 라벨을 추출
+    const tableLabels: Record<string, string> = {};
+    Object.entries(labelMap).forEach(([k, v]) => {
       // "A.어깨넓이" 형태에서 "어깨넓이"만 추출
       const cleanValue = v.replace(/^[A-Z]\.\s*/, '');
-      cleanLabels[k] = cleanValue;
+      tableLabels[k] = cleanValue;
     });
 
-    // 초기 로드 시에도 상위로 전달
-    if (onLabelChange) {
-      onLabelChange(cleanLabels);
+    console.log('표에서 추출한 라벨:', tableLabels);
+    return tableLabels;
+  }, [labelMap]);
+
+  // 부모에게 현재 라벨을 가져오는 함수 전달
+  useEffect(() => {
+    if (onSetGetCurrentLabels) {
+      console.log('부모에게 getCurrentLabels 함수 전달');
+      onSetGetCurrentLabels(getCurrentLabels);
     }
-  }, [initialLabels, existingLabels, onLabelChange]);
+  }, [getCurrentLabels, onSetGetCurrentLabels]);
+
+  // 라벨 변경 시 부모에게 전달 (무한루프 방지를 위해 조건부 실행)
+  useEffect(() => {
+    if (onLabelChange && Object.keys(editedLabels).length === 0) {
+      // 초기 로드 시에만 전달
+      onLabelChange(getCurrentLabels());
+    }
+  }, [labelMap, onLabelChange, editedLabels, getCurrentLabels]);
 
   // 라벨 변경 핸들러
   const handleLabelChange = (key: string, value: string) => {
-    const updatedLabels = { ...labelMap, [key]: value };
-    setLabelMap(updatedLabels);
+    console.log('handleLabelChange 호출:', key, value);
 
-    // 알파벳을 제거하고 실제 라벨 텍스트만 저장
-    const cleanLabels: Record<string, string> = {};
-    Object.entries(updatedLabels).forEach(([k, v]) => {
-      // "A.어깨넓이" 형태에서 "어깨넓이"만 추출
-      const cleanValue = v.replace(/^[A-Z]\.\s*/, '');
-      cleanLabels[k] = cleanValue;
+    // 편집된 라벨 상태 업데이트
+    setEditedLabels((prev) => {
+      const cleanValue = value.replace(/^[A-Z]\.\s*/, '');
+      const updated = { ...prev, [key]: cleanValue };
+      console.log('editedLabels 업데이트:', updated);
+      return updated;
     });
 
-    // 라벨 변경 시 즉시 상위로 전달
-    console.log('라벨 변경:', key, value, cleanLabels);
-    if (onLabelChange) {
-      onLabelChange(cleanLabels);
-    }
+    // 부모에게 라벨 변경 알림 (무한루프 방지를 위해 setTimeout 사용)
+    setTimeout(() => {
+      if (onLabelChange) {
+        const currentLabels = getCurrentLabels();
+        console.log('부모에게 라벨 변경 알림:', currentLabels);
+        onLabelChange(currentLabels);
+      }
+    }, 0);
   };
 
   //

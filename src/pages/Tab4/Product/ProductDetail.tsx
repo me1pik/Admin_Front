@@ -19,11 +19,14 @@ import {
 } from '../../../api/adminProduct';
 
 const cleanPayload = <T extends object>(obj: T): Partial<T> => {
-  const result = { ...(obj as any) } as Partial<T>;
+  const result = { ...(obj as Record<string, unknown>) } as Partial<T>;
   Object.entries(result).forEach(([key, value]) => {
     if (key === 'product_img') return;
     // size_label_guide는 빈 객체여도 유지
-    if (key === 'size_label_guide') return;
+    if (key === 'size_label_guide') {
+      console.log('cleanPayload에서 size_label_guide 발견:', value);
+      return;
+    }
     if (
       value == null ||
       (Array.isArray(value) && value.length === 0) ||
@@ -31,9 +34,10 @@ const cleanPayload = <T extends object>(obj: T): Partial<T> => {
         !Array.isArray(value) &&
         Object.keys(value).length === 0)
     ) {
-      delete (result as any)[key];
+      delete (result as Record<string, unknown>)[key];
     }
   });
+  console.log('cleanPayload 결과:', result);
   return result;
 };
 
@@ -41,6 +45,13 @@ const ProductDetail: React.FC = () => {
   const { no } = useParams<{ no: string }>();
   const productId = no ? Number(no) : null;
   const navigate = useNavigate();
+
+  // 디버깅을 위한 navigate 함수 래핑
+  const debugNavigate = (path: string) => {
+    console.log('debugNavigate 호출됨:', path);
+    console.log('navigate 함수 타입:', typeof navigate);
+    navigate(path);
+  };
 
   const [images, setImages] = useState<string[]>([]);
   const [product, setProduct] = useState<ProductDetailResponse | null>(null);
@@ -50,6 +61,9 @@ const ProductDetail: React.FC = () => {
   >({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [getCurrentSizeLabels, setGetCurrentSizeLabels] = useState<
+    (() => Record<string, string>) | null
+  >(null);
 
   const [confirmConfig, setConfirmConfig] = useState<{
     open: boolean;
@@ -74,20 +88,18 @@ const ProductDetail: React.FC = () => {
       setProduct((prev) => (prev ? { ...prev, ...data } : prev));
       setChanged((prev) => ({ ...prev, ...data }));
     },
-    []
+    [setProduct, setChanged]
   );
   const handleSizesChange = useCallback(
     (sizes: SizeRow[]) => handleProductChange({ sizes }),
     [handleProductChange]
   );
 
-  const handleLabelChange = useCallback(
-    (labels: Record<string, string>) => {
-      console.log('handleLabelChange 호출:', labels);
-      handleProductChange({ size_label_guide: labels });
-    },
-    [handleProductChange]
-  );
+  const handleLabelChange = useCallback((labels: Record<string, string>) => {
+    console.log('handleLabelChange 호출:', labels);
+    // 라벨 변경을 changed 상태에 저장
+    setChanged((prev) => ({ ...prev, size_label_guide: labels }));
+  }, []);
 
   const updateImage = (idx: number, url: string | null) => {
     setImages((prev) => {
@@ -122,13 +134,11 @@ const ProductDetail: React.FC = () => {
       setImages(data.product_img || []);
       setSizeGuides(data.sizesByCategory || {});
       setChanged({});
-    } catch (fetchErr: any) {
+    } catch (fetchErr: unknown) {
       console.error('제품 상세 정보를 불러오는 중 오류 발생:', fetchErr);
-      setError(
-        fetchErr?.message
-          ? `제품 상세 정보를 불러오는데 실패했습니다: ${fetchErr.message}`
-          : '제품 상세 정보를 불러오는데 실패했습니다.'
-      );
+      const errorMessage =
+        fetchErr instanceof Error ? fetchErr.message : '알 수 없는 오류';
+      setError(`제품 상세 정보를 불러오는데 실패했습니다: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -150,7 +160,7 @@ const ProductDetail: React.FC = () => {
       setProduct((prev) => (prev ? { ...prev, sizes: guide } : prev));
       setChanged((prev) => ({ ...prev, sizes: guide }));
     }
-  }, [product?.category, sizeGuides]);
+  }, [product?.category, sizeGuides, product]);
 
   const handleSave = () => {
     if (!product) return;
@@ -186,13 +196,31 @@ const ProductDetail: React.FC = () => {
           }
         });
 
-        // 2) payload 구성
-        const payload: any = {
+        // 2) payload 구성 - 현재 표에 표시된 라벨을 우선 사용
+        let currentLabels: Record<string, string> = {};
+
+        if (
+          getCurrentSizeLabels &&
+          typeof getCurrentSizeLabels === 'function'
+        ) {
+          currentLabels = getCurrentSizeLabels();
+          console.log('getCurrentSizeLabels()에서 가져온 라벨:', currentLabels);
+        } else {
+          currentLabels =
+            changed.size_label_guide ?? product.size_label_guide ?? {};
+          console.log('기존 데이터에서 가져온 라벨:', currentLabels);
+        }
+
+        console.log('최종 저장할 라벨:', currentLabels);
+        console.log('getCurrentSizeLabels 함수:', getCurrentSizeLabels);
+        console.log('changed.size_label_guide:', changed.size_label_guide);
+        console.log('product.size_label_guide:', product.size_label_guide);
+
+        const payload: Partial<ProductDetailResponse & { sizes: SizeRow[] }> = {
           ...changed,
           product_img: images,
           fabricComposition: sortedComp,
-          size_label_guide:
-            changed.size_label_guide ?? product.size_label_guide,
+          size_label_guide: currentLabels,
         };
         if (changed.sizes || product.sizes) {
           payload.sizes = (changed.sizes ?? product.sizes ?? []).map((row) => ({
@@ -202,6 +230,20 @@ const ProductDetail: React.FC = () => {
         }
 
         const cleaned = cleanPayload(payload);
+
+        // size_label_guide가 제거되었을 경우 강제로 추가
+        if (
+          !cleaned.size_label_guide &&
+          currentLabels &&
+          Object.keys(currentLabels).length > 0
+        ) {
+          cleaned.size_label_guide = currentLabels;
+          console.log(
+            'cleaned에서 size_label_guide가 제거되어 강제로 추가:',
+            currentLabels
+          );
+        }
+
         // 디버그용: 전송 payload 콘솔 출력
         console.log('업데이트 전송 payload:', cleaned);
         console.log('사이즈 라벨 가이드:', cleaned.size_label_guide);
@@ -213,11 +255,10 @@ const ProductDetail: React.FC = () => {
         await fetchDetail(updated.id);
         setChanged({});
         openResult('수정 완료되었습니다.');
-      } catch (updateErr: any) {
+      } catch (updateErr: unknown) {
         console.error('제품 수정 중 오류 발생:', updateErr);
-        const detailedMessage = updateErr?.response?.data?.message
-          ? updateErr.response.data.message
-          : updateErr?.message || `${updateErr}`;
+        const detailedMessage =
+          updateErr instanceof Error ? updateErr.message : '알 수 없는 오류';
         openResult(`수정에 실패했습니다: ${detailedMessage}`);
       }
     });
@@ -239,7 +280,12 @@ const ProductDetail: React.FC = () => {
       </HeaderRow>
       <TripleButtonDetailSubHeader
         backLabel='목록이동'
-        onBackClick={() => navigate(`/productlist${window.location.search}`)}
+        onBackClick={() => {
+          console.log('목록이동 버튼 클릭됨');
+          console.log('현재 URL:', window.location.href);
+          console.log('이동할 URL:', `/productlist${window.location.search}`);
+          debugNavigate(`/productlist${window.location.search}`);
+        }}
         saveLabel='변경저장'
         onSaveClick={handleSave}
         deleteLabel='삭제'
@@ -265,7 +311,7 @@ const ProductDetail: React.FC = () => {
                 sizes={changed.sizes ?? product.sizes ?? []}
                 onSizesChange={handleSizesChange}
                 onLabelChange={handleLabelChange}
-                existingLabels={product.size_label_guide}
+                onSetGetCurrentLabels={setGetCurrentSizeLabels}
               />
               <SizeDisplaySection
                 product={product}
