@@ -40,13 +40,41 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
     const existingLabels = product?.size_label_guide || {};
     const mergedLabels = { ...initialLabels, ...existingLabels };
     setLabelMap(mergedLabels);
-  }, [initialLabels, product?.size_label_guide]);
+
+    // 알파벳을 제거하고 실제 라벨 텍스트만 저장
+    const cleanLabels: Record<string, string> = {};
+    Object.entries(mergedLabels).forEach(([k, v]) => {
+      // "A.어깨넓이" 형태에서 "어깨넓이"만 추출
+      const cleanValue = v.replace(/^[A-Z]\.\s*/, '');
+      cleanLabels[k] = cleanValue;
+    });
+
+    // 초기 로드 시에도 상위로 전달
+    if (onLabelChange) {
+      onLabelChange(cleanLabels);
+    }
+  }, [initialLabels, product?.size_label_guide, onLabelChange]);
 
   // 3) 사용자 입력으로 변경된 경우에만 부모 콜백 호출
   const handleLabelChange = (key: string, e: ChangeEvent<HTMLInputElement>) => {
     const next = { ...labelMap, [key]: e.target.value };
     setLabelMap(next);
-    onLabelChange?.(next);
+
+    // 알파벳을 제거하고 실제 라벨 텍스트만 저장
+    const cleanLabels: Record<string, string> = {};
+    Object.entries(next).forEach(([k, v]) => {
+      // "A.어깨넓이" 형태에서 "어깨넓이"만 추출
+      const cleanValue = v.replace(/^[A-Z]\.\s*/, '');
+      cleanLabels[k] = cleanValue;
+    });
+
+    console.log(
+      'SizeDisplaySection 라벨 변경:',
+      key,
+      e.target.value,
+      cleanLabels
+    );
+    onLabelChange?.(cleanLabels);
   };
 
   // 이하 타이틀/노트 렌더링 로직은 그대로 유지

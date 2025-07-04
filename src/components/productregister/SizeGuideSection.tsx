@@ -46,17 +46,39 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     // 기존 라벨이 있으면 사용, 없으면 기본값 사용
     const mergedLabels = { ...initialLabels, ...existingLabels };
     setLabelMap(mergedLabels);
-  }, [initialLabels, existingLabels]);
 
-  // 라벨 변경 시 상위로 전달
-  useEffect(() => {
-    onLabelChange?.(labelMap);
-  }, [labelMap, onLabelChange]);
+    // 알파벳을 제거하고 실제 라벨 텍스트만 저장
+    const cleanLabels: Record<string, string> = {};
+    Object.entries(mergedLabels).forEach(([k, v]) => {
+      // "A.어깨넓이" 형태에서 "어깨넓이"만 추출
+      const cleanValue = v.replace(/^[A-Z]\.\s*/, '');
+      cleanLabels[k] = cleanValue;
+    });
+
+    // 초기 로드 시에도 상위로 전달
+    if (onLabelChange) {
+      onLabelChange(cleanLabels);
+    }
+  }, [initialLabels, existingLabels, onLabelChange]);
 
   // 라벨 변경 핸들러
   const handleLabelChange = (key: string, value: string) => {
     const updatedLabels = { ...labelMap, [key]: value };
     setLabelMap(updatedLabels);
+
+    // 알파벳을 제거하고 실제 라벨 텍스트만 저장
+    const cleanLabels: Record<string, string> = {};
+    Object.entries(updatedLabels).forEach(([k, v]) => {
+      // "A.어깨넓이" 형태에서 "어깨넓이"만 추출
+      const cleanValue = v.replace(/^[A-Z]\.\s*/, '');
+      cleanLabels[k] = cleanValue;
+    });
+
+    // 라벨 변경 시 즉시 상위로 전달
+    console.log('라벨 변경:', key, value, cleanLabels);
+    if (onLabelChange) {
+      onLabelChange(cleanLabels);
+    }
   };
 
   //

@@ -78,11 +78,15 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
       const initType = data.ticket_name;
       setType(initType);
       setOriginalType(initType);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('fetchDetail 오류:', err);
-      if (err.response?.status === 401) {
+      const errorResponse =
+        err && typeof err === 'object' && 'response' in err
+          ? (err as { response?: { status?: number } }).response
+          : null;
+      if (errorResponse?.status === 401) {
         alert('인증이 필요합니다. 로그인 후 시도해주세요.');
-      } else if (err.response?.status === 404) {
+      } else if (errorResponse?.status === 404) {
         setError(`ID ${id}에 해당하는 이용권을 찾을 수 없습니다.`);
       } else {
         setError('이용권 정보를 불러오는 중 오류가 발생했습니다.');
@@ -186,13 +190,17 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
           setType(originalType);
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('performSave 오류:', err);
-      if (err.response?.status === 401) {
+      const errorResponse =
+        err && typeof err === 'object' && 'response' in err
+          ? (err as { response?: { status?: number } }).response
+          : null;
+      if (errorResponse?.status === 401) {
         alert('인증이 필요합니다. 로그인 후 시도해주세요.');
-      } else if (err.response?.status === 404) {
+      } else if (errorResponse?.status === 404) {
         alert('해당 ID의 티켓을 찾을 수 없습니다.');
-      } else if (err.response?.status === 400) {
+      } else if (errorResponse?.status === 400) {
         alert('변경이 불가능한 상태입니다.');
       } else {
         alert('변경 중 오류가 발생했습니다.');
@@ -211,11 +219,15 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
       alert('삭제가 완료되었습니다.');
       // 삭제 후 목록 페이지로 이동하거나, ticket=null 처리 등 필요에 따라 구현
       // 예: navigate('/ticket-list'); 등
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('performDelete 오류:', err);
-      if (err.response?.status === 401) {
+      const errorResponse =
+        err && typeof err === 'object' && 'response' in err
+          ? (err as { response?: { status?: number } }).response
+          : null;
+      if (errorResponse?.status === 401) {
         alert('인증이 필요합니다. 로그인 후 시도해주세요.');
-      } else if (err.response?.status === 404) {
+      } else if (errorResponse?.status === 404) {
         alert('해당 ID의 이용권을 찾을 수 없습니다.');
       } else {
         alert('삭제 중 오류가 발생했습니다.');

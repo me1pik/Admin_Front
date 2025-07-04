@@ -22,6 +22,8 @@ const cleanPayload = <T extends object>(obj: T): Partial<T> => {
   const result = { ...(obj as any) } as Partial<T>;
   Object.entries(result).forEach(([key, value]) => {
     if (key === 'product_img') return;
+    // size_label_guide는 빈 객체여도 유지
+    if (key === 'size_label_guide') return;
     if (
       value == null ||
       (Array.isArray(value) && value.length === 0) ||
@@ -68,6 +70,7 @@ const ProductDetail: React.FC = () => {
 
   const handleProductChange = useCallback(
     (data: Partial<ProductDetailResponse & { sizes: SizeRow[] }>) => {
+      console.log('handleProductChange 호출:', data);
       setProduct((prev) => (prev ? { ...prev, ...data } : prev));
       setChanged((prev) => ({ ...prev, ...data }));
     },
@@ -75,6 +78,14 @@ const ProductDetail: React.FC = () => {
   );
   const handleSizesChange = useCallback(
     (sizes: SizeRow[]) => handleProductChange({ sizes }),
+    [handleProductChange]
+  );
+
+  const handleLabelChange = useCallback(
+    (labels: Record<string, string>) => {
+      console.log('handleLabelChange 호출:', labels);
+      handleProductChange({ size_label_guide: labels });
+    },
     [handleProductChange]
   );
 
@@ -195,6 +206,8 @@ const ProductDetail: React.FC = () => {
         console.log('업데이트 전송 payload:', cleaned);
         console.log('사이즈 라벨 가이드:', cleaned.size_label_guide);
         console.log('사이즈 데이터:', cleaned.sizes);
+        console.log('changed 상태:', changed);
+        console.log('product 상태:', product);
 
         const updated = await updateProduct(product.id, cleaned);
         await fetchDetail(updated.id);
@@ -251,17 +264,13 @@ const ProductDetail: React.FC = () => {
                 category={product.category}
                 sizes={changed.sizes ?? product.sizes ?? []}
                 onSizesChange={handleSizesChange}
-                onLabelChange={(labels) =>
-                  handleProductChange({ size_label_guide: labels })
-                }
+                onLabelChange={handleLabelChange}
                 existingLabels={product.size_label_guide}
               />
               <SizeDisplaySection
                 product={product}
                 sizeProductImg={product.size_picture}
-                onLabelChange={(labels) =>
-                  handleProductChange({ size_label_guide: labels })
-                }
+                onLabelChange={handleLabelChange}
               />
             </TwoColumn>
             <MiddleDivider />
