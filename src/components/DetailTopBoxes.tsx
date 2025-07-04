@@ -10,7 +10,7 @@ import { sizeGuideConfig } from '../config/sizeGuideConfig';
 import IconMiniDress from '../assets/category/MiniDress.svg';
 import IconMidiDress from '../assets/category/MidiDress.svg';
 import IconLongDress from '../assets/category/LongDress.svg';
-import IconTowDress from '../assets/category/TowDress.svg';
+import IconTwoDress from '../assets/category/TwoDress.svg';
 import IconJumpSuit from '../assets/category/JumpSuit.svg';
 import IconBlouse from '../assets/category/Blouse.svg';
 import IconKnitTop from '../assets/category/KnitTop.svg';
@@ -53,7 +53,7 @@ const categoryOptions = [
   { label: '미니원피스', value: 'MiniDress', icon: IconMiniDress },
   { label: '미디원피스', value: 'MidiDress', icon: IconMidiDress },
   { label: '롱 원피스', value: 'LongDress', icon: IconLongDress },
-  { label: '투피스', value: 'TowDress', icon: IconTowDress },
+  { label: '투피스', value: 'TwoDress', icon: IconTwoDress },
   { label: '점프수트', value: 'JumpSuit', icon: IconJumpSuit },
   { label: '블라우스', value: 'Blouse', icon: IconBlouse },
   { label: '니트 상의', value: 'KnitTop', icon: IconKnitTop },

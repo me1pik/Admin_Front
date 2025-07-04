@@ -1,4 +1,22 @@
 // src/config/sizeGuideConfig.ts
+
+import BlouseImg from '../assets/category/Blouse.png';
+import MiniSkirtImg from '../assets/category/MiniSkirt.png';
+import TshirtImg from '../assets/category/Tshirt.png';
+import MidiSkirtImg from '../assets/category/MidiSkirt.png';
+import BestImg from '../assets/category/Best.png';
+import KnitTopImg from '../assets/category/KnitTop.png';
+import LongSkirtImg from '../assets/category/LongSkirt.png';
+import PantsImg from '../assets/category/Pants.png';
+import MiniDressImg from '../assets/category/MiniDress.png';
+import MidiDressImg from '../assets/category/MidiDress.png';
+import LongDressImg from '../assets/category/LongDress.png';
+// import TwoDressImg from '../assets/category/LongDress.png';
+import JacketImg from '../assets/category/Jacket.png';
+import CardiganImg from '../assets/category/Cardigan.png';
+import PaddingImg from '../assets/category/Padding.png';
+import CoatImg from '../assets/category/Coat.png';
+
 export interface SizeGuideConfigItem {
   image: string;
   labels: Record<string, string>;
@@ -27,8 +45,7 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
     },
   },
   Tshirt: {
-    image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/25db6b65a4c2eccbe1ea546026389427.png',
+    image: TshirtImg,
     labels: {
       A: 'A.어깨넓이',
       B: 'B.가슴둘레',
@@ -39,8 +56,7 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
     },
   },
   Blouse: {
-    image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/6aa5cfc1fcf058242047931081e6bd5c.png',
+    image: BlouseImg,
     labels: {
       A: 'A.어깨넓이',
       B: 'B.가슴둘레',
@@ -50,8 +66,7 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
     },
   },
   KnitTop: {
-    image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/25db6b65a4c2eccbe1ea546026389427.png',
+    image: KnitTopImg,
     labels: {
       A: 'A.어깨넓이',
       B: 'B.가슴둘레',
@@ -73,8 +88,7 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
     },
   },
   MiniSkirt: {
-    image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/4a3564bd7e1095a189083bb62916349a.png',
+    image: MiniSkirtImg,
     labels: {
       A: 'A.허리둘레',
       B: 'B.엉덩이둘레',
@@ -83,8 +97,7 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
     },
   },
   MidiSkirt: {
-    image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/4a3564bd7e1095a189083bb62916349a.png',
+    image: MidiSkirtImg,
     labels: {
       A: 'A.허리둘레',
       B: 'B.엉덩이둘레',
@@ -93,8 +106,7 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
     },
   },
   LongSkirt: {
-    image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/4a3564bd7e1095a189083bb62916349a.png',
+    image: LongSkirtImg,
     labels: {
       A: 'A.허리둘레',
       B: 'B.엉덩이둘레',
@@ -103,8 +115,7 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
     },
   },
   Pants: {
-    image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/59c6a4e2fb13d263e2799ab338f8674a.png',
+    image: PantsImg,
     labels: {
       A: 'A.허리둘레',
       B: 'B.엉덩이둘레',
@@ -115,8 +126,7 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
     },
   },
   MiniDress: {
-    image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/358a254fc60602c20991d47964a23311.png',
+    image: MiniDressImg,
     labels: {
       A: 'A.어깨넓이',
       B: 'B.가슴둘레',
@@ -127,8 +137,7 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
     },
   },
   MidiDress: {
-    image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/358a254fc60602c20991d47964a23311.png',
+    image: MidiDressImg,
     labels: {
       A: 'A.어깨넓이',
       B: 'B.가슴둘레',
@@ -139,8 +148,7 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
     },
   },
   LongDress: {
-    image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/358a254fc60602c20991d47964a23311.png',
+    image: LongDressImg,
     labels: {
       A: 'A.어깨넓이',
       B: 'B.가슴둘레',
@@ -150,9 +158,8 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
       F: 'F.총길이',
     },
   },
-  TowDress: {
-    image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/358a254fc60602c20991d47964a23311.png',
+  TwoDress: {
+    image: LongDressImg,
     labels: {
       A: 'A.어깨넓이',
       B: 'B.가슴둘레',
@@ -174,8 +181,7 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
     },
   },
   Best: {
-    image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/356a561aa2641c9a99a5fa22196a60fb.png',
+    image: BestImg,
     labels: {
       A: 'A.어깨넓이',
       B: 'B.가슴둘레',
@@ -186,8 +192,7 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
     },
   },
   Cardigan: {
-    image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/88bf095e82d97c3fa1fbc85dea6fb58b.png',
+    image: CardiganImg,
     labels: {
       A: 'A.어깨넓이',
       B: 'B.가슴둘레',
@@ -198,8 +203,7 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
     },
   },
   Jacket: {
-    image:
-      'https://www.daehyuninside.com/_skin/daehyun_250205/img/etc/OUTER3.jpg',
+    image: JacketImg,
     labels: {
       A: 'A.어깨넓이',
       B: 'B.가슴둘레',
@@ -211,8 +215,7 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
     },
   },
   Padding: {
-    image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/88bf095e82d97c3fa1fbc85dea6fb58b.png',
+    image: PaddingImg,
     labels: {
       A: 'A.어깨넓이',
       B: 'B.가슴둘레',
@@ -223,8 +226,7 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
     },
   },
   Coat: {
-    image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/c514aa235c2c74a8f6c9a4d6ee59e58e.png',
+    image: CoatImg,
     labels: {
       A: 'A.어깨넓이',
       B: 'B.가슴둘레',
