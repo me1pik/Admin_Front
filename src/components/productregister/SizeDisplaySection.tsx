@@ -36,8 +36,11 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
 
   // --- (1) 초기 레이블 변경 감지 시에만 labelMap 리셋 ---
   useEffect(() => {
-    setLabelMap(initialLabels);
-  }, [initialLabels]);
+    // 기존 제품의 라벨이 있으면 사용, 없으면 기본값 사용
+    const existingLabels = product?.size_label_guide || {};
+    const mergedLabels = { ...initialLabels, ...existingLabels };
+    setLabelMap(mergedLabels);
+  }, [initialLabels, product?.size_label_guide]);
 
   // 3) 사용자 입력으로 변경된 경우에만 부모 콜백 호출
   const handleLabelChange = (key: string, e: ChangeEvent<HTMLInputElement>) => {

@@ -18,6 +18,8 @@ export interface SizeGuideSectionProps {
   onSizesChange?: (sizes: SizeRow[]) => void;
   /** 변경된 라벨을 부모로 전달 */
   onLabelChange?: (labels: Record<string, string>) => void;
+  /** 기존 라벨 데이터 */
+  existingLabels?: Record<string, string>;
 }
 
 const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
@@ -25,6 +27,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   sizes,
   onSizesChange,
   onLabelChange,
+  existingLabels,
 }) => {
   //
   // 1) config에서 초기 라벨 맵 가져오기
@@ -34,19 +37,27 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     [category]
   );
 
-  // 2) 로컬 상태로 라벨 관리 (읽기 전용)
+  // 2) 로컬 상태로 라벨 관리 (편집 가능)
   const [labelMap, setLabelMap] =
     useState<Record<string, string>>(initialLabels);
 
   // 카테고리가 바뀔 때마다 라벨 초기화
   useEffect(() => {
-    setLabelMap(initialLabels);
-  }, [initialLabels]);
+    // 기존 라벨이 있으면 사용, 없으면 기본값 사용
+    const mergedLabels = { ...initialLabels, ...existingLabels };
+    setLabelMap(mergedLabels);
+  }, [initialLabels, existingLabels]);
 
   // 라벨 변경 시 상위로 전달
   useEffect(() => {
     onLabelChange?.(labelMap);
   }, [labelMap, onLabelChange]);
+
+  // 라벨 변경 핸들러
+  const handleLabelChange = (key: string, value: string) => {
+    const updatedLabels = { ...labelMap, [key]: value };
+    setLabelMap(updatedLabels);
+  };
 
   //
   // 3) 컬럼 정의 (첫 번째는 빈 헤더, 나머지는 labelMap 기반)
@@ -78,7 +89,9 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
 
     // 정렬된 순서대로 rows 객체 생성
     const newRows = sortedSizes.map((item) => {
-      const row: RowData = { size: item.size };
+      // "SIZE 55" 형태를 "55" 형태로 변환
+      const cleanSize = item.size.replace('SIZE ', '');
+      const row: RowData = { size: cleanSize };
       Object.keys(labelMap).forEach((k) => {
         // measurement 키는 "A 어깨넓이" 등으로 시작한다고 가정
         const mKey = Object.keys(item.measurements).find((mk) =>
@@ -103,7 +116,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
 
     onSizesChange?.(
       updated.map((r) => ({
-        size: r.size,
+        size: `SIZE ${r.size}`,
         measurements: Object.entries(r).reduce<Record<string, number>>(
           (acc, [k, v]) => {
             if (k !== 'size') acc[k] = v ? Number(v) : 0;
@@ -152,7 +165,17 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
             <tr>
               {columns.map((col) => (
                 <Th key={col.key}>
-                  <HeaderStatic>{col.label}</HeaderStatic>
+                  {col.key === 'size' ? (
+                    <HeaderStatic>{col.label}</HeaderStatic>
+                  ) : (
+                    <HeaderInput
+                      value={col.label}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        handleLabelChange(col.key, e.target.value)
+                      }
+                      placeholder='라벨 입력'
+                    />
+                  )}
                 </Th>
               ))}
             </tr>
@@ -244,6 +267,22 @@ const HeaderStatic = styled.div`
   font-weight: 700;
   font-size: 12px;
   color: #333;
+`;
+
+const HeaderInput = styled.input`
+  width: 100%;
+  text-align: center;
+  font-weight: 700;
+  font-size: 12px;
+  color: #333;
+  border: none;
+  background: transparent;
+  padding: 2px;
+
+  &:focus {
+    outline: 2px solid #f6ae24;
+    background: white;
+  }
 `;
 
 const Tr = styled.tr<{ even: boolean }>`

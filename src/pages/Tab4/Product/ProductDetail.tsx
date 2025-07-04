@@ -183,8 +183,8 @@ const ProductDetail: React.FC = () => {
           size_label_guide:
             changed.size_label_guide ?? product.size_label_guide,
         };
-        if (product.sizes) {
-          payload.sizes = product.sizes.map((row) => ({
+        if (changed.sizes || product.sizes) {
+          payload.sizes = (changed.sizes ?? product.sizes ?? []).map((row) => ({
             size: row.size,
             measurements: { ...row.measurements },
           }));
@@ -193,6 +193,8 @@ const ProductDetail: React.FC = () => {
         const cleaned = cleanPayload(payload);
         // 디버그용: 전송 payload 콘솔 출력
         console.log('업데이트 전송 payload:', cleaned);
+        console.log('사이즈 라벨 가이드:', cleaned.size_label_guide);
+        console.log('사이즈 데이터:', cleaned.sizes);
 
         const updated = await updateProduct(product.id, cleaned);
         await fetchDetail(updated.id);
@@ -249,6 +251,10 @@ const ProductDetail: React.FC = () => {
                 category={product.category}
                 sizes={changed.sizes ?? product.sizes ?? []}
                 onSizesChange={handleSizesChange}
+                onLabelChange={(labels) =>
+                  handleProductChange({ size_label_guide: labels })
+                }
+                existingLabels={product.size_label_guide}
               />
               <SizeDisplaySection
                 product={product}
