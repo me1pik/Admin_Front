@@ -49,12 +49,21 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     }
   }, [category, currentCategory]);
 
-  // 4) 라벨 맵 계산 (카테고리 변경 시 config 라벨 우선)
+  // 4) 라벨 맵 계산 (카테고리 변경 시 config 라벨 우선, 표시용으로는 접두사 포함)
   const labelMap = useMemo(() => {
     // 카테고리가 변경되면 config의 라벨을 우선 사용
-    // 편집된 라벨이 있으면 그것을 사용
+    // 편집된 라벨이 있으면 그것을 사용 (표시용으로는 접두사 포함)
     const baseLabels = initialLabels;
-    return { ...baseLabels, ...editedLabels };
+    const displayLabels = { ...baseLabels, ...editedLabels };
+
+    // 편집된 라벨에 접두사가 없으면 추가
+    Object.keys(editedLabels).forEach((key) => {
+      if (!displayLabels[key].startsWith(key + '.')) {
+        displayLabels[key] = `${key}. ${editedLabels[key]}`;
+      }
+    });
+
+    return displayLabels;
   }, [initialLabels, editedLabels]);
 
   // 카테고리가 바뀔 때만 라벨 초기화
@@ -63,12 +72,12 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     setEditedLabels({});
   }, [category]);
 
-  // 현재 라벨을 가져오는 함수
+  // 현재 라벨을 가져오는 함수 (접두사 제거된 순수 라벨만 반환)
   const getCurrentLabels = useCallback(() => {
     console.log('getCurrentLabels 호출됨');
     console.log('현재 labelMap:', labelMap);
 
-    // labelMap에서 실제 표에 표시된 라벨을 추출
+    // labelMap에서 접두사 제거된 순수 라벨만 추출
     const tableLabels: Record<string, string> = {};
     Object.entries(labelMap).forEach(([k, v]) => {
       // "A.어깨넓이" 형태에서 "어깨넓이"만 추출
@@ -76,7 +85,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
       tableLabels[k] = cleanValue;
     });
 
-    console.log('표에서 추출한 라벨:', tableLabels);
+    console.log('저장용 순수 라벨:', tableLabels);
     return tableLabels;
   }, [labelMap]);
 
@@ -100,19 +109,21 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   const handleLabelChange = (key: string, value: string) => {
     console.log('handleLabelChange 호출:', key, value);
 
-    // 편집된 라벨 상태 업데이트
+    // 접두사 제거된 순수 라벨만 저장
+    const cleanValue = value.replace(/^[A-Z]\.\s*/, '');
+
+    // 편집된 라벨 상태 업데이트 (순수 라벨만 저장)
     setEditedLabels((prev) => {
-      const cleanValue = value.replace(/^[A-Z]\.\s*/, '');
       const updated = { ...prev, [key]: cleanValue };
-      console.log('editedLabels 업데이트:', updated);
+      console.log('editedLabels 업데이트 (순수 라벨):', updated);
       return updated;
     });
 
-    // 부모에게 라벨 변경 알림 (무한루프 방지를 위해 setTimeout 사용)
+    // 부모에게 라벨 변경 알림 (순수 라벨만 전달)
     setTimeout(() => {
       if (onLabelChange) {
         const currentLabels = getCurrentLabels();
-        console.log('부모에게 라벨 변경 알림:', currentLabels);
+        console.log('부모에게 순수 라벨 전달:', currentLabels);
         onLabelChange(currentLabels);
       }
     }, 0);

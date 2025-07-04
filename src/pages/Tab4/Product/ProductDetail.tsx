@@ -196,7 +196,7 @@ const ProductDetail: React.FC = () => {
           }
         });
 
-        // 2) payload 구성 - 현재 표에 표시된 라벨을 우선 사용
+        // 2) payload 구성 - 순수 라벨만 저장 (접두사 제거)
         let currentLabels: Record<string, string> = {};
 
         if (
@@ -204,14 +204,17 @@ const ProductDetail: React.FC = () => {
           typeof getCurrentSizeLabels === 'function'
         ) {
           currentLabels = getCurrentSizeLabels();
-          console.log('getCurrentSizeLabels()에서 가져온 라벨:', currentLabels);
+          console.log(
+            'getCurrentSizeLabels()에서 가져온 순수 라벨:',
+            currentLabels
+          );
         } else {
           currentLabels =
             changed.size_label_guide ?? product.size_label_guide ?? {};
           console.log('기존 데이터에서 가져온 라벨:', currentLabels);
         }
 
-        console.log('최종 저장할 라벨:', currentLabels);
+        console.log('최종 저장할 순수 라벨:', currentLabels);
         console.log('getCurrentSizeLabels 함수:', getCurrentSizeLabels);
         console.log('changed.size_label_guide:', changed.size_label_guide);
         console.log('product.size_label_guide:', product.size_label_guide);
