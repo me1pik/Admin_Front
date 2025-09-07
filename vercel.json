@@ -1,9 +1,9 @@
 {
   "framework": "vite",
-  "buildCommand": "cd Admin && yarn build",
-  "outputDirectory": "Admin/dist",
-  "installCommand": "cd Admin && yarn install",
-  "devCommand": "cd Admin && yarn dev",
+  "buildCommand": "yarn build",
+  "outputDirectory": "dist",
+  "installCommand": "yarn install",
+  "devCommand": "yarn dev",
   "rewrites": [
     {
       "source": "/(.*)",
