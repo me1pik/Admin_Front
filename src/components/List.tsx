@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
-import HomeIcon from '../assets/Home.svg';
-import MemberIcon from '../assets/Member.svg';
-import AdminIcon from '../assets/Admin.svg';
-import PaymentIcon from '../assets/Payment.svg';
-import SettingIcon from '../assets/Setting.svg';
-import ListLogo from '../assets/ListLogo.svg';
+import HomeIcon from 'src/assets/Home.svg';
+import MemberIcon from 'src/assets/Member.svg';
+import AdminIcon from 'src/assets/Admin.svg';
+import PaymentIcon from 'src/assets/Payment.svg';
+import SettingIcon from 'src/assets/Setting.svg';
+import ListLogo from 'src/assets/ListLogo.svg';
 
 /**
  * 2개의 가로 막대를 쌓은 TopBar
@@ -29,13 +29,15 @@ const List: React.FC = () => {
     setActiveMenu(activeMenu === menu ? null : menu);
   };
 
+  const location = useLocation();
+  useEffect(() => {
+    setActiveMenu(null);
+  }, [location.pathname]);
+
   // 메뉴 영역 외부 클릭 시 메뉴 닫기
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setActiveMenu(null);
       }
     };
@@ -54,108 +56,53 @@ const List: React.FC = () => {
         <DoubleTopBar />
         <NavIcons>
           {/* 대시보드 아이콘 */}
-          <NavIcon
-            onClick={() => navigate('/dashboard')}
-            isActive={activeMenu === 'dashboard'}
-          >
-            <Icon
-              src={HomeIcon}
-              alt='Home'
-              isActive={activeMenu === 'dashboard'}
-            />
+          <NavIcon onClick={() => navigate('/dashboard')} $isActive={activeMenu === 'dashboard'}>
+            <Icon src={HomeIcon} alt="Home" $isActive={activeMenu === 'dashboard'} />
           </NavIcon>
 
           {/* 관리자 아이콘 */}
-          <NavIcon
-            onClick={() => handleMenuClick('admin')}
-            isActive={activeMenu === 'admin'}
-          >
-            <Icon
-              src={AdminIcon}
-              alt='Admin'
-              isActive={activeMenu === 'admin'}
-            />
+          <NavIcon onClick={() => handleMenuClick('admin')} $isActive={activeMenu === 'admin'}>
+            <Icon src={AdminIcon} alt="Admin" $isActive={activeMenu === 'admin'} />
             {activeMenu === 'admin' && (
               <SubMenu>
-                <SubMenuItem onClick={() => navigate('/adminlist')}>
-                  관리자 관리
-                </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/analysisinfo')}>
-                  분석정보
-                </SubMenuItem>
+                <SubMenuItem onClick={() => navigate('/adminlist')}>관리자 관리</SubMenuItem>
+                <SubMenuItem onClick={() => navigate('/analysisinfo')}>분석정보</SubMenuItem>
               </SubMenu>
             )}
           </NavIcon>
 
           {/* 회원 아이콘 */}
-          <NavIcon
-            onClick={() => handleMenuClick('member')}
-            isActive={activeMenu === 'member'}
-          >
-            <Icon
-              src={MemberIcon}
-              alt='Member'
-              isActive={activeMenu === 'member'}
-            />
+          <NavIcon onClick={() => handleMenuClick('member')} $isActive={activeMenu === 'member'}>
+            <Icon src={MemberIcon} alt="Member" $isActive={activeMenu === 'member'} />
             {activeMenu === 'member' && (
               <SubMenu>
-                <SubMenuItem onClick={() => navigate('/userlist')}>
-                  회원 관리
-                </SubMenuItem>
-                <SubMenuItem
-                  disabled
-                  style={{ color: '#aaa', cursor: 'default' }}
-                >
+                <SubMenuItem onClick={() => navigate('/userlist')}>회원 관리</SubMenuItem>
+                <SubMenuItem $disabled style={{ color: '#aaa', cursor: 'default' }}>
                   회원등급 관리
                 </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/product-evaluation')}>
-                  회원 평가
-                </SubMenuItem>
+                <SubMenuItem onClick={() => navigate('/product-evaluation')}>회원 평가</SubMenuItem>
 
                 {/* Divider 추가 */}
                 <SubMenuDivider />
 
-                <SubMenuItem onClick={() => navigate('/pagelist')}>
-                  멜픽 페이지
-                </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/saleslist')}>
-                  멜픽 판매내역
-                </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/calculatelist')}>
-                  멜픽 정산내역
-                </SubMenuItem>
+                <SubMenuItem onClick={() => navigate('/pagelist')}>멜픽 페이지</SubMenuItem>
+                <SubMenuItem onClick={() => navigate('/saleslist')}>멜픽 판매내역</SubMenuItem>
+                <SubMenuItem onClick={() => navigate('/calculatelist')}>멜픽 정산내역</SubMenuItem>
               </SubMenu>
             )}
           </NavIcon>
 
           {/* 결제 아이콘 */}
-          <NavIcon
-            onClick={() => handleMenuClick('payment')}
-            isActive={activeMenu === 'payment'}
-          >
-            <Icon
-              src={PaymentIcon}
-              alt='Payment'
-              isActive={activeMenu === 'payment'}
-            />
+          <NavIcon onClick={() => handleMenuClick('payment')} $isActive={activeMenu === 'payment'}>
+            <Icon src={PaymentIcon} alt="Payment" $isActive={activeMenu === 'payment'} />
             {activeMenu === 'payment' && (
               <SubMenu>
-                <SubMenuItem onClick={() => navigate('/productlist')}>
-                  제품 관리
-                </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/brandlist')}>
-                  브랜드 관리
-                </SubMenuItem>
+                <SubMenuItem onClick={() => navigate('/productlist')}>제품 관리</SubMenuItem>
+                <SubMenuItem onClick={() => navigate('/brandlist')}>브랜드 관리</SubMenuItem>
                 <SubMenuDivider />
-                <SubMenuItem onClick={() => navigate('/Ticketlist')}>
-                  이용권 내역
-                </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/monitoringlist')}>
-                  대여 내역
-                </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/GeneralOrderList')}>
-                  구매 내역
-                </SubMenuItem>
+                <SubMenuItem onClick={() => navigate('/Ticketlist')}>이용권 내역</SubMenuItem>
+                <SubMenuItem onClick={() => navigate('/monitoringlist')}>대여 내역</SubMenuItem>
+                <SubMenuItem onClick={() => navigate('/GeneralOrderList')}>구매 내역</SubMenuItem>
                 <SubMenuItem onClick={() => navigate('/marketorderlist')}>
                   멜픽 구매내역
                 </SubMenuItem>
@@ -166,25 +113,24 @@ const List: React.FC = () => {
           {/* 설정 아이콘 */}
           <NavIcon
             onClick={() => handleMenuClick('settings')}
-            isActive={activeMenu === 'settings'}
+            $isActive={activeMenu === 'settings'}
           >
-            <Icon
-              src={SettingIcon}
-              alt='Settings'
-              isActive={activeMenu === 'settings'}
-            />
+            <Icon src={SettingIcon} alt="Settings" $isActive={activeMenu === 'settings'} />
             {activeMenu === 'settings' && (
               <SubMenu>
-                <SubMenuItem onClick={() => navigate('/notice')}>
+                <SubMenuItem
+                  onClick={() => {
+                    setActiveMenu(null); // 메뉴 닫기
+                    navigate('/document/notice');
+                  }}
+                >
                   공지사항
                 </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/terms')}>
-                  이용약관
-                </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/privacy')}>
+                <SubMenuItem onClick={() => navigate('/document/terms')}>이용약관</SubMenuItem>
+                <SubMenuItem onClick={() => navigate('/document/privacy')}>
                   개인정보보호
                 </SubMenuItem>
-                <SubMenuItem onClick={() => navigate('/faq')}>FAQ</SubMenuItem>
+                <SubMenuItem onClick={() => navigate('/document/faq')}>FAQ</SubMenuItem>
               </SubMenu>
             )}
           </NavIcon>
@@ -194,7 +140,7 @@ const List: React.FC = () => {
       {/* 하단 화이트 바 */}
       <WhiteBar>
         <LogoContainer>
-          <Logo src={ListLogo} alt='Logo' />
+          <Logo src={ListLogo} alt="Logo" />
         </LogoContainer>
 
         {/* 두 줄로 된 탑바를 화이트 바 하단에도 표시 */}
@@ -271,19 +217,19 @@ const NavIcons = styled.div`
 `;
 
 interface NavIconProps {
-  isActive: boolean;
+  $isActive: boolean;
 }
 
 const NavIcon = styled.div<NavIconProps>`
   width: 50px;
   height: 50px;
-  background-color: ${({ isActive }) => (isActive ? '#F6AE24' : '#2c2c2c')};
+  background-color: ${({ $isActive }) => ($isActive ? '#F6AE24' : '#2c2c2c')};
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   cursor: pointer;
-  border-radius: ${({ isActive }) => (isActive ? '10px' : '0px')};
+  border-radius: ${({ $isActive }) => ($isActive ? '10px' : '0px')};
 
   &:hover {
     background-color: #f6ac36;
@@ -292,13 +238,13 @@ const NavIcon = styled.div<NavIconProps>`
 `;
 
 interface IconProps {
-  isActive: boolean;
+  $isActive: boolean;
 }
 
 const Icon = styled.img<IconProps>`
   width: 24px;
   height: 24px;
-  filter: ${({ isActive }) => (isActive ? 'brightness(0) invert(1)' : 'none')};
+  filter: ${({ $isActive }) => ($isActive ? 'brightness(0) invert(1)' : 'none')};
 `;
 
 const slideFade = keyframes`
@@ -340,18 +286,18 @@ const SubMenuDivider = styled.div`
   margin: 6px 0;
 `;
 
-const SubMenuItem = styled.div<{ disabled?: boolean }>`
+const SubMenuItem = styled.div<{ $disabled?: boolean }>`
   font-weight: 700;
   font-size: 12px;
   line-height: 13px;
   text-align: center;
-  color: ${({ disabled }) => (disabled ? '#aaa' : '#fff')};
+  color: ${({ $disabled }) => ($disabled ? '#aaa' : '#fff')};
   padding: 8px 12px;
-  cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
+  cursor: ${({ $disabled }) => ($disabled ? 'default' : 'pointer')};
   border-radius: 4px;
 
   &:hover {
-    background-color: ${({ disabled }) => (disabled ? 'none' : '#f6ac36')};
+    background-color: ${({ $disabled }) => ($disabled ? 'none' : '#f6ac36')};
   }
 `;
 

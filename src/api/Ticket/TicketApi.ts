@@ -1,4 +1,4 @@
-import { Axios } from '../Axios';
+import { Axios } from 'src/api/Axios';
 
 /**
  * 관리자용 이용권 항목 스펙
@@ -39,14 +39,11 @@ export interface AdminPaginatedTicketsResponse {
  */
 export const getAdminPaginatedTickets = async (
   page: number,
-  limit: number
+  limit: number,
 ): Promise<AdminPaginatedTicketsResponse> => {
-  const response = await Axios.get<AdminPaginatedTicketsResponse>(
-    '/ticket/admin/paginated',
-    {
-      params: { page, limit },
-    }
-  );
+  const response = await Axios.get<AdminPaginatedTicketsResponse>('/ticket/admin/paginated', {
+    params: { page, limit },
+  });
   return response.data;
 };
 
@@ -56,9 +53,7 @@ export const getAdminPaginatedTickets = async (
  * - 성공: 200, AdminTicketItem 반환
  * - 실패: 404
  */
-export const getAdminTicketById = async (
-  id: number
-): Promise<AdminTicketItem> => {
+export const getAdminTicketById = async (id: number): Promise<AdminTicketItem> => {
   const response = await Axios.get<AdminTicketItem>(`/ticket/user/${id}`);
   return response.data;
 };
@@ -79,12 +74,9 @@ export const changeTicketStatus = async (
   body: {
     status: string;
     isActive: boolean;
-  }
+  },
 ): Promise<AdminTicketItem> => {
-  const response = await Axios.patch<AdminTicketItem>(
-    `/ticket/${id}/status`,
-    body
-  );
+  const response = await Axios.patch<AdminTicketItem>(`/ticket/${id}/status`, body);
   return response.data;
 };
 
@@ -95,12 +87,8 @@ export const changeTicketStatus = async (
  * - 400: 전환 불가
  * - 401: 권한 문제
  */
-export const convertTicketType = async (
-  ticketId: number
-): Promise<AdminTicketItem> => {
-  const response = await Axios.patch<AdminTicketItem>(
-    `/ticket/convert-ticket/${ticketId}`
-  );
+export const convertTicketType = async (ticketId: number): Promise<AdminTicketItem> => {
+  const response = await Axios.patch<AdminTicketItem>(`/ticket/convert-ticket/${ticketId}`);
   return response.data;
 };
 

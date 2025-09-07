@@ -7,17 +7,17 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { FaCalendarAlt } from 'react-icons/fa';
 import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
-} from '../../../components/Header/SettingsDetailSubHeader';
-import OrderDetailTopBoxes from '../../../components/OrderDetailTopBoxes';
-import ReusableModal2 from '../../../components/OneButtonModal';
+} from '@/components/Header/SettingsDetailSubHeader';
+import OrderDetailTopBoxes from '@/components/OrderDetailTopBoxes';
+import ReusableModal2 from '@/components/OneButtonModal';
+import StatusBadge from '@/components/Common/StatusBadge';
+import { getStatusBadge } from '@/utils/statusUtils';
 
 interface GeneralOrderDetailProps {
   isCreate?: boolean;
 }
 
-const GeneralOrderDetail: React.FC<GeneralOrderDetailProps> = ({
-  isCreate = false,
-}) => {
+const GeneralOrderDetail: React.FC<GeneralOrderDetailProps> = ({ isCreate = false }) => {
   const navigate = useNavigate();
   const { no } = useParams<{ no: string }>();
   const numericNo = isCreate ? undefined : Number(no);
@@ -30,9 +30,7 @@ const GeneralOrderDetail: React.FC<GeneralOrderDetailProps> = ({
   const [shippingMethod] = useState('택배');
   const [tracking] = useState('6909-3074-9676');
   const [amount] = useState('55,000');
-  const [expectedDate, setExpectedDate] = useState<Date>(
-    new Date('2025-04-10')
-  );
+  const [expectedDate, setExpectedDate] = useState<Date>(new Date('2025-04-10'));
   const [paymentStatus, setPaymentStatus] = useState('결제완료');
 
   // ─── 배송정보 state ───
@@ -50,9 +48,7 @@ const GeneralOrderDetail: React.FC<GeneralOrderDetailProps> = ({
   const handleBack = () => navigate('/GeneralOrderList');
   const handleSave = () => {
     setModalTitle(isCreate ? '등록 완료' : '변경 완료');
-    setModalMessage(
-      isCreate ? '새 구매를 등록하시겠습니까?' : '변경 내용을 저장하시겠습니까?'
-    );
+    setModalMessage(isCreate ? '새 구매를 등록하시겠습니까?' : '변경 내용을 저장하시겠습니까?');
     setIsModalOpen(true);
   };
   const handleDelete = () => {
@@ -143,21 +139,31 @@ const GeneralOrderDetail: React.FC<GeneralOrderDetailProps> = ({
               <StyledDatePicker
                 selected={expectedDate}
                 onChange={handleDateChange}
-                dateFormat='yyyy.MM.dd'
+                dateFormat="yyyy.MM.dd"
               />
             </DatePickerContainer>
             <Hint>(제품 신청일로부터 3일 이내)</Hint>
           </Field>
           <Field>
             <label>결제상태</label>
-            <select
-              value={paymentStatus}
-              onChange={(e) => setPaymentStatus(e.target.value)}
-            >
-              <option>결제완료</option>
-              <option>결제대기</option>
-              <option>취소요청</option>
-            </select>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <StatusBadge
+                style={{
+                  backgroundColor: getStatusBadge(paymentStatus).background,
+                }}
+              >
+                {getStatusBadge(paymentStatus).label}
+              </StatusBadge>
+              <select
+                value={paymentStatus}
+                onChange={(e) => setPaymentStatus(e.target.value)}
+                style={{ flex: 1, marginLeft: '8px' }}
+              >
+                <option>결제완료</option>
+                <option>결제대기</option>
+                <option>취소요청</option>
+              </select>
+            </div>
           </Field>
         </Row>
       </FormBox>
@@ -176,10 +182,7 @@ const GeneralOrderDetail: React.FC<GeneralOrderDetailProps> = ({
           </Field>
           <Field>
             <label>메시지</label>
-            <input
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
+            <input value={message} onChange={(e) => setMessage(e.target.value)} />
           </Field>
         </Row>
 
@@ -193,14 +196,24 @@ const GeneralOrderDetail: React.FC<GeneralOrderDetailProps> = ({
         <Row>
           <Field>
             <label>배송상태</label>
-            <select
-              value={deliveryStatus}
-              onChange={(e) => setDeliveryStatus(e.target.value)}
-            >
-              <option>배송 준비중</option>
-              <option>배송 중</option>
-              <option>배송 완료</option>
-            </select>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <StatusBadge
+                style={{
+                  backgroundColor: getStatusBadge(deliveryStatus).background,
+                }}
+              >
+                {getStatusBadge(deliveryStatus).label}
+              </StatusBadge>
+              <select
+                value={deliveryStatus}
+                onChange={(e) => setDeliveryStatus(e.target.value)}
+                style={{ flex: 1, marginLeft: '8px' }}
+              >
+                <option>배송 준비중</option>
+                <option>배송 중</option>
+                <option>배송 완료</option>
+              </select>
+            </div>
           </Field>
         </Row>
       </FormBox>
@@ -222,8 +235,21 @@ export default GeneralOrderDetail;
 /* ===== styled-components ===== */
 const Container = styled.div`
   width: 100%;
-  min-width: 1000px;
-  padding: 20px;
+  height: 100%;
+  max-width: 100vw;
+  margin: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #fff;
+  overflow: hidden;
+  padding: 12px 8px 0 8px;
+
+  @media (max-width: 834px) {
+    min-width: 100vw;
+    padding: 0 4px;
+  }
 `;
 
 const HeaderRow = styled.div`

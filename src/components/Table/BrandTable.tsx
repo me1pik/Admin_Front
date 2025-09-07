@@ -1,182 +1,117 @@
 import React from 'react';
-import styled, { css } from 'styled-components';
+import CommonTable, { Column } from '@components/CommonTable';
+import StatusBadge from 'src/components/Common/StatusBadge';
+import { getStatusBadge } from 'src/utils/statusUtils';
 
-/** 제품 아이템 인터페이스 */
-export interface BrandItem {
+export interface BrandItem extends Record<string, unknown> {
   no: number;
-  group: string; // 그룹사(대/중/소)
-  brand: string; // 브랜드
-  quantity: number; // 제품수
-  discount: number; // 할인율 (예: 20 -> "20%")
-  manager: string; // 담당자
-  contact: string; // 연락처
-  registerDate: string; // 등록일
-  status: string; // 상태
+  group: string;
+  brand: string;
+  quantity: number;
+  discount: number;
+  manager: string;
+  contact: string;
+  registerDate: string;
+  status: string;
 }
 
-/** BrandTable Props */
 interface BrandTableProps {
   filteredData: BrandItem[];
-  /** handleEdit: 행 클릭 시 no값만 넘겨 받도록 변경 */
   handleEdit: (no: number) => void;
+  selectedRows?: Set<number>;
+  onSelectAll?: (checked: boolean) => void;
+  onSelectRow?: (row: BrandItem, checked: boolean) => void;
+  isLoading?: boolean; // 추가
 }
 
-// 모든 셀에 공통으로 적용할 ellipsis 스타일
-const ellipsis = css`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
+const columns: Column<BrandItem & { handleEdit: (no: number) => void }>[] = [
+  { key: 'no', label: 'No.', width: '60px' },
+  {
+    key: 'group',
+    label: '그룹사',
+    width: '150px',
+    render: (v, row) => (
+      <span
+        style={{ color: '#007bff', cursor: 'pointer' }}
+        title={String(v)}
+        onClick={() => row.handleEdit(row.no)}
+      >
+        {String(v)}
+      </span>
+    ),
+  },
+  {
+    key: 'brand',
+    label: '브랜드',
+    width: '100px',
+    render: (v) => <span title={String(v)}>{String(v)}</span>,
+  },
+  {
+    key: 'quantity',
+    label: '제품수',
+    width: '80px',
+    render: (v) => <span title={String(v)}>{String(v)}</span>,
+  },
+  {
+    key: 'discount',
+    label: '할인율',
+    width: '80px',
+    render: (v) => <span title={`${v}%`}>{String(v)}%</span>,
+  },
+  {
+    key: 'manager',
+    label: '담당자',
+    width: '120px',
+    render: (v) => <span title={String(v)}>{String(v)}</span>,
+  },
+  {
+    key: 'contact',
+    label: '연락처',
+    width: '120px',
+    render: (v) => <span title={String(v)}>{String(v)}</span>,
+  },
+  {
+    key: 'registerDate',
+    label: '등록일',
+    width: '100px',
+    render: (v) => <span title={String(v)}>{String(v)}</span>,
+  },
+  {
+    key: 'status',
+    label: '상태',
+    width: '80px',
+    render: (v) => {
+      const badge = getStatusBadge(String(v));
+      return <StatusBadge style={{ background: badge.background }}>{badge.label}</StatusBadge>;
+    },
+  },
+];
 
 const BrandTable: React.FC<BrandTableProps> = ({
   filteredData,
   handleEdit,
+  selectedRows = new Set(),
+  onSelectAll,
+  onSelectRow,
+  isLoading,
 }) => {
-  // 상태별 배경색 반환 함수
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case '등록완료':
-        return '#4AA361'; // 초록
-      case '등록대기':
-        return '#3071B2'; // 파랑
-      case '계약종료':
-        return '#CD5542'; // 주황/빨강
-      default:
-        return '#6c757d'; // 회색
-    }
-  };
+  // handleEdit을 row에 추가
+  const dataWithEdit = filteredData.map((item) => ({ ...item, handleEdit }));
 
   return (
-    <Table>
-      <colgroup>
-        <col style={{ width: '60px' }} /> {/* No. */}
-        <col style={{ width: '150px' }} /> {/* 그룹사(대/중/소) */}
-        <col style={{ width: '100px' }} /> {/* 브랜드 */}
-        <col style={{ width: '80px' }} /> {/* 제품수 */}
-        <col style={{ width: '80px' }} /> {/* 할인율 */}
-        <col style={{ width: '120px' }} /> {/* 담당자 */}
-        <col style={{ width: '120px' }} /> {/* 연락처 */}
-        <col style={{ width: '100px' }} /> {/* 등록일 */}
-        <col style={{ width: '80px' }} /> {/* 상태 */}
-      </colgroup>
-      <thead>
-        <TableRow>
-          <Th>No.</Th>
-          <Th>그룹사</Th>
-          <Th>브랜드</Th>
-          <Th>제품수</Th>
-          <Th>할인율</Th>
-          <Th>담당자</Th>
-          <Th>연락처</Th>
-          <Th>등록일</Th>
-          <Th>상태</Th>
-        </TableRow>
-      </thead>
-      <tbody>
-        {filteredData.map((item, idx) => (
-          <TableRow key={idx}>
-            <Td>{item.no}</Td>
-            {/* 행 클릭 시 handleEdit 호출 */}
-            <Td onClick={() => handleEdit(item.no)}>
-              <SpanLink title={item.group}>{item.group}</SpanLink>
-            </Td>
-            <Td title={item.brand}>{item.brand}</Td>
-            <Td title={String(item.quantity)}>{item.quantity}</Td>
-            <Td title={`${item.discount}%`}>{item.discount}%</Td>
-            <Td title={item.manager}>{item.manager}</Td>
-            <Td title={item.contact}>{item.contact}</Td>
-            <Td title={item.registerDate}>{item.registerDate}</Td>
-            <Td>
-              <StatusBadge
-                title={item.status}
-                style={{ backgroundColor: getStatusColor(item.status) }}
-              >
-                {item.status}
-              </StatusBadge>
-            </Td>
-          </TableRow>
-        ))}
-        {filteredData.length < 10 &&
-          Array.from({ length: 10 - filteredData.length }).map((_, i) => (
-            <TableRow key={`empty-${i}`}>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-            </TableRow>
-          ))}
-      </tbody>
-    </Table>
+    <CommonTable<BrandItem & { handleEdit: (no: number) => void }>
+      columns={columns}
+      data={dataWithEdit}
+      showCheckbox
+      selectedRows={Array.from(selectedRows)}
+      onSelectAll={onSelectAll}
+      onSelectRow={onSelectRow}
+      rowKey={(row) => row.no}
+      emptyMessage="데이터가 없습니다."
+      style={{ minWidth: 1000 }}
+      isLoading={isLoading} // 추가
+    />
   );
 };
 
 export default BrandTable;
-
-/* ====================== Styled Components ====================== */
-
-const Table = styled.table`
-  width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-  background-color: #ffffff;
-  border: 1px solid #dddddd;
-`;
-
-const TableRow = styled.tr`
-  height: 44px;
-  &:hover {
-    background: #fafafa;
-  }
-`;
-
-const Th = styled.th`
-  text-align: center;
-  vertical-align: middle;
-  background-color: #eeeeee;
-
-  font-weight: 800;
-  font-size: 12px;
-  color: #000000;
-  border: 1px solid #dddddd;
-  ${ellipsis}
-`;
-
-const Td = styled.td`
-  text-align: center;
-  vertical-align: middle;
-
-  font-weight: 400;
-  font-size: 12px;
-  color: #000000;
-  border: 1px solid #dddddd;
-  cursor: default;
-  ${ellipsis}
-`;
-
-const SpanLink = styled.span`
-  font-size: 12px;
-  color: #007bff;
-  cursor: pointer;
-  &:hover {
-    color: #0056b3;
-  }
-`;
-
-const StatusBadge = styled.div`
-  display: inline-block;
-  border-radius: 4px;
-  padding: 0 8px;
-  height: 24px;
-  line-height: 24px;
-  font-size: 10px;
-  font-weight: 800;
-  color: #ffffff;
-  text-align: center;
-  vertical-align: middle;
-  ${ellipsis}
-`;

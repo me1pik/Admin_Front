@@ -11,9 +11,7 @@ export interface TripleButtonDetailSubHeaderProps {
   onDeleteClick?: () => void;
 }
 
-const TripleButtonDetailSubHeader: React.FC<
-  TripleButtonDetailSubHeaderProps
-> = ({
+const TripleButtonDetailSubHeader: React.FC<TripleButtonDetailSubHeaderProps> = ({
   backLabel,
   onBackClick,
   saveLabel,
@@ -43,9 +41,10 @@ const TripleButtonDetailSubHeader: React.FC<
 export default TripleButtonDetailSubHeader;
 
 const HeaderContainer = styled.div`
+  width: 100%;
   display: flex;
   align-items: center;
-  min-width: 1000px;
+  min-width: 834px;
   min-height: 60px;
   background: #f9f9f9;
   border: 1px solid #dddddd;

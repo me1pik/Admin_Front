@@ -5,16 +5,14 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import ListButtonDetailSubHeader, {
   DetailSubHeaderProps,
-} from '../../../components/Header/ListButtonDetailSubHeader';
-import AdminDetailTopBoxes from '../../../components/AdminDetailTopBoxes';
-import ShippingTabBar from '../../../components/TabBar';
-import TaskHistoryTable, {
-  TaskHistoryRow,
-} from '../../../components/Table/admin/TaskHistoryTable';
+} from '@/components/Header/ListButtonDetailSubHeader';
+import AdminDetailTopBoxes from '@/components/AdminDetailTopBoxes';
+import ShippingTabBar from '@/components/TabBar';
+import TaskHistoryTable, { TaskHistoryRow } from '@/components/Table/admin/TaskHistoryTable';
 import PermissionSettingsTable, {
   PermissionGroup,
-} from '../../../components/Table/admin/PermissionSettingsTable';
-import Pagination from '../../../components/Pagination';
+} from '@/components/Table/admin/PermissionSettingsTable';
+import Pagination from '@/components/Pagination';
 
 // 예시 제품 번호
 const dummyProducts = [{ no: 5 }];
@@ -26,8 +24,7 @@ const tabs = ['작업내역', '권한설정'];
 const dummyTaskData: TaskHistoryRow[] = [
   {
     workDate: '서비스 > 제품목록 관리',
-    workContent:
-      '변경전 작업내용을 기여합니다. 관리자 내 상세 변경된 내용을 검토 및 반영',
+    workContent: '변경전 작업내용을 기여합니다. 관리자 내 상세 변경된 내용을 검토 및 반영',
     changedAt: '2025-03-02 00:00:00',
   },
   // 필요에 따라 추가...
@@ -110,17 +107,17 @@ const AdminDetail: React.FC = () => {
   const totalPages = Math.max(1, Math.ceil(activeData.length / pageSize));
 
   /** 페이지에 맞춰 데이터 슬라이스 */
-  const sliceData = (data: any[]) =>
-    data.slice((page - 1) * pageSize, page * pageSize);
+  const sliceData = <T,>(data: T[]): T[] => data.slice((page - 1) * pageSize, page * pageSize);
 
   /** 테이블 렌더링 */
   const renderTable = () => {
-    const sliced = sliceData(activeData as any[]);
-    return activeTab === 0 ? (
-      <TaskHistoryTable data={sliced as TaskHistoryRow[]} />
-    ) : (
-      <PermissionSettingsTable data={sliced as PermissionGroup[]} />
-    );
+    if (activeTab === 0) {
+      const sliced = sliceData(dummyTaskData);
+      return <TaskHistoryTable data={sliced} />;
+    } else {
+      const sliced = sliceData(dummyPermissionData);
+      return <PermissionSettingsTable data={sliced} />;
+    }
   };
 
   return (
@@ -136,15 +133,15 @@ const AdminDetail: React.FC = () => {
         <ProductNumberValue>{dummyProducts[0].no}</ProductNumberValue>
       </ProductNumberWrapper>
 
-      <AdminDetailTopBoxes />
+      <AdminDetailTopBoxesWrapper>
+        <AdminDetailTopBoxes />
+      </AdminDetailTopBoxesWrapper>
 
       <MiddleDivider />
 
-      <ShippingTabBar
-        tabs={tabs}
-        activeIndex={activeTab}
-        onTabClick={handleTabClick}
-      />
+      <TabBarWrapper>
+        <ShippingTabBar tabs={tabs} activeIndex={activeTab} onTabClick={handleTabClick} />
+      </TabBarWrapper>
 
       {renderTable()}
 
@@ -161,9 +158,21 @@ export default AdminDetail;
 
 const Container = styled.div`
   width: 100%;
-  margin: 0 auto;
-  padding: 20px;
+  height: 100%;
+  max-width: 100vw;
+  margin: 0;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #fff;
+  overflow: hidden;
+  padding: 12px 8px 0 8px;
+
+  @media (max-width: 834px) {
+    min-width: 100vw;
+    padding: 0 4px;
+  }
 `;
 
 const HeaderRow = styled.div`
@@ -200,15 +209,26 @@ const ProductNumberValue = styled.div`
   color: #000000;
 `;
 
+const AdminDetailTopBoxesWrapper = styled.div`
+  width: 100%;
+  margin-bottom: 24px;
+`;
+
 const MiddleDivider = styled.hr`
+  width: 100%;
   border: 0;
-  border-top: 1px dashed #dddddd;
-  margin: 30px 0;
+  border-top: 1px dashed #ddd;
+  margin: 12px 0;
+`;
+
+const TabBarWrapper = styled.div`
+  width: 100%;
 `;
 
 const FooterRow = styled.div`
+  width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  margin-top: 40px;
+  margin-top: 24px;
 `;

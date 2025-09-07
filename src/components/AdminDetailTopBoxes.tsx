@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import userDetailImg2 from '../assets/userDetailImg2.svg';
-import userDetailImg3 from '../assets/userDetailImg3.svg';
+import userDetailImg2 from '@assets/userDetailImg2.svg';
+import userDetailImg3 from '@assets/userDetailImg3.svg';
 
 const AdminDetailTopBoxes: React.FC = () => {
   return (
@@ -11,7 +11,7 @@ const AdminDetailTopBoxes: React.FC = () => {
         {/* 첫 번째 박스 */}
         <Box>
           <IconPlaceholder>
-            <IconImage src={userDetailImg2} alt='User Detail 2' />
+            <IconImage src={userDetailImg2} alt="User Detail 2" />
           </IconPlaceholder>
           <Content>
             <Row>
@@ -35,7 +35,7 @@ const AdminDetailTopBoxes: React.FC = () => {
         {/* 두 번째 박스 */}
         <Box>
           <IconPlaceholder>
-            <IconImage src={userDetailImg3} alt='User Detail 3' />
+            <IconImage src={userDetailImg3} alt="User Detail 3" />
           </IconPlaceholder>
           <Content>
             <Row>

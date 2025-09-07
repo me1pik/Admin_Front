@@ -12,45 +12,45 @@ const SizeSettingSection: React.FC = () => {
       <VerticalLine />
       <InputRow>
         <Label>종류</Label>
-        <Select defaultValue='원피스'>
-          <option value='원피스'>원피스</option>
-          <option value='블라우스'>블라우스</option>
-          <option value='팬츠'>팬츠</option>
-          <option value='스커트'>스커트</option>
+        <Select defaultValue="원피스">
+          <option value="원피스">원피스</option>
+          <option value="블라우스">블라우스</option>
+          <option value="팬츠">팬츠</option>
+          <option value="스커트">스커트</option>
         </Select>
       </InputRow>
       <InputRow>
         <Label>사이즈</Label>
         <SizeCheckGroup>
           <SizeCheckboxLabel>
-            <SizeCheckbox type='checkbox' value='44' />
+            <SizeCheckbox type="checkbox" value="44" />
             44
           </SizeCheckboxLabel>
           <SizeCheckboxLabel>
-            <SizeCheckbox type='checkbox' value='55' />
+            <SizeCheckbox type="checkbox" value="55" />
             55
           </SizeCheckboxLabel>
           <SizeCheckboxLabel>
-            <SizeCheckbox type='checkbox' value='66' />
+            <SizeCheckbox type="checkbox" value="66" />
             66
           </SizeCheckboxLabel>
           <SizeCheckboxLabel>
-            <SizeCheckbox type='checkbox' value='77' />
+            <SizeCheckbox type="checkbox" value="77" />
             77
           </SizeCheckboxLabel>
           <SizeCheckboxLabel>
-            <SizeCheckbox type='checkbox' value='FREE' />
+            <SizeCheckbox type="checkbox" value="FREE" />
             FREE
           </SizeCheckboxLabel>
         </SizeCheckGroup>
       </InputRow>
       <InputRow>
         <Label>색상</Label>
-        <Select defaultValue='CREAM'>
-          <option value='BLACK'>BLACK</option>
-          <option value='PINK'>PINK</option>
-          <option value='CREAM'>CREAM</option>
-          <option value='GRAY'>GRAY</option>
+        <Select defaultValue="CREAM">
+          <option value="BLACK">BLACK</option>
+          <option value="PINK">PINK</option>
+          <option value="CREAM">CREAM</option>
+          <option value="GRAY">GRAY</option>
         </Select>
       </InputRow>
     </SectionBox>

@@ -1,13 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
-import avatar from '../assets/userDetailImg1.svg';
+import avatar from 'src/assets/userDetailImg1.svg';
 
 const PageDetailTopBoxes: React.FC = () => {
   return (
     <Container>
       <InfoSection>
         <AvatarWrapper>
-          <Avatar src={avatar} alt='User Avatar' />
+          <Avatar src={avatar} alt="User Avatar" />
         </AvatarWrapper>
 
         <TextGroup>

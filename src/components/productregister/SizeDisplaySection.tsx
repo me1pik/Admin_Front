@@ -1,16 +1,17 @@
 // src/components/productregister/SizeDisplaySection.tsx
 import React, { useState, ChangeEvent, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
-import { ProductDetailResponse } from '../../api/adminProduct';
-import { sizeGuideConfig } from '../../config/sizeGuideConfig';
+import { ProductDetailResponse } from '@api/adminProduct';
+import { sizeGuideConfig } from '@config/sizeGuideConfig';
 // BulletIcon을 불러옵니다. (Webpack/CRA 기준)
-import BulletIcon from '../../assets/BulletIcon.svg';
+import BulletIcon from '@assets/BulletIcon.svg';
 
 interface SizeDisplaySectionProps {
   product?: ProductDetailResponse;
   sizeProductImg: string;
   /** 변경된 라벨을 부모로 전달 */
   onLabelChange?: (labels: Record<string, string>) => void;
+  style?: React.CSSProperties;
 }
 
 const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
@@ -21,18 +22,11 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
   const category = product?.category || '';
 
   // 1) 원본 키(key) 목록 및 초기 라벨 맵
-  const keys = useMemo(
-    () => Object.keys(sizeGuideConfig[category]?.labels || {}),
-    [category]
-  );
-  const initialLabels = useMemo(
-    () => sizeGuideConfig[category]?.labels || {},
-    [category]
-  );
+  const keys = useMemo(() => Object.keys(sizeGuideConfig[category]?.labels || {}), [category]);
+  const initialLabels = useMemo(() => sizeGuideConfig[category]?.labels || {}, [category]);
 
   // 2) 라벨 상태를 key→label 맵으로 관리
-  const [labelMap, setLabelMap] =
-    useState<Record<string, string>>(initialLabels);
+  const [labelMap, setLabelMap] = useState<Record<string, string>>(initialLabels);
 
   // --- (1) 초기 레이블 변경 감지 시에만 labelMap 리셋 ---
   useEffect(() => {
@@ -45,7 +39,7 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
     const cleanLabels: Record<string, string> = {};
     Object.entries(mergedLabels).forEach(([k, v]) => {
       // "A.어깨넓이" 형태에서 "어깨넓이"만 추출
-      const cleanValue = v.replace(/^[A-Z]\.\s*/, '');
+      const cleanValue = typeof v === 'string' ? v.replace(/^[A-Z]\. 0/, '') : String(v);
       cleanLabels[k] = cleanValue;
     });
 
@@ -64,16 +58,11 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
     const cleanLabels: Record<string, string> = {};
     Object.entries(next).forEach(([k, v]) => {
       // "A.어깨넓이" 형태에서 "어깨넓이"만 추출
-      const cleanValue = v.replace(/^[A-Z]\.\s*/, '');
+      const cleanValue = typeof v === 'string' ? v.replace(/^[A-Z]\. 0/, '') : String(v);
       cleanLabels[k] = cleanValue;
     });
 
-    console.log(
-      'SizeDisplaySection 라벨 변경:',
-      key,
-      e.target.value,
-      cleanLabels
-    );
+    console.log('SizeDisplaySection 라벨 변경:', key, e.target.value, cleanLabels);
     onLabelChange?.(cleanLabels);
   };
 
@@ -84,10 +73,7 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
     note: '*측정 위치에 따라 약간의 오차 있음.',
   });
 
-  const handleFieldChange = (
-    field: keyof typeof labelsState,
-    e: ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFieldChange = (field: keyof typeof labelsState, e: ChangeEvent<HTMLInputElement>) => {
     setLabelsState((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
@@ -95,14 +81,14 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
     <SectionBox>
       <SectionHeader>
         {/* BulletIcon으로 대체 */}
-        <BulletIconImage src={BulletIcon} alt='bullet icon' />
+        <BulletIconImage src={BulletIcon} alt="bullet icon" />
         <SectionTitleInput value={labelsState.title} readOnly />
       </SectionHeader>
 
       <SizeGuideContainer>
         <GuideWrapper>
           <ImageContainer>
-            <SizeProductImage src={sizeProductImg} alt='사이즈 표기 이미지' />
+            <SizeProductImage src={sizeProductImg} alt="사이즈 표기 이미지" />
           </ImageContainer>
 
           <SizeInfoContainer>
@@ -123,10 +109,7 @@ const SizeDisplaySection: React.FC<SizeDisplaySectionProps> = ({
               ))}
             </SpaceColumn>
 
-            <NoteInput
-              value={labelsState.note}
-              onChange={(e) => handleFieldChange('note', e)}
-            />
+            <NoteInput value={labelsState.note} onChange={(e) => handleFieldChange('note', e)} />
           </SizeInfoContainer>
         </GuideWrapper>
       </SizeGuideContainer>

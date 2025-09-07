@@ -1,10 +1,10 @@
 // src/components/productregister/SizeGuideSection.tsx
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
-import { SizeRow } from '../../api/adminProduct';
-import { sizeGuideConfig } from '../../config/sizeGuideConfig';
+import { SizeRow } from '@api/adminProduct';
+import { sizeGuideConfig } from '@config/sizeGuideConfig';
 // SVG 아이콘을 import (Webpack 또는 CRA 기준)
-import BulletIcon from '../../assets/BulletIcon.svg';
+import BulletIcon from '@assets/BulletIcon.svg';
 
 interface Column {
   key: string;
@@ -20,6 +20,7 @@ export interface SizeGuideSectionProps {
   onLabelChange?: (labels: Record<string, string>) => void;
   /** 현재 라벨을 가져오는 함수를 설정 */
   onSetGetCurrentLabels?: (getLabels: () => Record<string, string>) => void;
+  style?: React.CSSProperties;
 }
 
 const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
@@ -32,10 +33,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
   //
   // 1) config에서 초기 라벨 맵 가져오기
   //
-  const initialLabels = useMemo(
-    () => sizeGuideConfig[category]?.labels ?? {},
-    [category]
-  );
+  const initialLabels = useMemo(() => sizeGuideConfig[category]?.labels ?? {}, [category]);
 
   // 2) 카테고리 변경 감지
   const [currentCategory, setCurrentCategory] = useState(category);
@@ -81,7 +79,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     const tableLabels: Record<string, string> = {};
     Object.entries(labelMap).forEach(([k, v]) => {
       // "A.어깨넓이" 형태에서 "어깨넓이"만 추출
-      const cleanValue = v.replace(/^[A-Z]\.\s*/, '');
+      const cleanValue = typeof v === 'string' ? v.replace(/^[A-Z]\. 0/, '') : String(v);
       tableLabels[k] = cleanValue;
     });
 
@@ -164,9 +162,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
       const row: RowData = { size: cleanSize };
       Object.keys(labelMap).forEach((k) => {
         // measurement 키는 "A 어깨넓이" 등으로 시작한다고 가정
-        const mKey = Object.keys(item.measurements).find((mk) =>
-          mk.startsWith(k + ' ')
-        );
+        const mKey = Object.keys(item.measurements).find((mk) => mk.startsWith(k + ' '));
         const rawKey = mKey ?? k;
         const val = item.measurements[rawKey];
         row[k] = val != null && val !== 0 ? String(val) : '';
@@ -187,14 +183,11 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
     onSizesChange?.(
       updated.map((r) => ({
         size: `SIZE ${r.size}`,
-        measurements: Object.entries(r).reduce<Record<string, number>>(
-          (acc, [k, v]) => {
-            if (k !== 'size') acc[k] = v ? Number(v) : 0;
-            return acc;
-          },
-          {}
-        ),
-      }))
+        measurements: Object.entries(r).reduce<Record<string, number>>((acc, [k, v]) => {
+          if (k !== 'size') acc[k] = v ? Number(v) : 0;
+          return acc;
+        }, {}),
+      })),
     );
   };
 
@@ -225,7 +218,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
       {/* ──────────────────────────────────────────────────────── */}
       <Header>
         {/* BulletIcon으로 대체 */}
-        <BulletIconImage src={BulletIcon} alt='Bullet Icon' />
+        <BulletIconImage src={BulletIcon} alt="Bullet Icon" />
         <Title>사이즈 가이드</Title>
       </Header>
 
@@ -243,7 +236,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleLabelChange(col.key, e.target.value)
                       }
-                      placeholder='라벨 입력'
+                      placeholder="라벨 입력"
                     />
                   )}
                 </Th>
@@ -253,7 +246,7 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
 
           <tbody>
             {rows.map((row, ri) => (
-              <Tr key={ri} even={ri % 2 === 1}>
+              <Tr key={ri} $even={ri % 2 === 1}>
                 {columns.map((col) => (
                   <Td key={`${ri}-${col.key}`}>
                     {col.key === 'size' ? (
@@ -261,10 +254,8 @@ const SizeGuideSection: React.FC<SizeGuideSectionProps> = ({
                     ) : (
                       <CellInput
                         value={row[col.key] || ''}
-                        placeholder='-'
-                        onChange={(e) =>
-                          handleCellChange(ri, col.key, e.target.value)
-                        }
+                        placeholder="-"
+                        onChange={(e) => handleCellChange(ri, col.key, e.target.value)}
                       />
                     )}
                   </Td>
@@ -283,8 +274,6 @@ export default SizeGuideSection;
 /* ===== Styled Components ===== */
 const SectionBox = styled.div`
   position: relative;
-  padding-bottom: 20px;
-  margin-bottom: 30px;
 `;
 
 const Header = styled.div`
@@ -306,8 +295,12 @@ const Title = styled.div`
 `;
 
 const TableContainer = styled.div`
-  margin-top: 10px;
+  max-width: 100vw;
   overflow-x: auto;
+  @media (max-width: 834px) {
+    min-width: 100vw;
+    padding: 0 8px;
+  }
 `;
 
 const Table = styled.table`
@@ -355,8 +348,15 @@ const HeaderInput = styled.input`
   }
 `;
 
-const Tr = styled.tr<{ even: boolean }>`
-  background: ${({ even }) => (even ? '#fafafa' : 'transparent')};
+const Tr = styled.tr<{ $even: boolean }>`
+  height: 44px;
+  &:nth-child(even) {
+    background: #f8f9fa;
+  }
+  &:hover {
+    background-color: #e3f2fd;
+    cursor: pointer;
+  }
 `;
 
 const Td = styled.td``;

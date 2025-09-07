@@ -1,22 +1,24 @@
 // src/config/sizeGuideConfig.ts
 
-import BlouseImg from '../assets/category/Blouse.png';
-import MiniSkirtImg from '../assets/category/MiniSkirt.png';
-import TshirtImg from '../assets/category/Tshirt.png';
-import MidiSkirtImg from '../assets/category/MidiSkirt.png';
-import BestImg from '../assets/category/Best.png';
-import KnitTopImg from '../assets/category/KnitTop.png';
-import LongSkirtImg from '../assets/category/LongSkirt.png';
-import PantsImg from '../assets/category/Pants.png';
-import MiniDressImg from '../assets/category/MiniDress.png';
-import MidiDressImg from '../assets/category/MidiDress.png';
-import LongDressImg from '../assets/category/LongDress.png';
-// import TwoDressImg from '../assets/category/LongDress.png';
-import JacketImg from '../assets/category/Jacket.png';
-import CardiganImg from '../assets/category/Cardigan.png';
-import PaddingImg from '../assets/category/Padding.png';
-import CoatImg from '../assets/category/Coat.png';
-
+import BlouseImg from 'src/assets/category/Blouse.svg';
+import MiniSkirtImg from 'src/assets/category/MiniSkirt.svg';
+import TshirtImg from 'src/assets/category/Tshirt.svg';
+import MidiSkirtImg from 'src/assets/category/MidiSkirt.svg';
+import BestImg from 'src/assets/category/Best.svg';
+import KnitTopImg from 'src/assets/category/KnitTop.svg';
+import LongSkirtImg from 'src/assets/category/LongSkirt.svg';
+import PantsImg from 'src/assets/category/Pants.svg';
+import MiniDressImg from 'src/assets/category/MiniDress.svg';
+import MidiDressImg from 'src/assets/category/MidiDress.svg';
+import LongDressImg from 'src/assets/category/LongDress.svg';
+// import TwoDressImg from 'src/assets/category/LongDress.svg';
+import JacketImg from 'src/assets/category/Jacket.svg';
+import CardiganImg from 'src/assets/category/Cardigan.svg';
+import PaddingImg from 'src/assets/category/Padding.svg';
+import CoatImg from 'src/assets/category/Coat.svg';
+import TopImg from 'src/assets/category/Top.svg';
+import ShirtsImg from 'src/assets/category/ShirtTop.svg';
+import JumpSuitImg from 'src/assets/category/JumpSuit.svg';
 export interface SizeGuideConfigItem {
   image: string;
   labels: Record<string, string>;
@@ -25,7 +27,7 @@ export interface SizeGuideConfigItem {
 export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
   Entire: {
     image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/6aa5cfc1fcf058242047931081e6bd5c.png',
+      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/6aa5cfc1fcf058242047931081e6bd5c.svg',
     labels: {
       A: 'A.어깨넓이',
       B: 'B.가슴둘레',
@@ -35,13 +37,12 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
     },
   },
   Top: {
-    image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/cba04f035c2ef680c59aac3c5535fd95.png',
+    image: TopImg,
     labels: {
-      A: 'A.어깨넓이',
-      B: 'B.가슴둘레',
-      C: 'C.암홀',
-      D: 'D.총길이',
+      A: 'A.가슴둘레',
+      B: 'B.암홀',
+      C: 'C.총길이',
+      D: 'D.밑단둘레',
     },
   },
   Tshirt: {
@@ -77,8 +78,7 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
     },
   },
   ShirtTop: {
-    image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/6aa5cfc1fcf058242047931081e6bd5c.png',
+    image: ShirtsImg,
     labels: {
       A: 'A.어깨넓이',
       B: 'B.가슴둘레',
@@ -170,8 +170,7 @@ export const sizeGuideConfig: Record<string, SizeGuideConfigItem> = {
     },
   },
   JumpSuit: {
-    image:
-      'https://daehyuninside.wisacdn.com/_data/product/sizeimg/5ded97cf03063ebe34316355b36a419c.png',
+    image: JumpSuitImg,
     labels: {
       A: 'A.어깨넓이',
       B: 'B.가슴둘레',

@@ -1,31 +1,30 @@
 // src/components/DetailTopBoxes.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import DetailBoxSvg1 from '../assets/DetailTopBoxesSvg1.svg';
-import DetailBoxSvg2 from '../assets/DetailTopBoxesSvg2.svg';
-import DetailBoxSvg3 from '../assets/DetailTopBoxesSvg3.svg';
-import { ProductDetailResponse, SizeRow } from '../api/adminProduct';
-import { sizeGuideConfig } from '../config/sizeGuideConfig';
+import DetailBoxSvg1 from 'src/assets/DetailTopBoxesSvg1.svg';
+import DetailBoxSvg2 from 'src/assets/DetailTopBoxesSvg2.svg';
+import DetailBoxSvg3 from 'src/assets/DetailTopBoxesSvg3.svg';
+import { ProductDetailResponse, SizeRow } from 'src/api/adminProduct';
+import { sizeGuideConfig } from 'src/config/sizeGuideConfig';
 
-import IconMiniDress from '../assets/category/MiniDress.svg';
-import IconMidiDress from '../assets/category/MidiDress.svg';
-import IconLongDress from '../assets/category/LongDress.svg';
-import IconTwoDress from '../assets/category/TwoDress.svg';
-import IconJumpSuit from '../assets/category/JumpSuit.svg';
-import IconBlouse from '../assets/category/Blouse.svg';
-import IconKnitTop from '../assets/category/KnitTop.svg';
-import IconShirtTop from '../assets/category/ShirtTop.svg';
-import IconMiniSkirt from '../assets/category/MiniSkirt.svg';
-import IconMidiSkirt from '../assets/category/MidiSkirt.svg';
-import IconLongSkirt from '../assets/category/LongSkirt.svg';
-import IconPants from '../assets/category/Pants.svg';
-import IconJacket from '../assets/category/Jacket.svg';
-import IconCoat from '../assets/category/Coat.svg';
-import IconTop from '../assets/category/Top.svg';
-import IconTshirt from '../assets/category/Tshirt.svg';
-import IconCardigan from '../assets/category/Cardigan.svg';
-import IconBest from '../assets/category/Best.svg';
-import IconPadding from '../assets/category/Padding.svg';
+import IconMiniDress from 'src/assets/category/MiniDress.svg';
+import IconMidiDress from 'src/assets/category/MidiDress.svg';
+import IconLongDress from 'src/assets/category/LongDress.svg';
+import IconJumpSuit from 'src/assets/category/JumpSuit.svg';
+import IconBlouse from 'src/assets/category/Blouse.svg';
+import IconKnitTop from 'src/assets/category/KnitTop.svg';
+import IconShirtTop from 'src/assets/category/ShirtTop.svg';
+import IconMiniSkirt from 'src/assets/category/MiniSkirt.svg';
+import IconMidiSkirt from 'src/assets/category/MidiSkirt.svg';
+import IconLongSkirt from 'src/assets/category/LongSkirt.svg';
+import IconPants from 'src/assets/category/Pants.svg';
+import IconJacket from 'src/assets/category/Jacket.svg';
+import IconCoat from 'src/assets/category/Coat.svg';
+import IconTop from 'src/assets/category/Top.svg';
+import IconCardigan from 'src/assets/category/Cardigan.svg';
+// import IconTshirt from 'src/assets/category/Tshirt.svg';
+// import IconBest from 'src/assets/category/Best.svg';
+// import IconPadding from 'src/assets/category/Padding.svg';
 
 const colorOptions = [
   { label: '화이트', value: 'WHITE' },
@@ -49,11 +48,9 @@ const colorOptions = [
 ];
 
 const categoryOptions = [
-  { label: '전체', value: 'Entire', icon: null },
   { label: '미니원피스', value: 'MiniDress', icon: IconMiniDress },
   { label: '미디원피스', value: 'MidiDress', icon: IconMidiDress },
   { label: '롱 원피스', value: 'LongDress', icon: IconLongDress },
-  { label: '투피스', value: 'TwoDress', icon: IconTwoDress },
   { label: '점프수트', value: 'JumpSuit', icon: IconJumpSuit },
   { label: '블라우스', value: 'Blouse', icon: IconBlouse },
   { label: '니트 상의', value: 'KnitTop', icon: IconKnitTop },
@@ -65,16 +62,18 @@ const categoryOptions = [
   { label: '자켓', value: 'Jacket', icon: IconJacket },
   { label: '코트', value: 'Coat', icon: IconCoat },
   { label: '탑', value: 'Top', icon: IconTop },
-  { label: '티셔츠', value: 'Tshirt', icon: IconTshirt },
   { label: '가디건', value: 'Cardigan', icon: IconCardigan },
-  { label: '베스트', value: 'Best', icon: IconBest },
-  { label: '패딩', value: 'Padding', icon: IconPadding },
+  // { label: '티셔츠', value: 'Tshirt', icon: IconTshirt },
+  // { label: '베스트', value: 'Best', icon: IconBest },
+  // { label: '패딩', value: 'Padding', icon: IconPadding },
 ];
 
 const statusOptions = [
   { label: '등록대기', value: 0 },
   { label: '등록완료', value: 1 },
   { label: '판매종료', value: 2 },
+  { label: '삭제예정', value: 4 },
+  { label: '비활성화', value: 5 },
 ];
 
 const defaultSizes = ['44', '55', '66', '77', 'Free'];
@@ -82,9 +81,7 @@ const defaultSizes = ['44', '55', '66', '77', 'Free'];
 interface DetailTopBoxesProps {
   product: ProductDetailResponse;
   editable?: boolean;
-  onChange?: (
-    data: Partial<ProductDetailResponse & { sizes: SizeRow[] }>
-  ) => void;
+  onChange?: (data: Partial<ProductDetailResponse & { sizes: SizeRow[] }>) => void;
 }
 
 // ——— 커스텀 드롭다운 컴포넌트 ———
@@ -123,7 +120,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   return (
     <DropdownWrapper ref={ref}>
       <SelectStyled onClick={() => setOpen((v) => !v)}>
-        {selected?.icon && <IconSmall src={selected.icon} />}
+        {/* 아이콘 제거 */}
         <span>{selected?.label ?? placeholder}</span>
         <Arrow>{open ? '▲' : '▼'}</Arrow>
       </SelectStyled>
@@ -137,7 +134,7 @@ const Dropdown: React.FC<DropdownProps> = ({
                 setOpen(false);
               }}
             >
-              {o.icon && <IconSmall src={o.icon} />}
+              {/* 아이콘 제거 */}
               <span>{o.label}</span>
             </MenuItem>
           ))}
@@ -148,16 +145,10 @@ const Dropdown: React.FC<DropdownProps> = ({
 };
 // ————————————————————————————
 
-const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
-  product,
-  editable = false,
-  onChange,
-}) => {
+const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({ product, editable = false, onChange }) => {
   const retailValue = Math.floor(product.retailPrice);
-  const saleValue =
-    product.sale_price != null ? Math.floor(product.sale_price) : retailValue;
-  const rentalValue =
-    product.rental_price != null ? Math.floor(product.rental_price) : 0;
+  const saleValue = product.sale_price != null ? Math.floor(product.sale_price) : retailValue;
+  const rentalValue = product.rental_price != null ? Math.floor(product.rental_price) : 0;
 
   const handleCategoryChange = (val: string) => {
     if (!onChange) return;
@@ -170,14 +161,14 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
     const exists = product.sizes?.some((item) =>
       sz === 'Free'
         ? item.size.toLowerCase().includes('free')
-        : item.size.replace(/[^0-9]/g, '') === sz
+        : item.size.replace(/[^0-9]/g, '') === sz,
     );
     let newSizes = product.sizes ? [...product.sizes] : [];
     if (exists) {
       newSizes = newSizes.filter((item) =>
         sz === 'Free'
           ? !item.size.toLowerCase().includes('free')
-          : item.size.replace(/[^0-9]/g, '') !== sz
+          : item.size.replace(/[^0-9]/g, '') !== sz,
       );
     } else {
       const measurements = product.sizes?.[0]?.measurements ?? {};
@@ -200,7 +191,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               {editable ? (
                 <Input
                   value={product.brand}
-                  placeholder='입력하세요'
+                  placeholder="입력하세요"
                   onChange={(e) => onChange?.({ brand: e.target.value })}
                 />
               ) : (
@@ -212,7 +203,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               {editable ? (
                 <Input
                   value={product.product_num}
-                  placeholder='입력하세요'
+                  placeholder="입력하세요"
                   onChange={(e) => onChange?.({ product_num: e.target.value })}
                 />
               ) : (
@@ -228,12 +219,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                   onChange={(v) => onChange?.({ registration: Number(v) })}
                 />
               ) : (
-                <Value>
-                  {
-                    statusOptions.find((o) => o.value === product.registration)
-                      ?.label
-                  }
-                </Value>
+                <Value>{statusOptions.find((o) => o.value === product.registration)?.label}</Value>
               )}
             </Row>
           </InfoCol>
@@ -256,12 +242,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                   onChange={(v) => handleCategoryChange(String(v))}
                 />
               ) : (
-                <Value>
-                  {
-                    categoryOptions.find((o) => o.value === product.category)
-                      ?.label
-                  }
-                </Value>
+                <Value>{categoryOptions.find((o) => o.value === product.category)?.label}</Value>
               )}
             </Row>
             <Row>
@@ -271,7 +252,7 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
                   const active = product.sizes?.some((item) =>
                     sz === 'Free'
                       ? item.size.toLowerCase().includes('free')
-                      : item.size.replace(/[^0-9]/g, '') === sz
+                      : item.size.replace(/[^0-9]/g, '') === sz,
                   );
                   if (editable) {
                     return (
@@ -297,13 +278,16 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
               <Label>색상</Label>
               {editable ? (
                 <Dropdown
-                  value={product.color}
-                  options={colorOptions}
+                  value={product.color || ''} // 값이 없으면 ''(빈값)
+                  options={[
+                    { label: '선택하세요', value: '' }, // 첫 옵션 추가
+                    ...colorOptions,
+                  ]}
                   onChange={(v) => onChange?.({ color: String(v) })}
                 />
               ) : (
                 <Value>
-                  {colorOptions.find((o) => o.value === product.color)?.label}
+                  {colorOptions.find((o) => o.value === product.color)?.label || '선택하세요'}
                 </Value>
               )}
             </Row>
@@ -320,7 +304,16 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
           <InfoCol>
             <Row>
               <Label>리테일</Label>
-              <Input disabled value={retailValue.toString()} />
+              {editable ? (
+                <Input
+                  type="number"
+                  value={retailValue.toString()}
+                  onChange={(e) => onChange?.({ retailPrice: Number(e.target.value) })}
+                  min={0}
+                />
+              ) : (
+                <Input disabled value={retailValue.toString()} />
+              )}
             </Row>
             <Row>
               <Label>판매</Label>
@@ -328,11 +321,21 @@ const DetailTopBoxes: React.FC<DetailTopBoxesProps> = ({
             </Row>
             <Row>
               <Label>대여</Label>
-              <Input
-                disabled
-                value={rentalValue > 0 ? rentalValue.toString() : ''}
-                placeholder='-'
-              />
+              {editable ? (
+                <Input
+                  type="number"
+                  value={rentalValue > 0 ? rentalValue.toString() : ''}
+                  onChange={(e) => onChange?.({ rental_price: Number(e.target.value) })}
+                  min={0}
+                  placeholder="-"
+                />
+              ) : (
+                <Input
+                  disabled
+                  value={rentalValue > 0 ? rentalValue.toString() : ''}
+                  placeholder="-"
+                />
+              )}
             </Row>
           </InfoCol>
         </Box>
@@ -451,11 +454,6 @@ const MenuItem = styled.div`
   }
 `;
 
-const IconSmall = styled.img`
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-`;
 const Divider = styled.div`
   width: 1px;
   background: #ddd;

@@ -15,11 +15,8 @@ interface PermissionSettingsTableProps {
   data: PermissionGroup[];
 }
 
-const PermissionSettingsTable: React.FC<PermissionSettingsTableProps> = ({
-  data,
-}) => {
-  const [permissionState, setPermissionState] =
-    useState<PermissionGroup[]>(data);
+const PermissionSettingsTable: React.FC<PermissionSettingsTableProps> = ({ data }) => {
+  const [permissionState, setPermissionState] = useState<PermissionGroup[]>(data);
 
   // 체크박스 상태 변경 핸들러
   const handleCheckboxChange = (groupIdx: number, permIdx: number) => {
@@ -45,7 +42,7 @@ const PermissionSettingsTable: React.FC<PermissionSettingsTableProps> = ({
                 {group.permissions.map((perm, permIdx) => (
                   <SizeCheckboxLabel key={permIdx}>
                     <SizeCheckbox
-                      type='checkbox'
+                      type="checkbox"
                       checked={perm.checked}
                       onChange={() => handleCheckboxChange(idx, permIdx)}
                     />

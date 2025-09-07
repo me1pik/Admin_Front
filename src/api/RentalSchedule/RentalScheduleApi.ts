@@ -1,6 +1,6 @@
 // src/api/rentalScheduleAdminApi.ts
 
-import { Axios } from '../Axios';
+import { Axios } from 'src/api/Axios';
 
 /**
  * 관리자: 전체 대여 내역 조회 (페이징 지원)
@@ -28,12 +28,11 @@ export interface RentalScheduleAdminListResponse {
 
 export const getRentalSchedules = async (
   limit: number = 10,
-  page: number = 1
+  page: number = 1,
 ): Promise<RentalScheduleAdminListResponse> => {
-  const response = await Axios.get<RentalScheduleAdminListResponse>(
-    '/rental-schedule',
-    { params: { limit, page } }
-  );
+  const response = await Axios.get<RentalScheduleAdminListResponse>('/rental-schedule', {
+    params: { limit, page },
+  });
   return response.data;
 };
 
@@ -82,10 +81,10 @@ export interface RentalScheduleAdminDetailResponse {
 }
 
 export const getRentalScheduleDetail = async (
-  id: number
+  id: number,
 ): Promise<RentalScheduleAdminDetailResponse> => {
   const response = await Axios.get<RentalScheduleAdminDetailResponse>(
-    `/rental-schedule/detail/${id}`
+    `/rental-schedule/detail/${id}`,
   );
   return response.data;
 };
@@ -118,11 +117,11 @@ export interface UpdateRentalStatusResponse {
 
 export const updateRentalScheduleStatus = async (
   id: number,
-  payload: UpdateRentalStatusRequest
+  payload: UpdateRentalStatusRequest,
 ): Promise<UpdateRentalStatusResponse> => {
   const response = await Axios.patch<UpdateRentalStatusResponse>(
     `/rental-schedule/${id}/status`,
-    payload
+    payload,
   );
   return response.data;
 };
@@ -159,11 +158,52 @@ export interface ChangeRentalPeriodResponse {
 
 export const changeRentalSchedulePeriod = async (
   id: number,
-  payload: ChangeRentalPeriodRequest
+  payload: ChangeRentalPeriodRequest,
 ): Promise<ChangeRentalPeriodResponse> => {
   const response = await Axios.patch<ChangeRentalPeriodResponse>(
     `/admin/rental/${id}/change-period`,
-    payload
+    payload,
+  );
+  return response.data;
+};
+
+/**
+ * 관리자: 대여 제품정보 변경
+ * PATCH /admin/rental/{id}/change-product
+ *
+ * Request body:
+ * {
+ *   "productNum": "ITP4DPT850",
+ *   "sizeLabel": "55",
+ *   "color": "BLUE"
+ * }
+ *
+ * Response example:
+ * {
+ *   "id": 1,
+ *   "product_id": 1,
+ *   "product_size_stock_id": 1
+ * }
+ */
+export interface ChangeRentalProductRequest {
+  productNum: string; // 품번
+  sizeLabel: string; // 사이즈 라벨
+  color: string; // 색상
+}
+
+export interface ChangeRentalProductResponse {
+  id: number;
+  product_id: number;
+  product_size_stock_id: number;
+}
+
+export const changeRentalScheduleProduct = async (
+  id: number,
+  payload: ChangeRentalProductRequest,
+): Promise<ChangeRentalProductResponse> => {
+  const response = await Axios.patch<ChangeRentalProductResponse>(
+    `/admin/rental/${id}/change-product`,
+    payload,
   );
   return response.data;
 };
@@ -240,14 +280,11 @@ export interface RentalScheduleAdminByRentalIdResponse {
 }
 
 export const getRentalScheduleByRentalId = async (
-  rentalId: number
+  rentalId: number,
 ): Promise<RentalScheduleAdminByRentalIdResponse> => {
-  const response = await Axios.get<any>(
-    '/rental-schedule/search-by-rental-id',
-    {
-      params: { rentalId },
-    }
-  );
+  const response = await Axios.get<any>('/rental-schedule/search-by-rental-id', {
+    params: { rentalId },
+  });
   const data = response.data;
   // snake_case 필드를 camelCase로 매핑
   const mapped: RentalScheduleAdminByRentalIdResponse = {
@@ -290,4 +327,72 @@ export const getRentalScheduleByRentalId = async (
     isRepaired: data.is_repaired,
   };
   return mapped;
+};
+
+/**
+ * 관리자: 제품 정보 조회 (드롭다운용)
+ * GET /admin/products
+ *
+ * Response example:
+ * {
+ *   "products": [
+ *     {
+ *       "id": 1,
+ *       "productNum": "ITP4DPT850",
+ *       "name": "제품명",
+ *       "brand": "브랜드명"
+ *     }
+ *   ]
+ * }
+ */
+export interface ProductInfo {
+  id: number;
+  productNum: string;
+  name: string;
+  brand: string;
+}
+
+export interface GetProductsResponse {
+  products: ProductInfo[];
+}
+
+export const getProducts = async (): Promise<GetProductsResponse> => {
+  const response = await Axios.get<GetProductsResponse>('/admin/products');
+  return response.data;
+};
+
+/**
+ * 관리자: 사이즈 옵션 조회
+ * GET /admin/sizes
+ *
+ * Response example:
+ * {
+ *   "sizes": ["XS", "S", "M", "L", "XL", "55", "66", "77"]
+ * }
+ */
+export interface GetSizesResponse {
+  sizes: string[];
+}
+
+export const getSizes = async (): Promise<GetSizesResponse> => {
+  const response = await Axios.get<GetSizesResponse>('/admin/sizes');
+  return response.data;
+};
+
+/**
+ * 관리자: 색상 옵션 조회
+ * GET /admin/colors
+ *
+ * Response example:
+ * {
+ *   "colors": ["BLACK", "WHITE", "BLUE", "RED", "GREEN"]
+ * }
+ */
+export interface GetColorsResponse {
+  colors: string[];
+}
+
+export const getColors = async (): Promise<GetColorsResponse> => {
+  const response = await Axios.get<GetColorsResponse>('/admin/colors');
+  return response.data;
 };

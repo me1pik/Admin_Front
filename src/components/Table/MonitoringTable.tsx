@@ -1,6 +1,10 @@
 // src/components/Table/MonitoringTable.tsx
 import React from 'react';
+import { Column, default as CommonTable } from '@components/CommonTable';
+import StatusBadge from 'src/components/Common/StatusBadge';
+import { getStatusBadge } from 'src/utils/statusUtils';
 import styled from 'styled-components';
+import { FaCopy } from 'react-icons/fa';
 
 export interface MonitoringItem {
   no: number;
@@ -23,7 +27,93 @@ interface Props {
   toggleAll: () => void;
   statuses: string[];
   onSave: (id: number, status: string) => Promise<void>;
+  isLoading?: boolean; // 추가
 }
+
+const StyleCodeContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+`;
+
+const StyleCodeText = styled.span`
+  font-size: 12px;
+  color: #333;
+`;
+
+const CopyButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #007bff;
+  }
+`;
+
+const columns: Column<MonitoringItem & { handleEdit: (no: number) => void }>[] = [
+  { key: 'no', label: '번호', width: '50px' },
+  { key: '신청일', label: '신청일', width: '100px' },
+  {
+    key: '주문자',
+    label: '주문자',
+    width: '100px',
+    render: (v, row) => (
+      <span
+        style={{ cursor: 'pointer', color: '#007bff', textAlign: 'center' }}
+        onClick={() => row.handleEdit(row.no)}
+      >
+        {v as string}
+      </span>
+    ),
+  },
+  { key: '대여기간', label: '대여기간', width: '170px' },
+  { key: '브랜드', label: '브랜드', width: '80px' },
+  { key: '종류', label: '종류', width: '80px' },
+  {
+    key: '스타일',
+    label: '스타일(품번)',
+    width: '120px',
+    render: (value, row) => {
+      const handleCopy = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        try {
+          await navigator.clipboard.writeText(row.스타일);
+          console.log('스타일 품번이 복사되었습니다:', row.스타일);
+        } catch (err) {
+          console.error('복사 실패:', err);
+        }
+      };
+
+      return (
+        <StyleCodeContainer>
+          <StyleCodeText>{value as string}</StyleCodeText>
+          <CopyButton onClick={handleCopy} title="스타일 품번 복사">
+            <FaCopy size={12} />
+          </CopyButton>
+        </StyleCodeContainer>
+      );
+    },
+  },
+  { key: '색상', label: '색상', width: '60px' },
+  { key: '사이즈', label: '사이즈', width: '60px' },
+  {
+    key: '배송상태',
+    label: '배송상태',
+    width: '60px',
+    render: (v) => {
+      const badge = getStatusBadge(v as string);
+      return <StatusBadge style={{ background: badge.background }}>{v as string}</StatusBadge>;
+    },
+  },
+];
 
 const MonitoringTable: React.FC<Props> = ({
   filteredData,
@@ -31,153 +121,33 @@ const MonitoringTable: React.FC<Props> = ({
   selectedRows,
   toggleRow,
   toggleAll,
+  isLoading,
 }) => {
-  const getBadgeStyle = (status: string): { bg: string; color: string } => {
-    switch (status) {
-      case '신청완료':
-        return { bg: '#ffb300', color: '#FFFFFF' };
-      case '배송준비':
-        return { bg: '#000000', color: '#FFFFFF' };
-      case '배송중':
-        return { bg: '#007bff', color: '#FFFFFF' };
-      case '배송완료':
-        return { bg: '#4AA361', color: '#FFFFFF' };
-      case '배송취소':
-        return { bg: '#c02626', color: '#FFFFFF' };
-      case '반납중':
-        return { bg: '#6c757d', color: '#FFFFFF' };
-      case '반납완료':
-        return { bg: '#6c757d', color: '#FFFFFF' };
-      default:
-        return { bg: '#6c757d', color: '#FFFFFF' };
-    }
+  // handleEdit을 row에 추가
+  const dataWithEdit = filteredData.map((item) => ({ ...item, handleEdit }));
+
+  const onSelectAll = () => {
+    toggleAll();
+  };
+
+  const onSelectRow = (row: MonitoringItem) => {
+    toggleRow(row.no);
   };
 
   return (
-    <Table>
-      <colgroup>
-        <col style={{ width: '40px' }} />
-        <col style={{ width: '50px' }} />
-        <col style={{ width: '100px' }} />
-        <col style={{ width: '100px' }} />
-        <col style={{ width: '170px' }} />
-        <col style={{ width: '80px' }} />
-        <col style={{ width: '80px' }} />
-        <col style={{ width: '120px' }} />
-        <col style={{ width: '60px' }} />
-        <col style={{ width: '60px' }} />
-        <col style={{ width: '60px' }} />
-      </colgroup>
-      <thead>
-        <TableRow>
-          <Th>
-            <input
-              type='checkbox'
-              checked={
-                filteredData.length > 0 &&
-                filteredData.every((i) => selectedRows.has(i.no))
-              }
-              onChange={toggleAll}
-            />
-          </Th>
-          <Th>번호</Th>
-          <Th>신청일</Th>
-          <Th>주문자</Th>
-          <Th>대여기간</Th>
-          <Th>브랜드</Th>
-          <Th>종류</Th>
-          <Th>스타일(품번)</Th>
-          <Th>색상</Th>
-          <Th>사이즈</Th>
-          <Th>배송상태</Th>
-        </TableRow>
-      </thead>
-      <tbody>
-        {filteredData.map((item) => {
-          const badge = getBadgeStyle(item.배송상태);
-          return (
-            <TableRow key={item.no}>
-              <Td>
-                <input
-                  type='checkbox'
-                  checked={selectedRows.has(item.no)}
-                  onChange={() => toggleRow(item.no)}
-                />
-              </Td>
-              <Td>{item.no}</Td>
-              <Td>{item.신청일}</Td>
-              <Td
-                onClick={() => handleEdit(item.no)}
-                style={{
-                  cursor: 'pointer',
-                  color: '#007bff',
-                  textAlign: 'center',
-                }}
-              >
-                {item.주문자}
-              </Td>
-              <Td>{item.대여기간}</Td>
-              <Td>{item.브랜드}</Td>
-              <Td>{item.종류}</Td>
-              <Td>{item.스타일}</Td>
-              <Td>{item.색상}</Td>
-              <Td>{item.사이즈}</Td>
-              <Td>
-                <StatusBadge
-                  style={{ background: badge.bg, color: badge.color }}
-                >
-                  {item.배송상태}
-                </StatusBadge>
-              </Td>
-            </TableRow>
-          );
-        })}
-        {filteredData.length < 10 &&
-          Array.from({ length: 10 - filteredData.length }).map((_, i) => (
-            <TableRow key={`empty-${i}`}>
-              {Array.from({ length: 11 }).map((_, ci) => (
-                <Td key={ci}>&nbsp;</Td>
-              ))}
-            </TableRow>
-          ))}
-      </tbody>
-    </Table>
+    <CommonTable
+      columns={columns}
+      data={dataWithEdit}
+      showCheckbox
+      selectedRows={Array.from(selectedRows)}
+      onSelectAll={onSelectAll}
+      onSelectRow={onSelectRow}
+      rowKey={(row) => row.no}
+      emptyMessage="데이터가 없습니다."
+      style={{ minWidth: 1000 }}
+      isLoading={isLoading} // 추가
+    />
   );
 };
 
 export default MonitoringTable;
-
-const Table = styled.table`
-  width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-  background: #fff;
-  border: 1px solid #ddd;
-  min-width: 1000px;
-`;
-const TableRow = styled.tr`
-  height: 44px;
-`;
-const Th = styled.th`
-  text-align: center;
-  vertical-align: middle;
-  background: #eee;
-  font-weight: 800;
-  font-size: 12px;
-  border: 1px solid #ddd;
-`;
-const Td = styled.td`
-  text-align: center;
-  vertical-align: middle;
-  font-size: 12px;
-  border: 1px solid #ddd;
-`;
-const StatusBadge = styled.div`
-  display: inline-block;
-  border-radius: 4px;
-  padding: 0 8px;
-  height: 24px;
-  line-height: 24px;
-  font-size: 10px;
-  font-weight: 800;
-`;

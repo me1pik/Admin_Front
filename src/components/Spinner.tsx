@@ -25,9 +25,9 @@ const Dot = styled.div<{ delay: string }>`
 
 const Spinner: React.FC = () => (
   <SpinnerWrapper>
-    <Dot delay='0s' />
-    <Dot delay='0.15s' />
-    <Dot delay='0.3s' />
+    <Dot delay="0s" />
+    <Dot delay="0.15s" />
+    <Dot delay="0.3s" />
   </SpinnerWrapper>
 );
 

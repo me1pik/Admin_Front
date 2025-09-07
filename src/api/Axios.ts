@@ -1,6 +1,6 @@
 // src/api/Axios.ts
 import axios from 'axios';
-import Cookies from 'js-cookie';
+import { getRefreshToken, saveTokens, clearTokens } from 'src/utils/auth';
 
 export const Axios = axios.create({
   baseURL: 'https://api.stylewh.com',
@@ -21,30 +21,32 @@ Axios.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        const refreshToken = Cookies.get('refreshToken');
+        const refreshToken = getRefreshToken();
         if (!refreshToken) throw new Error('No refresh token available.');
 
         console.log('🔄 리프레시 토큰으로 새 액세스 토큰 요청 중...');
         // 명세서에 맞게 /admin/auth/refresh 엔드포인트 호출
-        const { data } = await axios.post(
-          'https://api.stylewh.com/admin/auth/refresh',
-          { refreshToken }
-        );
+        const { data } = await axios.post('https://api.stylewh.com/admin/auth/refresh', {
+          refreshToken,
+        });
 
         console.log('✅ 액세스 토큰 갱신 성공:', data);
-        Cookies.set('accessToken', data.accessToken, { secure: true });
+
+        // API 명세서에 따르면 refreshToken은 새로 발급되지 않으므로 기존 것 유지
+        const currentRefreshToken = getRefreshToken();
+        saveTokens(data.accessToken, currentRefreshToken || undefined);
+
         Axios.defaults.headers.Authorization = `Bearer ${data.accessToken}`;
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
 
         return Axios(originalRequest);
       } catch (refreshError) {
         console.error('❌ 리프레시 토큰 만료 - 로그아웃 처리', refreshError);
-        Cookies.remove('accessToken');
-        Cookies.remove('refreshToken');
+        clearTokens();
         window.location.href = '/login'; // 강제 로그아웃 처리
         return Promise.reject(refreshError);
       }
     }
     return Promise.reject(error);
-  }
+  },
 );

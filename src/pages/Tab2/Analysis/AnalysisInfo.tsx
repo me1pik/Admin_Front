@@ -21,9 +21,22 @@ export default AnalysisInfo;
 
 /* Styled Components */
 const Container = styled.div`
-  padding: 20px;
+  width: 100%;
+  height: 100%;
+  max-width: 100vw;
+  margin: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #fff;
+  overflow: hidden;
+  padding: 12px 8px 0 8px;
 
-  min-height: 100vh;
+  @media (max-width: 834px) {
+    min-width: 100vw;
+    padding: 0 4px;
+  }
 `;
 
 const Title = styled.h1`

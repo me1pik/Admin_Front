@@ -1,11 +1,24 @@
 // src/Layout.tsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import styled from 'styled-components';
-import List from './components/List';
-import Header from './components/Header';
+import List from '@components/List';
+import Header from '@components/Header';
+import { getCurrentToken, hasValidToken } from '@/utils/auth';
+import { Axios } from '@/api/Axios';
 
 const Layout: React.FC = () => {
+  useEffect(() => {
+    // 토큰이 유효한지 확인하고 Axios 헤더 설정
+    const token = getCurrentToken();
+    if (token && hasValidToken()) {
+      Axios.defaults.headers.Authorization = `Bearer ${token}`;
+      console.log('🔐 토큰이 유효합니다. Axios 헤더 설정 완료');
+    } else {
+      console.log('⚠️ 토큰이 유효하지 않습니다.');
+    }
+  }, []);
+
   return (
     <Container>
       {/* 왼쪽 사이드바 */}
@@ -51,9 +64,8 @@ const SidebarContainer = styled.div`
 const ContentContainer = styled.div`
   flex: 1;
   overflow-x: hidden;
-  overflow-y: auto;
-
-  padding: 90px 36px;
+  /* overflow-y: auto; 제거 */
+  padding: 90px 2rem;
 `;
 
 /** 헤더를 오른쪽 상단에 고정하기 위한 래퍼 */

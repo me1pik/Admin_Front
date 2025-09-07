@@ -9,7 +9,7 @@ declare module 'date-holidays' {
     new (
       country: string,
       state?: string,
-      region?: string
+      region?: string,
     ): {
       getHolidays(year: number): Holiday[];
       isHoliday(date: Date | string): boolean;

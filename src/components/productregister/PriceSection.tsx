@@ -87,7 +87,6 @@ const InputRow = styled.div`
 const Label = styled.label`
   position: relative;
   min-width: 40px;
-
   font-weight: 900;
   font-size: 12px;
   line-height: 13px;
@@ -111,7 +110,6 @@ const Input = styled.input`
   max-width: 120px;
   border: 1px solid #ddd;
   padding: 0 8px;
-
   font-weight: 700;
   font-size: 12px;
   text-align: center;

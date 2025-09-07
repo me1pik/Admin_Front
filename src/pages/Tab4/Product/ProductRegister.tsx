@@ -2,16 +2,16 @@
 // import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 // import { useNavigate, useParams } from 'react-router-dom';
 // import styled from 'styled-components';
-// import ListButtonDetailSubHeader from '../components/Header/ListButtonDetailSubHeader';
-// import sizeProductImg from '../assets/productregisterSizeProduct.svg';
-// import DetailTopBoxes from '../components/DetailTopBoxes';
-// import SizeGuideSection from '../components/productregister/SizeGuideSection';
-// import SizeDisplaySection from '../components/productregister/SizeDisplaySection';
-// import MaterialInfoSection from '../components/productregister/MaterialInfoSection';
-// import FabricInfoSection from '../components/productregister/FabricInfoSection';
-// import ProductImageSection from '../components/productregister/ProductImageSection';
-// import ReusableModal from '../components/ReusableModal';
-// import ReusableModal2 from '../components/ReusableModal2';
+// import ListButtonDetailSubHeader from 'src/components/Header/ListButtonDetailSubHeader';
+// import sizeProductImg from 'src/assets/productregisterSizeProduct.svg';
+// import DetailTopBoxes from 'src/components/DetailTopBoxes';
+// import SizeGuideSection from 'src/components/productregister/SizeGuideSection';
+// import SizeDisplaySection from 'src/components/productregister/SizeDisplaySection';
+// import MaterialInfoSection from 'src/components/productregister/MaterialInfoSection';
+// import FabricInfoSection from 'src/components/productregister/FabricInfoSection';
+// import ProductImageSection from 'src/components/productregister/ProductImageSection';
+// import ReusableModal from 'src/components/ReusableModal';
+// import ReusableModal2 from 'src/components/ReusableModal2';
 
 // import {
 //   getProductDetail,
@@ -21,7 +21,7 @@
 //   UpdateProductRequest,
 //   CreateProductRequest,
 //   SizeRow,
-// } from '../api/adminProduct';
+// } from 'src/api/adminProduct';
 
 // // 신규 등록용 빈 제품 정보
 // const newEmptyProduct: ProductDetailResponse = {

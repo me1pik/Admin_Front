@@ -2,15 +2,15 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FaPlus, FaTimes } from 'react-icons/fa';
-import { ProductDetailResponse } from '../../api/adminProduct';
-import BulletIcon from '../../assets/BulletIcon.svg'; // SVG 아이콘 import
+import { ProductDetailResponse } from '@api/adminProduct';
+import BulletIcon from '@assets/BulletIcon.svg';
 
 interface FabricInfoSectionProps {
   product: ProductDetailResponse;
   onChange?: (data: Partial<ProductDetailResponse>) => void;
+  style?: React.CSSProperties;
 }
 
-// 초기 컬럼 수
 const INITIAL_COLUMN_COUNT = 5;
 const MATERIAL_OPTIONS = [
   '폴리에스터',
@@ -39,10 +39,7 @@ type SlotItem = { material: string; percent: string };
 type SlotsMap = Record<string, SlotItem[]>;
 const FABRIC_KEYS = ['겉감', '안감', '배색', '부속'] as const;
 
-const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
-  product,
-  onChange,
-}) => {
+const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({ product, onChange }) => {
   const [columnCount, setColumnCount] = useState(INITIAL_COLUMN_COUNT);
 
   const createEmptySlots = (cols: number): SlotsMap =>
@@ -54,14 +51,12 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
       return acc;
     }, {} as SlotsMap);
 
-  const [slots, setSlots] = useState<SlotsMap>(() =>
-    createEmptySlots(columnCount)
-  );
+  const [slots, setSlots] = useState<SlotsMap>(() => createEmptySlots(columnCount));
 
   useEffect(() => {
     const compMap = (product.fabricComposition || {}) as Record<string, string>;
     const savedCounts = FABRIC_KEYS.map(
-      (key) => (compMap[key] || '').split(/\s*,\s*/).filter(Boolean).length
+      (key) => (compMap[key] || '').split(/\s*,\s*/).filter(Boolean).length,
     );
     const maxSaved = Math.max(...savedCounts, INITIAL_COLUMN_COUNT);
     setColumnCount(maxSaved);
@@ -89,15 +84,13 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
         .map((s) => `${s.material} ${s.percent}`);
       if (entries.length) comp[key] = entries.join(', ');
     });
-    onChange?.({ fabricComposition: comp } as any);
+    onChange?.({ fabricComposition: comp } as Partial<ProductDetailResponse>);
   };
 
   const handleMaterial = (key: string, idx: number, material: string) => {
     setSlots((prev) => {
       const updated = { ...prev };
-      updated[key] = updated[key].map((s, i) =>
-        i === idx ? { material, percent: '' } : s
-      );
+      updated[key] = updated[key].map((s, i) => (i === idx ? { material, percent: '' } : s));
       return updated;
     });
   };
@@ -109,9 +102,7 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
     const percent = `${num}%`;
     setSlots((prev) => {
       const updated = { ...prev };
-      updated[key] = updated[key].map((s, i) =>
-        i === idx ? { ...s, percent } : s
-      );
+      updated[key] = updated[key].map((s, i) => (i === idx ? { ...s, percent } : s));
       notifyChange(updated);
       return updated;
     });
@@ -120,9 +111,7 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
   const handleDeleteSlot = (key: string, idx: number) => {
     setSlots((prev) => {
       const updated = { ...prev };
-      updated[key] = updated[key].map((s, i) =>
-        i === idx ? { material: '', percent: '' } : s
-      );
+      updated[key] = updated[key].map((s, i) => (i === idx ? { material: '', percent: '' } : s));
       notifyChange(updated);
       return updated;
     });
@@ -146,12 +135,12 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
     <Container>
       <Header>
         <HeaderLeft>
-          <BulletIconImage src={BulletIcon} alt='bullet icon' />
+          <BulletIconImage src={BulletIcon} alt="bullet icon" />
           <Title>제품 원단정보</Title>
         </HeaderLeft>
       </Header>
       <OutsideButtonWrapper>
-        <AddButton onClick={handleAddColumn} title='열 추가'>
+        <AddButton onClick={handleAddColumn} title="열 추가">
           <FaPlus />
         </AddButton>
       </OutsideButtonWrapper>
@@ -169,18 +158,18 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
           <tbody>
             {FABRIC_KEYS.map((key) => (
               <tr key={key}>
-                <td className='label'>{key}</td>
+                <td className="label">{key}</td>
                 {slots[key].map((slot, idx) => {
                   const empty = !slot.material && !slot.percent;
                   const listId = `options-${key}-${idx}`;
                   return (
-                    <CellTd key={idx} empty={empty}>
+                    <CellTd key={idx} $empty={empty}>
                       <CellRow>
                         <MaterialInput
-                          empty={empty}
+                          $empty={empty}
                           list={listId}
                           value={slot.material}
-                          onChange={(e) =>
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                             handleMaterial(key, idx, e.target.value)
                           }
                         />
@@ -191,23 +180,20 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
                         </datalist>
                         <PercentWrapper>
                           <NumberInput
-                            empty={empty}
-                            type='number'
+                            $empty={empty}
+                            type="number"
                             min={0}
                             max={100}
                             value={slot.percent.replace('%', '')}
                             disabled={!slot.material}
-                            onChange={(e) =>
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                               handlePercent(key, idx, e.target.value)
                             }
                           />
                           <Suffix>%</Suffix>
                         </PercentWrapper>
                         {!empty && (
-                          <DeleteButton
-                            onClick={() => handleDeleteSlot(key, idx)}
-                            title='삭제'
-                          >
+                          <DeleteButton onClick={() => handleDeleteSlot(key, idx)} title="삭제">
                             <FaTimes />
                           </DeleteButton>
                         )}
@@ -226,7 +212,7 @@ const FabricInfoSection: React.FC<FabricInfoSectionProps> = ({
 
 export default FabricInfoSection;
 
-/* styled-components */
+// styled-components 정의
 const Container = styled.div`
   position: relative;
   margin-bottom: 20px;
@@ -242,7 +228,6 @@ const HeaderLeft = styled.div`
   align-items: center;
 `;
 
-// BulletIconImage: SVG 아이콘을 렌더링하기 위한 styled.img
 const BulletIconImage = styled.img`
   width: 14px;
   height: 14px;
@@ -254,7 +239,6 @@ const Title = styled.div`
   font-size: 15px;
 `;
 
-// “열 추가” 버튼을 감싸는 영역
 const OutsideButtonWrapper = styled.div`
   text-align: right;
   margin-bottom: 8px;
@@ -298,12 +282,16 @@ const Table = styled.table`
     color: #333;
     width: auto;
   }
+  tr:hover {
+    background-color: #e3f2fd;
+    cursor: pointer;
+  }
 `;
 
-const CellTd = styled.td<{ empty: boolean }>`
+const CellTd = styled.td<{ $empty: boolean }>`
   position: relative;
   padding: 8px 28px 8px 8px;
-  background: ${({ empty }) => (empty ? '#f9f9f9' : '#fff')};
+  background: ${({ $empty }) => ($empty ? '#f9f9f9' : '#fff')};
 `;
 
 const CellRow = styled.div`
@@ -313,7 +301,7 @@ const CellRow = styled.div`
   align-items: center;
 `;
 
-const MaterialInput = styled.input<{ empty: boolean }>`
+const MaterialInput = styled.input<{ $empty: boolean }>`
   flex: 1;
   max-width: 100px;
   height: 32px;
@@ -322,7 +310,7 @@ const MaterialInput = styled.input<{ empty: boolean }>`
   border: 1px solid #bbb;
   border-radius: 4px;
   background: #fff;
-  outline: ${({ empty }) => (empty ? 'none' : '2px solid #f6ae24')};
+  outline: ${({ $empty }) => ($empty ? 'none' : '2px solid #f6ae24')};
   &:focus {
     outline: 2px solid #f6ae24;
   }
@@ -333,15 +321,15 @@ const PercentWrapper = styled.div`
   align-items: center;
 `;
 
-const NumberInput = styled.input<{ empty: boolean }>`
+const NumberInput = styled.input<{ $empty: boolean }>`
   width: 36px;
   height: 30px;
   font-size: 13px;
   text-align: center;
   border: 1px solid #bbb;
   border-radius: 4px;
-  background: ${({ empty }) => (empty ? '#f9f9f9' : '#fff')};
-  outline: ${({ empty }) => (empty ? 'none' : '2px solid #f6ae24')};
+  background: ${({ $empty }) => ($empty ? '#f9f9f9' : '#fff')};
+  outline: ${({ $empty }) => ($empty ? 'none' : '2px solid #f6ae24')};
   &:focus {
     outline: 2px solid #f6ae24;
   }

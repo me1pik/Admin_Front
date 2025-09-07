@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import userDetailImg1 from '../assets/userDetailImg1.svg';
-import userDetailImg2 from '../assets/userDetailImg2.svg';
-import userDetailImg3 from '../assets/userDetailImg3.svg';
-import userDetailImg4 from '../assets/userDetailImg4.svg';
-import { getUserByEmail, UserDetail } from '../api/adminUser';
+import userDetailImg1 from '@assets/userDetailImg1.svg';
+import userDetailImg2 from '@assets/userDetailImg2.svg';
+import userDetailImg3 from '@assets/userDetailImg3.svg';
+import userDetailImg4 from '@assets/userDetailImg4.svg';
+import { getUserByEmail, UserDetail } from '@api/adminUser';
 
 interface Props {
   email: string;
@@ -40,7 +40,7 @@ const UserDetailTopBoxes: React.FC<Props> = ({ email }) => {
         {/* 첫 번째 박스 */}
         <Box>
           <IconPlaceholder>
-            <IconImage src={userDetailImg1} alt='User Detail 1' />
+            <IconImage src={userDetailImg1} alt="User Detail 1" />
           </IconPlaceholder>
           <Content>
             <Row>
@@ -66,13 +66,12 @@ const UserDetailTopBoxes: React.FC<Props> = ({ email }) => {
         {/* 두 번째 박스 */}
         <Box>
           <IconPlaceholder>
-            <IconImage src={userDetailImg2} alt='User Detail 2' />
+            <IconImage src={userDetailImg2} alt="User Detail 2" />
           </IconPlaceholder>
           <Content>
             <Row>
               <Value>
-                <BoldValue>{user.birthdate.split('-')[0]}년</BoldValue> (
-                {getAge(user.birthdate)}세)
+                <BoldValue>{user.birthdate.split('-')[0]}년</BoldValue> ({getAge(user.birthdate)}세)
               </Value>
             </Row>
             <Row>
@@ -88,7 +87,7 @@ const UserDetailTopBoxes: React.FC<Props> = ({ email }) => {
         {/* 세 번째 박스 */}
         <Box>
           <IconPlaceholder>
-            <IconImage src={userDetailImg3} alt='User Detail 3' />
+            <IconImage src={userDetailImg3} alt="User Detail 3" />
           </IconPlaceholder>
           <Content>
             <Row>
@@ -98,9 +97,7 @@ const UserDetailTopBoxes: React.FC<Props> = ({ email }) => {
             </Row>
             <Row>
               <Value>
-                팔로워{' '}
-                <BoldValue>{user.followersCount.toLocaleString()}</BoldValue> /
-                팔로잉{' '}
+                팔로워 <BoldValue>{user.followersCount.toLocaleString()}</BoldValue> / 팔로잉{' '}
                 <BoldValue>{user.followingCount.toLocaleString()}</BoldValue>
               </Value>
             </Row>
@@ -112,7 +109,7 @@ const UserDetailTopBoxes: React.FC<Props> = ({ email }) => {
         {/* 네 번째 박스 */}
         <Box>
           <IconPlaceholder>
-            <IconImage src={userDetailImg4} alt='User Detail 4' />
+            <IconImage src={userDetailImg4} alt="User Detail 4" />
           </IconPlaceholder>
           <Content>
             <Row>

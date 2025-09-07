@@ -1,6 +1,6 @@
 // src/api/brand/brand.ts
 
-import { Axios } from '../Axios';
+import { Axios } from 'src/api/Axios';
 
 /**
  * 관리자용 브랜드 정보 (목록) 타입
@@ -54,9 +54,7 @@ export const getAdminBrandList = async (): Promise<AdminBrand[]> => {
  * 관리자용 브랜드 상세 정보 조회
  * GET /brand/admin/{id}
  */
-export const getAdminBrandDetail = async (
-  id: number
-): Promise<AdminBrandDetail> => {
+export const getAdminBrandDetail = async (id: number): Promise<AdminBrandDetail> => {
   const response = await Axios.get<AdminBrandDetail>(`/brand/admin/${id}`);
   return response.data;
 };
@@ -85,7 +83,7 @@ export interface CreateAdminBrandRequest {
  * POST /brand/admin
  */
 export const createAdminBrand = async (
-  body: CreateAdminBrandRequest
+  body: CreateAdminBrandRequest,
 ): Promise<AdminBrandDetail> => {
   const response = await Axios.post<AdminBrandDetail>('/brand/admin', body);
   return response.data;
@@ -115,12 +113,9 @@ export interface UpdateAdminBrandRequest {
  */
 export const updateAdminBrand = async (
   id: number,
-  body: UpdateAdminBrandRequest
+  body: UpdateAdminBrandRequest,
 ): Promise<AdminBrandDetail> => {
-  const response = await Axios.patch<AdminBrandDetail>(
-    `/brand/admin/${id}`,
-    body
-  );
+  const response = await Axios.patch<AdminBrandDetail>(`/brand/admin/${id}`, body);
   return response.data;
 };
 
@@ -147,13 +142,10 @@ export interface AdminBrandSelectOptions {
  * 관리자용 select 박스 옵션 조회
  * GET /brand/admin/select-options
  */
-export const getAdminBrandSelectOptions =
-  async (): Promise<AdminBrandSelectOptions> => {
-    const response = await Axios.get<AdminBrandSelectOptions>(
-      '/brand/admin/select-options'
-    );
-    return response.data;
-  };
+export const getAdminBrandSelectOptions = async (): Promise<AdminBrandSelectOptions> => {
+  const response = await Axios.get<AdminBrandSelectOptions>('/brand/admin/select-options');
+  return response.data;
+};
 
 export default {
   getAdminBrandList,

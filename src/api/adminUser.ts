@@ -1,4 +1,4 @@
-import { Axios } from './Axios';
+import { Axios } from 'src/api/Axios';
 
 /**
  * 사용자 상세 정보 인터페이스 (GET /admin/user/{email})
@@ -141,12 +141,8 @@ export const getUserByEmail = async (email: string): Promise<UserDetail> => {
  * 이메일을 이용하여 사용자를 삭제합니다. (관리자용)
  * DELETE /admin/user/{email}
  */
-export const deleteUserByEmail = async (
-  email: string
-): Promise<DeleteUserResponse> => {
-  const response = await Axios.delete(
-    `/admin/user/${encodeURIComponent(email)}`
-  );
+export const deleteUserByEmail = async (email: string): Promise<DeleteUserResponse> => {
+  const response = await Axios.delete(`/admin/user/${encodeURIComponent(email)}`);
   return response.data;
 };
 
@@ -154,10 +150,7 @@ export const deleteUserByEmail = async (
  * 모든 사용자를 조회합니다. (관리자용)
  * GET /admin/user
  */
-export const getAllUsers = async (
-  limit = 10,
-  page = 1
-): Promise<GetUsersResponse> => {
+export const getAllUsers = async (limit = 10, page = 1): Promise<GetUsersResponse> => {
   const response = await Axios.get(`/admin/user`, {
     params: { limit, page },
   });
@@ -168,10 +161,7 @@ export const getAllUsers = async (
  * 차단된 사용자를 조회합니다. (관리자용)
  * GET /admin/user/blocked
  */
-export const getBlockedUsers = async (
-  limit = 10,
-  page = 1
-): Promise<GetBlockedUsersResponse> => {
+export const getBlockedUsers = async (limit = 10, page = 1): Promise<GetBlockedUsersResponse> => {
   const response = await Axios.get(`/admin/user/blocked`, {
     params: { limit, page },
   });
@@ -182,12 +172,8 @@ export const getBlockedUsers = async (
  * 이메일을 이용하여 사용자의 찜 목록을 조회합니다. (관리자용)
  * GET /admin/user/{email}/closet
  */
-export const getUserClosetByEmail = async (
-  email: string
-): Promise<GetUserClosetResponse> => {
-  const response = await Axios.get(
-    `/admin/user/${encodeURIComponent(email)}/closet`
-  );
+export const getUserClosetByEmail = async (email: string): Promise<GetUserClosetResponse> => {
+  const response = await Axios.get(`/admin/user/${encodeURIComponent(email)}/closet`);
   return response.data;
 };
 
@@ -197,13 +183,10 @@ export const getUserClosetByEmail = async (
  */
 export const changeUserMembership = async (
   id: number,
-  membershipId: number
+  membershipId: number,
 ): Promise<MembershipChangeResponse> => {
   const requestBody: MembershipChangeRequest = { membershipId };
-  const response = await Axios.patch(
-    `/admin/user/${id}/membership`,
-    requestBody
-  );
+  const response = await Axios.patch(`/admin/user/${id}/membership`, requestBody);
   return response.data;
 };
 
@@ -211,8 +194,7 @@ export const changeUserMembership = async (
  * 모든 멤버십을 조회합니다. (관리자용)
  * GET /admin/user/membership/all
  */
-export const getAllMemberships =
-  async (): Promise<GetAllMembershipsResponse> => {
-    const response = await Axios.get(`/admin/user/membership/all`);
-    return response.data;
-  };
+export const getAllMemberships = async (): Promise<GetAllMembershipsResponse> => {
+  const response = await Axios.get(`/admin/user/membership/all`);
+  return response.data;
+};

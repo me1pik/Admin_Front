@@ -3,183 +3,117 @@
 import React from 'react';
 import styled from 'styled-components';
 
-/** Admin 인터페이스 (임시 데이터용) */
 export interface Admin {
   no: number;
-  status: string;
-  id: string;
-  team: string; // 팀장(또는 팀) 정보
   name: string;
+  team: string; // 구분
   email: string;
-  lastLogin: string; // 최근로그인
-  registeredAt: string; // 등록일자
+  status: string;
 }
 
-/** AdminTable 컴포넌트 Props */
 interface AdminTableProps {
   filteredData: Admin[];
-  handleEdit: (id: string) => void; // 이메일 클릭 시 수정/상세 페이지로 이동
-
-  // 아래 3가지 props 추가
-  selectedIds: Set<number>;
-  onSelectChange: (no: number, checked: boolean) => void;
-  onSelectAll: (checked: boolean) => void;
+  handleEdit?: (id: string) => void;
 }
 
-const AdminTable: React.FC<AdminTableProps> = ({
-  filteredData,
-  handleEdit,
-  selectedIds,
-  onSelectChange,
-  onSelectAll,
-}) => {
-  // 모두 선택되었는지 여부
-  const allSelected =
-    filteredData.length > 0 &&
-    filteredData.every((mgr) => selectedIds.has(mgr.no));
+const StatusLabel = styled.span<{ status: string }>`
+  display: inline-block;
+  min-width: 48px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  background: ${({ status }) => (status === '정상' ? '#f4f4f4' : '#ffeaea')};
+  color: ${({ status }) => (status === '정상' ? '#555' : '#e74c3c')};
+  border: 1px solid ${({ status }) => (status === '정상' ? '#e0e0e0' : '#ffb3b3')};
+`;
 
-  // 접속 기록이 없는 경우 '-'로 표시
-  const getLastLogin = (lastLogin: string) => {
-    return lastLogin && lastLogin.trim() !== '' ? lastLogin : '-';
-  };
-
-  return (
+const AdminTable: React.FC<AdminTableProps> = ({ filteredData, handleEdit }) => (
+  <TableWrapper>
     <Table>
       <colgroup>
-        <col style={{ width: '40px' }} /> {/* 체크박스 */}
-        <col style={{ width: '50px' }} /> {/* No. */}
-        <col style={{ width: '50px' }} /> {/* 상태 */}
-        <col style={{ width: '100px' }} /> {/* 아이디 */}
-        <col style={{ width: '80px' }} /> {/* 팀장 */}
-        <col style={{ width: '80px' }} /> {/* 이름 */}
-        <col style={{ width: '150px' }} /> {/* 이메일 */}
-        <col style={{ width: '100px' }} /> {/* 최근로그인 */}
-        <col style={{ width: '100px' }} /> {/* 등록일자 */}
+        <col style={{ width: '10%' }} />
+        <col style={{ width: '20%' }} />
+        <col style={{ width: '15%' }} />
+        <col style={{ width: '35%' }} />
+        <col style={{ width: '20%' }} />
       </colgroup>
       <thead>
         <tr>
-          <Th>
-            <input
-              type='checkbox'
-              onChange={(e) => onSelectAll(e.target.checked)}
-              checked={allSelected}
-              disabled={filteredData.length === 0}
-            />
-          </Th>
-          <Th>No.</Th>
-          <Th>상태</Th>
+          <Th>번호</Th>
+          <Th>관리자</Th>
+          <Th>구분</Th>
           <Th>아이디</Th>
-          <Th>팀장</Th>
-          <Th>이름</Th>
-          <Th>이메일</Th>
-          <Th>최근로그인</Th>
-          <Th>등록일자</Th>
+          <Th>상태</Th>
         </tr>
       </thead>
       <tbody>
-        {filteredData.map((manager) => (
-          <tr key={manager.no}>
-            <Td>
-              <input
-                type='checkbox'
-                checked={selectedIds.has(manager.no)}
-                onChange={(e) => onSelectChange(manager.no, e.target.checked)}
-              />
+        {filteredData.map((row) => (
+          <Tr key={row.no} onClick={() => handleEdit && handleEdit(row.email)}>
+            <Td style={{ textAlign: 'center' }}>{row.no}</Td>
+            <Td>{row.name}</Td>
+            <Td>{row.team}</Td>
+            <Td>{row.email}</Td>
+            <Td style={{ textAlign: 'center' }}>
+              <StatusLabel status={row.status}>{row.status}</StatusLabel>
             </Td>
-            <Td>{manager.no}</Td>
-            <Td>{manager.status}</Td>
-            <IdCell title={manager.id}>{manager.id}</IdCell>
-            <Td title={manager.team}>{manager.team}</Td>
-            <Td title={manager.name}>{manager.name}</Td>
-            <EmailCell
-              onClick={() => handleEdit(manager.id)}
-              title={manager.email}
-            >
-              {manager.email}
-            </EmailCell>
-            <Td title={getLastLogin(manager.lastLogin)}>
-              {getLastLogin(manager.lastLogin)}
-            </Td>
-            <Td title={manager.registeredAt}>{manager.registeredAt}</Td>
-          </tr>
+          </Tr>
         ))}
-        {filteredData.length < 10 &&
-          Array.from({ length: 10 - filteredData.length }).map((_, i) => (
-            <tr key={`empty-${i}`} style={{ height: '44px' }}>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-            </tr>
-          ))}
       </tbody>
     </Table>
-  );
-};
+  </TableWrapper>
+);
 
-export default AdminTable;
-
-/* ====================== Styled Components ====================== */
+const TableWrapper = styled.div`
+  width: 100%;
+  min-width: 0;
+  background: #fff;
+  border-radius: 12px;
+  overflow-x: hidden;
+  border: 1px solid #eee;
+`;
 
 const Table = styled.table`
   width: 100%;
-  table-layout: fixed;
+  min-width: 0;
   border-collapse: collapse;
-  background-color: #ffffff;
-  border: 1px solid #dddddd;
+  background: #fff;
+  table-layout: fixed;
 `;
 
 const Th = styled.th`
-  padding: 12px;
+  background: #fafafa;
+  font-weight: 700;
+  font-size: 14px;
+  color: #222;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
   text-align: center;
-  vertical-align: middle;
-  background-color: #eeeeee;
-
-  font-weight: 800;
-  font-size: 12px;
-  line-height: 13px;
-  color: #000000;
-  border: 1px solid #dddddd;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 5ch;
 `;
 
 const Td = styled.td`
-  padding: 12px;
+  font-size: 14px;
+  color: #222;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
   text-align: center;
-  vertical-align: middle;
 
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 13px;
-  color: #000000;
-  border: 1px solid #dddddd;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 5ch;
-`;
-
-const IdCell = styled(Td)`
-  min-width: 5ch;
-`;
-
-const EmailCell = styled(Td)`
-  cursor: pointer;
-  color: #007bff;
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 5ch;
-
-  &:hover {
-    color: #0056b3;
+  &:nth-child(2),
+  &:nth-child(3),
+  &:nth-child(4) {
+    text-align: left;
+    padding-left: 16px;
   }
 `;
+
+const Tr = styled.tr`
+  background: #fff;
+  cursor: pointer;
+
+  &:hover {
+    background: #f8f9fa;
+  }
+`;
+
+export default AdminTable;

@@ -1,166 +1,85 @@
 // src/components/Table/CalculateListTable.tsx
 import React from 'react';
-import styled from 'styled-components';
+import { Column, default as CommonTable } from '@components/CommonTable';
+import { InstaContainer, Avatar, InstaText } from '@components/Common/Profile';
 
-/** User 인터페이스 */
 export interface User {
-  no: number; // No.
-  grade: string; // 등급
-  name: string; // 이름
-  nickname: string; // 닉네임
-  instagram: string; // 계정(인스타)
-  season: string; // 시즌 진행상태
-  sellCount: string; // 판매 제출수
-  totalSum: number; // 총 판매금액
-  profit: number; // 정산 수익
-  expectedProfit: number; // 정산 예정금액
+  no: number;
+  grade: string;
+  name: string;
+  nickname: string;
+  instagram: string;
+  season: string;
+  sellCount: string;
+  totalSum: number;
+  profit: number;
+  expectedProfit: number;
 }
 
-/** CalculateListTable 컴포넌트 Props */
 interface CalculateListTableProps {
   filteredData: User[];
   handleEdit: (no: number) => void;
+  isLoading?: boolean; // 추가
 }
+
+const columns: Column<User & { handleEdit: (no: number) => void }>[] = [
+  { key: 'no', label: 'No.', width: '60px' },
+  { key: 'grade', label: '등급', width: '60px' },
+  { key: 'name', label: '이름', width: '80px' },
+  { key: 'nickname', label: '닉네임', width: '80px' },
+  {
+    key: 'instagram',
+    label: '계정(인스타)',
+    width: '150px',
+    render: (v, row) => (
+      <InstaContainer>
+        <Avatar />
+        <InstaText $clickable onClick={() => row.handleEdit(row.no)}>
+          {v as string}
+        </InstaText>
+      </InstaContainer>
+    ),
+  },
+  { key: 'season', label: '시즌 진행상태', width: '120px' },
+  { key: 'sellCount', label: '판매 제품수', width: '90px' },
+  {
+    key: 'totalSum',
+    label: '총 판매금액',
+    width: '100px',
+    render: (v) => Number(v).toLocaleString(),
+  },
+  {
+    key: 'profit',
+    label: '판매 수익금',
+    width: '90px',
+    render: (v) => Number(v).toLocaleString(),
+  },
+  {
+    key: 'expectedProfit',
+    label: '정산 예정금',
+    width: '90px',
+    render: (v) => Number(v).toLocaleString(),
+  },
+];
 
 const CalculateListTable: React.FC<CalculateListTableProps> = ({
   filteredData,
   handleEdit,
+  isLoading,
 }) => {
+  // handleEdit을 row에 추가
+  const dataWithEdit = filteredData.map((user) => ({ ...user, handleEdit }));
+
   return (
-    <Table>
-      <colgroup>
-        <col style={{ width: '60px' }} /> {/* No. */}
-        <col style={{ width: '60px' }} /> {/* 등급 */}
-        <col style={{ width: '80px' }} /> {/* 이름 */}
-        <col style={{ width: '80px' }} /> {/* 닉네임 */}
-        <col style={{ width: '150px' }} /> {/* 계정(인스타) */}
-        <col style={{ width: '120px' }} /> {/* 시즌 진행상태 */}
-        <col style={{ width: '90px' }} /> {/* 판매 제출수 */}
-        <col style={{ width: '100px' }} /> {/* 총 판매금액 */}
-        <col style={{ width: '90px' }} /> {/* 정산 수익 */}
-        <col style={{ width: '90px' }} /> {/* 정산 예정금액 */}
-      </colgroup>
-      <thead>
-        <TableRow>
-          <Th>No.</Th>
-          <Th>등급</Th>
-          <Th>이름</Th>
-          <Th>닉네임</Th>
-          <Th>계정(인스타)</Th>
-          <Th>시즌 진행상태</Th>
-          <Th>판매 제품수</Th>
-          <Th>총 판매금액</Th>
-          <Th>판매 수익금</Th>
-          <Th>정산 예정금</Th>
-        </TableRow>
-      </thead>
-      <tbody>
-        {filteredData.map((user, index) => (
-          <TableRow key={index}>
-            <Td>{user.no}</Td>
-            <Td>{user.grade}</Td>
-            <Td>{user.name}</Td>
-            <Td>{user.nickname}</Td>
-            <TdLeft>
-              <InstaContainer>
-                <Avatar />
-                <InstaText onClick={() => handleEdit(user.no)}>
-                  {user.instagram}
-                </InstaText>
-              </InstaContainer>
-            </TdLeft>
-            <Td>{user.season}</Td>
-            <Td>{user.sellCount}</Td>
-            {/* 1,840,000처럼 쉼표 표시 */}
-            <Td>{user.totalSum.toLocaleString()}</Td>
-            <Td>{user.profit.toLocaleString()}</Td>
-            <Td>{user.expectedProfit.toLocaleString()}</Td>
-          </TableRow>
-        ))}
-        {/* 10행 미만이면 빈 행 생성 */}
-        {filteredData.length < 10 &&
-          Array.from({ length: 10 - filteredData.length }).map((_, i) => (
-            <TableRow key={`empty-${i}`}>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <TdLeft>&nbsp;</TdLeft>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-            </TableRow>
-          ))}
-      </tbody>
-    </Table>
+    <CommonTable
+      columns={columns}
+      data={dataWithEdit}
+      rowKey={(row) => row.no}
+      emptyMessage="데이터가 없습니다."
+      style={{ minWidth: 900 }}
+      isLoading={isLoading} // 추가
+    />
   );
 };
 
 export default CalculateListTable;
-
-/* ====================== Styled Components ====================== */
-
-const Table = styled.table`
-  width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-  background-color: #ffffff;
-  border: 1px solid #dddddd;
-`;
-
-const TableRow = styled.tr`
-  height: 44px;
-`;
-
-const Th = styled.th`
-  text-align: center;
-  vertical-align: middle;
-  background-color: #eeeeee;
-
-  font-weight: 800;
-  font-size: 12px;
-  color: #000000;
-  border: 1px solid #dddddd;
-  white-space: nowrap;
-`;
-
-const Td = styled.td`
-  text-align: center;
-  vertical-align: middle;
-
-  font-weight: 400;
-  font-size: 12px;
-  color: #000000;
-  border: 1px solid #dddddd;
-  white-space: nowrap;
-`;
-
-const TdLeft = styled(Td)`
-  text-align: left;
-`;
-
-const InstaContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: 10px;
-`;
-
-const Avatar = styled.div`
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  background-color: #cccccc;
-`;
-
-const InstaText = styled.span`
-  cursor: pointer;
-  color: #007bff;
-
-  &:hover {
-    color: #0056b3;
-  }
-`;

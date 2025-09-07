@@ -1,3 +1,13 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "framework": "vite",
+  "buildCommand": "cd Admin && yarn build",
+  "outputDirectory": "Admin/dist",
+  "installCommand": "cd Admin && yarn install",
+  "devCommand": "cd Admin && yarn dev",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }

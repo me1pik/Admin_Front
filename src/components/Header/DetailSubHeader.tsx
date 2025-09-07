@@ -13,10 +13,7 @@ interface DetailSubHeaderProps {
   onTabChange?: (tab: TabItem) => void;
 }
 
-const DetailSubHeader: React.FC<DetailSubHeaderProps> = ({
-  tabs,
-  onTabChange,
-}) => {
+const DetailSubHeader: React.FC<DetailSubHeaderProps> = ({ tabs, onTabChange }) => {
   // 버튼 클릭 시 상위 콜백 호출
   const handleClick = (tab: TabItem) => {
     if (onTabChange) {
@@ -34,9 +31,9 @@ const DetailSubHeader: React.FC<DetailSubHeaderProps> = ({
           return (
             <ActionButton
               key={index}
-              isSaveButton={isSaveButton}
-              isFirst={index === 0}
-              isLast={index === tabs.length - 1}
+              $isSaveButton={isSaveButton}
+              $isFirst={index === 0}
+              $isLast={index === tabs.length - 1}
               onClick={() => handleClick(tab)}
             >
               {tab.label}
@@ -71,9 +68,9 @@ const ButtonContainer = styled.div`
 `;
 
 interface ActionButtonProps {
-  isSaveButton: boolean;
-  isFirst?: boolean;
-  isLast?: boolean;
+  $isSaveButton: boolean;
+  $isFirst?: boolean;
+  $isLast?: boolean;
 }
 
 const ActionButton = styled.button<ActionButtonProps>`
@@ -88,8 +85,8 @@ const ActionButton = styled.button<ActionButtonProps>`
   min-width: 100px;
 
   /* 왼쪽 버튼(변경저장)인지, 오른쪽 버튼(취소)인지에 따라 스타일 분기 */
-  ${({ isSaveButton }) =>
-    isSaveButton
+  ${({ $isSaveButton }) =>
+    $isSaveButton
       ? `
         background-color: #000; 
         color: #fff;
@@ -101,10 +98,10 @@ const ActionButton = styled.button<ActionButtonProps>`
       `}
 
   /* 좌/우 상하단 둥근 모서리 적용 */
-  ${({ isFirst, isLast }) =>
-    isFirst
+  ${({ $isFirst, $isLast }) =>
+    $isFirst
       ? 'border-top-left-radius: 8px; border-bottom-left-radius: 8px;'
-      : isLast
+      : $isLast
         ? 'border-top-right-radius: 8px; border-bottom-right-radius: 8px;'
         : ''}
 `;

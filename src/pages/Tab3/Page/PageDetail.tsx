@@ -3,10 +3,10 @@ import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
 import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
-} from '../../../components/Header/SettingsDetailSubHeader';
-import ShippingTabBar from '../../../components/TabBar';
-import ReusableModal2 from '../../../components/OneButtonModal';
-import PageDetailTopBoxes from '../../../components/PageDetailTopBoxes';
+} from '@components/Header/SettingsDetailSubHeader';
+import ShippingTabBar from '@components/TabBar';
+import ReusableModal2 from '@components/OneButtonModal';
+import PageDetailTopBoxes from '@components/PageDetailTopBoxes';
 
 interface PageDetailProps {
   isCreate?: boolean;
@@ -88,11 +88,7 @@ const PageDetail: React.FC<PageDetailProps> = ({ isCreate = false }) => {
       <DividerDashed />
 
       {/* 페이지 상세 탭 */}
-      <ShippingTabBar
-        tabs={['페이지 상세']}
-        activeIndex={activeTab}
-        onTabClick={setActiveTab}
-      />
+      <ShippingTabBar tabs={['페이지 상세']} activeIndex={activeTab} onTabClick={setActiveTab} />
 
       {/* 상세 내용 컨테이너 */}
       <DetailSection>
@@ -147,7 +143,7 @@ const PageDetail: React.FC<PageDetailProps> = ({ isCreate = false }) => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirm}
-        title='확인'
+        title="확인"
       >
         저장하시겠습니까?
       </ReusableModal2>
@@ -161,8 +157,21 @@ export default PageDetail;
 
 const Container = styled.div`
   width: 100%;
-  min-width: 1000px;
-  padding: 20px;
+  height: 100%;
+  max-width: 100vw;
+  margin: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #fff;
+  overflow: hidden;
+  padding: 12px 8px 0 8px;
+
+  @media (max-width: 834px) {
+    min-width: 100vw;
+    padding: 0 4px;
+  }
 `;
 
 const HeaderRow = styled.div`

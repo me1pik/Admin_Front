@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import userDetailImg2 from '../assets/userDetailImg2.svg';
+import userDetailImg2 from 'src/assets/userDetailImg2.svg';
 // import userDetailImg3 from '../assets/userDetailImg3.svg';
 
 const SettingsDetailTopBoxes: React.FC = () => {
@@ -11,7 +11,7 @@ const SettingsDetailTopBoxes: React.FC = () => {
         {/* 첫 번째 박스 */}
         <Box>
           <IconPlaceholder>
-            <IconImage src={userDetailImg2} alt='User Detail 2' />
+            <IconImage src={userDetailImg2} alt="User Detail 2" />
           </IconPlaceholder>
           <Content>
             <Row>
@@ -42,20 +42,29 @@ export default SettingsDetailTopBoxes;
 
 /** 전체 컨테이너 */
 const Container = styled.div`
-  min-width: 1000px;
+  width: 100%;
+  min-width: 834px;
+  max-width: 100vw;
+  box-sizing: border-box;
 `;
 
 /** 박스와 Divider를 포함하는 그룹 */
 const BoxWrapper = styled.div`
+  width: 100%;
   display: flex;
+  flex-wrap: wrap;
   align-items: stretch;
   border: 1px solid #dddddd;
   border-radius: 4px;
+
+  /* overflow: 없음 */
 `;
 
 /** 각 박스 */
 const Box = styled.div`
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 100%;
   display: flex;
   align-items: center;
   padding: 10px;

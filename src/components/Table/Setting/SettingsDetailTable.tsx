@@ -1,7 +1,7 @@
 // src/components/Table/Setting/SettingsDetailTable.tsx
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { TabItem } from '../../Header/SearchSubHeader';
+import { TabItem } from '@components/Header/SearchSubHeader';
 
 export interface SettingsDetailRow {
   title: string;
@@ -22,7 +22,7 @@ const SettingsDetailTable: React.FC<SettingsDetailTableProps> = ({
   selectOptions,
 }) => {
   const [row, setRow] = useState<SettingsDetailRow>(
-    data[0] ?? { title: '', category: '', content: '' }
+    data[0] ?? { title: '', category: '', content: '' },
   );
 
   useEffect(() => {
@@ -57,11 +57,7 @@ const SettingsDetailTable: React.FC<SettingsDetailTableProps> = ({
           <TableRow>
             <Th>제목</Th>
             <Td>
-              <InputBox
-                type='text'
-                value={row.title}
-                onChange={handleTitleChange}
-              />
+              <InputBox type="text" value={row.title} onChange={handleTitleChange} />
             </Td>
           </TableRow>
 
@@ -71,9 +67,9 @@ const SettingsDetailTable: React.FC<SettingsDetailTableProps> = ({
             <Td>
               <SelectBox value={row.category} onChange={handleCategoryChange}>
                 {selectOptions.map((option) => (
-                  <Option key={option.label} value={option.label}>
+                  <option key={option.label} value={option.label}>
                     {option.label}
-                  </Option>
+                  </option>
                 ))}
               </SelectBox>
             </Td>
@@ -97,11 +93,14 @@ export default SettingsDetailTable;
 /* ====================== Styled Components ====================== */
 
 const TableContainer = styled.div`
-  width: 100%;
-  min-width: 1000px;
-  box-sizing: border-box;
-  border: 1px solid #dddddd;
-  border-radius: 4px;
+  min-width: 834px;
+  min-height: 600px;
+  max-width: 100vw;
+  overflow-x: auto;
+  @media (max-width: 834px) {
+    min-width: 100vw;
+    padding: 0 8px;
+  }
 `;
 
 const StyledTable = styled.table`
@@ -119,50 +118,55 @@ const TableRow = styled.tr`
   &:last-child {
     border-bottom: none;
   }
+  &:nth-child(even) {
+    background: #f8f9fa;
+  }
+  &:hover {
+    background-color: #e3f2fd;
+    cursor: pointer;
+  }
 `;
 
 const Th = styled.th`
-  padding: 0 20px;
-  white-space: nowrap;
-  font-weight: 800;
-  width: 50px;
+  width: 120px;
+  padding: 12px 16px;
+  background: #f5f6fa;
+  font-weight: bold;
+  text-align: left;
+  border-right: 1px solid #dddddd;
 `;
 
 const Td = styled.td`
-  padding: 0 10px;
-  vertical-align: middle;
+  padding: 12px 16px;
+  border-right: 1px solid #dddddd;
+  vertical-align: top;
 `;
 
 const InputBox = styled.input`
   width: 100%;
-  height: 32px;
-  padding: 10px;
+  padding: 8px 12px;
   border: 1px solid #dddddd;
-  margin: 10px 0;
+  border-radius: 4px;
+  font-size: 14px;
   box-sizing: border-box;
 `;
 
 const SelectBox = styled.select`
-  width: 160px;
-  height: 32px;
-  margin: 10px 0;
-  border: 1px solid #000000;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+  font-size: 14px;
   box-sizing: border-box;
-`;
-
-const Option = styled.option`
-  font-weight: 800;
-  font-size: 12px;
-  line-height: 13px;
-  color: #000000;
 `;
 
 const TextArea = styled.textarea`
   width: 100%;
-  min-height: 300px;
-  padding: 10px;
-  margin: 10px 0;
+  min-height: 120px;
+  padding: 8px 12px;
   border: 1px solid #dddddd;
+  border-radius: 4px;
+  font-size: 14px;
   box-sizing: border-box;
-  resize: none;
+  resize: vertical;
 `;

@@ -11,11 +11,7 @@ interface ShippingTabBarProps {
   onTabClick?: (index: number) => void;
 }
 
-const TabBar: React.FC<ShippingTabBarProps> = ({
-  tabs,
-  activeIndex = 0,
-  onTabClick,
-}) => {
+const TabBar: React.FC<ShippingTabBarProps> = ({ tabs, activeIndex = 0, onTabClick }) => {
   return (
     <TabContainer>
       {tabs.map((label, idx) => {
@@ -23,9 +19,9 @@ const TabBar: React.FC<ShippingTabBarProps> = ({
         return (
           <TabButton
             key={idx}
-            isActive={isActive}
-            isFirst={idx === 0}
-            isLast={idx === tabs.length - 1}
+            $isActive={isActive}
+            $isFirst={idx === 0}
+            $isLast={idx === tabs.length - 1}
             onClick={() => onTabClick && onTabClick(idx)}
           >
             {label}
@@ -45,9 +41,9 @@ const TabContainer = styled.div`
 `;
 
 interface TabButtonProps {
-  isActive: boolean;
-  isFirst: boolean;
-  isLast: boolean;
+  $isActive: boolean;
+  $isFirst: boolean;
+  $isLast: boolean;
 }
 
 const TabButton = styled.button<TabButtonProps>`
@@ -62,15 +58,9 @@ const TabButton = styled.button<TabButtonProps>`
   color: #000;
   cursor: pointer;
   /* 탭 버튼이 하나인 경우 양쪽 끝 모두 8px, 아니라면 첫번째/마지막에만 적용 */
-  border-radius: ${({ isFirst, isLast }) =>
-    isFirst && isLast
-      ? '8px 8px 0 0'
-      : isFirst
-        ? '8px 0 0 0'
-        : isLast
-          ? '0 8px 0 0'
-          : '0'};
-  background-color: ${({ isActive }) => (isActive ? '#eeeeee' : '#ffffff')};
+  border-radius: ${({ $isFirst, $isLast }) =>
+    $isFirst && $isLast ? '8px 8px 0 0' : $isFirst ? '8px 0 0 0' : $isLast ? '0 8px 0 0' : '0'};
+  background-color: ${({ $isActive }) => ($isActive ? '#eeeeee' : '#ffffff')};
 
   &:hover {
     background-color: #f2f2f2;

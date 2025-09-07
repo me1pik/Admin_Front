@@ -5,9 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
-} from '../../../components/Header/SettingsDetailSubHeader';
-import ShippingTabBar from '../../../components/TabBar'; // 탭바 컴포넌트 임포트
-import { createAdmin, AdminCreateRequest } from '../../../api/admin';
+} from '@components/Header/SettingsDetailSubHeader';
+import ShippingTabBar from '@components/TabBar'; // 탭바 컴포넌트 임포트
+import { createAdmin, AdminCreateRequest } from '@api/admin';
 
 const AdminCreate: React.FC = () => {
   const navigate = useNavigate();
@@ -30,8 +30,7 @@ const AdminCreate: React.FC = () => {
 
   // 입력 필드 변경 핸들러
   const handleChange =
-    (key: keyof AdminCreateRequest) =>
-    (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    (key: keyof AdminCreateRequest) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       setFormData((prev) => ({
         ...prev,
         [key]: e.target.value,
@@ -60,9 +59,7 @@ const AdminCreate: React.FC = () => {
       navigate('/adminlist');
     } catch (err: any) {
       console.error('관리자 생성 오류', err);
-      setErrorMessage(
-        err?.response?.data?.message || '관리자 생성 중 오류가 발생했습니다.'
-      );
+      setErrorMessage(err?.response?.data?.message || '관리자 생성 중 오류가 발생했습니다.');
     } finally {
       setIsSubmitting(false);
     }
@@ -97,11 +94,7 @@ const AdminCreate: React.FC = () => {
       <DividerDashed />
 
       {/* === 탭바: 관리자 정보 탭 === */}
-      <ShippingTabBar
-        tabs={['관리자 정보']}
-        activeIndex={activeTab}
-        onTabClick={setActiveTab}
-      />
+      <ShippingTabBar tabs={['관리자 정보']} activeIndex={activeTab} onTabClick={setActiveTab} />
 
       {/* === 탭 콘텐츠: activeTab === 0 일 때 폼 표시 === */}
       {activeTab === 0 && (
@@ -110,65 +103,61 @@ const AdminCreate: React.FC = () => {
 
           <Row>
             <Field>
-              <label htmlFor='id'>아이디</label>
+              <label htmlFor="id">아이디</label>
               <input
-                type='text'
-                id='id'
+                type="text"
+                id="id"
                 value={formData.id}
                 onChange={handleChange('id')}
-                placeholder='예: admin1'
+                placeholder="예: admin1"
               />
             </Field>
           </Row>
 
           <Row>
             <Field>
-              <label htmlFor='name'>이름</label>
+              <label htmlFor="name">이름</label>
               <input
-                type='text'
-                id='name'
+                type="text"
+                id="name"
                 value={formData.name}
                 onChange={handleChange('name')}
-                placeholder='예: 김철수'
+                placeholder="예: 김철수"
               />
             </Field>
           </Row>
 
           <Row>
             <Field>
-              <label htmlFor='password'>비밀번호</label>
+              <label htmlFor="password">비밀번호</label>
               <input
-                type='password'
-                id='password'
+                type="password"
+                id="password"
                 value={formData.password}
                 onChange={handleChange('password')}
-                placeholder='비밀번호를 입력하세요'
+                placeholder="비밀번호를 입력하세요"
               />
             </Field>
           </Row>
 
           <Row>
             <Field>
-              <label htmlFor='email'>이메일</label>
+              <label htmlFor="email">이메일</label>
               <input
-                type='email'
-                id='email'
+                type="email"
+                id="email"
                 value={formData.email}
                 onChange={handleChange('email')}
-                placeholder='예: admin1@example.com'
+                placeholder="예: admin1@example.com"
               />
             </Field>
           </Row>
 
           <Row>
             <Field>
-              <label htmlFor='role'>역할(Role)</label>
-              <select
-                id='role'
-                value={formData.role}
-                onChange={handleChange('role')}
-              >
-                <option value='admin'>admin</option>
+              <label htmlFor="role">역할(Role)</label>
+              <select id="role" value={formData.role} onChange={handleChange('role')}>
+                <option value="admin">admin</option>
                 {/* 필요에 따라 옵션 추가 */}
               </select>
             </Field>
@@ -176,21 +165,17 @@ const AdminCreate: React.FC = () => {
 
           <Row>
             <Field>
-              <label htmlFor='status'>상태(Status)</label>
-              <select
-                id='status'
-                value={formData.status}
-                onChange={handleChange('status')}
-              >
-                <option value='active'>active</option>
-                <option value='blocked'>blocked</option>
+              <label htmlFor="status">상태(Status)</label>
+              <select id="status" value={formData.status} onChange={handleChange('status')}>
+                <option value="active">active</option>
+                <option value="blocked">blocked</option>
                 {/* 필요에 따라 옵션 추가 */}
               </select>
             </Field>
           </Row>
 
           {/* 숨겨진 submit 버튼 (엔터 입력 시에도 동작하도록) */}
-          <button type='submit' style={{ display: 'none' }} />
+          <button type="submit" style={{ display: 'none' }} />
         </FormBox>
       )}
     </Container>
@@ -203,8 +188,21 @@ export default AdminCreate;
 
 const Container = styled.div`
   width: 100%;
-  min-width: 1000px;
-  padding: 20px;
+  height: 100%;
+  max-width: 100vw;
+  margin: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #fff;
+  overflow: hidden;
+  padding: 12px 8px 0 8px;
+
+  @media (max-width: 834px) {
+    min-width: 100vw;
+    padding: 0 4px;
+  }
 `;
 
 const HeaderRow = styled.div`

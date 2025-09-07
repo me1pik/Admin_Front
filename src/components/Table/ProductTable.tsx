@@ -1,6 +1,11 @@
 // src/components/Table/ProductTable.tsx
 import React from 'react';
-import styled, { css } from 'styled-components';
+import { Column } from '@components/CommonTable';
+import StatusBadge from 'src/components/Common/StatusBadge';
+import { getStatusBadge } from 'src/utils/statusUtils';
+import styled from 'styled-components';
+import { FaCopy } from 'react-icons/fa';
+import GenericTable from './GenericTable';
 
 const SIZE_LABELS: Record<string, string> = {
   '44': 'S',
@@ -9,7 +14,7 @@ const SIZE_LABELS: Record<string, string> = {
   '77': 'XL',
 };
 
-export interface ProductItem {
+export interface ProductItem extends Record<string, unknown> {
   no: number;
   styleCode: string;
   brand: string;
@@ -28,13 +33,140 @@ interface ProductTableProps {
   selectedRows: Set<number>;
   toggleRow: (no: number) => void;
   toggleAll: () => void;
+  isLoading?: boolean; // 추가
 }
 
-const ellipsis = css`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+const StyleCodeContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 `;
+
+const StyleCodeText = styled.span`
+  font-size: 12px;
+  cursor: pointer;
+  color: #007bff;
+`;
+
+const CopyButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #007bff;
+  }
+`;
+
+const formatSize = (raw: string) => {
+  if (/free/i.test(raw)) return 'Free';
+  const parts = raw.match(/\d+/g);
+  if (!parts) return raw;
+  return parts
+    .map((num) => {
+      const label = SIZE_LABELS[num];
+      return label ? `${num}(${label})` : num;
+    })
+    .join(' / ');
+};
+
+type ProductRow = ProductItem & {
+  rowNo: number;
+  handleEdit: (styleCode: string, no: number) => void;
+  [key: string]: unknown;
+};
+
+const columns: Column<ProductRow>[] = [
+  {
+    key: 'rowNo',
+    label: 'No.',
+    width: '50px',
+    render: (value) => value as React.ReactNode,
+  },
+  {
+    key: 'styleCode',
+    label: '스타일(품번)',
+    width: '150px',
+    render: (value, row) => {
+      const handleCopy = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        try {
+          await navigator.clipboard.writeText(row.styleCode);
+          // 복사 성공 시 피드백 (선택사항)
+          console.log('스타일 품번이 복사되었습니다:', row.styleCode);
+        } catch (err) {
+          console.error('복사 실패:', err);
+        }
+      };
+
+      return (
+        <StyleCodeContainer>
+          <StyleCodeText
+            title={value as string}
+            onClick={() => row.handleEdit(row.styleCode, row.no)}
+          >
+            {value as string}
+          </StyleCodeText>
+          <CopyButton onClick={handleCopy} title="스타일 품번 복사">
+            <FaCopy size={12} />
+          </CopyButton>
+        </StyleCodeContainer>
+      );
+    },
+  },
+  {
+    key: 'brand',
+    label: '브랜드',
+    width: '100px',
+    render: (v) => <span title={v as string}>{v as string}</span>,
+  },
+  {
+    key: 'category',
+    label: '분류',
+    width: '80px',
+    render: (v) => <span title={v as string}>{v as string}</span>,
+  },
+  {
+    key: 'color',
+    label: '색상',
+    width: '80px',
+    render: (v) => <span title={v as string}>{v as string}</span>,
+  },
+  {
+    key: 'size',
+    label: '사이즈',
+    width: '100px',
+    render: (v) => formatSize(v as string),
+  },
+  {
+    key: 'price',
+    label: '가격',
+    width: '100px',
+    render: (v) => `${Number(v).toLocaleString()}원`,
+  },
+  {
+    key: 'registerDate',
+    label: '등록일',
+    width: '100px',
+    render: (v) => v as React.ReactNode,
+  },
+  {
+    key: 'status',
+    label: '상태',
+    width: '80px',
+    render: (v) => {
+      const badge = getStatusBadge(v as string);
+      return <StatusBadge style={{ background: badge.background }}>{badge.label}</StatusBadge>;
+    },
+  },
+];
 
 const ProductTable: React.FC<ProductTableProps> = ({
   filteredData,
@@ -43,175 +175,37 @@ const ProductTable: React.FC<ProductTableProps> = ({
   selectedRows,
   toggleRow,
   toggleAll,
+  isLoading,
 }) => {
-  const allSelected =
-    filteredData.length > 0 && selectedRows.size === filteredData.length;
+  // rowNo, handleEdit을 각 row에 추가 (GenericTable의 processRow로 대체)
+  const processRow = React.useCallback(
+    (item: ProductItem, idx: number) => ({
+      ...item,
+      rowNo: startNo + idx + 1,
+      handleEdit,
+    }),
+    [handleEdit, startNo],
+  );
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case '등록완료':
-        return '#4AA361';
-      case '등록대기':
-        return '#3071B2';
-      case '판매종료':
-        return '#CD5542';
-      default:
-        return '#6c757d';
-    }
-  };
-
-  const formatSize = (raw: string) => {
-    if (/free/i.test(raw)) return 'Free';
-    const parts = raw.match(/\d+/g);
-    if (!parts) return raw;
-    return parts
-      .map((num) => {
-        const label = SIZE_LABELS[num];
-        return label ? `${num}(${label})` : num;
-      })
-      .join(' / ');
-  };
+  // onSelectRow, onSelectAll useCallback 유지
+  const onSelectRow = React.useCallback((row: ProductRow) => toggleRow(row.no), [toggleRow]);
+  const onSelectAll = React.useCallback(() => toggleAll(), [toggleAll]);
 
   return (
-    <Table>
-      <colgroup>
-        <col style={{ width: '40px' }} />
-        <col style={{ width: '50px' }} />
-        <col style={{ width: '150px' }} />
-        <col style={{ width: '100px' }} />
-        <col style={{ width: '80px' }} />
-        <col style={{ width: '80px' }} />
-        <col style={{ width: '100px' }} />
-        <col style={{ width: '100px' }} />
-        <col style={{ width: '100px' }} />
-        <col style={{ width: '80px' }} />
-      </colgroup>
-      <thead>
-        <TableRow>
-          <ThCheckbox>
-            <input type='checkbox' checked={allSelected} onChange={toggleAll} />
-          </ThCheckbox>
-          <Th>No.</Th>
-          <Th>스타일(품번)</Th>
-          <Th>브랜드</Th>
-          <Th>분류</Th>
-          <Th>색상</Th>
-          <Th>사이즈</Th>
-          <Th>가격</Th>
-          <Th>등록일</Th>
-          <Th>상태</Th>
-        </TableRow>
-      </thead>
-      <tbody>
-        {filteredData.map((item, idx) => (
-          <TableRow key={item.no}>
-            <TdCheckbox>
-              <input
-                type='checkbox'
-                checked={selectedRows.has(item.no)}
-                onChange={() => toggleRow(item.no)}
-              />
-            </TdCheckbox>
-            <Td>{startNo + idx + 1}</Td>
-            <Td onClick={() => handleEdit(item.styleCode, item.no)}>
-              <StyleCodeText title={item.styleCode}>
-                {item.styleCode}
-              </StyleCodeText>
-            </Td>
-            <Td title={item.brand}>{item.brand}</Td>
-            <Td title={item.category}>{item.category}</Td>
-            <Td title={item.color}>{item.color}</Td>
-            <Td title={item.size}>{formatSize(item.size)}</Td>
-            <Td title={`${item.price.toLocaleString()}원`}>
-              {item.price.toLocaleString()}원
-            </Td>
-            <Td title={item.registerDate}>{item.registerDate}</Td>
-            <Td>
-              <StatusBadge
-                title={item.status}
-                style={{ backgroundColor: getStatusColor(item.status) }}
-              >
-                {item.status}
-              </StatusBadge>
-            </Td>
-          </TableRow>
-        ))}
-        {filteredData.length < 10 &&
-          Array.from({ length: 10 - filteredData.length }).map((_, i) => (
-            <TableRow key={`empty-${i}`}>
-              {Array.from({ length: 10 }).map((_, j) => (
-                <Td key={j}>&nbsp;</Td>
-              ))}
-            </TableRow>
-          ))}
-      </tbody>
-    </Table>
+    <GenericTable<ProductItem, ProductRow>
+      data={filteredData}
+      columns={columns}
+      rowKey={(row) => row.no}
+      processRow={processRow}
+      showCheckbox
+      selectedRows={Array.from(selectedRows)}
+      onSelectAll={onSelectAll}
+      onSelectRow={onSelectRow}
+      emptyMessage="데이터가 없습니다."
+      style={{ minWidth: 900 }}
+      isLoading={isLoading}
+    />
   );
 };
 
 export default ProductTable;
-
-/* Styled Components */
-const Table = styled.table`
-  width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-  background-color: #fff;
-  border: 1px solid #ddd;
-`;
-const TableRow = styled.tr`
-  height: 44px;
-`;
-const Th = styled.th`
-  text-align: center;
-  vertical-align: middle;
-  background-color: #eee;
-
-  font-weight: 800;
-  font-size: 12px;
-  color: #000;
-  border: 1px solid #ddd;
-  ${ellipsis}
-`;
-const ThCheckbox = styled.th`
-  text-align: center;
-  vertical-align: middle;
-  background-color: #eee;
-  border: 1px solid #ddd;
-`;
-const Td = styled.td`
-  text-align: center;
-  vertical-align: middle;
-
-  font-weight: 400;
-  font-size: 12px;
-  color: #000;
-  border: 1px solid #ddd;
-  ${ellipsis}
-`;
-const TdCheckbox = styled.td`
-  text-align: center;
-  vertical-align: middle;
-  border: 1px solid #ddd;
-`;
-const StyleCodeText = styled.span`
-  font-size: 12px;
-  cursor: pointer;
-  color: #007bff;
-  &:hover {
-    color: #0056b3;
-  }
-`;
-const StatusBadge = styled.div`
-  display: inline-block;
-  border-radius: 4px;
-  padding: 0 8px;
-  height: 24px;
-  line-height: 24px;
-  font-size: 10px;
-  font-weight: 800;
-  color: #fff;
-  text-align: center;
-  vertical-align: middle;
-  ${ellipsis}
-`;

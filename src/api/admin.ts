@@ -1,5 +1,5 @@
 // src/api/admin.ts
-import { Axios } from './Axios';
+import { Axios } from 'src/api/Axios';
 
 /**
  * 관리자 생성 요청 데이터 인터페이스
@@ -64,9 +64,7 @@ export interface GetAdminCountResponse {
  * 새 관리자를 생성합니다.
  * POST /admin
  */
-export const createAdmin = async (
-  data: AdminCreateRequest
-): Promise<AdminResponse> => {
+export const createAdmin = async (data: AdminCreateRequest): Promise<AdminResponse> => {
   const response = await Axios.post('/admin', data);
   return response.data;
 };
@@ -77,9 +75,12 @@ export const createAdmin = async (
  */
 export const getAllAdmins = async (
   limit = 10,
-  page = 1
+  page = 1,
+  search?: string,
 ): Promise<GetAdminsResponse> => {
-  const response = await Axios.get('/admin', { params: { limit, page } });
+  const params: any = { limit, page };
+  if (search) params.search = search;
+  const response = await Axios.get('/admin', { params });
   return response.data;
 };
 
@@ -89,11 +90,12 @@ export const getAllAdmins = async (
  */
 export const getActiveAdmins = async (
   limit = 10,
-  page = 1
+  page = 1,
+  search?: string,
 ): Promise<GetAdminsResponse> => {
-  const response = await Axios.get('/admin/active', {
-    params: { limit, page },
-  });
+  const params: any = { limit, page };
+  if (search) params.search = search;
+  const response = await Axios.get('/admin/active', { params });
   return response.data;
 };
 
@@ -103,11 +105,12 @@ export const getActiveAdmins = async (
  */
 export const getBlockedAdmins = async (
   limit = 10,
-  page = 1
+  page = 1,
+  search?: string,
 ): Promise<GetAdminsResponse> => {
-  const response = await Axios.get('/admin/blocked', {
-    params: { limit, page },
-  });
+  const params: any = { limit, page };
+  if (search) params.search = search;
+  const response = await Axios.get('/admin/blocked', { params });
   return response.data;
 };
 
@@ -115,10 +118,7 @@ export const getBlockedAdmins = async (
  * 특정 관리자의 정보를 업데이트합니다.
  * PUT /admin/{id}
  */
-export const updateAdmin = async (
-  id: string,
-  data: AdminUpdateRequest
-): Promise<AdminResponse> => {
+export const updateAdmin = async (id: string, data: AdminUpdateRequest): Promise<AdminResponse> => {
   const response = await Axios.put(`/admin/${id}`, data);
   return response.data;
 };

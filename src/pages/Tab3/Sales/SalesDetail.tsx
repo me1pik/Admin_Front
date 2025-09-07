@@ -2,12 +2,14 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
+import { FaCopy } from 'react-icons/fa';
+
 import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
-} from '../../../components/Header/SettingsDetailSubHeader';
-import ShippingTabBar from '../../../components/TabBar';
-import ReusableModal2 from '../../../components/OneButtonModal';
-import SalesDetailTopBoxes from '../../../components/SalesDetailTopBoxes';
+} from '@components/Header/SettingsDetailSubHeader';
+import ShippingTabBar from '@components/TabBar';
+import ReusableModal2 from '@components/TwoButtonModal';
+import SalesDetailTopBoxes from '@components/SalesDetailTopBoxes';
 
 interface SalesDetailProps {
   isCreate?: boolean;
@@ -139,6 +141,15 @@ const SalesDetail: React.FC<SalesDetailProps> = ({ isCreate = false }) => {
     onEndClick: handleDelete,
   };
 
+  const handleCopyStyleCode = async (styleCode: string) => {
+    try {
+      await navigator.clipboard.writeText(styleCode);
+      console.log('스타일 품번이 복사되었습니다:', styleCode);
+    } catch (err) {
+      console.error('복사 실패:', err);
+    }
+  };
+
   return (
     <Container>
       <HeaderRow>
@@ -156,11 +167,7 @@ const SalesDetail: React.FC<SalesDetailProps> = ({ isCreate = false }) => {
 
       <DividerDashed />
 
-      <ShippingTabBar
-        tabs={['상세내역']}
-        activeIndex={activeTab}
-        onTabClick={setActiveTab}
-      />
+      <ShippingTabBar tabs={['상세내역']} activeIndex={activeTab} onTabClick={setActiveTab} />
 
       {activeTab === 0 && (
         <DetailSection>
@@ -196,12 +203,22 @@ const SalesDetail: React.FC<SalesDetailProps> = ({ isCreate = false }) => {
                   <TdCenter>{o.date}</TdCenter>
                   <TdLeft>
                     <InstaContainer>
-                      <Avatar />
+                      <Avatar src={o.avatarUrl} alt={o.account} />
                       <AccountText>{o.account}</AccountText>
                     </InstaContainer>
                   </TdLeft>
                   <TdCenter>{o.brand}</TdCenter>
-                  <TdCenter>{o.styleCode}</TdCenter>
+                  <TdCenter>
+                    <StyleCodeContainer>
+                      <StyleCodeText>{o.styleCode}</StyleCodeText>
+                      <CopyButton
+                        onClick={() => handleCopyStyleCode(o.styleCode)}
+                        title="스타일 품번 복사"
+                      >
+                        <FaCopy size={12} />
+                      </CopyButton>
+                    </StyleCodeContainer>
+                  </TdCenter>
                   <TdCenter>{o.size}</TdCenter>
                   <TdCenter>{o.color}</TdCenter>
                   <TdCenter>{o.amount.toLocaleString()}원</TdCenter>
@@ -217,7 +234,7 @@ const SalesDetail: React.FC<SalesDetailProps> = ({ isCreate = false }) => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirm}
-        title='확인'
+        title="확인"
       >
         저장하시겠습니까?
       </ReusableModal2>
@@ -231,8 +248,21 @@ export default SalesDetail;
 
 const Container = styled.div`
   width: 100%;
-  min-width: 1000px;
-  padding: 20px;
+  height: 100%;
+  max-width: 100vw;
+  margin: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #fff;
+  overflow: hidden;
+  padding: 12px 8px 0 8px;
+
+  @media (max-width: 834px) {
+    min-width: 100vw;
+    padding: 0 4px;
+  }
 `;
 
 const HeaderRow = styled.div`
@@ -291,57 +321,71 @@ const Tbody = styled.tbody``;
 const TableRow = styled.tr`
   height: 44px;
   &:nth-child(even) {
-    background-color: #fafafa;
+    background: #f8f9fa;
+  }
+  &:hover {
+    background-color: #e3f2fd;
+    cursor: pointer;
   }
 `;
 
-const Th = styled.th`
-  text-align: center;
-  vertical-align: middle;
-
-  font-weight: 800;
-  font-size: 12px;
-  color: #000000;
-  border: 1px solid #dddddd;
-  white-space: nowrap;
-`;
+const Th = styled.th``;
 
 const TdCenter = styled.td`
   text-align: center;
   vertical-align: middle;
-
-  font-weight: 400;
-  font-size: 12px;
-  color: #000000;
-  border: 1px solid #dddddd;
-  white-space: nowrap;
+  padding: 12px 16px;
+  border-right: 1px solid #dddddd;
 `;
 
-const TdLeft = styled(TdCenter)`
+const TdLeft = styled.td`
   text-align: left;
-  padding-left: 12px;
+  vertical-align: middle;
+  padding: 12px 16px;
+  border-right: 1px solid #dddddd;
 `;
 
 const InstaContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
 `;
 
-const Avatar = styled.div`
-  width: 26px;
-  height: 26px;
+const Avatar = styled.img`
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background-color: #cccccc;
-  flex-shrink: 0;
+  margin-right: 8px;
 `;
 
 const AccountText = styled.span`
-  font-weight: 400;
+  font-size: 14px;
+  color: #333;
+`;
+
+const StyleCodeContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+`;
+
+const StyleCodeText = styled.span`
   font-size: 12px;
-  color: #007bff;
+  color: #333;
+`;
+
+const CopyButton = styled.button`
+  background: none;
+  border: none;
   cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: color 0.2s;
+
   &:hover {
-    color: #0056b3;
+    color: #007bff;
   }
 `;

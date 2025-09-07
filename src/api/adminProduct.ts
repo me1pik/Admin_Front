@@ -1,4 +1,4 @@
-import { Axios } from './Axios';
+import { Axios } from 'src/api/Axios';
 
 export interface SizeRow {
   size: string;
@@ -79,9 +79,7 @@ export type UpdateProductRequest = Partial<
 };
 
 /** 제품 목록 조회 */
-export const getProducts = async (
-  params?: ProductListParams
-): Promise<ProductListResponse> => {
+export const getProducts = async (params?: ProductListParams): Promise<ProductListResponse> => {
   const response = await Axios.get('/admin/products-management/list', {
     params,
   });
@@ -89,9 +87,7 @@ export const getProducts = async (
 };
 
 /** 제품 상세 조회 */
-export const getProductDetail = async (
-  id: number
-): Promise<ProductDetailResponse> => {
+export const getProductDetail = async (id: number): Promise<ProductDetailResponse> => {
   const response = await Axios.get(`/admin/products-management/${id}`);
   return response.data;
 };
@@ -99,23 +95,17 @@ export const getProductDetail = async (
 /** 제품 수정 */
 export const updateProduct = async (
   id: number,
-  updateData: UpdateProductRequest
+  updateData: UpdateProductRequest,
 ): Promise<ProductDetailResponse> => {
-  const response = await Axios.patch(
-    `/admin/products-management/${id}`,
-    updateData
-  );
+  const response = await Axios.patch(`/admin/products-management/${id}`, updateData);
   return response.data;
 };
 
 /** 신규 제품 등록 */
 export const createProduct = async (
   productData: Partial<
-    Pick<
-      ProductDetailResponse,
-      'fabricComposition' | 'retailPrice' | 'sale_price' | 'rental_price'
-    >
-  >
+    Pick<ProductDetailResponse, 'fabricComposition' | 'retailPrice' | 'sale_price' | 'rental_price'>
+  >,
 ): Promise<ProductDetailResponse> => {
   const response = await Axios.post('/admin/products-management', productData);
   return response.data;
@@ -130,13 +120,8 @@ export interface BulkUpdateStatusRequest {
   registration: number;
 }
 
-export const updateProductsStatus = async (
-  payload: BulkUpdateStatusRequest
-): Promise<void> => {
-  const response = await Axios.patch(
-    '/admin/products-management/status/cn',
-    payload
-  );
+export const updateProductsStatus = async (payload: BulkUpdateStatusRequest): Promise<void> => {
+  const response = await Axios.patch('/admin/products-management/status/cn', payload);
   return response.data;
 };
 

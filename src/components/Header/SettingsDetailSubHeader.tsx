@@ -37,7 +37,7 @@ const SettingsDetailSubHeader: React.FC<DetailSubHeaderProps> = ({
   };
 
   return (
-    <HeaderContainer>
+    <Container>
       <LeftButton onClick={handleBack}>
         <BulletIcon />
         {backLabel}
@@ -46,16 +46,17 @@ const SettingsDetailSubHeader: React.FC<DetailSubHeaderProps> = ({
         <EditButton onClick={handleEdit}>{editLabel}</EditButton>
         <EndButton onClick={handleEnd}>{endLabel}</EndButton>
       </RightButtons>
-    </HeaderContainer>
+    </Container>
   );
 };
 
 export default SettingsDetailSubHeader;
 
-const HeaderContainer = styled.div`
+const Container = styled.div`
+  width: 100%;
   display: flex;
   align-items: center;
-  min-width: 1000px;
+  min-width: 834px;
   min-height: 60px;
   background: #f9f9f9;
   border: 1px solid #dddddd;

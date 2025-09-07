@@ -1,8 +1,8 @@
 import React from 'react';
-import styled from 'styled-components';
-import { useSearchParams } from 'react-router-dom';
+import { Column } from '@components/CommonTable';
+import GradeBadgeCell from '@components/Table/GradeBadgeCell';
+import GenericTable from './GenericTable';
 
-/** User 인터페이스 (이미지에 맞춰 필드 변경) */
 export interface User {
   no: number;
   grade: string;
@@ -14,165 +14,81 @@ export interface User {
   submitCount: string;
   average: number;
   totalSum: number;
+  handleEdit?: (no: number) => void;
+  [key: string]: unknown;
 }
 
-/** PageTable 컴포넌트 Props */
 interface PageTableProps {
-  /** 전체 사용자 데이터 */
   data: User[];
-  /** 편집 버튼 클릭 시 호출될 콜백 */
   handleEdit: (no: number) => void;
-  /** 한 페이지당 항목 수 (기본값: 10) */
-  pageSize?: number;
+  selectedRows?: Set<number>;
+  onSelectAll?: (checked: boolean) => void;
+  onSelectRow?: (row: User, checked: boolean) => void;
+  isLoading?: boolean; // 추가
 }
+
+const columns: Column<User & { handleEdit?: (no: number) => void }>[] = [
+  { key: 'no', label: 'No.', width: '60px' },
+  {
+    key: 'grade',
+    label: '등급',
+    width: '80px',
+    render: (v) => <GradeBadgeCell grade={v as string} />,
+  },
+  { key: 'name', label: '이름', width: '80px' },
+  { key: 'nickname', label: '닉네임', width: '80px' },
+  {
+    key: 'instagram',
+    label: '계정(인스타)',
+    width: '150px',
+    render: (v, row) => (
+      <span
+        style={{ color: '#007bff', cursor: 'pointer' }}
+        onClick={() => row.handleEdit?.(row.no)}
+        role="button"
+        tabIndex={0}
+        aria-label="계정 상세 보기"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') row.handleEdit?.(row.no);
+        }}
+      >
+        {v as string}
+      </span>
+    ),
+  },
+  { key: 'season', label: '시즌 진행상태', width: '100px' },
+  { key: 'contentsCount', label: '콘텐츠 수', width: '80px' },
+  { key: 'submitCount', label: '등록 제출 수', width: '80px' },
+  { key: 'average', label: '1회 평균', width: '80px' },
+  { key: 'totalSum', label: '총 합', width: '80px' },
+];
 
 const PageTable: React.FC<PageTableProps> = ({
   data,
   handleEdit,
-  pageSize = 10,
+  selectedRows = new Set(),
+  onSelectAll,
+  onSelectRow,
+  isLoading,
 }) => {
-  const [searchParams] = useSearchParams();
-
-  // URL ?page= 에서 현재 페이지를 읽되, 없으면 1
-  const currentPage = Number(searchParams.get('page') ?? '1');
-
-  // 현재 페이지에 해당하는 데이터 슬라이스
-  const slicedData = data.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  // handleEdit을 row에 추가 (GenericTable의 processRow로 대체)
+  const processRow = React.useCallback((user: User) => ({ ...user, handleEdit }), [handleEdit]);
 
   return (
-    <>
-      <Table>
-        <colgroup>
-          <col style={{ width: '60px' }} />
-          <col style={{ width: '60px' }} />
-          <col style={{ width: '80px' }} />
-          <col style={{ width: '80px' }} />
-          <col style={{ width: '150px' }} />
-          <col style={{ width: '100px' }} />
-          <col style={{ width: '80px' }} />
-          <col style={{ width: '80px' }} />
-          <col style={{ width: '80px' }} />
-          <col style={{ width: '80px' }} />
-        </colgroup>
-        <thead>
-          <TableRow>
-            <Th>No.</Th>
-            <Th>등급</Th>
-            <Th>이름</Th>
-            <Th>닉네임</Th>
-            <Th>계정(인스타)</Th>
-            <Th>시즌 진행상태</Th>
-            <Th>컨텐츠 수</Th>
-            <Th>등록 제출 수</Th>
-            <Th>1회 평균</Th>
-            <Th>총 합</Th>
-          </TableRow>
-        </thead>
-        <tbody>
-          {slicedData.map((user, idx) => (
-            <TableRow key={idx}>
-              <Td>{user.no}</Td>
-              <Td>{user.grade}</Td>
-              <Td>{user.name}</Td>
-              <Td>{user.nickname}</Td>
-              <TdLeft>
-                <InstaContainer>
-                  <Avatar />
-                  <InstaText onClick={() => handleEdit(user.no)}>
-                    {user.instagram}
-                  </InstaText>
-                </InstaContainer>
-              </TdLeft>
-              <Td>{user.season}</Td>
-              <Td>{user.contentsCount}</Td>
-              <Td>{user.submitCount}</Td>
-              <Td>{user.average}</Td>
-              <Td>{user.totalSum}</Td>
-            </TableRow>
-          ))}
-
-          {/* 빈 행 채우기 */}
-          {slicedData.length < pageSize &&
-            Array.from({ length: pageSize - slicedData.length }).map((_, i) => (
-              <TableRow key={`empty-${i}`}>
-                <Td>&nbsp;</Td>
-                <Td>&nbsp;</Td>
-                <Td>&nbsp;</Td>
-                <Td>&nbsp;</Td>
-                <TdLeft>&nbsp;</TdLeft>
-                <Td>&nbsp;</Td>
-                <Td>&nbsp;</Td>
-                <Td>&nbsp;</Td>
-                <Td>&nbsp;</Td>
-                <Td>&nbsp;</Td>
-              </TableRow>
-            ))}
-        </tbody>
-      </Table>
-    </>
+    <GenericTable<User>
+      data={data}
+      columns={columns}
+      rowKey={(row) => row.no}
+      processRow={processRow}
+      showCheckbox
+      selectedRows={Array.from(selectedRows)}
+      {...(onSelectAll ? { onSelectAll } : {})}
+      {...(onSelectRow ? { onSelectRow } : {})}
+      emptyMessage="데이터가 없습니다."
+      style={{ minWidth: 900 }}
+      isLoading={isLoading}
+    />
   );
 };
 
 export default PageTable;
-
-/* ================= Styled Components ================= */
-const Table = styled.table`
-  width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-  background: #fff;
-  border: 1px solid #ddd;
-`;
-
-const TableRow = styled.tr`
-  height: 44px;
-`;
-
-const Th = styled.th`
-  text-align: center;
-  vertical-align: middle;
-  background: #eee;
-
-  font-weight: 800;
-  font-size: 12px;
-  border: 1px solid #ddd;
-  white-space: nowrap;
-`;
-
-const Td = styled.td`
-  text-align: center;
-  vertical-align: middle;
-
-  font-size: 12px;
-  border: 1px solid #ddd;
-  white-space: nowrap;
-`;
-
-const TdLeft = styled(Td)`
-  text-align: left;
-`;
-
-const InstaContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: 10px;
-`;
-
-const Avatar = styled.div`
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: #ccc;
-`;
-
-const InstaText = styled.span`
-  cursor: pointer;
-  color: #007bff;
-  &:hover {
-    color: #0056b3;
-  }
-`;

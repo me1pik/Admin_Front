@@ -5,10 +5,10 @@ import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
 import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
-} from '../../../components/Header/SettingsDetailSubHeader';
-import ShippingTabBar from '../../../components/TabBar';
-import ReusableModal2 from '../../../components/OneButtonModal';
-import CalculateDetailTopBoxes from '../../../components/CalculateDetailTopBoxes';
+} from '@components/Header/SettingsDetailSubHeader';
+import ShippingTabBar from '@components/TabBar';
+import ReusableModal2 from '@components/OneButtonModal';
+import CalculateDetailTopBoxes from '@components/CalculateDetailTopBoxes';
 
 interface CalculateDetailProps {
   isCreate?: boolean;
@@ -25,9 +25,7 @@ interface SummaryItem {
   settlementDate: string;
 }
 
-const CalculateDetail: React.FC<CalculateDetailProps> = ({
-  isCreate = false,
-}) => {
+const CalculateDetail: React.FC<CalculateDetailProps> = ({ isCreate = false }) => {
   const navigate = useNavigate();
   const { no } = useParams<{ no: string }>();
   const numericNo = isCreate ? undefined : Number(no);
@@ -143,11 +141,7 @@ const CalculateDetail: React.FC<CalculateDetailProps> = ({
 
       <DividerDashed />
 
-      <ShippingTabBar
-        tabs={['상세내역']}
-        activeIndex={activeTab}
-        onTabClick={setActiveTab}
-      />
+      <ShippingTabBar tabs={['상세내역']} activeIndex={activeTab} onTabClick={setActiveTab} />
 
       {activeTab === 0 && (
         <DetailSection>
@@ -196,7 +190,7 @@ const CalculateDetail: React.FC<CalculateDetailProps> = ({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirm}
-        title='확인'
+        title="확인"
       >
         저장하시겠습니까?
       </ReusableModal2>
@@ -210,8 +204,21 @@ export default CalculateDetail;
 
 const Container = styled.div`
   width: 100%;
-  min-width: 1000px;
-  padding: 20px;
+  height: 100%;
+  max-width: 100vw;
+  margin: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #fff;
+  overflow: hidden;
+  padding: 12px 8px 0 8px;
+
+  @media (max-width: 834px) {
+    min-width: 100vw;
+    padding: 0 4px;
+  }
 `;
 
 const HeaderRow = styled.div`
@@ -268,30 +275,20 @@ const Tbody = styled.tbody``;
 
 const TableRow = styled.tr`
   height: 44px;
-
   &:nth-child(even) {
-    background-color: #fafafa;
+    background: #f8f9fa;
+  }
+  &:hover {
+    background-color: #e3f2fd;
+    cursor: pointer;
   }
 `;
 
-const Th = styled.th`
-  text-align: center;
-  vertical-align: middle;
-
-  font-weight: 800;
-  font-size: 12px;
-  color: #000000;
-  border: 1px solid #dddddd;
-  white-space: nowrap;
-`;
+const Th = styled.th``;
 
 const TdCenter = styled.td`
   text-align: center;
   vertical-align: middle;
-
-  font-weight: 400;
-  font-size: 12px;
-  color: #000000;
-  border: 1px solid #dddddd;
-  white-space: nowrap;
+  padding: 12px 16px;
+  border-right: 1px solid #dddddd;
 `;

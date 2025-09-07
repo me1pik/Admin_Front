@@ -2,8 +2,7 @@
 import React from 'react';
 import styled, { keyframes } from 'styled-components';
 
-interface RegisterButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface RegisterButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** 버튼에 표시할 텍스트 */
   text: string;
 }

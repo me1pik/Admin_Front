@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FaTimes, FaLink } from 'react-icons/fa';
 
-import BulletIcon from '../../assets/BulletIcon.svg'; // SVG 아이콘 import
+import BulletIcon from '@assets/BulletIcon.svg'; // SVG 아이콘 import
 
 interface ProductImageSectionProps {
   images: string[];
@@ -11,6 +11,7 @@ interface ProductImageSectionProps {
   handleImageDelete: (index: number) => void;
   handleImageReorder: (from: number, to: number) => void;
   productUrl: string;
+  style?: React.CSSProperties;
 }
 
 const ProductImageSection: React.FC<ProductImageSectionProps> = ({
@@ -23,23 +24,19 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
   const [isCopied, setIsCopied] = useState(false);
 
   const onAddUrl = (idx: number) => {
-    const url = window.prompt(
-      '이미지 URL을 입력해주세요\n예: https://…jpg#addimg'
-    );
+    const url = window.prompt('이미지 URL을 입력해주세요\n예: https://…jpg#addimg');
     if (url?.trim()) handleImageLinkUpload(idx, url.trim());
   };
 
   const onBatchUrl = () => {
     const input = window.prompt(
-      '여러 이미지 URL을 붙여넣으세요.\n쉼표(,) 또는 공백·줄바꿈으로 구분'
+      '여러 이미지 URL을 붙여넣으세요.\n쉼표(,) 또는 공백·줄바꿈으로 구분',
     );
     if (!input) return;
     const urls = input
       .split(/[\s,]+/)
       .map((u) => u.trim())
-      .filter((u) =>
-        /^https?:\/\/\S+\.(?:jpe?g|png|gif)(?:\?\S*)?(?:#\S*)?$/i.test(u)
-      );
+      .filter((u) => /^https?:\/\/\S+\.(?:jpe?g|png|gif)(?:\?\S*)?(?:#\S*)?$/i.test(u));
     if (!urls.length) {
       alert('유효한 이미지 URL이 없습니다.');
       return;
@@ -80,7 +77,7 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
       {/* Header: 타이틀만 남기고 일괄등록 버튼은 제거 */}
       <Header>
         <HeaderLeft>
-          <BulletIconImage src={BulletIcon} alt='bullet icon' />
+          <BulletIconImage src={BulletIcon} alt="bullet icon" />
           <Title>제품 이미지</Title>
         </HeaderLeft>
       </Header>
@@ -97,22 +94,20 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
                 onDrop={(e) => onDrop(e, idx)}
               >
                 <IdxLabel>{idx + 1}</IdxLabel>
-                <ImgBox isMain={idx === 0}>
+                <ImgBox $isMain={idx === 0}>
                   <Img src={src} alt={`이미지 ${idx + 1}`} />
                   <DeleteBtn
                     onClick={(e) => {
                       e.stopPropagation();
                       handleImageDelete(idx);
                     }}
-                    title='삭제'
+                    title="삭제"
                   >
                     <FaTimes size={16} />
                   </DeleteBtn>
                 </ImgBox>
               </DragWrapper>
-              <Caption>
-                {idx === 0 ? '썸네일 이미지' : `착장 이미지 ${idx}`}
-              </Caption>
+              <Caption>{idx === 0 ? '썸네일 이미지' : `착장 이미지 ${idx}`}</Caption>
             </Column>
           ))}
 
@@ -128,7 +123,7 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
         </ImageList>
 
         {/* 일괄등록 버튼: BorderContainer 안쪽 오른쪽 하단에 절대 위치 */}
-        <ContainerBatchButton onClick={onBatchUrl} title='URL 일괄 등록'>
+        <ContainerBatchButton onClick={onBatchUrl} title="URL 일괄 등록">
           <FaLink size={14} />
           <span>일괄등록</span>
         </ContainerBatchButton>
@@ -137,20 +132,16 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
       {/* URL 복사 섹션 */}
       <UrlContainer>
         <HeaderLeft>
-          <BulletIconImage src={BulletIcon} alt='bullet icon' />
+          <BulletIconImage src={BulletIcon} alt="bullet icon" />
           <Title>제품(원본) URL 정보</Title>
         </HeaderLeft>
 
         {productUrl ? (
           <UrlLinkWrapper>
-            <StyledLink
-              href={productUrl}
-              target='_blank'
-              rel='noopener noreferrer'
-            >
+            <StyledLink href={productUrl} target="_blank" rel="noopener noreferrer">
               {productUrl}
             </StyledLink>
-            <CopyButton onClick={handleCopyClick} isCopied={isCopied}>
+            <CopyButton onClick={handleCopyClick} $isCopied={isCopied}>
               {isCopied ? '복사완료' : '링크복사'}
             </CopyButton>
           </UrlLinkWrapper>
@@ -250,11 +241,11 @@ const IdxLabel = styled.div`
 `;
 
 /* ImgBox: 이미지 박스 (연한 회색 배경, 테두리) */
-const ImgBox = styled.div<{ isMain?: boolean }>`
+const ImgBox = styled.div<{ $isMain?: boolean }>`
   width: 140px;
   height: 200px;
   background: #ececec;
-  border: 2px solid ${({ isMain }) => (isMain ? '#f6ae24' : '#ddd')};
+  border: 2px solid ${({ $isMain }) => ($isMain ? '#f6ae24' : '#ddd')};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -386,10 +377,10 @@ const StyledLink = styled.a`
 `;
 
 /* CopyButton: 링크 복사 버튼 */
-const CopyButton = styled.button<{ isCopied: boolean }>`
+const CopyButton = styled.button<{ $isCopied: boolean }>`
   width: 70px;
   height: 100%;
-  background: ${({ isCopied }) => (isCopied ? '#555' : '#000')};
+  background: ${({ $isCopied }) => ($isCopied ? '#555' : '#000')};
   color: #fff;
   border: none;
   border-radius: 0;

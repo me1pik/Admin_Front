@@ -64,43 +64,66 @@ export default TaskHistoryTable;
 /* ====================== Styled Components ====================== */
 
 const TableContainer = styled.div`
-  width: 100%;
+  min-width: 834px;
+  min-height: 600px;
+  max-width: 100vw;
   overflow-x: auto;
+  @media (max-width: 834px) {
+    min-width: 100vw;
+    padding: 0 8px;
+  }
+  @media (max-height: 1194px) {
+    min-height: 400px;
+  }
   border: 1px solid #dddddd;
   border-radius: 4px;
-  min-width: 1000px;
 `;
 
 const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
+  font-size: 14px;
+  color: #333;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow-x: auto;
 
-  background-color: #ffffff;
+  th,
+  td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+
+  th {
+    font-weight: 700;
+    font-size: 14px;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+  }
+
+  tbody tr:hover {
+    background-color: #e3f2fd;
+    cursor: pointer;
+  }
+
+  @media (max-width: 834px) {
+    display: block;
+    overflow-x: auto;
+  }
 `;
 
 const Th = styled.th`
-  height: 40px;
-  border: 1px solid #dddddd;
-  background-color: #eeeeee;
-  font-weight: 800;
-  font-size: 12px;
-  color: #000000;
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
 `;
 
-const Td = styled.td`
-  height: 44px;
-  border: 1px solid #dddddd;
-  font-weight: 400;
-  font-size: 12px;
-  color: #000000;
-  text-align: justify;
-  padding: 0 20px;
-  vertical-align: middle;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+const Td = styled.td<{ $align?: string }>`
+  font-size: 14px;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  text-align: ${({ $align }) => $align || 'left'};
 `;

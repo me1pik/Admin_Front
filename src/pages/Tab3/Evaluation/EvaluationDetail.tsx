@@ -5,19 +5,17 @@ import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
 import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
-} from '../../../components/Header/SettingsDetailSubHeader';
-import ShippingTabBar from '../../../components/TabBar';
-import ReusableModal2 from '../../../components/OneButtonModal';
-import EvaluationDetailTopBoxes from '../../../components/EvaluationDetailTopBoxes';
+} from '@components/Header/SettingsDetailSubHeader';
+import ShippingTabBar from '@components/TabBar';
+import ReusableModal2 from '@components/OneButtonModal';
+import EvaluationDetailTopBoxes from '@components/EvaluationDetailTopBoxes';
 import { FaStar, FaRegStar } from 'react-icons/fa';
 
 interface EvaluationDetailProps {
   isCreate?: boolean;
 }
 
-const EvaluationDetail: React.FC<EvaluationDetailProps> = ({
-  isCreate = false,
-}) => {
+const EvaluationDetail: React.FC<EvaluationDetailProps> = ({ isCreate = false }) => {
   const navigate = useNavigate();
   const { no } = useParams<{ no: string }>();
   const numericNo = isCreate ? undefined : Number(no);
@@ -57,7 +55,7 @@ const EvaluationDetail: React.FC<EvaluationDetailProps> = ({
           <FaStar key={i} style={{ marginRight: 4 }} />
         ) : (
           <FaRegStar key={i} style={{ marginRight: 4 }} />
-        )
+        ),
       );
     }
     return stars;
@@ -81,11 +79,7 @@ const EvaluationDetail: React.FC<EvaluationDetailProps> = ({
 
       <DividerDashed />
 
-      <ShippingTabBar
-        tabs={['평가상세']}
-        activeIndex={activeTab}
-        onTabClick={setActiveTab}
-      />
+      <ShippingTabBar tabs={['평가상세']} activeIndex={activeTab} onTabClick={setActiveTab} />
 
       {activeTab === 0 && (
         <DetailSection>
@@ -126,7 +120,7 @@ const EvaluationDetail: React.FC<EvaluationDetailProps> = ({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirm}
-        title='확인'
+        title="확인"
       >
         저장하시겠습니까?
       </ReusableModal2>
@@ -140,8 +134,21 @@ export default EvaluationDetail;
 
 const Container = styled.div`
   width: 100%;
-  min-width: 1000px;
-  padding: 20px;
+  height: 100%;
+  max-width: 100vw;
+  margin: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #fff;
+  overflow: hidden;
+  padding: 12px 8px 0 8px;
+
+  @media (max-width: 834px) {
+    min-width: 100vw;
+    padding: 0 4px;
+  }
 `;
 
 const HeaderRow = styled.div`
@@ -192,10 +199,13 @@ const FieldTable = styled.table`
 `;
 
 const TableRow = styled.tr`
-  vertical-align: top;
-
+  height: 44px;
   &:nth-child(even) {
-    background-color: #fafafa;
+    background: #f8f9fa;
+  }
+  &:hover {
+    background-color: #e3f2fd;
+    cursor: pointer;
   }
 `;
 

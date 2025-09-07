@@ -4,16 +4,16 @@ import styled from 'styled-components';
 import { useSearchParams } from 'react-router-dom';
 
 // 활성화 아이콘
-import FirstPageIcon from '../assets/PageNationIcon1.svg';
-import PrevPageIcon from '../assets/PageNationIcon2.svg';
-import NextPageIcon from '../assets/PageNationIcon3.svg';
-import LastPageIcon from '../assets/PageNationIcon4.svg';
+import FirstPageIcon from 'src/assets/PageNationIcon1.svg';
+import PrevPageIcon from 'src/assets/PageNationIcon2.svg';
+import NextPageIcon from 'src/assets/PageNationIcon3.svg';
+import LastPageIcon from 'src/assets/PageNationIcon4.svg';
 
 // 비활성화 아이콘
-import FirstPageIconDisabled from '../assets/PageNationIcon1none.svg';
-import PrevPageIconDisabled from '../assets/PageNationIcon2none.svg';
-import NextPageIconDisabled from '../assets/PageNationIcon3none.svg';
-import LastPageIconDisabled from '../assets/PageNationIcon4none.svg';
+import FirstPageIconDisabled from 'src/assets/PageNationIcon1none.svg';
+import PrevPageIconDisabled from 'src/assets/PageNationIcon2none.svg';
+import NextPageIconDisabled from 'src/assets/PageNationIcon3none.svg';
+import LastPageIconDisabled from 'src/assets/PageNationIcon4none.svg';
 
 interface PaginationProps {
   /** 전체 페이지 수 */
@@ -53,22 +53,15 @@ const Pagination: React.FC<PaginationProps> = ({
     <Wrapper>
       {leftComponent && <LeftSlot>{leftComponent}</LeftSlot>}
       <CenterSlot>
-        <PageArrow
-          disabled={page === 1}
-          onClick={() => changePage(1)}
-          aria-label='첫 페이지'
-        >
-          <Icon
-            src={page === 1 ? FirstPageIconDisabled : FirstPageIcon}
-            alt=''
-          />
+        <PageArrow disabled={page === 1} onClick={() => changePage(1)} aria-label="첫 페이지">
+          <Icon src={page === 1 ? FirstPageIconDisabled : FirstPageIcon} alt="" />
         </PageArrow>
         <PageArrow
           disabled={page === 1}
           onClick={() => changePage(page - 1)}
-          aria-label='이전 페이지'
+          aria-label="이전 페이지"
         >
-          <Icon src={page === 1 ? PrevPageIconDisabled : PrevPageIcon} alt='' />
+          <Icon src={page === 1 ? PrevPageIconDisabled : PrevPageIcon} alt="" />
         </PageArrow>
 
         <PageInfo>
@@ -80,22 +73,16 @@ const Pagination: React.FC<PaginationProps> = ({
         <PageArrow
           disabled={page === correctedTotal}
           onClick={() => changePage(page + 1)}
-          aria-label='다음 페이지'
+          aria-label="다음 페이지"
         >
-          <Icon
-            src={page === correctedTotal ? NextPageIconDisabled : NextPageIcon}
-            alt=''
-          />
+          <Icon src={page === correctedTotal ? NextPageIconDisabled : NextPageIcon} alt="" />
         </PageArrow>
         <PageArrow
           disabled={page === correctedTotal}
           onClick={() => changePage(correctedTotal)}
-          aria-label='마지막 페이지'
+          aria-label="마지막 페이지"
         >
-          <Icon
-            src={page === correctedTotal ? LastPageIconDisabled : LastPageIcon}
-            alt=''
-          />
+          <Icon src={page === correctedTotal ? LastPageIconDisabled : LastPageIcon} alt="" />
         </PageArrow>
       </CenterSlot>
     </Wrapper>

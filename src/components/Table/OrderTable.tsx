@@ -1,6 +1,10 @@
 // src/components/OrderTable.tsx
-import React, { useState } from 'react';
-import styled from 'styled-components';
+import React, { useCallback } from 'react';
+import StatusBadge from 'src/components/Common/StatusBadge';
+import type { Column } from '@components/CommonTable';
+import CommonTable from '@components/CommonTable'; // default import
+import { AccountContainer, ProfileCircle, AccountText } from '@components/Common/Profile';
+import { getStatusBadge } from 'src/utils/statusUtils';
 
 /** 주문 인터페이스 */
 export interface Order {
@@ -17,240 +21,91 @@ export interface Order {
 
 /** OrderTable Props */
 interface OrderTableProps {
-  filteredData: Order[];
-  handleEdit: (account: string) => void; // 주문자(계정) 클릭 시 이벤트
+  data: Order[]; // 또는 data: T[];
+  handleEdit: (no: number) => void; // 주문자(계정) 클릭 시 이벤트
+  selectedRows?: Set<number>;
+  onSelectAll?: (checked: boolean) => void;
+  onSelectRow?: (row: Order, checked: boolean) => void;
+}
+
+function getOrderColumns<
+  T extends {
+    no: number;
+    buyerAccount: string;
+    paymentStatus: string;
+    handleEdit: (no: number) => void;
+  },
+>(handleAccountClick: (no: number) => void): Column<T>[] {
+  return [
+    { key: 'no', label: 'No.', width: '50px' },
+    { key: 'orderDate', label: '주문일', width: '100px' },
+    {
+      key: 'buyerAccount',
+      label: '주문자(계정)',
+      width: '150px',
+      render: (v: unknown, row: T) => (
+        <AccountContainer onClick={() => handleAccountClick(row.no)}>
+          <ProfileCircle />
+          <AccountText $clickable>{v as string}</AccountText>
+        </AccountContainer>
+      ),
+    },
+    { key: 'brand', label: '브랜드', width: '120px' },
+    { key: 'styleCode', label: '스타일(품번)', width: '100px' },
+    { key: 'size', label: '사이즈', width: '100px' },
+    { key: 'color', label: '제품색상', width: '80px' },
+    { key: 'paymentMethod', label: '결제방식', width: '80px' },
+    {
+      key: 'paymentStatus',
+      label: '결제상태',
+      width: '80px',
+      render: (v: unknown) => {
+        const paymentInfo = getStatusBadge(v as string);
+        return (
+          <StatusBadge style={{ backgroundColor: paymentInfo.background }}>
+            {paymentInfo.label}
+          </StatusBadge>
+        );
+      },
+    },
+  ];
 }
 
 const OrderTable: React.FC<OrderTableProps> = ({
-  filteredData,
+  data,
   handleEdit,
+  selectedRows = new Set(),
+  onSelectAll,
+  onSelectRow,
+  ...props
 }) => {
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-  const allSelected =
-    filteredData.length > 0 && selectedIds.size === filteredData.length;
+  // handleEdit을 각 row에 추가
+  const dataWithEdit = data.map((order) => ({
+    ...order,
+    handleEdit,
+  }));
 
-  // 전체 선택/해제
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      const all = new Set(filteredData.map((item) => item.no));
-      setSelectedIds(all);
-    } else {
-      setSelectedIds(new Set());
-    }
-  };
+  // useCallback으로 최적화된 핸들러 생성
+  const handleAccountClick = useCallback(
+    (no: number) => {
+      handleEdit(no);
+    },
+    [handleEdit],
+  );
 
-  // 개별 행 선택
-  const handleRowSelect = (no: number) => {
-    setSelectedIds((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(no)) {
-        newSet.delete(no);
-      } else {
-        newSet.add(no);
-      }
-      return newSet;
-    });
-  };
-
-  // 결제상태 배경색 + 텍스트(흰색)
-  const getStatusStyle = (status: string) => {
-    switch (status) {
-      case '결제 완료':
-        return { background: '#3071B2', label: '결제완료' };
-      case '취소일정':
-        return { background: '#000000', label: '취소일정' };
-      case '환불 진행중':
-        return { background: '#CD5542', label: '환불진행' };
-      case '환불 완료':
-        return { background: '#F69636', label: '환불완료' };
-      case '결제실패':
-        return { background: '#AAAAAA', label: '결제실패' };
-      default:
-        return { background: '#000000', label: status };
-    }
-  };
-
+  const columns = getOrderColumns<(typeof dataWithEdit)[0]>(handleAccountClick);
   return (
-    <Table>
-      <colgroup>
-        <col style={{ width: '40px' }} /> {/* 체크박스 */}
-        <col style={{ width: '50px' }} /> {/* No. */}
-        <col style={{ width: '100px' }} /> {/* 주문일 */}
-        <col style={{ width: '150px' }} /> {/* 주문자 (계정) */}
-        <col style={{ width: '100px' }} /> {/* 브랜드 */}
-        <col style={{ width: '100px' }} /> {/* 스타일(행정) */}
-        <col style={{ width: '80px' }} /> {/* 사이즈 */}
-        <col style={{ width: '80px' }} /> {/* 제품명/옵션 */}
-        <col style={{ width: '80px' }} /> {/* 결제방법 */}
-        <col style={{ width: '80px' }} /> {/* 결제상태 (맨 오른쪽) */}
-      </colgroup>
-      <thead>
-        <TableRow>
-          <Th>
-            <input
-              type='checkbox'
-              onChange={handleSelectAll}
-              checked={allSelected}
-              disabled={filteredData.length === 0}
-            />
-          </Th>
-          <Th>No.</Th>
-          <Th>주문일</Th>
-          <Th>주문자 (계정)</Th>
-          <Th>브랜드</Th>
-          <Th>스타일(코드)</Th>
-          <Th>사이즈</Th>
-          <Th>제품명/옵션</Th>
-          <Th>결제방법</Th>
-          <Th>결제상태</Th>
-        </TableRow>
-      </thead>
-      <tbody>
-        {filteredData.map((order, index) => {
-          const statusInfo = getStatusStyle(order.paymentStatus);
-          return (
-            <TableRow key={index}>
-              <Td>
-                <input
-                  type='checkbox'
-                  checked={selectedIds.has(order.no)}
-                  onChange={() => handleRowSelect(order.no)}
-                />
-              </Td>
-              <Td>{order.no}</Td>
-              <Td>{order.orderDate}</Td>
-              {/* 주문자(계정) 셀: 프로필 이미지(회색 원) + 텍스트 */}
-              <TdLeft onClick={() => handleEdit(order.buyerAccount)}>
-                <AccountContainer>
-                  <ProfileCircle />
-                  <AccountText>{order.buyerAccount}</AccountText>
-                </AccountContainer>
-              </TdLeft>
-              <Td>{order.brand}</Td>
-              <Td>{order.styleCode}</Td>
-              <Td>{order.size}</Td>
-              <Td>{order.productOption}</Td>
-              <Td>{order.paymentMethod}</Td>
-              <Td>
-                <StatusBadge style={{ backgroundColor: statusInfo.background }}>
-                  {statusInfo.label}
-                </StatusBadge>
-              </Td>
-            </TableRow>
-          );
-        })}
-
-        {/* 빈 행 렌더링 시 주문자 셀에는 프로필 이미지 없이 빈 공간만 표시 */}
-        {filteredData.length < 10 &&
-          Array.from({ length: 10 - filteredData.length }).map((_, i) => (
-            <TableRow key={`empty-${i}`}>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <TdLeft>&nbsp;</TdLeft>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-              <Td>&nbsp;</Td>
-            </TableRow>
-          ))}
-      </tbody>
-    </Table>
+    <CommonTable
+      columns={columns}
+      data={dataWithEdit}
+      showCheckbox
+      selectedRows={Array.from(selectedRows)}
+      onSelectAll={onSelectAll}
+      onSelectRow={onSelectRow}
+      rowKey={(row) => row.no}
+      {...props}
+    />
   );
 };
 
 export default OrderTable;
-
-/* ====================== Styled Components ====================== */
-
-/** 공통 테이블 스타일 */
-const Table = styled.table`
-  width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-  background-color: #ffffff;
-  border: 1px solid #dddddd;
-`;
-
-/** 행 높이를 44px로 고정 */
-const TableRow = styled.tr`
-  height: 44px;
-`;
-
-const Th = styled.th`
-  text-align: center;
-  vertical-align: middle;
-  background-color: #eeeeee;
-
-  font-weight: 800;
-  font-size: 12px;
-  color: #000000;
-  border: 1px solid #dddddd;
-  white-space: nowrap;
-`;
-
-const Td = styled.td`
-  text-align: center;
-  vertical-align: middle;
-
-  font-weight: 400;
-  font-size: 12px;
-  color: #000000;
-  border: 1px solid #dddddd;
-  white-space: nowrap;
-`;
-
-/** 주문자(계정) 셀: 왼쪽 정렬 */
-const TdLeft = styled(Td)`
-  text-align: left;
-`;
-
-/** 주문자 및 인스타 계정 공용 컨테이너 */
-const AccountContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: 10px;
-`;
-
-/** 프로필 이미지 (회색 원) - shrink 방지 */
-const ProfileCircle = styled.div`
-  width: 26px;
-  height: 26px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background-color: #cccccc;
-`;
-
-/** 계정 텍스트: 최소 3글자 이상 보이고, 공간 부족 시 "..." 처리 */
-const AccountText = styled.span`
-  display: inline-block;
-  min-width: 3ch;
-  max-width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 12px;
-  cursor: pointer;
-  color: #007bff;
-
-  &:hover {
-    color: #0056b3;
-  }
-`;
-
-/** 결제상태 박스 (흰색 텍스트) */
-const StatusBadge = styled.div`
-  display: inline-block;
-  border-radius: 4px;
-  padding: 0 8px;
-  height: 24px;
-  line-height: 24px;
-  font-size: 10px;
-  font-weight: 800;
-  color: #ffffff;
-  text-align: center;
-  vertical-align: middle;
-`;

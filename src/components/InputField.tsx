@@ -1,6 +1,6 @@
 import React, { useState, forwardRef } from 'react';
 import styled from 'styled-components';
-import Button02 from '../components/Button02';
+import Button02 from 'src/components/Button02';
 
 type InputFieldProps = {
   label: string;
@@ -32,10 +32,7 @@ function parsePrefixContent(content: string) {
     if (applyGray) {
       return <GraySpan key={i}>{token}</GraySpan>;
     }
-    if (
-      (token.startsWith('(') && token.endsWith(')')) ||
-      token === '해당없음'
-    ) {
+    if ((token.startsWith('(') && token.endsWith(')')) || token === '해당없음') {
       return <GraySpan key={i}>{token}</GraySpan>;
     }
     return token;
@@ -61,11 +58,9 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
       onSelectChange,
       ...rest
     },
-    ref
+    ref,
   ) => {
-    const [selectedOption, setSelectedOption] = useState(
-      options ? options[0] : ''
-    );
+    const [selectedOption, setSelectedOption] = useState(options ? options[0] : '');
 
     const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedOption(e.target.value);
@@ -77,11 +72,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
     const renderPrefixContent = () => {
       if (!prefixcontent) return null;
       if (typeof prefixcontent === 'string') {
-        return (
-          <PrefixcontentText>
-            {parsePrefixContent(prefixcontent)}
-          </PrefixcontentText>
-        );
+        return <PrefixcontentText>{parsePrefixContent(prefixcontent)}</PrefixcontentText>;
       }
       return <PrefixcontentText>{prefixcontent}</PrefixcontentText>;
     };
@@ -90,9 +81,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
       <InputContainer>
         <Label htmlFor={id} $isEmpty={!label}>
           {label.split('(')[0] || '​'}
-          {label.includes('(') && (
-            <GrayText>{`(${label.split('(')[1]}`}</GrayText>
-          )}
+          {label.includes('(') && <GrayText>{`(${label.split('(')[1]}`}</GrayText>}
         </Label>
 
         <div>
@@ -102,12 +91,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
               {prefixcontent && renderPrefixContent()}
 
               {options ? (
-                <Select
-                  id={id}
-                  value={selectedOption}
-                  onChange={handleSelectChange}
-                  {...rest}
-                >
+                <Select id={id} value={selectedOption} onChange={handleSelectChange} {...rest}>
                   {options.map((option: string) => (
                     <option key={option} value={option}>
                       {option}
@@ -132,25 +116,23 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
               <InputWrapper>
                 <EmailDropdown
                   id={`${id}-domain`}
-                  defaultValue='naver.com'
+                  defaultValue="naver.com"
                   disabled={rest.readOnly}
                 >
-                  <option value='gmail.com'>gmail.com</option>
-                  <option value='naver.com'>naver.com</option>
-                  <option value='daum.net'>daum.net</option>
+                  <option value="gmail.com">gmail.com</option>
+                  <option value="naver.com">naver.com</option>
+                  <option value="daum.net">daum.net</option>
                 </EmailDropdown>
               </InputWrapper>
             )}
           </InputRow>
 
           {/* 에러 메시지 영역 (항상 일정 높이 확보) */}
-          <ErrorContainer>
-            {error && <ErrorMessage>{error.message}</ErrorMessage>}
-          </ErrorContainer>
+          <ErrorContainer>{error && <ErrorMessage>{error.message}</ErrorMessage>}</ErrorContainer>
         </div>
       </InputContainer>
     );
-  }
+  },
 );
 
 export default InputField;

@@ -1,8 +1,8 @@
 // src/components/OrderDetailTopBoxes.tsx
 import React from 'react';
 import styled from 'styled-components';
-import userDetailImg2 from '../assets/userDetailImg2.svg';
-import storeDetailImg from '../assets/storeDetailImg.svg';
+import userDetailImg2 from '@assets/userDetailImg2.svg';
+import storeDetailImg from '@assets/storeDetailImg.svg';
 
 interface OrderDetailTopBoxesProps {
   userName?: string;
@@ -38,7 +38,7 @@ const OrderDetailTopBoxes: React.FC<OrderDetailTopBoxesProps> = ({
         {/* 1. 회원정보 */}
         <Box>
           <IconPlaceholder>
-            <IconImage src={userDetailImg2} alt='User' />
+            <IconImage src={userDetailImg2} alt="User" />
           </IconPlaceholder>
           <Content>
             <Row>
@@ -60,7 +60,7 @@ const OrderDetailTopBoxes: React.FC<OrderDetailTopBoxesProps> = ({
         {/* 2. 주문/신청 정보 */}
         <Box>
           <IconPlaceholder>
-            <IconImage src={storeDetailImg} alt='Order Info' />
+            <IconImage src={storeDetailImg} alt="Order Info" />
           </IconPlaceholder>
           <Content>
             <Row>
@@ -86,17 +86,13 @@ const OrderDetailTopBoxes: React.FC<OrderDetailTopBoxesProps> = ({
             <Row>
               <Label>포인트 사용</Label>
               <Value>
-                {pointUsed && pointUsed > 0
-                  ? `${pointUsed.toLocaleString()}원`
-                  : '미사용'}
+                {pointUsed && pointUsed > 0 ? `${pointUsed.toLocaleString()}원` : '미사용'}
               </Value>
             </Row>
             <Row>
               <Label>추가비용</Label>
               <Value>
-                {extraCharge && extraCharge > 0
-                  ? `${extraCharge.toLocaleString()}원`
-                  : '없음'}
+                {extraCharge && extraCharge > 0 ? `${extraCharge.toLocaleString()}원` : '없음'}
               </Value>
             </Row>
           </Content>

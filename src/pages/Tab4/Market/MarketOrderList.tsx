@@ -3,11 +3,10 @@
 import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import MarketOrderListTable, {
-  MarketOrderListItem,
-} from '../../../components/Table/MarketOrderTable';
-import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
-import Pagination from '../../../components/Pagination';
+import MarketOrderListTable, { MarketOrderListItem } from '@components/Table/MarketOrderTable';
+import SubHeader, { TabItem } from '@components/Header/SearchSubHeader';
+import Pagination from '@components/Pagination';
+import { advancedSearchFilter, normalize } from '@utils/advancedSearch';
 
 /** 더미 데이터 (배송 관련 필드 제거, 결제 필드 추가) */
 const dummyMarketOrderList: MarketOrderListItem[] = [
@@ -108,6 +107,51 @@ const tabs: TabItem[] = [
   { label: '취소내역', path: '취소' },
 ];
 
+// Chip 컴포넌트 (제품 관리에서 복사)
+const Chip = ({ label, onDelete }: { label: string; onDelete: () => void }) => (
+  <span
+    style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      background: '#e6f0fa',
+      border: '1px solid #90caf9',
+      borderRadius: 16,
+      padding: '4px 14px',
+      marginRight: 8,
+      fontSize: 14,
+      fontWeight: 500,
+      color: '#1976d2',
+      marginBottom: 4,
+      boxShadow: '0 1px 4px rgba(25, 118, 210, 0.08)',
+      transition: 'background 0.2s',
+    }}
+    onMouseOver={(e) => (e.currentTarget.style.background = '#bbdefb')}
+    onMouseOut={(e) => (e.currentTarget.style.background = '#e6f0fa')}
+  >
+    {label}
+    <button
+      onClick={onDelete}
+      style={{
+        background: 'none',
+        border: 'none',
+        marginLeft: 8,
+        cursor: 'pointer',
+        fontWeight: 'bold',
+        color: '#1976d2',
+        fontSize: 16,
+        lineHeight: 1,
+        padding: 0,
+        transition: 'color 0.2s',
+      }}
+      onMouseOver={(e) => (e.currentTarget.style.color = '#d32f2f')}
+      onMouseOut={(e) => (e.currentTarget.style.color = '#1976d2')}
+      aria-label="삭제"
+    >
+      ×
+    </button>
+  </span>
+);
+
 const MarketOrderList: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -132,34 +176,49 @@ const MarketOrderList: React.FC = () => {
   const dataByTab = data.filter((item) => {
     if (selectedTab.label === '전체보기') return true;
     if (selectedTab.label === '진행내역') {
-      return !['취소요청', '환불 진행중', '결제실패'].includes(
-        item.paymentStatus
-      );
+      return !['취소요청', '환불 진행중', '결제실패'].includes(item.paymentStatus);
     }
     return ['취소요청', '환불 진행중', '결제실패'].includes(item.paymentStatus);
   });
 
   // 검색어 필터링
-  const filteredData = dataByTab.filter((item) => {
-    const t = searchTerm;
-    return (
-      String(item.no).includes(t) ||
-      item.orderDate.includes(t) ||
-      item.buyerAccount.toLowerCase().includes(t) ||
-      item.brand.toLowerCase().includes(t) ||
-      item.styleCode.toLowerCase().includes(t) ||
-      item.size.toLowerCase().includes(t) ||
-      item.color.toLowerCase().includes(t) ||
-      item.paymentMethod.toLowerCase().includes(t) ||
-      item.paymentStatus.toLowerCase().includes(t)
-    );
-  });
+  const keywords = normalize(searchTerm).split(/\s+/).filter(Boolean);
+  const filteredData = dataByTab.filter((item) =>
+    advancedSearchFilter({
+      item,
+      keywords,
+      fields: [
+        'no',
+        'orderDate',
+        'buyerAccount',
+        'brand',
+        'styleCode',
+        'size',
+        'color',
+        'paymentMethod',
+        'paymentStatus',
+      ],
+    }),
+  );
 
   // 페이징 로직
   const totalCount = filteredData.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
   const offset = (page - 1) * limit;
   const currentPageData = filteredData.slice(offset, offset + limit);
+
+  // 검색어 키워드 분리 (공백 기준)
+  const chipKeywords = searchTerm.trim().split(/\s+/).filter(Boolean);
+
+  // Chip 삭제 핸들러
+  const handleDeleteChip = (chip: string) => {
+    const newKeywords = chipKeywords.filter((k) => k !== chip);
+    const newSearch = newKeywords.join(' ');
+    const params = Object.fromEntries(searchParams.entries());
+    if (newSearch) params.search = newSearch;
+    else delete params.search;
+    setSearchParams(params);
+  };
 
   // 상세 페이지로 이동
   const handleEdit = (no: number) => {
@@ -170,19 +229,24 @@ const MarketOrderList: React.FC = () => {
 
   return (
     <Content>
-      <HeaderTitle>멜픽구매 내역</HeaderTitle>
-
+      <HeaderTitle>마켓 주문 내역</HeaderTitle>
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
-
       <InfoBar>
-        <TotalCountText>Total: {totalCount}</TotalCountText>
+        <div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
+          <TotalCountText>Total: {totalCount}</TotalCountText>
+          {/* Chip row: TotalCount 오른쪽에 한 줄로 정렬 */}
+          {chipKeywords.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', marginLeft: 12, minWidth: 0 }}>
+              {chipKeywords.map((chip) => (
+                <Chip key={chip} label={chip} onDelete={() => handleDeleteChip(chip)} />
+              ))}
+            </div>
+          )}
+        </div>
       </InfoBar>
 
       <TableContainer>
-        <MarketOrderListTable
-          filteredData={currentPageData}
-          handleEdit={handleEdit}
-        />
+        <MarketOrderListTable filteredData={currentPageData} handleEdit={handleEdit} />
       </TableContainer>
 
       <FooterRow>
@@ -225,7 +289,17 @@ const TotalCountText = styled.div`
 `;
 
 const TableContainer = styled.div`
-  box-sizing: border-box;
+  min-width: 834px;
+  min-height: 600px;
+  max-width: 100vw;
+  overflow-x: auto;
+  @media (max-width: 834px) {
+    min-width: 100vw;
+    padding: 0 8px;
+  }
+  @media (max-height: 1194px) {
+    min-height: 400px;
+  }
 `;
 
 const FooterRow = styled.div`

@@ -3,16 +3,17 @@ import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
 import SettingsDetailSubHeader, {
   DetailSubHeaderProps,
-} from '../../../components/Header/SettingsDetailSubHeader';
-import ReusableModal2 from '../../../components/TwoButtonModal';
-import Spinner from '../../../components/Spinner';
+} from '@components/Header/SettingsDetailSubHeader';
+import ReusableModal2 from '@components/TwoButtonModal';
+import StatusBadge from '@components/Common/StatusBadge';
+import { getStatusBadge } from '@utils/statusUtils';
 import {
   getAdminTicketById,
   changeTicketStatus,
   deleteAdminTicketById,
   convertTicketType,
   AdminTicketItem,
-} from '../../../api/Ticket/TicketApi';
+} from '@api/Ticket/TicketApi';
 
 // 상태 옵션 매핑
 const STATUS_OPTIONS: { value: string; label: string }[] = [
@@ -49,9 +50,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
   const [modalMessage, setModalMessage] = useState('');
-  const [pendingAction, setPendingAction] = useState<'save' | 'delete' | null>(
-    null
-  );
+  const [pendingAction, setPendingAction] = useState<'save' | 'delete' | null>(null);
 
   // StrictMode에서 useEffect 두 번 실행 방지
   const didFetchRef = useRef(false);
@@ -145,10 +144,8 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
       if (typeChanged) {
         // 정기권 간 전환: originalType 과 type 이 두 옵션일 때만 호출
         if (
-          (originalType === '정기 구독권(4회권)' &&
-            type === '정기 구독권(무제한)') ||
-          (originalType === '정기 구독권(무제한)' &&
-            type === '정기 구독권(4회권)')
+          (originalType === '정기 구독권(4회권)' && type === '정기 구독권(무제한)') ||
+          (originalType === '정기 구독권(무제한)' && type === '정기 구독권(4회권)')
         ) {
           const updated = await convertTicketType(id);
           if (updated && typeof updated.ticket_name === 'string') {
@@ -172,10 +169,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
             setStatus(updated.ticket_status);
             setOriginalStatus(updated.ticket_status);
           } else {
-            console.warn(
-              'convertTicketType 응답에 ticket_name이 없습니다.',
-              updated
-            );
+            console.warn('convertTicketType 응답에 ticket_name이 없습니다.', updated);
           }
         }
         // 1회 이용권 선택 시
@@ -246,13 +240,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
     onEndClick: isCreate ? handleBack : handleDelete,
   };
 
-  if (loading) {
-    return (
-      <Container>
-        <Spinner />
-      </Container>
-    );
-  }
+  if (loading) return <SkeletonBox style={{ height: '200px' }} />;
   if (error) {
     return (
       <Container>
@@ -292,7 +280,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
                 <select value={type} onChange={(e) => setType(e.target.value)}>
                   {/* 현재 type이 정의된 옵션 목록에 없으면 최상단에 현재 값 옵션 추가 */}
                   {!TYPE_OPTIONS.some((opt) => opt.value === type) && (
-                    <option key='current' value={type}>
+                    <option key="current" value={type}>
                       {type}
                     </option>
                   )}
@@ -321,16 +309,26 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
             <Row>
               <Field style={{ flex: 1 }}>
                 <label>상태</label>
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                >
-                  {STATUS_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <StatusBadge
+                    style={{
+                      backgroundColor: getStatusBadge(status).background,
+                    }}
+                  >
+                    {getStatusBadge(status).label}
+                  </StatusBadge>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    style={{ flex: 1, marginLeft: '8px' }}
+                  >
+                    {STATUS_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </Field>
             </Row>
           </FormBox>
@@ -354,8 +352,21 @@ export default TicketDetail;
 /* ===== styled-components ===== */
 const Container = styled.div`
   width: 100%;
-  min-width: 1000px;
-  padding: 20px;
+  height: 100%;
+  max-width: 100vw;
+  margin: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #fff;
+  overflow: hidden;
+  padding: 12px 8px 0 8px;
+
+  @media (max-width: 834px) {
+    min-width: 100vw;
+    padding: 0 4px;
+  }
 `;
 const HeaderRow = styled.div`
   display: flex;
@@ -382,11 +393,13 @@ const TicketNumber = styled.div`
   }
 `;
 const FormBox = styled.div`
+  width: 100%;
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 0 4px 4px 4px;
 `;
 const Row = styled.div`
+  width: 100%;
   display: flex;
   & + & {
     border-top: 1px solid #ddd;
@@ -395,7 +408,7 @@ const Row = styled.div`
 const Field = styled.div`
   flex: 1;
   min-width: 200px;
-
+  width: 100%;
   display: flex;
   align-items: center;
   padding: 12px 16px;
@@ -443,4 +456,21 @@ const BackButton = styled.button`
   border: 1px solid #ccc;
   border-radius: 4px;
   cursor: pointer;
+`;
+
+const SkeletonBox = styled.div`
+  width: 100%;
+  height: 32px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  border-radius: 4px;
+  margin-bottom: 12px;
+  animation: skeleton-loading 1.2s infinite linear;
+  @keyframes skeleton-loading {
+    0% {
+      background-position: -200px 0;
+    }
+    100% {
+      background-position: calc(200px + 100%) 0;
+    }
+  }
 `;

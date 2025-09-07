@@ -22,10 +22,7 @@ interface DetailsSalesTableProps {
   handleEdit: (no: number) => void;
 }
 
-const DetailsSalesTable: React.FC<DetailsSalesTableProps> = ({
-  filteredData,
-  handleEdit,
-}) => {
+const DetailsSalesTable: React.FC<DetailsSalesTableProps> = ({ filteredData, handleEdit }) => {
   return (
     <Table>
       <colgroup>
@@ -64,9 +61,7 @@ const DetailsSalesTable: React.FC<DetailsSalesTableProps> = ({
             <TdLeft>
               <InstaContainer>
                 <Avatar />
-                <InstaText onClick={() => handleEdit(user.no)}>
-                  {user.instagram}
-                </InstaText>
+                <InstaText onClick={() => handleEdit(user.no)}>{user.instagram}</InstaText>
               </InstaContainer>
             </TdLeft>
             <Td>{user.season}</Td>
@@ -112,6 +107,13 @@ const Table = styled.table`
 
 const TableRow = styled.tr`
   height: 44px;
+  &:nth-child(even) {
+    background: #f8f9fa;
+  }
+  &:hover {
+    background-color: #e3f2fd;
+    cursor: pointer;
+  }
 `;
 
 const Th = styled.th`

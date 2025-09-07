@@ -12,22 +12,22 @@ const BasicInfoSection: React.FC = () => {
       <VerticalLine />
       <InputRow>
         <Label>브랜드</Label>
-        <Select defaultValue='MICHAA'>
-          <option value='MICHAA'>MICHAA</option>
-          <option value='CC Collect'>CC Collect</option>
-          <option value='SATIN'>SATIN</option>
-          <option value='ZZOC'>ZZOC</option>
+        <Select defaultValue="MICHAA">
+          <option value="MICHAA">MICHAA</option>
+          <option value="CC Collect">CC Collect</option>
+          <option value="SATIN">SATIN</option>
+          <option value="ZZOC">ZZOC</option>
         </Select>
       </InputRow>
       <InputRow>
         <Label>품번</Label>
-        <Input placeholder='예) MIOCWOP011' />
+        <Input placeholder="예) MIOCWOP011" />
       </InputRow>
       <InputRow>
         <Label>시즌</Label>
-        <Select defaultValue='2025년 봄 시즌'>
-          <option value='2025년 봄 시즌'>2025년 봄 시즌</option>
-          <option value='2024년 가을 시즌'>2024년 가을 시즌</option>
+        <Select defaultValue="2025년 봄 시즌">
+          <option value="2025년 봄 시즌">2025년 봄 시즌</option>
+          <option value="2024년 가을 시즌">2024년 가을 시즌</option>
         </Select>
       </InputRow>
     </SectionBox>
@@ -95,7 +95,6 @@ const InputRow = styled.div`
 const Label = styled.label`
   position: relative;
   min-width: 40px;
-
   font-weight: 900;
   font-size: 12px;
   line-height: 13px;
@@ -119,7 +118,6 @@ const Select = styled.select`
   border: 1px solid #000;
   padding: 0 8px;
   font-size: 12px;
-
   font-weight: 800;
   max-width: 180px;
 `;
@@ -130,7 +128,6 @@ const Input = styled.input`
   max-width: 120px;
   border: 1px solid #ddd;
   padding: 0 8px;
-
   font-weight: 700;
   font-size: 12px;
   text-align: center;

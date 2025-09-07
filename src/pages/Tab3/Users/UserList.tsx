@@ -1,22 +1,63 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
-import UserTable, { User } from '../../../components/Table/UserTable';
-import SubHeader, { TabItem } from '../../../components/Header/SearchSubHeader';
-import Pagination from '../../../components/Pagination';
-import {
-  getAllUsers,
-  changeUserMembership,
-  getAllMemberships,
-  GetAllMembershipsResponse,
-  // 가정: API에서 전체 개수 조회를 위해 getAllUsers(limit, page)를 사용
-} from '../../../api/adminUser';
+import UserTable, { User } from '@components/Table/UserTable';
+import SubHeader, { TabItem } from '@components/Header/SearchSubHeader';
+import TableWithRegisterButton from '@components/TableWithRegisterButton';
+import BulkMembershipChangeUI from '@components/BulkMembershipChangeUI';
+import { getAllUsers } from '@api/adminUser';
+import { advancedSearchFilter, normalize } from '@utils/advancedSearch';
 
 const tabs: TabItem[] = [
   { label: '전체보기', path: '' },
   { label: '일반회원', path: '일반' },
   { label: '블럭회원', path: '블럭' },
 ];
+
+// Chip 컴포넌트 (제품 관리에서 복사)
+const Chip = ({ label, onDelete }: { label: string; onDelete: () => void }) => (
+  <span
+    style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      background: '#e6f0fa',
+      border: '1px solid #90caf9',
+      borderRadius: 16,
+      padding: '4px 14px',
+      marginRight: 8,
+      fontSize: 14,
+      fontWeight: 500,
+      color: '#1976d2',
+      marginBottom: 4,
+      boxShadow: '0 1px 4px rgba(25, 118, 210, 0.08)',
+      transition: 'background 0.2s',
+    }}
+    onMouseOver={(e) => (e.currentTarget.style.background = '#bbdefb')}
+    onMouseOut={(e) => (e.currentTarget.style.background = '#e6f0fa')}
+  >
+    {label}
+    <button
+      onClick={onDelete}
+      style={{
+        background: 'none',
+        border: 'none',
+        marginLeft: 8,
+        cursor: 'pointer',
+        fontWeight: 'bold',
+        color: '#1976d2',
+        fontSize: 16,
+        lineHeight: 1,
+        padding: 0,
+        transition: 'color 0.2s',
+      }}
+      onMouseOver={(e) => (e.currentTarget.style.color = '#d32f2f')}
+      onMouseOut={(e) => (e.currentTarget.style.color = '#1976d2')}
+      aria-label="삭제"
+    >
+      ×
+    </button>
+  </span>
+);
 
 const UserList: React.FC = () => {
   const navigate = useNavigate();
@@ -35,17 +76,6 @@ const UserList: React.FC = () => {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [loadingAll, setLoadingAll] = useState(false);
 
-  // memberships for bulk change
-  const [memberships, setMemberships] = useState<GetAllMembershipsResponse>([]);
-  useEffect(() => {
-    getAllMemberships()
-      .then((data) => setMemberships(data))
-      .catch((err) => console.error('멤버십 목록 조회 실패:', err));
-  }, []);
-
-  // bulk change
-  const [newMembershipId, setNewMembershipId] = useState<number | ''>('');
-  const [isBulkLoading, setIsBulkLoading] = useState(false);
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
 
   // 1) 전체 사용자 목록 한 번에 불러오기
@@ -58,22 +88,22 @@ const UserList: React.FC = () => {
 
       // 1-2) 전체 데이터 요청: limit=totalCount, page=1
       const res = await getAllUsers(totalCount, 1);
-      const users: User[] = res.users.map((u: any) => ({
-        no: u.id,
-        email: u.email,
+      const users: User[] = res.users.map((u: unknown) => ({
+        no: (u as { id: number }).id,
+        email: (u as { email: string }).email,
         status:
-          u.status === 'active'
+          (u as { status: string }).status === 'active'
             ? '일반회원'
-            : u.status === 'blocked'
+            : (u as { status: string }).status === 'blocked'
               ? '블럭회원'
-              : u.status,
-        grade: u.membership?.name || '',
-        name: u.name,
-        nickname: u.nickname,
-        instagram: u.instagramId || '',
-        followingFollower: `${u.followersCount} / ${u.followingCount}`,
-        serviceArea: u.address,
-        joinDate: new Date(u.signupDate).toLocaleDateString('ko-KR'),
+              : (u as { status: string }).status,
+        grade: (u as { membership?: { name: string } }).membership?.name || '',
+        name: (u as { name: string }).name,
+        nickname: (u as { nickname: string }).nickname,
+        instagram: (u as { instagramId?: string }).instagramId || '',
+        followingFollower: `${(u as { followersCount: number }).followersCount} / ${(u as { followingCount: number }).followingCount}`,
+        serviceArea: (u as { address: string }).address,
+        joinDate: new Date((u as { signupDate: string }).signupDate).toLocaleDateString('ko-KR'),
       }));
       setAllUsers(users);
       // 초기 선택행 해제
@@ -92,7 +122,6 @@ const UserList: React.FC = () => {
     // 현재는 탭 변경 시 전체 다시 불러옴. 검색어는 클라이언트 필터링이므로 전체 재요청 불필요하지만,
     // 신규 사용자가 생겼을 가능성 반영 위해 탭 변경 시만 재요청해도 무방.
     // searchTerm 의존은 생략해도 됨(클라이언트 필터링).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusParam]);
 
   // 탭 변경 시 URL 반영, currentPage 초기화
@@ -107,79 +136,42 @@ const UserList: React.FC = () => {
 
   // 2) 탭 필터링
   const dataByTab = allUsers.filter((item) =>
-    selectedTab.label === '전체보기' ? true : item.status === selectedTab.label
+    selectedTab.label === '전체보기' ? true : item.status === selectedTab.label,
   );
 
   // 3) 검색 필터링
-  const filteredData = dataByTab.filter((item) => {
-    const txt = searchTerm;
-    if (!txt) return true;
-    return (
-      String(item.no).toLowerCase().includes(txt) ||
-      item.email.toLowerCase().includes(txt) ||
-      item.name.toLowerCase().includes(txt) ||
-      item.nickname.toLowerCase().includes(txt) ||
-      item.instagram.toLowerCase().includes(txt) ||
-      item.followingFollower.toLowerCase().includes(txt) ||
-      item.serviceArea.toLowerCase().includes(txt) ||
-      item.status.toLowerCase().includes(txt) ||
-      item.grade.toLowerCase().includes(txt) ||
-      item.joinDate.toLowerCase().includes(txt)
-    );
-  });
+  const keywords = normalize(searchTerm).split(/\s+/).filter(Boolean);
+  const filteredData = dataByTab.filter((item) =>
+    advancedSearchFilter({
+      item,
+      keywords,
+      fields: [
+        'no',
+        'email',
+        'name',
+        'nickname',
+        'instagram',
+        'followingFollower',
+        'serviceArea',
+        'status',
+        'grade',
+        'joinDate',
+      ],
+    }),
+  );
 
   // 4) 페이지네이션 계산
   const totalPages = Math.max(1, Math.ceil(filteredData.length / limit));
   // URL의 page가 범위를 벗어나면 보정
   const currentPage = Math.min(Math.max(page, 1), totalPages);
-  const paginated = filteredData.slice(
-    (currentPage - 1) * limit,
-    currentPage * limit
-  );
-
-  // bulk change
-  const handleBulkChange = () => {
-    if (newMembershipId === '') {
-      alert('변경할 멤버십을 선택해주세요.');
-      return;
-    }
-    if (selectedRows.size === 0) {
-      alert('변경할 사용자를 선택해주세요.');
-      return;
-    }
-
-    const target = memberships.find((m) => m.id === newMembershipId);
-    if (!target) return;
-
-    if (
-      !window.confirm(
-        `선택된 ${selectedRows.size}명 멤버십을 "${target.name}"로 변경하시겠습니까?`
-      )
-    )
-      return;
-
-    setIsBulkLoading(true);
-    Promise.all(
-      Array.from(selectedRows).map((userId) =>
-        changeUserMembership(userId, newMembershipId)
-      )
-    )
-      .then(() => {
-        alert('멤버십이 성공적으로 변경되었습니다.');
-        // 전체 재로딩
-        fetchAllUsers();
-      })
-      .catch((err) => {
-        console.error('멤버십 일괄 변경 실패:', err);
-        alert('일부 또는 전체 변경에 실패했습니다.');
-      })
-      .finally(() => setIsBulkLoading(false));
-  };
+  const paginated = filteredData.slice((currentPage - 1) * limit, currentPage * limit);
 
   const handleEdit = (no: number) => {
     const user = allUsers.find((u) => u.no === no);
     if (user) {
-      navigate(`/userdetail/${encodeURIComponent(user.email)}`);
+      navigate(`/userdetail/${encodeURIComponent(user.email)}`, {
+        state: { fromQuery: window.location.search },
+      });
     }
   };
 
@@ -190,60 +182,56 @@ const UserList: React.FC = () => {
     setSearchParams(params);
   };
 
+  // 검색어 키워드 분리 (공백 기준)
+  const chipKeywords = searchTerm.trim().split(/\s+/).filter(Boolean);
+
+  // Chip 삭제 핸들러
+  const handleDeleteChip = (chip: string) => {
+    const newKeywords = chipKeywords.filter((k) => k !== chip);
+    const newSearch = newKeywords.join(' ');
+    const params = Object.fromEntries(searchParams.entries());
+    if (newSearch) params.search = newSearch;
+    else delete params.search;
+    setSearchParams(params);
+  };
+
   return (
     <Content>
       <HeaderTitle>회원 관리</HeaderTitle>
       <SubHeader tabs={tabs} onTabChange={handleTabChange} />
 
       <InfoBar>
-        <TotalCountText>Total: {filteredData.length}</TotalCountText>
-        <FilterGroup>
-          <Select
-            value={newMembershipId}
-            onChange={(e) =>
-              setNewMembershipId(
-                e.target.value === '' ? '' : Number(e.target.value)
-              )
-            }
-          >
-            <option value=''>변경할 멤버십 선택</option>
-            {memberships.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </Select>
-          <BulkButton
-            onClick={handleBulkChange}
-            disabled={
-              newMembershipId === '' || selectedRows.size === 0 || isBulkLoading
-            }
-          >
-            {isBulkLoading ? '변경중...' : '일괄변경'}
-          </BulkButton>
-        </FilterGroup>
+        <div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
+          <TotalCountText>Total: {filteredData.length}</TotalCountText>
+          {/* Chip row: TotalCount 오른쪽에 한 줄로 정렬 */}
+          {chipKeywords.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', marginLeft: 12, minWidth: 0 }}>
+              {chipKeywords.map((chip) => (
+                <Chip key={chip} label={chip} onDelete={() => handleDeleteChip(chip)} />
+              ))}
+            </div>
+          )}
+        </div>
+        <BulkMembershipChangeUI selectedRows={selectedRows} onSuccess={fetchAllUsers} />
       </InfoBar>
 
-      <TableContainer>
-        {loadingAll ? (
-          <LoadingText>로딩중...</LoadingText>
-        ) : (
-          <UserTable
-            filteredData={paginated}
-            handleEdit={handleEdit}
-            selectedRows={selectedRows}
-            setSelectedRows={setSelectedRows}
-          />
-        )}
-      </TableContainer>
-
-      <FooterRow>
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={onPageChange}
+      <TableWithRegisterButton
+        registerButtonText="회원 등록"
+        onRegisterClick={() => navigate('/user-create')}
+        paginationProps={{
+          totalPages,
+          currentPage,
+          onPageChange,
+        }}
+      >
+        <UserTable
+          filteredData={paginated}
+          handleEdit={handleEdit}
+          selectedRows={selectedRows}
+          setSelectedRows={setSelectedRows}
+          isLoading={loadingAll}
         />
-      </FooterRow>
+      </TableWithRegisterButton>
     </Content>
   );
 };
@@ -277,37 +265,4 @@ const TotalCountText = styled.div`
   font-weight: 900;
   font-size: 12px;
   color: #000000;
-`;
-const FilterGroup = styled.div`
-  display: flex;
-  gap: 8px;
-`;
-const Select = styled.select`
-  height: 32px;
-  padding: 0 8px;
-  font-size: 12px;
-  border: 1px solid #ccc;
-`;
-const BulkButton = styled.button`
-  height: 32px;
-  padding: 0 12px;
-  background: #000;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-`;
-const TableContainer = styled.div`
-  box-sizing: border-box;
-`;
-const LoadingText = styled.div`
-  font-size: 14px;
-  color: #555;
-  text-align: center;
-  padding: 20px;
-`;
-const FooterRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 40px;
 `;
