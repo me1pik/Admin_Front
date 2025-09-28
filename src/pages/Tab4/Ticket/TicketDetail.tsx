@@ -12,6 +12,7 @@ import {
   changeTicketStatus,
   deleteAdminTicketById,
   convertTicketType,
+  addTicketCount,
   AdminTicketItem,
 } from '@api/Ticket/TicketApi';
 
@@ -51,6 +52,11 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
   const [modalTitle, setModalTitle] = useState('');
   const [modalMessage, setModalMessage] = useState('');
   const [pendingAction, setPendingAction] = useState<'save' | 'delete' | null>(null);
+
+  // 이용권 개수 추가용 작은 팝업 상태
+  const [isAddCountOpen, setIsAddCountOpen] = useState<boolean>(false);
+  const [addCountValue, setAddCountValue] = useState<string>('1');
+  const [addReason, setAddReason] = useState<string>('');
 
   // StrictMode에서 useEffect 두 번 실행 방지
   const didFetchRef = useRef(false);
@@ -109,6 +115,42 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
     setModalMessage('이용권을 삭제하시겠습니까?');
     setPendingAction('delete');
     setIsModalOpen(true);
+  };
+
+  // 작은 팝업 열기 (이용권 개수 추가)
+  const openAddCountPopup = () => setIsAddCountOpen(true);
+  const closeAddCountPopup = () => setIsAddCountOpen(false);
+
+  const handleSubmitAddCount = async () => {
+    if (!ticket || !addCountValue) return;
+    const addCountNum = Number(addCountValue);
+    if (!Number.isFinite(addCountNum) || addCountNum <= 0) return;
+    
+    setLoading(true);
+    try {
+      await addTicketCount(ticket.id, { addCount: addCountNum, reason: addReason || '' });
+      alert('이용권 개수가 추가되었습니다.');
+      closeAddCountPopup();
+      // 성공 후 데이터 새로고침
+      await fetchDetail(ticket.id);
+    } catch (err: unknown) {
+      console.error('addTicketCount 오류:', err);
+      const errorResponse =
+        err && typeof err === 'object' && 'response' in err
+          ? (err as { response?: { status?: number } }).response
+          : null;
+      if (errorResponse?.status === 400) {
+        alert('무제한권이거나 활성 상태가 아닌 이용권입니다.');
+      } else if (errorResponse?.status === 401) {
+        alert('관리자 인증이 필요합니다.');
+      } else if (errorResponse?.status === 404) {
+        alert('해당 ID의 이용권을 찾을 수 없습니다.');
+      } else {
+        alert('이용권 개수 추가 중 오류가 발생했습니다.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleConfirm = async () => {
@@ -303,7 +345,12 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
               </Field>
               <Field>
                 <label>이용횟수</label>
-                <input value={ticket.ticket_count} readOnly disabled />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <input value={ticket.ticket_count} readOnly disabled style={{ flex: 1 }} />
+                  <AddCountButton onClick={openAddCountPopup}>
+                    개수 추가
+                  </AddCountButton>
+                </div>
               </Field>
             </Row>
             <Row>
@@ -342,6 +389,36 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
         title={modalTitle}
       >
         {modalMessage}
+      </ReusableModal2>
+
+      {/* 이용권 개수 추가 모달 */}
+      <ReusableModal2
+        isOpen={isAddCountOpen}
+        onClose={closeAddCountPopup}
+        onConfirm={handleSubmitAddCount}
+        title="이용권 개수 추가"
+        width="400px"
+        height="auto"
+      >
+        <AddCountModalContent>
+          <FieldGroup>
+            <FieldLabel>추가 수량</FieldLabel>
+            <SmallInput
+              placeholder="예: 2"
+              value={addCountValue}
+              onChange={(e) => setAddCountValue(e.target.value.replace(/[^0-9]/g, ''))}
+            />
+          </FieldGroup>
+          <FieldGroup>
+            <FieldLabel>사유</FieldLabel>
+            <SmallTextarea
+              rows={3}
+              placeholder="사유를 입력하세요"
+              value={addReason}
+              onChange={(e) => setAddReason(e.target.value)}
+            />
+          </FieldGroup>
+        </AddCountModalContent>
       </ReusableModal2>
     </Container>
   );
@@ -472,5 +549,76 @@ const SkeletonBox = styled.div`
     100% {
       background-position: calc(200px + 100%) 0;
     }
+  }
+`;
+
+// 이용권 개수 추가 버튼
+const AddCountButton = styled.button`
+  height: 36px;
+  padding: 0 12px;
+  background: #000;
+  color: #fff;
+  border: 1px solid #000;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  &:hover {
+    opacity: 0.9;
+  }
+`;
+
+// 모달 컨텐츠 스타일
+const AddCountModalContent = styled.div`
+  padding: 0;
+`;
+
+const FieldGroup = styled.div`
+  margin-bottom: 16px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const FieldLabel = styled.div`
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-align: left;
+  color: #333;
+`;
+
+const SmallInput = styled.input`
+  width: 100%;
+  height: 40px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  box-sizing: border-box;
+  
+  &:focus {
+    outline: none;
+    border-color: #000;
+  }
+`;
+
+const SmallTextarea = styled.textarea`
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+  
+  &:focus {
+    outline: none;
+    border-color: #000;
   }
 `;

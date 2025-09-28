@@ -102,3 +102,27 @@ export const convertTicketType = async (ticketId: number): Promise<AdminTicketIt
 export const deleteAdminTicketById = async (id: number): Promise<void> => {
   await Axios.delete(`/ticket-list/${id}`);
 };
+
+/**
+ * 관리자용: 이용권 개수 추가
+ * PATCH /ticket/{id}/add-count
+ * Request body 예:
+ * {
+ *   "addCount": 2,
+ *   "reason": "고객 문의로 인한 보상 지급"
+ * }
+ * - 200: 수정된 이용권 정보 반환
+ * - 400: 무제한권이거나 비활성 이용권
+ * - 401: 권한 문제
+ * - 404: 해당 ID 없음
+ */
+export const addTicketCount = async (
+  id: number,
+  body: {
+    addCount: number;
+    reason: string;
+  },
+): Promise<AdminTicketItem> => {
+  const response = await Axios.patch<AdminTicketItem>(`/ticket/${id}/add-count`, body);
+  return response.data;
+};
