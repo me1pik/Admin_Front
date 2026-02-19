@@ -11,6 +11,7 @@ import ReusableModal from '@components/TwoButtonModal';
 import ReusableModal2 from '@components/OneButtonModal';
 
 import { getProductDetail, updateProduct, ProductDetailResponse, SizeRow } from '@api/adminProduct';
+import { presignUpload} from '@api/adminUpload';
 
 import React, { useState, useEffect, useCallback, FormEvent } from 'react';
 
@@ -282,7 +283,14 @@ const ProductDetail: React.FC = () => {
     navigate(path);
   };
 
-  const [images, setImages] = useState<string[]>([]);
+  type ImageItem =
+    | { kind: 'remote'; url: string } // 기존 URL(링크/이미 업로드된 CDN URL)
+    | { kind: 'local'; previewUrl: string; file: File }; // 저장 전 미리보기(업로드 대기)
+
+  const [imageItems, setImageItems] = useState<ImageItem[]>([]);
+
+  // 화면에 보여줄 이미지들(로컬이면 previewUrl, 원격이면 url)
+  const displayImages = imageItems.map((it) => (it.kind === 'remote' ? it.url : it.previewUrl));
   const [product, setProduct] = useState<ProductDetailResponse | null>(null);
   const [sizeGuides, setSizeGuides] = useState<Record<string, SizeRow[]>>({});
   const [changed, setChanged] = useState<Partial<ProductDetailResponse & { sizes: SizeRow[] }>>({});
@@ -331,25 +339,30 @@ const ProductDetail: React.FC = () => {
     setChanged((prev) => ({ ...prev, size_label_guide: labels }));
   }, []);
 
-  const updateImage = (idx: number, url: string | null) => {
-    setImages((prev) => {
+  const handleImageLinkUpload = (idx: number, url: string) => {
+    setImageItems((prev) => {
       const next = [...prev];
-      if (url) next[idx] = url;
-      else next.splice(idx, 1);
-      handleProductChange({ product_img: next });
+      if (idx >= next.length) next.push({ kind: 'remote', url });
+      else next[idx] = { kind: 'remote', url };
       return next;
     });
   };
-  const handleImageLinkUpload = (idx: number, url: string) => {
-    updateImage(idx, url);
+
+  const handleImageDelete = (idx: number) => {
+    setImageItems((prev) => {
+      const next = [...prev];
+      const removed = next[idx];
+      if (removed?.kind === 'local') URL.revokeObjectURL(removed.previewUrl);
+      next.splice(idx, 1);
+      return next;
+    });
   };
-  const handleImageDelete = (idx: number) => updateImage(idx, null);
+
   const handleImageReorder = (from: number, to: number) => {
-    setImages((prev) => {
+    setImageItems((prev) => {
       const next = [...prev];
       const [moved] = next.splice(from, 1);
       next.splice(to, 0, moved);
-      handleProductChange({ product_img: next });
       return next;
     });
   };
@@ -388,7 +401,7 @@ const ProductDetail: React.FC = () => {
         sale_price,
         rental_price,
       });
-      setImages(data.product_img || []);
+      setImageItems((data.product_img || []).map((url) => ({ kind: 'remote', url })));
       setSizeGuides(data.sizesByCategory || {});
       setChanged({});
     } catch (fetchErr: unknown) {
@@ -417,6 +430,42 @@ const ProductDetail: React.FC = () => {
       setChanged((prev) => ({ ...prev, sizes: guide }));
     }
   }, [product?.category, sizeGuides, product]);
+
+  const uploadPendingImagesIfNeeded = async (): Promise<string[]> => {
+    if (!product) return [];
+
+    const next = [...imageItems];
+
+    for (let i = 0; i < next.length; i++) {
+      const item = next[i];
+      if (item.kind !== 'local') continue;
+
+      const contentType = item.file.type || 'image/jpeg';
+
+      const presigned = await presignUpload({
+        scope: 'product',
+        entityId: product.id,
+        contentType,
+      });
+
+      const putRes = await fetch(presigned.uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': contentType },
+        body: item.file,
+      });
+
+      if (!putRes.ok) throw new Error(`S3 업로드 실패: ${putRes.status}`);
+
+      URL.revokeObjectURL(item.previewUrl);
+      next[i] = { kind: 'remote', url: presigned.fileUrl };
+    }
+
+    setImageItems(next);
+
+    return next
+      .filter((it): it is { kind: 'remote'; url: string } => it.kind === 'remote')
+      .map((it) => it.url);
+  };
 
   const handleSave = () => {
     if (!product) return;
@@ -466,9 +515,11 @@ const ProductDetail: React.FC = () => {
         console.log('changed.size_label_guide:', changed.size_label_guide);
         console.log('product.size_label_guide:', product.size_label_guide);
 
+        const finalUrls = await uploadPendingImagesIfNeeded();
+
         const payload: Partial<ProductDetailResponse & { sizes: SizeRow[] }> = {
           ...changed,
-          product_img: images,
+          product_img: finalUrls,
           fabricComposition: sortedComp,
           size_label_guide: currentLabels,
         };
@@ -504,6 +555,11 @@ const ProductDetail: React.FC = () => {
         openResult(`수정에 실패했습니다: ${detailedMessage}`);
       }
     });
+  };
+
+  const handleImageFileUpload = async (_idx: number, file: File) => {
+    const previewUrl = URL.createObjectURL(file);
+    setImageItems((prev) => [...prev, { kind: 'local', previewUrl, file }]);
   };
 
   const handleDelete = () => {
@@ -576,10 +632,11 @@ const ProductDetail: React.FC = () => {
             />
             <MiddleDivider />
             <ProductImageSection
-              images={images}
+              images={displayImages}
               handleImageLinkUpload={handleImageLinkUpload}
               handleImageDelete={handleImageDelete}
               handleImageReorder={handleImageReorder}
+              handleImageFileUpload={handleImageFileUpload}
               productUrl={product.product_url}
               style={{ height: 0 }}
             />

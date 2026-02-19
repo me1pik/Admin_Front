@@ -1,7 +1,7 @@
 // src/components/productregister/ProductImageSection.tsx
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
-import { FaTimes, FaLink } from 'react-icons/fa';
+import { FaTimes, FaLink, FaUpload } from 'react-icons/fa';
 
 import BulletIcon from '@assets/BulletIcon.svg'; // SVG 아이콘 import
 
@@ -10,6 +10,9 @@ interface ProductImageSectionProps {
   handleImageLinkUpload: (index: number, url: string) => void;
   handleImageDelete: (index: number) => void;
   handleImageReorder: (from: number, to: number) => void;
+
+  handleImageFileUpload: (index: number, file: File) => Promise<void> | void;
+
   productUrl: string;
   style?: React.CSSProperties;
 }
@@ -19,6 +22,8 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
   handleImageLinkUpload,
   handleImageDelete,
   handleImageReorder,
+  handleImageFileUpload,
+
   productUrl,
 }) => {
   const [isCopied, setIsCopied] = useState(false);
@@ -57,6 +62,21 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
     e.preventDefault();
     const from = Number(e.dataTransfer.getData('text/plain'));
     if (!isNaN(from) && from !== idx) handleImageReorder(from, idx);
+  };
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const openFilePicker = () => fileInputRef.current?.click();
+
+  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      await handleImageFileUpload(images.length, file);
+    } finally {
+      e.target.value = ''; // 같은 파일 재선택 가능하게
+    }
   };
 
   const handleCopyClick = () => {
@@ -119,6 +139,23 @@ const ProductImageSection: React.FC<ProductImageSectionProps> = ({
               </AddIcon>
             </EmptyBox>
             <Caption>이미지 등록</Caption>
+          </Column>
+
+          <Column>
+            <EmptyBox onClick={openFilePicker}>
+              <AddIcon>
+                <FaUpload size={24} />
+              </AddIcon>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                style={{ display: 'none' }}
+                onChange={onFileChange}
+              />
+            </EmptyBox>
+            <Caption>파일 업로드</Caption>
           </Column>
         </ImageList>
 

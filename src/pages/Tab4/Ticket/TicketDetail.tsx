@@ -125,7 +125,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
     if (!ticket || !addCountValue) return;
     const addCountNum = Number(addCountValue);
     if (!Number.isFinite(addCountNum) || addCountNum <= 0) return;
-    
+
     setLoading(true);
     try {
       await addTicketCount(ticket.id, { addCount: addCountNum, reason: addReason || '' });
@@ -347,9 +347,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ isCreate = false }) => {
                 <label>이용횟수</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <input value={ticket.ticket_count} readOnly disabled style={{ flex: 1 }} />
-                  <AddCountButton onClick={openAddCountPopup}>
-                    개수 추가
-                  </AddCountButton>
+                  <AddCountButton onClick={openAddCountPopup}>개수 추가</AddCountButton>
                 </div>
               </Field>
             </Row>
@@ -576,7 +574,7 @@ const AddCountModalContent = styled.div`
 
 const FieldGroup = styled.div`
   margin-bottom: 16px;
-  
+
   &:last-child {
     margin-bottom: 0;
   }
@@ -599,7 +597,7 @@ const SmallInput = styled.input`
   font-size: 13px;
   font-weight: 500;
   box-sizing: border-box;
-  
+
   &:focus {
     outline: none;
     border-color: #000;
@@ -616,7 +614,7 @@ const SmallTextarea = styled.textarea`
   resize: vertical;
   box-sizing: border-box;
   font-family: inherit;
-  
+
   &:focus {
     outline: none;
     border-color: #000;
