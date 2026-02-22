@@ -11,7 +11,7 @@ import ReusableModal from '@components/TwoButtonModal';
 import ReusableModal2 from '@components/OneButtonModal';
 
 import { getProductDetail, updateProduct, ProductDetailResponse, SizeRow } from '@api/adminProduct';
-import { presignUpload } from '@api/adminUpload';
+import { presignUpload} from '@api/adminUpload';
 
 import React, { useState, useEffect, useCallback, FormEvent } from 'react';
 
